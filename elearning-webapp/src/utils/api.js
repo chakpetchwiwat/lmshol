@@ -128,6 +128,7 @@ export const userAPI = {
 // Admin Endpoints
 export const adminAPI = {
   getDashboardStats: () => api.get('/admin/dashboard'),
+  getAdvancedAnalytics: () => api.get('/admin/analytics'),
 
   getUsers: () => api.get('/admin/users'),
   getUserDetails: (id) => api.get(`/admin/users/${id}/details`),

@@ -79,7 +79,7 @@ const LessonPlayer = () => {
     };
 
     fetchLessonData();
-  }, [courseId, lessonId, toast]);
+  }, [courseId, lessonId]);
 
   useEffect(() => {
     if (!shouldScrollToQuizResult || !quizResult || lesson?.type !== 'quiz') return;
@@ -240,7 +240,7 @@ const LessonPlayer = () => {
     if (accessUrl) setShowDocViewer(true);
   };
 
-  if (loading || !lesson) {
+  if (!lesson && loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="h-10 w-10 animate-spin rounded-full border-t-2 border-r-2 border-primary border-r-transparent" />
@@ -264,6 +264,15 @@ const LessonPlayer = () => {
 
   return (
     <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col bg-white pb-12 md:bg-transparent md:px-4 md:py-6">
+      {/* Soft loading overlay during lesson transitions */}
+      {loading && (
+        <div className="pointer-events-none absolute inset-0 z-50 flex items-start justify-center pt-40">
+          <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white/90 px-6 py-4 shadow-xl backdrop-blur-sm">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+            <span className="text-sm font-bold text-slate-500">กำลังโหลด...</span>
+          </div>
+        </div>
+      )}
       <LessonMedia
         lesson={lesson}
         isNavigatingAway={isNavigatingAway}

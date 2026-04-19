@@ -30,7 +30,7 @@ const InstructorPresetPicker = ({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-black uppercase tracking-wider text-slate-500">เลือกวิทยากรจาก preset</label>
+        <label className="text-xs font-black uppercase tracking-wider text-slate-500">เลือกจากวิทยากรที่บันทึกไว้</label>
         {selectedPreset && (
           <button
             type="button"

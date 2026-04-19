@@ -743,17 +743,17 @@ const getDashboardStats = async (authUser) => {
     });
 
     const typeMap = {
-        'KM_COURSE': { name: 'Knowledge & Course Management', value: 0, enrollmentCount: 0, courses: [] },
-        'LEARNING_ASSESS': { name: 'Learning Experience & Assessment', value: 0, enrollmentCount: 0, courses: [] },
-        'INCENTIVE_REWARD': { name: 'Incentive & Reward System', value: 0, enrollmentCount: 0, courses: [] },
-        'TRACKING_ANALYTICS': { name: 'Tracking & Analytics', value: 0, enrollmentCount: 0, courses: [] },
-        'GOAL_PATH': { name: 'Goal Setting & Learning Path', value: 0, enrollmentCount: 0, courses: [] },
-        'INTERNAL_COMM': { name: 'Internal Communication', value: 0, enrollmentCount: 0, courses: [] }
+        'STRAT_BUSINESS': { name: 'Business Acumen / Corporate Knowledge', value: 0, enrollmentCount: 0, courses: [] },
+        'STRAT_CORE': { name: 'Core / Soft Skills', value: 0, enrollmentCount: 0, courses: [] },
+        'STRAT_FUNCTIONAL': { name: 'Functional Skills', value: 0, enrollmentCount: 0, courses: [] },
+        'STRAT_LEADERSHIP': { name: 'Leadership Skills', value: 0, enrollmentCount: 0, courses: [] },
+        'STRAT_COMPLIANCE': { name: 'Compliance', value: 0, enrollmentCount: 0, courses: [] },
+        'STRAT_DIGITAL': { name: 'Digital / Future Skills', value: 0, enrollmentCount: 0, courses: [] }
     };
 
     coursesByType.forEach(course => {
-        const typeKey = course.category?.type || 'KM_COURSE';
-        const group = typeMap[typeKey] || typeMap['KM_COURSE'];
+        const typeKey = course.category?.type || 'STRAT_BUSINESS';
+        const group = typeMap[typeKey] || typeMap['STRAT_BUSINESS'];
 
         
         group.value += 1;
@@ -783,6 +783,164 @@ const getDashboardStats = async (authUser) => {
         scope: isManager ? 'department' : 'global',
         department: isManager ? actor.department || null : null
     };
+};
+
+// ADVANCED DASHBOARD ANALYTICS
+const getAdvancedAnalytics = async (authUser) => {
+    const actor = await getActorContext(authUser);
+    const isManager = actor.role === USER_ROLES.MANAGER;
+    const departmentId = isManager ? actor.departmentId : null;
+
+    try {
+        // 1. Skill Gap Analysis (Mastery by Category Type)
+        // Optimization: Use flat fetching instead of deep nesting to prevent timeouts
+        const [categories, quizAttempts] = await Promise.all([
+            prisma.category.findMany({ 
+                select: { id: true, type: true } 
+            }),
+            prisma.quizAttempt.findMany({
+                where: isManager ? { user: { departmentId: actor.departmentId } } : {},
+                select: { 
+                    score: true, 
+                    lesson: { select: { courseId: true } } 
+                }
+            })
+        ]);
+
+        // Map course to category type for fast lookup
+        const categoryRecords = await prisma.category.findMany({
+            include: { courses: { select: { id: true } } }
+        });
+
+        const courseToTypeMap = {};
+        categoryRecords.forEach(cat => {
+            cat.courses.forEach(course => {
+                courseToTypeMap[course.id] = cat.type;
+            });
+        });
+
+        const statsMap = {}; // type -> { totalScore, count }
+        quizAttempts.forEach(attempt => {
+            const type = courseToTypeMap[attempt.lesson?.courseId];
+            if (type) {
+                if (!statsMap[type]) statsMap[type] = { totalScore: 0, count: 0 };
+                statsMap[type].totalScore += attempt.score;
+                statsMap[type].count += 1;
+            }
+        });
+
+        const skillGapStats = categories.map(cat => ({
+            type: cat.type,
+            average_mastery: statsMap[cat.type] 
+                ? statsMap[cat.type].totalScore / statsMap[cat.type].count 
+                : 0
+        }));
+
+        // 2. Department Benchmarking
+        const departments = await prisma.department.findMany({
+            include: {
+                users: {
+                    include: {
+                        enrollments: {
+                            select: { status: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        const departmentBenchmark = departments.map(dept => {
+            const enrollments = dept.users.flatMap(u => u.enrollments);
+            const completed = enrollments.filter(e => e.status === 'COMPLETED').length;
+            const total = enrollments.length;
+            return {
+                name: dept.name,
+                completion_rate: total > 0 ? (completed * 100) / total : 0
+            };
+        }).sort((a, b) => b.completion_rate - a.completion_rate);
+
+        // 3. Incentive ROI (Last 6 Months)
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        const [pointsLedger, completions] = await Promise.all([
+            prisma.pointsLedger.findMany({
+                where: { createdAt: { gte: sixMonthsAgo }, points: { gt: 0 } },
+                select: { points: true, createdAt: true }
+            }),
+            prisma.userCourse.findMany({
+                where: { completedAt: { gte: sixMonthsAgo }, status: 'COMPLETED' },
+                select: { completedAt: true }
+            })
+        ]);
+
+        const roiTrend = [];
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - i);
+            const monthStr = date.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+            const monthKey = date.toISOString().slice(0, 7); // YYYY-MM
+
+            const monthPoints = pointsLedger
+                .filter(p => p.createdAt.toISOString().slice(0, 7) === monthKey)
+                .reduce((sum, p) => sum + p.points, 0);
+            
+            const monthCompletions = completions
+                .filter(c => c.completedAt.toISOString().slice(0, 7) === monthKey)
+                .length;
+
+            roiTrend.push({
+                month: monthStr,
+                points: monthPoints,
+                completions: monthCompletions
+            });
+        }
+
+        // 4. At-Risk Learners (Deadlines)
+        const now = new Date();
+        const threeDaysLater = new Date();
+        threeDaysLater.setDate(now.getDate() + 3);
+
+        const atRiskRaw = await prisma.userCourse.findMany({
+            where: {
+                status: { not: 'COMPLETED' },
+                deadline: {
+                    lte: threeDaysLater,
+                    not: null
+                },
+                ...(isManager ? { user: { departmentId: actor.departmentId } } : {})
+            },
+            include: {
+                user: { select: { name: true, department: true } },
+                course: { select: { title: true } }
+            },
+            orderBy: { deadline: 'asc' },
+            take: 5
+        });
+
+        const atRisk = atRiskRaw.map(item => ({
+            name: item.user.name,
+            department: item.user.department,
+            course: item.course.title,
+            deadline: item.deadline,
+            isOverdue: item.deadline < now
+        }));
+
+        return {
+            skillGap: skillGapStats,
+            benchmarking: departmentBenchmark,
+            roiTrend,
+            atRisk
+        };
+    } catch (error) {
+        console.error('Error in getAdvancedAnalytics:', error);
+        return {
+            skillGap: [],
+            benchmarking: [],
+            roiTrend: [],
+            atRisk: []
+        };
+    }
 };
 
 // USERS
@@ -1709,6 +1867,7 @@ const getAnnouncementHistory = async (id, authUser) => {
 
 module.exports = {
     getDashboardStats,
+    getAdvancedAnalytics,
     getUsers,
     getUserDetails,
     createUser,

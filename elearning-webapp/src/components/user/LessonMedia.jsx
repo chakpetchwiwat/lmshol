@@ -76,7 +76,7 @@ const LessonMedia = ({
               <BookOpen size={40} strokeWidth={1.5} />
             </div>
             <div className="relative z-10 max-w-2xl">
-              <p className="mb-3 inline-flex items-center rounded-full border border-primary/30 bg-primary/15 px-4 py-2 text-sm font-black tracking-[0.04em] text-primary-light shadow-[0_16px_32px_-24px_rgba(79,70,229,0.85)]">
+              <p className="mb-3 inline-flex items-center rounded-full border border-primary/30 bg-primary/15 px-4 py-2 text-sm font-black tracking-[0.04em] text-white shadow-[0_16px_32px_-24px_rgba(79,70,229,0.85)]">
                 บทความแบบจัดรูปแบบ
               </p>
               <h2 className="mb-4 text-3xl font-extrabold tracking-tighter md:text-5xl">{lesson.title}</h2>
@@ -98,7 +98,7 @@ const LessonMedia = ({
               <BookOpen size={40} strokeWidth={1.5} />
             </div>
             <div className="relative z-10 flex flex-col items-center gap-3">
-              <p className="mb-2 inline-flex items-center rounded-full border border-primary/30 bg-primary/15 px-4 py-2 text-sm font-black tracking-[0.04em] text-primary-light shadow-[0_16px_32px_-24px_rgba(79,70,229,0.85)]">
+              <p className="mb-2 inline-flex items-center rounded-full border border-primary/30 bg-primary/15 px-4 py-2 text-sm font-black tracking-[0.04em] text-white shadow-[0_16px_32px_-24px_rgba(79,70,229,0.85)]">
                 เอกสารประกอบ
               </p>
               <button

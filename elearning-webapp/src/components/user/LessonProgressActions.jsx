@@ -75,16 +75,16 @@ const LessonProgressActions = ({
                 <div className="flex flex-col items-center md:items-start">
                   <p className="text-[10px] md:text-[11px] font-black tracking-[0.04em] text-slate-500 uppercase">คืบหน้า</p>
                   <div className="mt-1 flex items-baseline gap-1">
-                     <span className="text-2xl font-black text-slate-900">{Math.min(completedLessonsCount, totalLessons)}</span>
-                     <span className="text-sm font-bold text-slate-400">/ {totalLessons} บท</span>
+                    <span className="text-2xl font-black text-slate-900">{Math.min(completedLessonsCount, totalLessons)}</span>
+                    <span className="text-sm font-bold text-slate-400">/ {totalLessons} บท</span>
                   </div>
                 </div>
                 <div className="w-px h-8 bg-emerald-100/50 md:hidden"></div>
                 <div className="flex flex-col items-center md:items-start">
                   <p className="text-[10px] md:text-[11px] font-black tracking-[0.04em] text-slate-500 uppercase">ตอนนี้</p>
                   <div className="mt-1 flex items-baseline gap-1">
-                     <span className="text-2xl font-black text-slate-900">{currentLessonIndex + 1}</span>
-                     <span className="text-sm font-bold text-slate-400">/ {totalLessons}</span>
+                    <span className="text-2xl font-black text-slate-900">{currentLessonIndex + 1}</span>
+                    <span className="text-sm font-bold text-slate-400">/ {totalLessons}</span>
                   </div>
                 </div>
               </div>
@@ -95,7 +95,7 @@ const LessonProgressActions = ({
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                   <div className="min-w-0">
                     <p className="text-[11px] font-black tracking-[0.04em] text-primary uppercase">บทถัดไป</p>
-                    <h4 className="mt-2 text-xl md:text-2xl font-black tracking-tight text-slate-900 leading-tight">
+                    <h4 className="mt-2 text-xl md:text-2xl font-normal tracking-tight text-slate-900 leading-tight">
                       {nextLesson.title}
                     </h4>
                     <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -132,7 +132,7 @@ const LessonProgressActions = ({
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                   <div className="min-w-0">
                     <p className="text-[11px] font-black tracking-[0.04em] text-emerald-700 uppercase">ครบแล้ว</p>
-                    <h4 className="mt-2 text-2xl font-black tracking-tight text-slate-900">
+                    <h4 className="mt-2 text-2xl font-normal tracking-tight text-slate-900">
                       จบหลักสูตรอย่างเป็นทางการแล้ว!
                     </h4>
                   </div>

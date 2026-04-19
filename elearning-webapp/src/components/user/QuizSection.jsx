@@ -37,45 +37,82 @@ const QuizSection = ({
       )}
 
       {quizResult && (
-        <div ref={quizResultRef} className={`p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border-2 transition-all duration-500 animate-celebrate shadow-2xl flex flex-col items-center gap-5 text-center ${
-          quizResult.passed ? 'bg-white border-emerald-100' : 'bg-red-50/30 border-red-100'
+        <div ref={quizResultRef} className={`relative overflow-hidden rounded-[2.5rem] md:rounded-[3.5rem] border-2 transition-all duration-500 shadow-2xl flex flex-col items-center gap-5 text-center p-8 md:p-12 ${
+          quizResult.passed
+            ? 'bg-gradient-to-br from-emerald-50 to-white border-emerald-200'
+            : 'bg-gradient-to-br from-red-50 to-white border-red-200'
         }`}>
-           <div className={`w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl mb-2 ${quizResult.passed ? 'bg-emerald-500 shadow-emerald-200' : 'bg-red-500 shadow-red-200'}`}>
-              {quizResult.passed ? <CheckCircle size={40} className="md:w-12 md:h-12" strokeWidth={2}/> : <div className="text-3xl md:text-4xl font-black">!</div>}
-           </div>
-           <div>
-             <h3 className={`text-2xl md:text-4xl font-black tracking-tighter mb-2 ${quizResult.passed ? 'text-emerald-600' : 'text-red-700'}`}>
-               {quizResult.passed ? 'ยอดเยี่ยมมาก!' : 'เกือบผ่านแล้ว!'}
-             </h3>
-              <p className="text-xs font-bold tracking-[0.04em] text-slate-500">คะแนนของคุณ</p>
-           </div>
-           <div className="bg-slate-50 px-6 py-4 md:px-10 md:py-5 rounded-3xl md:rounded-[2.5rem] border border-slate-100 mt-4">
-              <p className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter">{quizResult.scorePercent}%</p>
-           </div>
-           
-           {quizResult.passed && (
-             <div className="mt-2 flex flex-col items-center gap-2">
-               {quizResult.earnedQuizPoints > 0 && (
-                 <div className="rounded-full bg-emerald-50 px-4 py-2 text-sm font-black text-emerald-700 ring-1 ring-emerald-100">
-                   +{quizResult.earnedQuizPoints.toLocaleString()} แต้มจากแบบทดสอบ
-                 </div>
-               )}
-               {quizResult.earnedCoursePoints > 0 && (
-                 <div className="rounded-full bg-primary/10 px-4 py-2 text-sm font-black text-primary ring-1 ring-primary/10">
-                   +{quizResult.earnedCoursePoints.toLocaleString()} แต้มจากการเรียนจบคอร์ส
-                 </div>
-               )}
-               {quizResult.earnedPoints === 0 && canEarnQuizPoints && (
-                 <p className="text-xs font-bold text-slate-400">แต้มแบบทดสอบจะได้รับเฉพาะตอนผ่านครั้งแรกเท่านั้น</p>
-               )}
-             </div>
-           )}
+          {/* Background glow */}
+          <div className={`absolute inset-0 opacity-20 ${
+            quizResult.passed
+              ? 'bg-[radial-gradient(circle_at_top,_#10b981,_transparent_60%)]'
+              : 'bg-[radial-gradient(circle_at_top,_#ef4444,_transparent_60%)]'
+          }`} />
 
-            <button onClick={() => { setQuizResult(null); setAnswers({}); }} className="mt-8 w-full md:w-auto rounded-2xl border border-slate-200 px-8 md:px-12 py-4 md:py-4.5 text-sm font-black tracking-[0.04em] text-slate-600 transition-all hover:border-slate-900 hover:bg-slate-900 hover:text-white">
-             {quizResult.passed ? 'ตรวจคำตอบ' : 'ทำควิซอีกครั้ง'}
-           </button>
+          {/* Icon */}
+          <div className={`relative z-10 w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center text-white shadow-2xl ${
+            quizResult.passed ? 'bg-emerald-500 shadow-emerald-300' : 'bg-red-500 shadow-red-300'
+          }`}>
+            {quizResult.passed
+              ? <CheckCircle size={44} strokeWidth={2.5} />
+              : <span className="text-3xl font-black">✕</span>}
+          </div>
+
+          {/* Title */}
+          <div className="relative z-10">
+            <h3 className={`text-2xl md:text-3xl font-black tracking-tighter mb-1 ${
+              quizResult.passed ? 'text-emerald-700' : 'text-red-700'
+            }`}>
+              {quizResult.passed ? '🎉 ยอดเยี่ยมมาก!' : 'เกือบผ่านแล้ว!'}
+            </h3>
+            <p className="text-sm font-semibold text-slate-500">ผลคะแนนของคุณ</p>
+          </div>
+
+          {/* Score bubble */}
+          <div className={`relative z-10 px-10 py-6 rounded-3xl shadow-inner ${
+            quizResult.passed ? 'bg-emerald-500' : 'bg-red-500'
+          }`}>
+            <p className="text-6xl md:text-7xl font-black text-white tracking-tighter">
+              {quizResult.scorePercent}%
+            </p>
+            <p className="text-xs font-bold text-white/70 mt-1">คะแนนที่ได้</p>
+          </div>
+
+          {/* Points earned */}
+          {quizResult.passed && (
+            <div className="relative z-10 flex flex-col items-center gap-2">
+              {quizResult.earnedQuizPoints > 0 && (
+                <div className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-black text-emerald-700 ring-1 ring-emerald-200">
+                  +{quizResult.earnedQuizPoints.toLocaleString()} แต้มจากแบบทดสอบ
+                </div>
+              )}
+              {quizResult.earnedCoursePoints > 0 && (
+                <div className="rounded-full bg-primary/10 px-4 py-2 text-sm font-black text-primary ring-1 ring-primary/20">
+                  +{quizResult.earnedCoursePoints.toLocaleString()} แต้มจากการเรียนจบคอร์ส
+                </div>
+              )}
+              {quizResult.earnedPoints === 0 && canEarnQuizPoints && (
+                <p className="text-xs font-bold text-slate-400">แต้มจะได้รับเฉพาะตอนผ่านครั้งแรกเท่านั้น</p>
+              )}
+            </div>
+          )}
+
+          {/* Action button */}
+          <div className="relative z-10 mt-4">
+            <button
+              onClick={() => { setQuizResult(null); setAnswers({}); }}
+              className={`rounded-2xl px-8 py-4 text-sm font-black tracking-[0.04em] text-white shadow-lg transition-all ${
+                quizResult.passed
+                  ? 'bg-emerald-600 shadow-emerald-200 hover:bg-emerald-700'
+                  : 'bg-red-600 shadow-red-200 hover:bg-red-700'
+              }`}
+            >
+              {quizResult.passed ? 'ทบทวนอีกครั้ง' : 'ทำควิซอีกครั้ง'}
+            </button>
+          </div>
         </div>
       )}
+
 
       <div className="flex flex-col gap-6">
         {lesson.questions?.map((q, idx) => {
@@ -86,7 +123,7 @@ const QuizSection = ({
           const isWrong = userA && userA !== correctA;
           
           return (
-            <div key={q.id} className={`bg-white border-[1.5px] rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 transition-all ${isSubmitted && isWrong ? 'border-red-100 bg-red-50/5' : isSubmitted && isCorrect ? 'border-emerald-100 bg-emerald-50/5' : 'border-slate-100 hover:border-slate-200'}`}>
+            <div key={q.id} className={`bg-white border-[1.5px] rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 transition-all ${isSubmitted && isWrong ? 'border-red-300 bg-red-50/40' : isSubmitted && isCorrect ? 'border-emerald-300 bg-emerald-50/40' : 'border-slate-100 hover:border-slate-200'}`}>
               <div className="flex justify-between items-start mb-10">
                  <h4 className="text-lg md:text-xl font-bold text-slate-900 leading-relaxed flex gap-4 md:gap-5">
                    <span className="shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-slate-900 text-white flex items-center justify-center text-xs md:text-sm font-black shadow-lg shadow-slate-200">{idx + 1}</span>

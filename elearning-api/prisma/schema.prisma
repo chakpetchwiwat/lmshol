@@ -273,6 +273,7 @@ model UserCourse {
   courseId        String
   status          String    @default("IN_PROGRESS") // "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED"
   progressPercent Float     @default(0)
+  deadline        DateTime?
   startedAt       DateTime  @default(now())
   completedAt     DateTime?
 

@@ -238,8 +238,8 @@ const UserManagement = () => {
 
   const handleInstructorPresetDelete = async (id, name) => {
     const ok = await confirm({
-      title: 'ยืนยันการลบ preset วิทยากร',
-      message: `ต้องการลบ preset ของ "${name}" ใช่หรือไม่?`,
+      title: 'ยืนยันการลบข้อมูลวิทยากร',
+      message: `ต้องการลบข้อมูลวิทยากร "${name}" ใช่หรือไม่?`,
       confirmLabel: 'ลบ',
       variant: 'danger',
     });
@@ -247,11 +247,11 @@ const UserManagement = () => {
 
     try {
       await adminAPI.deleteInstructorPreset(id);
-      toast.success('ลบ preset วิทยากรเรียบร้อย');
+      toast.success('ลบข้อมูลวิทยากรเรียบร้อย');
       await fetchReferenceData();
     } catch (error) {
       console.error('Delete instructor preset error:', error);
-      toast.error(error.response?.data?.message || 'ลบ preset วิทยากรไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'ลบข้อมูลวิทยากรไม่สำเร็จ');
     }
   };
 
@@ -306,7 +306,7 @@ const UserManagement = () => {
                 </button>
                 <button type="button" onClick={() => setShowInstructorPresetModal(true)} className="btn btn-outline">
                   <Sparkles size={18} />
-                  จัดการ preset วิทยากร
+                  จัดการวิทยากร
                 </button>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
@@ -383,12 +383,12 @@ const UserManagement = () => {
             onClose={() => setShowInstructorPresetModal(false)}
             onCreate={async (payload) => {
               await adminAPI.createInstructorPreset(payload);
-              toast.success('สร้าง preset วิทยากรเรียบร้อย');
+              toast.success('สร้างข้อมูลวิทยากรเรียบร้อย');
               await fetchReferenceData();
             }}
             onUpdate={async (id, payload) => {
               await adminAPI.updateInstructorPreset(id, payload);
-              toast.success('อัปเดต preset วิทยากรเรียบร้อย');
+              toast.success('อัปเดตข้อมูลวิทยากรเรียบร้อย');
               await fetchReferenceData();
             }}
             onDelete={handleInstructorPresetDelete}

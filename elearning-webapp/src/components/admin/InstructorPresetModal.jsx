@@ -66,7 +66,7 @@ const InstructorPresetModal = ({
       resetForm();
     } catch (error) {
       console.error('Save instructor preset error:', error);
-      toast.error(error.response?.data?.message || 'ไม่สามารถบันทึก preset วิทยากรได้');
+      toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลวิทยากรได้');
     }
   };
 
@@ -98,15 +98,15 @@ const InstructorPresetModal = ({
             resetForm();
             onClose();
           }}
-          aria-label="ปิดหน้าต่างจัดการ preset วิทยากร"
+          aria-label="ปิดหน้าต่างจัดการวิทยากร"
         />
 
         <div className="relative flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)]">
           <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
             <div>
-              <h3 className="text-xl font-black text-slate-900">จัดการ preset วิทยากร</h3>
+              <h3 className="text-xl font-black text-slate-900">จัดการวิทยากร</h3>
               <p className="mt-1 text-sm text-slate-500">
-                บันทึกข้อมูลวิทยากรไว้ล่วงหน้า เพื่อให้เลือกใช้ในคอร์สได้ด้วยการค้นหาชื่อ
+                บันทึกข้อมูลวิทยากรไว้ล่วงหน้า เพื่อให้เลือกใช้ในคอร์สได้รวดเร็ว
               </p>
             </div>
             <button
@@ -141,7 +141,7 @@ const InstructorPresetModal = ({
                   </div>
                 ) : filteredPresets.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
-                    ยังไม่มี preset วิทยากรที่ตรงกับคำค้น
+                    ยังไม่มีข้อมูลวิทยากรที่ตรงกับคำค้น
                   </div>
                 ) : (
                   filteredPresets.map((preset) => {
@@ -197,10 +197,10 @@ const InstructorPresetModal = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">
-                      {editingPreset ? 'Edit Preset' : 'New Preset'}
+                      {editingPreset ? 'Edit Instructor' : 'New Instructor'}
                     </p>
                     <h4 className="mt-1 text-lg font-black text-slate-900">
-                      {editingPreset ? 'แก้ไขข้อมูลวิทยากร' : 'สร้าง preset วิทยากร'}
+                      {editingPreset ? 'แก้ไขข้อมูลวิทยากร' : 'เพิ่มข้อมูลวิทยากร'}
                     </h4>
                   </div>
                   {editingPreset && (
@@ -276,7 +276,7 @@ const InstructorPresetModal = ({
                 <div className="flex gap-3 pt-2">
                   <button type="submit" className="btn btn-primary flex-1 gap-2">
                     {editingPreset ? <Save size={16} /> : <Plus size={16} />}
-                    {editingPreset ? 'บันทึกการแก้ไข' : 'สร้าง preset'}
+                    {editingPreset ? 'บันทึกการแก้ไข' : 'เพิ่มวิทยากร'}
                   </button>
                 </div>
               </form>

@@ -16,7 +16,7 @@ import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 const getDefaultCategoryForm = () => ({
   name: '',
   icon: 'Grid',
-  type: 'KM_COURSE',
+  type: 'STRAT_BUSINESS',
   order: 0,
   visibleToAll: true,
   visibleDepartmentIds: [],
@@ -229,12 +229,12 @@ const CategoryManagementModal = ({
               value={categoryForm.type}
               onChange={(e) => setCategoryForm({ ...categoryForm, type: e.target.value })}
               options={[
-                { value: 'KM_COURSE', label: 'Knowledge & Course Management' },
-                { value: 'LEARNING_ASSESS', label: 'Learning Experience & Assessment' },
-                { value: 'INCENTIVE_REWARD', label: 'Incentive & Reward System' },
-                { value: 'TRACKING_ANALYTICS', label: 'Tracking & Analytics' },
-                { value: 'GOAL_PATH', label: 'Goal Setting & Learning Path' },
-                { value: 'INTERNAL_COMM', label: 'Internal Communication' }
+                { value: 'STRAT_BUSINESS', label: 'Business Acumen / Corporate Knowledge' },
+                { value: 'STRAT_CORE', label: 'Core / Soft Skills' },
+                { value: 'STRAT_FUNCTIONAL', label: 'Functional Skills' },
+                { value: 'STRAT_LEADERSHIP', label: 'Leadership Skills' },
+                { value: 'STRAT_COMPLIANCE', label: 'Compliance' },
+                { value: 'STRAT_DIGITAL', label: 'Digital / Future Skills' }
               ]}
             />
 
@@ -487,20 +487,20 @@ const CategoryManagementModal = ({
                             {category.name}
                             {category.type && (
                               <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-black uppercase ring-1 ring-inset ${
-                                category.type === 'KM_COURSE' ? 'text-indigo-600 bg-indigo-50 ring-indigo-200' :
-                                category.type === 'LEARNING_ASSESS' ? 'text-emerald-600 bg-emerald-50 ring-emerald-200' :
-                                category.type === 'INCENTIVE_REWARD' ? 'text-amber-600 bg-amber-50 ring-amber-200' :
-                                category.type === 'TRACKING_ANALYTICS' ? 'text-blue-600 bg-blue-50 ring-blue-200' :
-                                category.type === 'GOAL_PATH' ? 'text-purple-600 bg-purple-50 ring-purple-200' :
-                                category.type === 'INTERNAL_COMM' ? 'text-rose-600 bg-rose-50 ring-rose-200' :
+                                category.type === 'STRAT_BUSINESS' ? 'text-indigo-600 bg-indigo-50 ring-indigo-200' :
+                                category.type === 'STRAT_CORE' ? 'text-emerald-600 bg-emerald-50 ring-emerald-200' :
+                                category.type === 'STRAT_FUNCTIONAL' ? 'text-amber-600 bg-amber-50 ring-amber-200' :
+                                category.type === 'STRAT_LEADERSHIP' ? 'text-blue-600 bg-blue-50 ring-blue-200' :
+                                category.type === 'STRAT_COMPLIANCE' ? 'text-purple-600 bg-purple-50 ring-purple-200' :
+                                category.type === 'STRAT_DIGITAL' ? 'text-rose-600 bg-rose-50 ring-rose-200' :
                                 'text-slate-500 bg-slate-50 ring-slate-200'
                               }`}>
-                                {category.type === 'KM_COURSE' ? 'KM & Course' :
-                                 category.type === 'LEARNING_ASSESS' ? 'Exp & Assess' :
-                                 category.type === 'INCENTIVE_REWARD' ? 'Incentive' :
-                                 category.type === 'TRACKING_ANALYTICS' ? 'Tracking' :
-                                 category.type === 'GOAL_PATH' ? 'Goal & Path' :
-                                 category.type === 'INTERNAL_COMM' ? 'Comm' : category.type}
+                                {category.type === 'STRAT_BUSINESS' ? 'Business / Corporate' :
+                                 category.type === 'STRAT_CORE' ? 'Core / Soft' :
+                                 category.type === 'STRAT_FUNCTIONAL' ? 'Functional' :
+                                 category.type === 'STRAT_LEADERSHIP' ? 'Leadership' :
+                                 category.type === 'STRAT_COMPLIANCE' ? 'Compliance' :
+                                 category.type === 'STRAT_DIGITAL' ? 'Digital' : category.type}
                               </span>
                             )}
                           </div>
@@ -555,7 +555,7 @@ const CategoryManagementModal = ({
                               setCategoryForm({
                                 name: category.name,
                                 icon: category.icon || 'Grid',
-                                type: category.type || 'KM_COURSE',
+                                type: category.type || 'STRAT_BUSINESS',
                                 order: category.order,
                                 visibleToAll: category.visibleToAll ?? true,
                                 visibleDepartmentIds: (category.visibleDepartments || []).map(d => d.id),

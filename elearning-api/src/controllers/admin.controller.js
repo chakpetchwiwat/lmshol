@@ -9,6 +9,11 @@ const getDashboardStats = asyncHandler(async (req, res) => {
   res.json({ success: true, data: stats });
 });
 
+const getAdvancedAnalytics = asyncHandler(async (req, res) => {
+  const analytics = await AdminService.getAdvancedAnalytics(req.user);
+  res.json({ success: true, data: analytics });
+});
+
 // USERS
 const getUsers = asyncHandler(async (req, res) => {
   const users = await AdminService.getUsers(req.user);
@@ -289,6 +294,7 @@ const getCourseQuizAttempts = asyncHandler(async (req, res) => {
 
 module.exports = {
   getDashboardStats,
+  getAdvancedAnalytics,
   getAdminCourses,
   createCourse,
   updateCourse,

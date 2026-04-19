@@ -6,6 +6,7 @@ const { verifyToken, verifyAdmin, verifySuperAdmin, verifyAdminPanelAccess } = r
 router.use(verifyToken, verifyAdminPanelAccess); // Admin + manager can access the admin panel
 
 router.get('/dashboard', adminController.getDashboardStats);
+router.get('/analytics', adminController.getAdvancedAnalytics);
 
 router.get('/users', adminController.getUsers);
 router.get('/users/:id/details', adminController.getUserDetails);
