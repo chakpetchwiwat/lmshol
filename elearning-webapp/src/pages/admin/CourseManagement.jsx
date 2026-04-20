@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { toUTCISOString, toLocalInputValue } from '../../utils/dateUtils';
 import { compressImage } from '../../utils/imageUtils';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 import useConfirm from '../../hooks/useConfirm';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 
@@ -83,11 +83,7 @@ const CourseManagement = () => {
   const [uploading, setUploading] = useState(false);
   const [editorImageUploading, setEditorImageUploading] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [courseResponse, categoryResponse, departmentResponse, tierResponse, instructorPresetResponse] = await Promise.all([
         adminAPI.getCourses(),
@@ -108,7 +104,11 @@ const CourseManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const resetCourseForm = () => {
     setCourseForm(getDefaultCourseForm());

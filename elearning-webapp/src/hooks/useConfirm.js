@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 /**
  * useConfirm — Hook to replace window.confirm() with a premium dialog.
@@ -14,17 +14,10 @@ import { useState, useCallback } from 'react';
  *       variant: 'danger',
  *     });
  *     if (!ok) return;
- *     // proceed with deletion...
  *   };
- *
- *   return (
- *     <>
- *       <ConfirmDialog {...ConfirmDialogProps} />
- *       ...
- *     </>
- *   );
  */
 const useConfirm = () => {
+  const resolveRef = useRef(null);
   const [state, setState] = useState({
     isOpen: false,
     title: '',
@@ -32,35 +25,27 @@ const useConfirm = () => {
     confirmLabel: 'ยืนยัน',
     cancelLabel: 'ยกเลิก',
     variant: 'danger',
-    resolve: null,
   });
 
-  const confirm = useCallback(
-    ({ title, message, confirmLabel, cancelLabel, variant } = {}) => {
-      return new Promise((resolve) => {
-        setState({
-          isOpen: true,
-          title: title || 'ยืนยันการดำเนินการ',
-          message: message || '',
-          confirmLabel: confirmLabel || 'ยืนยัน',
-          cancelLabel: cancelLabel || 'ยกเลิก',
-          variant: variant || 'danger',
-          resolve,
-        });
+  const confirm = useCallback(({ title, message, confirmLabel, cancelLabel, variant } = {}) => (
+    new Promise((resolve) => {
+      resolveRef.current = resolve;
+      setState({
+        isOpen: true,
+        title: title || 'ยืนยันการดำเนินการ',
+        message: message || '',
+        confirmLabel: confirmLabel || 'ยืนยัน',
+        cancelLabel: cancelLabel || 'ยกเลิก',
+        variant: variant || 'danger',
       });
-    },
-    []
-  );
+    })
+  ), []);
 
-  const handleConfirm = useCallback(() => {
-    state.resolve?.(true);
-    setState((prev) => ({ ...prev, isOpen: false, resolve: null }));
-  }, [state.resolve]);
-
-  const handleCancel = useCallback(() => {
-    state.resolve?.(false);
-    setState((prev) => ({ ...prev, isOpen: false, resolve: null }));
-  }, [state.resolve]);
+  const closeDialog = useCallback((confirmed) => {
+    resolveRef.current?.(confirmed);
+    resolveRef.current = null;
+    setState((prev) => ({ ...prev, isOpen: false }));
+  }, []);
 
   const ConfirmDialogProps = {
     isOpen: state.isOpen,
@@ -69,8 +54,8 @@ const useConfirm = () => {
     confirmLabel: state.confirmLabel,
     cancelLabel: state.cancelLabel,
     variant: state.variant,
-    onConfirm: handleConfirm,
-    onCancel: handleCancel,
+    onConfirm: () => closeDialog(true),
+    onCancel: () => closeDialog(false),
   };
 
   return { confirm, ConfirmDialogProps };

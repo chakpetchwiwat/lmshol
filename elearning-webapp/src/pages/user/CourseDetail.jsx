@@ -8,7 +8,7 @@ import {
   BookOpen,
 } from 'lucide-react';
 import { userAPI } from '../../utils/api';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 
 // Sub-components
 import CourseHero from '../../components/user/CourseHero';

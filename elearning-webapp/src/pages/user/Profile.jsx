@@ -2,7 +2,7 @@ import React, { useEffect, useId, useState } from 'react';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 
 // Sub-components
 import ProfileHeader from '../../components/user/ProfileHeader';

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Settings2, Sparkles } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -8,7 +8,7 @@ import InstructorPresetModal from '../../components/admin/InstructorPresetModal'
 import UserDetailModal from '../../components/admin/UserDetailModal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { canEditAdminUsers } from '../../utils/roles';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 import useConfirm from '../../hooks/useConfirm';
 import { USER_ROLES } from '../../utils/constants/roles';
 import { FILTER_VALUES } from '../../utils/constants/filters';
@@ -65,15 +65,7 @@ const UserManagement = () => {
   const canEditUsers = canEditAdminUsers(currentUser);
   const isManagerView = !canEditUsers;
 
-  useEffect(() => {
-    const bootstrap = async () => {
-      await Promise.all([fetchUsers(), fetchReferenceData()]);
-    };
-
-    bootstrap();
-  }, []);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const response = await adminAPI.getUsers();
       setUsers(response.data);
@@ -83,9 +75,9 @@ const UserManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const fetchReferenceData = async () => {
+  const fetchReferenceData = useCallback(async () => {
     try {
       const requests = [
         adminAPI.getDepartments(),
@@ -101,7 +93,15 @@ const UserManagement = () => {
     } finally {
       setReferenceLoading(false);
     }
-  };
+  }, [canEditUsers]);
+
+  useEffect(() => {
+    const bootstrap = async () => {
+      await Promise.all([fetchUsers(), fetchReferenceData()]);
+    };
+
+    bootstrap();
+  }, [fetchReferenceData, fetchUsers]);
 
   const handleSaveUser = async (event) => {
     event.preventDefault();

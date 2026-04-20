@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BellPlus, CalendarClock, Search } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 import { compressImage } from '../../utils/imageUtils';
 import { canEditAdminUsers } from '../../utils/roles';
 import useConfirm from '../../hooks/useConfirm';
@@ -55,11 +55,7 @@ const AnnouncementManagement = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [currentAnnouncementTitle, setCurrentAnnouncementTitle] = useState('');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [announcementRes, departmentRes] = await Promise.all([
@@ -85,7 +81,11 @@ const AnnouncementManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isFullAdmin, toast, user?.departmentId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const resetForm = () => {
     setEditingAnnouncement(null);
@@ -398,6 +398,7 @@ const AnnouncementManagement = () => {
         user={user}
         departments={departments}
         uploading={uploading}
+        editorImageUploading={editorImageUploading}
       />
 
       <AnnouncementHistoryModal

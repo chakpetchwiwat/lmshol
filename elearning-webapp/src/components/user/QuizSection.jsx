@@ -1,6 +1,5 @@
 import React from 'react';
 import { CheckCircle } from 'lucide-react';
-import { useToast } from '../../context/ToastContext';
 
 const QuizSection = ({
   lesson,
@@ -14,8 +13,6 @@ const QuizSection = ({
   canEarnQuizPoints,
   quizRewardPoints
 }) => {
-  const toast = useToast();
-
   if (!lesson || !lesson.questions) return null;
 
   return (

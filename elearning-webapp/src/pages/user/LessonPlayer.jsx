@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Play, CheckCircle, Clock, FileText, BookOpen } from 'lucide-react';
 import { userAPI, getFullUrl } from '../../utils/api';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 import DocViewer from '../../components/common/DocViewer';
 import { hasRenderableLessonContent, sanitizeLessonContent } from '../../utils/richText';
 
@@ -79,7 +79,7 @@ const LessonPlayer = () => {
     };
 
     fetchLessonData();
-  }, [courseId, lessonId]);
+  }, [courseId, lessonId, toast]);
 
   useEffect(() => {
     if (!shouldScrollToQuizResult || !quizResult || lesson?.type !== 'quiz') return;

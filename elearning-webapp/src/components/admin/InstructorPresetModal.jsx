@@ -3,7 +3,7 @@ import { ImagePlus, Plus, Save, Search, Trash2, UserRound, X } from 'lucide-reac
 import ModalPortal from '../common/ModalPortal';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import { compressImage } from '../../utils/imageUtils';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 
 const getDefaultForm = () => ({
   name: '',

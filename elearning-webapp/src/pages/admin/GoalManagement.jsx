@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { Plus, CalendarClock } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 import useConfirm from '../../hooks/useConfirm';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
@@ -43,11 +43,7 @@ const GoalManagement = () => {
     });
     const [courseSearch, setCourseSearch] = useState('');
 
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const user = JSON.parse(localStorage.getItem('user'));
@@ -76,7 +72,11 @@ const GoalManagement = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [toast]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleCreateGoal = async (e) => {
         e.preventDefault();

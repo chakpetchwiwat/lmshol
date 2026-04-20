@@ -1,10 +1,8 @@
 import React from 'react';
 import { ArrowUpRight, CheckCircle2, Clock, Layers3 } from 'lucide-react';
 import { DEFAULT_COURSE_IMAGE, getFullUrl } from '../../utils/api';
-import { formatThaiDateTime, formatThaiFullDate } from '../../utils/dateUtils';
+import { formatThaiFullDate } from '../../utils/dateUtils';
 import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
-
-// Standard date utilities now imported from dateUtils
 
 const CourseCard = ({ course, onClick, className = '', variant = 'default' }) => {
   const isCompleted = variant === 'completed' || course.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED;
