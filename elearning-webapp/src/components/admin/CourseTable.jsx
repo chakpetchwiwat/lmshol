@@ -47,7 +47,7 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
         <thead>
           <tr className="border-b border-border bg-gray-50 text-sm text-muted">
             <th className="p-4 font-medium">ชื่อคอร์ส</th>
-            <th className="p-4 font-medium">หมวดหมู่ / กลุ่มโมดูล</th>
+            <th className="p-4 font-medium">กลุ่มโมดูล / หมวดหมู่</th>
             <th className="p-4 font-medium">สิทธิ์การเห็น</th>
             <th className="p-4 font-medium text-center">จัดการ</th>
           </tr>
@@ -61,12 +61,10 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
                   {course.isTemporary && (
                     <span
                       className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                        course.isArchived
-                          ? 'bg-rose-100 text-rose-700'
-                          : 'bg-amber-100 text-amber-700'
+                        course.isArchived ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
                       }`}
                     >
-                      {course.isArchived ? 'Archived' : 'Limited Time'} ยท {formatThaiDateTime(course.expiredAt, true)}
+                      {course.isArchived ? 'Archived' : 'Limited Time'} ถึง {formatThaiDateTime(course.expiredAt, true)}
                     </span>
                   )}
                 </div>
@@ -86,7 +84,7 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
 
                   {course.category?.isTemporary && (
                     <span className="text-[11px] font-bold text-amber-700">
-                      หมวดชั่วคราว ยท {formatThaiDateTime(course.category?.expiredAt, true)}
+                      หมวดชั่วคราว ถึง {formatThaiDateTime(course.category?.expiredAt, true)}
                     </span>
                   )}
                 </div>

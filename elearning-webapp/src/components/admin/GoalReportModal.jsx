@@ -15,6 +15,9 @@ const GoalReportModal = ({
       .map((item) => item?.course?.title || item?.title || null)
       .filter(Boolean)
   ), [goalSource]);
+  const numberedTargetCourses = useMemo(() => (
+    targetCourses.map((courseTitle, index) => `${index + 1}. ${courseTitle}`).join('\n')
+  ), [targetCourses]);
 
   if (!reportGoal) return null;
 
@@ -35,7 +38,7 @@ const GoalReportModal = ({
           label: 'คอร์สในเป้าหมาย',
           value: goalSource?.type === 'ANY'
             ? 'นับทุกคอร์สที่เรียนจบภายในช่วงเวลาเป้าหมาย'
-            : (targetCourses.join(' | ') || '-'),
+            : (numberedTargetCourses || '-'),
         },
         { label: 'พนักงานทั้งหมด', value: `${reportData?.report?.length || 0} คน` },
         { label: 'สำเร็จแล้ว', value: `${successCount} คน` },

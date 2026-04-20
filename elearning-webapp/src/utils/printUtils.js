@@ -203,6 +203,7 @@ export const getPrintReportStyles = () => `
     font-size: 18px;
     font-weight: 700;
     line-height: 1.4;
+    white-space: pre-line;
   }
 
   .table-shell {
@@ -256,6 +257,8 @@ export const getPrintReportStyles = () => `
   @media print {
     html, body {
       background: #ffffff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .print-shell {
@@ -263,10 +266,12 @@ export const getPrintReportStyles = () => `
     }
 
     .page {
+      width: 100%;
       max-width: none;
       border: none;
       border-radius: 0;
       box-shadow: none;
+      overflow: visible;
     }
   }
 `;

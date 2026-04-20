@@ -380,7 +380,7 @@ const PrintReportPage = () => {
           padding-bottom: 32px;
         }
 
-        @media (max-width: 860px) {
+        @media screen and (max-width: 860px) {
           .print-toolbar-card {
             flex-direction: column;
             align-items: flex-start;
@@ -401,9 +401,38 @@ const PrintReportPage = () => {
             display: none;
           }
 
+          .dashboard-print {
+            width: 100%;
+          }
+
+          .section,
+          .dashboard-chart-grid {
+            break-inside: auto;
+            page-break-inside: auto;
+          }
+
+          .dashboard-chart-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 12px;
+            align-items: start;
+          }
+
           .dashboard-chart-card,
           .table-shell {
             break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          .dashboard-chart-shell {
+            height: 210px;
+          }
+
+          .dashboard-legend {
+            margin-top: 10px;
+          }
+
+          .dashboard-table-section {
+            padding-bottom: 0;
           }
         }
       `}</style>
