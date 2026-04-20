@@ -1,7 +1,18 @@
 import React from 'react';
 import { AlertCircle, Calendar, Clock } from 'lucide-react';
-import { format } from 'date-fns';
-import { th } from 'date-fns/locale';
+
+const formatShortThaiDate = (value) => {
+  if (!value) return 'N/A';
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'N/A';
+
+  return new Intl.DateTimeFormat('th-TH', {
+    day: 'numeric',
+    month: 'short',
+    year: '2-digit',
+  }).format(date);
+};
 
 const RiskIdentificationWidget = ({ data }) => {
   return (
@@ -42,7 +53,7 @@ const RiskIdentificationWidget = ({ data }) => {
                 <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-50">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
                     <Calendar size={10} />
-                    <span>Due: {risk.deadline ? format(new Date(risk.deadline), 'd MMM yy', { locale: th }) : 'N/A'}</span>
+                    <span>Due: {formatShortThaiDate(risk.deadline)}</span>
                   </div>
                   <button className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest">NUDGE</button>
                 </div>
