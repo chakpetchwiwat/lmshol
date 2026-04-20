@@ -12,9 +12,12 @@ const CourseFilters = ({
   setSearchTerm,
   selectedCategory,
   setSelectedCategory,
+  selectedModuleGroup,
+  setSelectedModuleGroup,
   categories,
+  moduleGroupOptions,
   activeCount,
-  archivedCount
+  archivedCount,
 }) => {
   return (
     <div className="space-y-6">
@@ -29,7 +32,7 @@ const CourseFilters = ({
 
       <div className="card !overflow-visible">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border p-4">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full lg:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
             <input
               type="text"
@@ -40,18 +43,28 @@ const CourseFilters = ({
             />
           </div>
 
-          <CustomSelect
-            size="sm"
-            className="w-full sm:w-64"
-            value={selectedCategory}
-            onChange={(event) => setSelectedCategory(event.target.value)}
-            options={[
-              { value: FILTER_VALUES.ALL, label: 'ทุกหมวดหมู่' },
-              ...categories
-                .filter((category) => !category.isArchived)
-                .map((category) => ({ value: category.id, label: category.name }))
-            ]}
-          />
+          <div className="grid w-full gap-4 sm:grid-cols-2 lg:w-auto">
+            <CustomSelect
+              size="sm"
+              className="w-full sm:w-64"
+              value={selectedModuleGroup}
+              onChange={(event) => setSelectedModuleGroup(event.target.value)}
+              options={moduleGroupOptions}
+            />
+
+            <CustomSelect
+              size="sm"
+              className="w-full sm:w-64"
+              value={selectedCategory}
+              onChange={(event) => setSelectedCategory(event.target.value)}
+              options={[
+                { value: FILTER_VALUES.ALL, label: 'ทุกหมวดหมู่' },
+                ...categories
+                  .filter((category) => !category.isArchived)
+                  .map((category) => ({ value: category.id, label: category.name })),
+              ]}
+            />
+          </div>
         </div>
       </div>
     </div>

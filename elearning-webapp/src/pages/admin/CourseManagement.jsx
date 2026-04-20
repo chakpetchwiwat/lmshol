@@ -51,6 +51,15 @@ const getDefaultLessonForm = (order = 0) => ({
   questions: [],
 });
 
+const MODULE_GROUP_LABELS = {
+  STRAT_BUSINESS: 'Business / Corporate',
+  STRAT_CORE: 'Core / Soft Skills',
+  STRAT_FUNCTIONAL: 'Functional Skills',
+  STRAT_LEADERSHIP: 'Leadership Skills',
+  STRAT_COMPLIANCE: 'Compliance',
+  STRAT_DIGITAL: 'Digital / Future Skills',
+};
+
 const CourseManagement = () => {
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
@@ -62,6 +71,7 @@ const CourseManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(FILTER_VALUES.ALL);
+  const [selectedModuleGroup, setSelectedModuleGroup] = useState(FILTER_VALUES.ALL);
   const [courseView, setCourseView] = useState(ENTITY_VIEW_STATUS.ACTIVE);
 
   const [showModal, setShowModal] = useState(false);
@@ -361,10 +371,29 @@ const CourseManagement = () => {
     courses.filter((course) => {
       const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === FILTER_VALUES.ALL || course.categoryId === selectedCategory;
+      const matchesModuleGroup = selectedModuleGroup === FILTER_VALUES.ALL || course.category?.type === selectedModuleGroup;
       const matchesView = courseView === ENTITY_VIEW_STATUS.ARCHIVED ? Boolean(course.isArchived) : !course.isArchived;
-      return matchesSearch && matchesCategory && matchesView;
+      return matchesSearch && matchesCategory && matchesModuleGroup && matchesView;
     })
-  ), [courseView, courses, searchTerm, selectedCategory]);
+  ), [courseView, courses, searchTerm, selectedCategory, selectedModuleGroup]);
+
+  const moduleGroupOptions = useMemo(() => {
+    const visibleTypes = Array.from(
+      new Set(
+        categories
+          .filter((category) => !category.isArchived && category.type)
+          .map((category) => category.type)
+      )
+    );
+
+    return [
+      { value: FILTER_VALUES.ALL, label: 'ทุกกลุ่มโมดูล' },
+      ...visibleTypes.map((type) => ({
+        value: type,
+        label: MODULE_GROUP_LABELS[type] || type,
+      })),
+    ];
+  }, [categories]);
 
   const selectableCategories = useMemo(() => (
     categories.filter((category) => !category.isArchived || category.id === courseForm.categoryId)
@@ -399,7 +428,10 @@ const CourseManagement = () => {
         setSearchTerm={setSearchTerm}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
+        selectedModuleGroup={selectedModuleGroup}
+        setSelectedModuleGroup={setSelectedModuleGroup}
         categories={categories}
+        moduleGroupOptions={moduleGroupOptions}
         activeCount={courses.filter(c => !c.isArchived).length}
         archivedCount={courses.filter(c => c.isArchived).length}
       />

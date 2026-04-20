@@ -3,6 +3,7 @@ import { Check, Clock, FileDown, X } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import AdminTable from '../../components/admin/AdminTable';
+import CustomSelect from '../../components/common/CustomSelect';
 import { useToast } from '../../context/useToast';
 import useConfirm from '../../hooks/useConfirm';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
@@ -35,7 +36,6 @@ const STATUS_LABELS = {
 };
 
 const getRequestDate = (request) => request.requestedAt || request.createdAt || null;
-
 const getRequestRef = (request) => `REQ-${request.id?.replace(/\D/g, '').substring(0, 5) || request.id}`;
 
 const getMonthLabel = (month) => (
@@ -103,32 +103,47 @@ const RedeemRequests = () => {
     }
   };
 
-  const yearOptions = useMemo(() => buildYearOptions(requests), [requests]);
+  const yearValues = useMemo(() => buildYearOptions(requests), [requests]);
+  const yearOptions = useMemo(
+    () => yearValues.map((year) => ({
+      value: year,
+      label: year === FILTER_VALUES.ALL ? 'ทุกปี' : year,
+    })),
+    [yearValues]
+  );
 
-  const filteredRequests = useMemo(() => requests.filter((request) => {
-    const matchesStatus = statusFilter === FILTER_VALUES.ALL || request.status === statusFilter;
-    if (!matchesStatus) return false;
+  const filteredRequests = useMemo(
+    () => requests.filter((request) => {
+      const matchesStatus = statusFilter === FILTER_VALUES.ALL || request.status === statusFilter;
+      if (!matchesStatus) return false;
 
-    const parsedDate = new Date(getRequestDate(request));
-    if (Number.isNaN(parsedDate.getTime())) return false;
+      const parsedDate = new Date(getRequestDate(request));
+      if (Number.isNaN(parsedDate.getTime())) return false;
 
-    const matchesMonth = monthFilter === FILTER_VALUES.ALL || String(parsedDate.getMonth() + 1) === String(monthFilter);
-    const matchesYear = yearFilter === FILTER_VALUES.ALL || String(parsedDate.getFullYear()) === String(yearFilter);
+      const matchesMonth =
+        monthFilter === FILTER_VALUES.ALL || String(parsedDate.getMonth() + 1) === String(monthFilter);
+      const matchesYear =
+        yearFilter === FILTER_VALUES.ALL || String(parsedDate.getFullYear()) === String(yearFilter);
 
-    return matchesMonth && matchesYear;
-  }), [monthFilter, requests, statusFilter, yearFilter]);
+      return matchesMonth && matchesYear;
+    }),
+    [monthFilter, requests, statusFilter, yearFilter]
+  );
 
   const pendingCount = useMemo(
     () => requests.filter((request) => request.status === REDEEM_STATUS.PENDING).length,
     [requests]
   );
 
-  const summary = useMemo(() => ({
-    total: filteredRequests.length,
-    approved: filteredRequests.filter((request) => request.status === REDEEM_STATUS.APPROVED).length,
-    pending: filteredRequests.filter((request) => request.status === REDEEM_STATUS.PENDING).length,
-    totalPoints: filteredRequests.reduce((sum, request) => sum + Number(request.reward?.pointsCost || 0), 0),
-  }), [filteredRequests]);
+  const summary = useMemo(
+    () => ({
+      total: filteredRequests.length,
+      approved: filteredRequests.filter((request) => request.status === REDEEM_STATUS.APPROVED).length,
+      pending: filteredRequests.filter((request) => request.status === REDEEM_STATUS.PENDING).length,
+      totalPoints: filteredRequests.reduce((sum, request) => sum + Number(request.reward?.pointsCost || 0), 0),
+    }),
+    [filteredRequests]
+  );
 
   const handlePrint = () => {
     const periodValue = [
@@ -137,7 +152,9 @@ const RedeemRequests = () => {
     ].join(' / ');
 
     openPrintReport({
-      fileName: `redeem-requests-${yearFilter === FILTER_VALUES.ALL ? 'all-years' : yearFilter}-${monthFilter === FILTER_VALUES.ALL ? 'all-months' : monthFilter}`,
+      fileName: `redeem-requests-${
+        yearFilter === FILTER_VALUES.ALL ? 'all-years' : yearFilter
+      }-${monthFilter === FILTER_VALUES.ALL ? 'all-months' : monthFilter}`,
       reportTitle: 'รายงานรายการ Redeem',
       subtitle: 'สรุปคำขอแลกของรางวัลตามตัวกรองที่เลือก',
       summary: [
@@ -147,11 +164,14 @@ const RedeemRequests = () => {
         { label: 'แต้มรวม', value: summary.totalPoints },
       ],
       filters: [
-        { label: 'สถานะ', value: statusFilter === FILTER_VALUES.ALL ? 'ทั้งหมด' : (STATUS_LABELS[statusFilter] || statusFilter) },
+        {
+          label: 'สถานะ',
+          value: statusFilter === FILTER_VALUES.ALL ? 'ทั้งหมด' : STATUS_LABELS[statusFilter] || statusFilter,
+        },
         { label: 'เดือน / ปี', value: periodValue },
       ],
       columns: ['รหัสอ้างอิง', 'ผู้แลก', 'แผนก', 'ของรางวัล', 'แต้มที่ใช้', 'วันที่ขอ', 'สถานะ'],
-      rows: filteredRequests.map((request) => ([
+      rows: filteredRequests.map((request) => [
         getRequestRef(request),
         request.user?.name || request.userId || '-',
         request.user?.department || '-',
@@ -159,7 +179,7 @@ const RedeemRequests = () => {
         request.reward?.pointsCost ?? '-',
         formatThaiDateTime(getRequestDate(request), true),
         STATUS_LABELS[request.status] || request.status || '-',
-      ])),
+      ]),
       emptyMessage: 'ไม่พบรายการ Redeem ตามตัวกรองที่เลือก',
     });
   };
@@ -179,12 +199,12 @@ const RedeemRequests = () => {
       <AdminPageHeader
         title="รายการแลกของรางวัล"
         subtitle="ตรวจสอบคำขอ Redeem, กรองตามเดือนและปี, และพิมพ์รายงานจากชุดข้อมูลที่กำลังดูอยู่"
-        actions={(
+        actions={
           <button type="button" onClick={handlePrint} className="btn btn-primary">
             <FileDown size={18} />
             <span>Print to PDF</span>
           </button>
-        )}
+        }
       />
 
       <div className="flex flex-wrap gap-2">
@@ -214,35 +234,19 @@ const RedeemRequests = () => {
 
       <div className="card p-5">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">เดือน</span>
-            <select
-              value={monthFilter}
-              onChange={(event) => setMonthFilter(event.target.value)}
-              className="form-input"
-            >
-              {MONTH_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <CustomSelect
+            label="เดือน"
+            value={monthFilter}
+            onChange={(event) => setMonthFilter(event.target.value)}
+            options={MONTH_OPTIONS}
+          />
 
-          <label className="flex flex-col gap-2">
-            <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">ปี</span>
-            <select
-              value={yearFilter}
-              onChange={(event) => setYearFilter(event.target.value)}
-              className="form-input"
-            >
-              {yearOptions.map((year) => (
-                <option key={year} value={year}>
-                  {year === FILTER_VALUES.ALL ? 'ทุกปี' : year}
-                </option>
-              ))}
-            </select>
-          </label>
+          <CustomSelect
+            label="ปี"
+            value={yearFilter}
+            onChange={(event) => setYearFilter(event.target.value)}
+            options={yearOptions}
+          />
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -288,19 +292,13 @@ const RedeemRequests = () => {
                 </span>
               )}
               {req.status === REDEEM_STATUS.APPROVED && (
-                <span className="badge bg-success-bg text-[10px] font-bold text-success">
-                  อนุมัติแล้ว
-                </span>
+                <span className="badge bg-success-bg text-[10px] font-bold text-success">อนุมัติแล้ว</span>
               )}
               {req.status === REDEEM_STATUS.REJECTED && (
-                <span className="badge bg-danger-bg text-[10px] font-bold text-danger">
-                  ปฏิเสธ
-                </span>
+                <span className="badge bg-danger-bg text-[10px] font-bold text-danger">ปฏิเสธ</span>
               )}
               {req.status === REDEEM_STATUS.FULFILLED && (
-                <span className="badge bg-info-bg text-[10px] font-bold text-info">
-                  จัดส่งแล้ว
-                </span>
+                <span className="badge bg-info-bg text-[10px] font-bold text-info">จัดส่งแล้ว</span>
               )}
             </td>
             <td className="p-4 text-center">
