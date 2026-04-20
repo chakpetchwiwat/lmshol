@@ -108,6 +108,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
         { label: 'อีเมล', value: detail?.email || '-' },
         { label: 'แผนก', value: detail?.department || '-' },
         { label: 'ระดับ', value: detail?.tier?.name || detail?.tier || '-' },
+        { label: 'เธงเธฑเธเน€เธฃเธดเนเธกเธเธฒเธ', value: detail?.employmentDate ? formatThaiDateTime(detail.employmentDate) : '-' },
         { label: 'Point Balance', value: `${detail?.pointsBalance?.toLocaleString?.() || 0}` },
       ],
       filters: [
