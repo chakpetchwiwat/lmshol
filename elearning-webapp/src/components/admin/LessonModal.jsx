@@ -1,10 +1,9 @@
-import React, { useRef, useState } from 'react';
-import { X, Upload, FileText, Play, Loader2 } from 'lucide-react';
+import React, { useRef } from 'react';
+import { X, Upload, FileText, Play } from 'lucide-react';
 import QuizBuilder from './QuizBuilder';
 import ModalPortal from '../common/ModalPortal';
 import RichTextEditor from '../common/RichTextEditor';
 import CustomSelect from '../common/CustomSelect';
-import { adminAPI } from '../../utils/api';
 
 const LessonModal = ({
   isOpen,

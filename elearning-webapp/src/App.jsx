@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { canAccessAdminPanel, canEditAdminUsers } from './utils/roles';
+import { canAccessAdminPanel } from './utils/roles';
 
 // Layouts
 const UserLayout = lazy(() => import('./components/layout/UserLayout'));
@@ -21,6 +21,7 @@ const PointsHistory = lazy(() => import('./pages/user/PointsHistory'));
 const Profile = lazy(() => import('./pages/user/Profile'));
 const OngoingCourses = lazy(() => import('./pages/user/OngoingCourses'));
 const GoalDetail = lazy(() => import('./pages/user/GoalDetail'));
+const PrintReportPage = lazy(() => import('./pages/common/PrintReportPage'));
 
 // Admin Pages
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -48,16 +49,20 @@ const LoadingFallback = () => (
 import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';
 
+const readStoredUser = () => {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
+  } catch {
+    return null;
+  }
+};
+
 function App() {
-  const getCurrentUser = () => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const userStr = localStorage.getItem('user');
-      return userStr ? JSON.parse(userStr) : null;
-    } catch (e) {
-      return null;
-    }
-  };
+  const currentUser = readStoredUser();
+  const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('token');
 
   return (
     <LanguageProvider>
@@ -66,8 +71,8 @@ function App() {
       <Routes>
         {/* Root Redirect - Check for existing session */}
         <Route path="/" element={
-          localStorage.getItem('token') ? (
-            canAccessAdminPanel(JSON.parse(localStorage.getItem('user')))
+          hasToken ? (
+            canAccessAdminPanel(currentUser)
               ? <Navigate to="/admin/dashboard" replace /> 
               : <Navigate to="/user/home" replace />
           ) : <Navigate to="/login" replace />
@@ -75,6 +80,7 @@ function App() {
         
         {/* Auth */}
         <Route path="/login" element={<Login />} />
+        <Route path="/print/report/:reportId" element={<PrintReportPage />} />
 
         {/* User Area */}
         <Route element={<ProtectedRoute allowedRoles={['user', 'admin', 'manager']} />}>
@@ -99,7 +105,7 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="courses" element={canEditAdminUsers(getCurrentUser()) ? <AdminCourses /> : <Navigate to="/admin/announcements" replace />} />
+            <Route path="courses" element={<AdminCourses />} />
             <Route path="announcements" element={<AdminAnnouncements />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="rewards" element={<AdminRewards />} />

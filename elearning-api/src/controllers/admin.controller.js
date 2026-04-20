@@ -5,12 +5,12 @@ const { REDEEM_STATUS } = require('../utils/constants/statuses');
 
 // DASHBOARD
 const getDashboardStats = asyncHandler(async (req, res) => {
-  const stats = await AdminService.getDashboardStats(req.user);
+  const stats = await AdminService.getDashboardStats(req.user, req.query);
   res.json({ success: true, data: stats });
 });
 
 const getAdvancedAnalytics = asyncHandler(async (req, res) => {
-  const analytics = await AdminService.getAdvancedAnalytics(req.user);
+  const analytics = await AdminService.getAdvancedAnalytics(req.user, req.query);
   res.json({ success: true, data: analytics });
 });
 

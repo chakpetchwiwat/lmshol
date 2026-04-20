@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Edit2, Plus, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 
 const ReferenceDataModal = ({
   isOpen,
@@ -24,7 +24,7 @@ const ReferenceDataModal = ({
     { value: 'INNOVATION', label: 'Innovation', color: 'text-amber-600 bg-amber-50 border-amber-200' }
   ]
 }) => {
-  const { showToast } = useToast();
+  const toast = useToast();
   const [draftName, setDraftName] = useState('');
   const [accessAdmin, setAccessAdmin] = useState(false);
   const [draftType, setDraftType] = useState('FUNCTION');
@@ -86,7 +86,7 @@ const ReferenceDataModal = ({
       resetForm();
     } catch (error) {
       console.error(`Save ${itemLabel} error:`, error);
-      showToast(error.response?.data?.message || `ไม่สามารถบันทึก${itemLabel}ได้`, 'danger');
+      toast.error(error.response?.data?.message || `ไม่สามารถบันทึก${itemLabel}ได้`);
     }
   };
 

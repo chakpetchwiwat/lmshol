@@ -1,55 +1,62 @@
-name: Continuous Integration
+name: DigitalOcean & ScaleUP-KM CI
 
 on:
   push:
-    branches: [ main ]
+    branches: ["main", "feat/*", "deploy/*"]
   pull_request:
-    branches: [ main ]
+    branches: ["main"]
 
 jobs:
   api-ci:
-    name: API CI
+    name: Backend API CI
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: elearning-api
+        working-directory: ./elearning-api
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "22"
           cache: 'npm'
-          cache-dependency-path: elearning-api/package-lock.json
+          cache-dependency-path: './elearning-api/package-lock.json'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run Tests
         run: npm test
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
   webapp-ci:
-    name: WebApp CI
+    name: Frontend WebApp CI
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: elearning-webapp
+        working-directory: ./elearning-webapp
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "22"
           cache: 'npm'
-          cache-dependency-path: elearning-webapp/package-lock.json
+          cache-dependency-path: './elearning-webapp/package-lock.json'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run Lint
         run: npm run lint

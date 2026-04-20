@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { BellRing, CalendarClock, CheckCircle, Clock, FileText, Play, BookOpen } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getFullUrl, userAPI } from '../../utils/api';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 import DocViewer from '../../components/common/DocViewer';
 import LessonMedia from '../../components/user/LessonMedia';
 import QuizSection from '../../components/user/QuizSection';

@@ -1,8 +1,6 @@
 import React from 'react';
-import { useTranslation } from '../../context/LanguageContext';
 
 const AdminPageHeader = ({ title, subtitle, actions }) => {
-  const { t } = useTranslation();
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
       <div>

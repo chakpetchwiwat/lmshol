@@ -1,84 +1,94 @@
 import React from 'react';
-import { Target } from 'lucide-react';
+import { ArrowUpRight, Target } from 'lucide-react';
 import {
-  Radar, RadarChart, PolarGrid, 
+  Radar, RadarChart, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
-  Tooltip, Legend
+  Tooltip,
 } from 'recharts';
 
-const SkillGapRadarChart = ({ data }) => {
-  // Map backend types to display names
-  const categoryMap = {
-    'STRAT_BUSINESS': 'Business Acumen / Corporate Knowledge',
-    'STRAT_CORE': 'Core / Soft Skills',
-    'STRAT_FUNCTIONAL': 'Functional Skills',
-    'STRAT_LEADERSHIP': 'Leadership Skills',
-    'STRAT_COMPLIANCE': 'Compliance',
-    'STRAT_DIGITAL': 'Digital / Future Skills'
-  };
+const CATEGORY_MAP = {
+  STRAT_BUSINESS: 'Business Acumen / Corporate Knowledge',
+  STRAT_CORE: 'Core / Soft Skills',
+  STRAT_FUNCTIONAL: 'Functional Skills',
+  STRAT_LEADERSHIP: 'Leadership Skills',
+  STRAT_COMPLIANCE: 'Compliance',
+  STRAT_DIGITAL: 'Digital / Future Skills',
+};
 
-  const allTypes = [
-    'STRAT_BUSINESS',
-    'STRAT_CORE',
-    'STRAT_FUNCTIONAL',
-    'STRAT_LEADERSHIP',
-    'STRAT_COMPLIANCE',
-    'STRAT_DIGITAL'
-  ];
+const ALL_TYPES = Object.keys(CATEGORY_MAP);
 
-  const chartData = allTypes.map(type => {
-    const item = (data || []).find(d => d.type === type);
-    const rawMastery = item ? (item.average_mastery || 0) : 0;
+const SkillGapRadarChart = ({ data, onSelectSkillGap }) => {
+  const safeData = data || [];
+
+  const chartData = ALL_TYPES.map((type) => {
+    const item = safeData.find((entry) => entry.type === type);
+    const mastery = item ? Number((item.average_mastery || 0).toFixed(1)) : 0;
     return {
-      subject: categoryMap[type] || type,
-      A: Number(rawMastery.toFixed(1)),
+      type,
+      subject: CATEGORY_MAP[type] || type,
+      mastery,
       fullMark: 100,
+      raw: item || { type, average_mastery: 0, details: [] },
     };
   });
 
   return (
-    <div className="card flex min-w-0 flex-col p-6 card-no-lift">
-      <div className="flex items-center gap-2 mb-6">
-        <Target size={20} className="text-primary" />
-        <h3 className="text-lg font-bold">Skill Gap Analysis (Org Mastery)</h3>
+    <div className="card card-no-lift flex min-w-0 flex-col p-6">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-light text-primary">
+            <Target size={20} />
+          </div>
+          <div className="text-left">
+            <h3 className="text-lg font-bold text-slate-900">Skill Gap Analysis</h3>
+            <p className="text-sm text-slate-500">เลือก competency ใต้กราฟเพื่อดูรายชื่อผู้เรียนและคะแนนสอบ</p>
+          </div>
+        </div>
       </div>
-      
-      <div className="h-[300px] w-full min-w-0 flex items-center justify-center">
-        {(!data || data.length === 0) ? (
-          <div className="text-slate-400 text-sm italic">No mastery data reported yet</div>
+
+      <div className="flex h-[300px] w-full min-w-0 items-center justify-center">
+        {safeData.length === 0 ? (
+          <div className="text-sm italic text-slate-400">No mastery data reported yet</div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
               <PolarGrid stroke="#e2e8f0" />
-              <PolarAngleAxis 
-                dataKey="subject" 
+              <PolarAngleAxis
+                dataKey="subject"
                 tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }}
               />
-              <PolarRadiusAxis 
-                angle={30} 
-                domain={[0, 100]} 
-                tick={false}
-                axisLine={false}
-              />
+              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
               <Radar
                 name="Mastery Level"
-                dataKey="A"
-                stroke="#6366f1"
-                fill="#6366f1"
-                fillOpacity={0.6}
+                dataKey="mastery"
+                stroke="#4f46e5"
+                fill="#4f46e5"
+                fillOpacity={0.55}
               />
-              <Tooltip 
-                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+              <Tooltip
+                contentStyle={{ borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 20px 45px -30px rgb(15 23 42 / 0.45)' }}
+                formatter={(value, name, info) => [`${value}%`, info?.payload?.subject || name]}
               />
             </RadarChart>
           </ResponsiveContainer>
         )}
       </div>
-      
-      <div className="mt-4 text-center">
-        <p className="text-xs text-muted font-medium italic">
-          Target baseline is constant 100% for all competency areas.
-        </p>
+
+      <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
+        {chartData.map((item) => (
+          <button
+            key={item.type}
+            type="button"
+            onClick={() => onSelectSkillGap?.(item.raw)}
+            className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-left transition-all hover:border-primary/20 hover:bg-primary/5"
+          >
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold text-slate-800">{item.subject}</div>
+              <div className="mt-1 text-xs text-slate-500">ค่าเฉลี่ย {item.mastery}%</div>
+            </div>
+            <ArrowUpRight size={16} className="shrink-0 text-slate-300" />
+          </button>
+        ))}
       </div>
     </div>
   );

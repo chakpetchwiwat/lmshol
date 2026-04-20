@@ -4,7 +4,7 @@ import { adminAPI, getFullUrl } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import RewardModal from '../../components/admin/RewardModal';
 import { isSuperAdmin } from '../../utils/roles';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 import useConfirm from '../../hooks/useConfirm';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { REWARD_STATUS } from '../../utils/constants/statuses';

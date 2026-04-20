@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 import useConfirm from '../../hooks/useConfirm';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 
@@ -21,11 +21,7 @@ const Rewards = () => {
   const [loading, setLoading] = useState(true);
   const [redeeming, setRedeeming] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [pointsRes, rewardsRes] = await Promise.allSettled([
         userAPI.getPoints(),
@@ -48,7 +44,11 @@ const Rewards = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleRedeem = async (rewardId, cost, max, userRedeemed) => {
     if (points < cost) {

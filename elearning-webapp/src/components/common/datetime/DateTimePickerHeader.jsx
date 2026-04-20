@@ -1,7 +1,7 @@
 import React from 'react';
 import { Calendar as CalendarIcon, Clock, X } from 'lucide-react';
 
-const DateTimePickerHeader = ({ view, onBack, onClose }) => {
+const DateTimePickerHeader = ({ view, onClose }) => {
   return (
     <div className="flex items-center justify-between bg-slate-50 px-8 py-6 border-b border-slate-100">
       <div className="flex items-center gap-4">

@@ -1,5 +1,4 @@
 import React, { useRef, useLayoutEffect, useState } from 'react';
-import { Settings2 } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 
 /**
@@ -12,8 +11,7 @@ import ModalPortal from '../common/ModalPortal';
 const AdminActionMenu = ({ isOpen, onToggle, actions = [] }) => {
   const triggerRef = useRef(null);
   const menuRef = useRef(null);
-  const [side, setSide] = useState('bottom'); // 'top' or 'bottom'
-  const [coords, setCoords] = useState(null);
+  const [menuPosition, setMenuPosition] = useState(null);
 
   useLayoutEffect(() => {
     if (isOpen && triggerRef.current) {
@@ -23,9 +21,8 @@ const AdminActionMenu = ({ isOpen, onToggle, actions = [] }) => {
       const spaceBelow = viewportHeight - rect.bottom;
       
       const shouldOpenUp = spaceBelow < menuHeight && rect.top > menuHeight;
-      setSide(shouldOpenUp ? 'top' : 'bottom');
-
-      setCoords({
+      setMenuPosition({
+        side: shouldOpenUp ? 'top' : 'bottom',
         top: rect.top + window.scrollY,
         bottom: rect.bottom + window.scrollY,
         left: rect.right + window.scrollX,
@@ -49,7 +46,7 @@ const AdminActionMenu = ({ isOpen, onToggle, actions = [] }) => {
         document.removeEventListener('mousedown', handleClickOutside);
       };
     } else {
-      setCoords(null);
+      setMenuPosition(null);
     }
   }, [isOpen, onToggle]);
 
@@ -71,17 +68,17 @@ const AdminActionMenu = ({ isOpen, onToggle, actions = [] }) => {
         จัดการ
       </button>
 
-      {isOpen && coords && (
+      {isOpen && menuPosition && (
         <ModalPortal isOpen={isOpen} lockScroll={false}>
           <div 
             ref={menuRef}
             className={`fixed z-[9999] w-52 overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-1.5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] backdrop-blur-xl animate-in fade-in duration-200 ${
-              side === 'top' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'
+              menuPosition.side === 'top' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'
             }`}
             style={{
-              top: side === 'top' ? 'auto' : `${coords.bottom + 8}px`,
-              bottom: side === 'top' ? `${window.innerHeight - (coords.top - window.scrollY) + 8}px` : 'auto',
-              left: `${coords.left - 208}px`,
+              top: menuPosition.side === 'top' ? 'auto' : `${menuPosition.bottom + 8}px`,
+              bottom: menuPosition.side === 'top' ? `${window.innerHeight - (menuPosition.top - window.scrollY) + 8}px` : 'auto',
+              left: `${menuPosition.left - 208}px`,
             }}
             onClick={(e) => e.stopPropagation()}
           >

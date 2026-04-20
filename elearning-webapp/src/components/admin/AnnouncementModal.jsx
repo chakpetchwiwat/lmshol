@@ -20,7 +20,8 @@ const AnnouncementModal = ({
   isFullAdmin,
   user,
   departments,
-  uploading
+  uploading,
+  editorImageUploading = false,
 }) => {
   // Render specific attachment/content forms based on type
   const renderSourceField = () => {
@@ -264,6 +265,7 @@ const AnnouncementModal = ({
                       value={form.content || ''}
                       onChange={(content) => setForm((current) => ({ ...current, content }))}
                       onImageUpload={onEditorImageUpload}
+                      imageUploading={editorImageUploading}
                     />
                   </div>
                 ) : null}

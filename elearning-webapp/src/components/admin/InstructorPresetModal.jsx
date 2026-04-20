@@ -3,7 +3,7 @@ import { ImagePlus, Plus, Save, Search, Trash2, UserRound, X } from 'lucide-reac
 import ModalPortal from '../common/ModalPortal';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import { compressImage } from '../../utils/imageUtils';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../context/useToast';
 
 const getDefaultForm = () => ({
   name: '',
@@ -122,7 +122,7 @@ const InstructorPresetModal = ({
           </div>
 
           <div className="grid flex-1 gap-0 overflow-hidden lg:grid-cols-[1.2fr_0.95fr]">
-            <div className="border-r border-slate-100 px-6 py-5">
+            <div className="min-h-0 border-r border-slate-100 px-6 py-5">
               <div className="relative mb-5">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
@@ -192,8 +192,8 @@ const InstructorPresetModal = ({
               </div>
             </div>
 
-            <div className="bg-slate-50/60 px-6 py-5">
-              <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="min-h-0 overflow-y-auto bg-slate-50/60 px-6 py-5">
+              <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">
@@ -273,7 +273,7 @@ const InstructorPresetModal = ({
                   />
                 </div>
 
-                <div className="flex gap-3 pt-2">
+                <div className="sticky bottom-0 mt-auto flex gap-3 border-t border-slate-200 bg-slate-50/95 pb-1 pt-4 backdrop-blur">
                   <button type="submit" className="btn btn-primary flex-1 gap-2">
                     {editingPreset ? <Save size={16} /> : <Plus size={16} />}
                     {editingPreset ? 'บันทึกการแก้ไข' : 'เพิ่มวิทยากร'}

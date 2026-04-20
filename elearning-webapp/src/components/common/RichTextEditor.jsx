@@ -2,8 +2,6 @@ import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Bold, Eraser, ImagePlus, Italic, Link2, Palette, Underline } from 'lucide-react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import UnderlineExtension from '@tiptap/extension-underline';
-import Link from '@tiptap/extension-link';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
 import { normalizeLessonContentToHtml } from '../../utils/richText';

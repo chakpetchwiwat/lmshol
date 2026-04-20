@@ -1,39 +1,65 @@
 import React from 'react';
+import { ArrowUpRight } from 'lucide-react';
 
-const PopularCoursesTable = ({ courses }) => {
+const PopularCoursesTable = ({ courses, onSelectCourse }) => {
+  const safeCourses = courses || [];
+
   return (
-    <div className="card p-6 lg:col-span-2 overflow-hidden card-no-lift">
-      <h3 className="text-lg font-bold mb-6">คอร์สยอดนิยม</h3>
+    <div className="card card-no-lift overflow-hidden p-6 lg:col-span-2">
+      <div className="mb-5 flex items-center justify-between gap-4">
+        <div className="text-left">
+          <h3 className="text-lg font-bold text-slate-900">คอร์สที่มีผู้เรียนสูง</h3>
+          <p className="text-sm text-slate-500">กดที่แถวเพื่อดูรายชื่อผู้ที่ลงเรียนคอร์สนั้น</p>
+        </div>
+        <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-slate-500">
+          Top {safeCourses.length}
+        </span>
+      </div>
+
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full border-collapse text-left">
           <thead>
-            <tr className="text-xs font-black text-muted uppercase tracking-widest border-b border-border">
-              <th className="pb-4 font-black">ชื่อคอร์สเรียน</th>
-              <th className="pb-4 font-black text-right pr-6">การลงทะเบียน</th>
+            <tr className="border-b border-border text-xs font-black uppercase tracking-widest text-muted">
+              <th className="pb-4 font-black">คอร์ส</th>
+              <th className="pb-4 font-black text-right">จำนวนผู้เรียน</th>
+              <th className="pb-4 font-black text-right">ดูรายละเอียด</th>
             </tr>
           </thead>
           <tbody>
-            {(courses || []).map((course, i) => (
-              <tr key={course.id} className="border-b border-gray-50 last:border-0 group">
+            {safeCourses.map((course, index) => (
+              <tr
+                key={course.id}
+                className="group cursor-pointer border-b border-slate-100 last:border-0"
+                onClick={() => onSelectCourse?.(course)}
+              >
                 <td className="py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center font-black text-slate-400 text-xs text-left">#{i + 1}</div>
-                    <span className="font-bold text-sm group-hover:text-primary transition-colors text-left">{course.title}</span>
-                  </div>
-                </td>
-                <td className="py-4 text-right pr-6">
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="text-xs font-bold text-success">{course.students} คน</span>
-                    <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-success rounded-full"
-                        style={{ width: `${Math.max(8, Math.min(100, course.students * 10))}%` }}
-                      ></div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-xs font-black text-slate-500">
+                      #{index + 1}
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-900 transition-colors group-hover:text-primary">
+                        {course.title}
+                      </div>
+                      <div className="text-xs text-slate-400">คลิกเพื่อดูรายชื่อผู้เรียน</div>
                     </div>
                   </div>
                 </td>
+                <td className="py-4 text-right">
+                  <span className="text-sm font-black text-success">{course.students} คน</span>
+                </td>
+                <td className="py-4 text-right">
+                  <ArrowUpRight size={16} className="ml-auto text-slate-300 transition-colors group-hover:text-primary" />
+                </td>
               </tr>
             ))}
+            {safeCourses.length === 0 && (
+              <tr>
+                <td colSpan={3} className="py-12 text-center text-sm font-medium text-slate-400">
+                  ยังไม่มีข้อมูลคอร์สในช่วงเวลานี้
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

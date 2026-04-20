@@ -69,6 +69,14 @@ const CustomDateTimePicker = ({
     setView('calendar');
   };
 
+  const handlePrevYearRange = () => {
+    setViewDate(new Date(viewDate.getFullYear() - 12, viewDate.getMonth(), 1));
+  };
+
+  const handleNextYearRange = () => {
+    setViewDate(new Date(viewDate.getFullYear() + 12, viewDate.getMonth(), 1));
+  };
+
   const updateValue = (date) => {
     const finalDate = new Date(date);
     if (showTime) {
@@ -169,6 +177,8 @@ const CustomDateTimePicker = ({
                   months={months}
                   onMonthSelect={handleMonthSelect}
                   onYearSelect={handleYearSelect}
+                  onPrevYearRange={handlePrevYearRange}
+                  onNextYearRange={handleNextYearRange}
                 />
               )}
 

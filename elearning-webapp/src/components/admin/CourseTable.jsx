@@ -3,12 +3,32 @@ import { RotateCcw, Edit, Trash2, History, Archive } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminActionMenu from './AdminActionMenu';
 
+const MODULE_GROUP_LABELS = {
+  STRAT_BUSINESS: 'Business / Corporate',
+  STRAT_CORE: 'Core / Soft Skills',
+  STRAT_FUNCTIONAL: 'Functional Skills',
+  STRAT_LEADERSHIP: 'Leadership Skills',
+  STRAT_COMPLIANCE: 'Compliance',
+  STRAT_DIGITAL: 'Digital / Future Skills',
+};
+
+const getModuleGroupBadgeClass = (type) => {
+  if (type === 'STRAT_BUSINESS') return 'bg-indigo-50 text-indigo-700 ring-indigo-200';
+  if (type === 'STRAT_CORE') return 'bg-sky-50 text-sky-700 ring-sky-200';
+  if (type === 'STRAT_FUNCTIONAL') return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
+  if (type === 'STRAT_LEADERSHIP') return 'bg-violet-50 text-violet-700 ring-violet-200';
+  if (type === 'STRAT_COMPLIANCE') return 'bg-amber-50 text-amber-700 ring-amber-200';
+  if (type === 'STRAT_DIGITAL') return 'bg-cyan-50 text-cyan-700 ring-cyan-200';
+  return 'bg-slate-100 text-slate-600 ring-slate-200';
+};
+
 const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHistory, onArchive }) => {
   const [openDropdownId, setOpenDropdownId] = useState(null);
+
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
       </div>
     );
   }
@@ -23,11 +43,11 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[760px] border-collapse text-left">
+      <table className="w-full min-w-[820px] border-collapse text-left">
         <thead>
           <tr className="border-b border-border bg-gray-50 text-sm text-muted">
             <th className="p-4 font-medium">ชื่อคอร์ส</th>
-            <th className="p-4 font-medium">หมวดหมู่</th>
+            <th className="p-4 font-medium">กลุ่มโมดูล / หมวดหมู่</th>
             <th className="p-4 font-medium">สิทธิ์การเห็น</th>
             <th className="p-4 font-medium text-center">จัดการ</th>
           </tr>
@@ -39,27 +59,38 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
                 <div className="flex flex-col gap-1">
                   <span className="font-medium text-left">{course.title}</span>
                   {course.isTemporary && (
-                    <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                      course.isArchived
-                        ? 'bg-rose-100 text-rose-700'
-                        : 'bg-amber-100 text-amber-700'
-                    }`}>
-                      {course.isArchived ? 'Archived' : 'Limited Time'} · {formatThaiDateTime(course.expiredAt, true)}
+                    <span
+                      className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                        course.isArchived ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                      }`}
+                    >
+                      {course.isArchived ? 'Archived' : 'Limited Time'} ถึง {formatThaiDateTime(course.expiredAt, true)}
                     </span>
                   )}
                 </div>
               </td>
+
               <td className="p-4 text-sm text-muted">
-                <div className="flex flex-col gap-1 text-left">
-                  <span>{course.category?.name || 'Uncategorized'}</span>
+                <div className="flex flex-col gap-2 text-left">
+                  {course.category?.type ? (
+                    <span
+                      className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ring-1 ring-inset ${getModuleGroupBadgeClass(course.category.type)}`}
+                    >
+                      {MODULE_GROUP_LABELS[course.category.type] || course.category.type}
+                    </span>
+                  ) : null}
+
+                  <span className="font-medium text-slate-700">{course.category?.name || 'Uncategorized'}</span>
+
                   {course.category?.isTemporary && (
                     <span className="text-[11px] font-bold text-amber-700">
-                      หมวดชั่วคราว · {formatThaiDateTime(course.category?.expiredAt, true)}
+                      หมวดชั่วคราว ถึง {formatThaiDateTime(course.category?.expiredAt, true)}
                     </span>
                   )}
                 </div>
               </td>
-              <td className="p-4 text-sm text-muted text-left">
+
+              <td className="p-4 text-left text-sm text-muted">
                 {course.visibleToAll ? (
                   <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">
                     ทุกคน
@@ -71,6 +102,7 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
                   </div>
                 )}
               </td>
+
               <td className="p-4 text-center">
                 <div className="flex justify-center">
                   <AdminActionMenu
@@ -111,9 +143,9 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
                         icon: Trash2,
                         label: 'ลบคอร์สเรียน',
                         onClick: () => onDelete(course.id),
-                        className: 'text-slate-500 hover:bg-red-50 hover:text-red-600 mt-1 border-t border-slate-100/60 pt-2',
+                        className: 'mt-1 border-t border-slate-100/60 pt-2 text-slate-500 hover:bg-red-50 hover:text-red-600',
                         iconClassName: 'bg-red-50 text-red-500 group-hover:bg-red-100',
-                      }
+                      },
                     ]}
                   />
                 </div>

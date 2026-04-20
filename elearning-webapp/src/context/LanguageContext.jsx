@@ -1,19 +1,18 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import th from '../locales/th.json';
 import en from '../locales/en.json';
-
-const LanguageContext = createContext();
+import LanguageContext from './languageContextValue';
 
 const locales = { th, en };
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState(localStorage.getItem('language') || 'th');
+  const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'th');
 
   useEffect(() => {
     localStorage.setItem('language', language);
   }, [language]);
 
-  const t = (keyPath) => {
+  const t = useCallback((keyPath) => {
     const keys = keyPath.split('.');
     let value = locales[language];
     
@@ -26,19 +25,17 @@ export const LanguageProvider = ({ children }) => {
     }
     
     return value;
-  };
+  }, [language]);
+
+  const contextValue = useMemo(() => ({
+    language,
+    setLanguage,
+    t,
+  }), [language, t]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );
-};
-
-export const useTranslation = () => {
-  const context = useContext(LanguageContext);
-  if (!context) {
-    throw new Error('useTranslation must be used within a LanguageProvider');
-  }
-  return context;
 };
