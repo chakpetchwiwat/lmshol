@@ -108,7 +108,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
         { label: 'อีเมล', value: detail?.email || '-' },
         { label: 'แผนก', value: detail?.department || '-' },
         { label: 'ระดับ', value: detail?.tier?.name || detail?.tier || '-' },
-        { label: 'เธงเธฑเธเน€เธฃเธดเนเธกเธเธฒเธ', value: detail?.employmentDate ? formatThaiDateTime(detail.employmentDate) : '-' },
+        { label: '\u0e27\u0e31\u0e19\u0e40\u0e23\u0e34\u0e48\u0e21\u0e07\u0e32\u0e19', value: detail?.employmentDate ? formatThaiDateTime(detail.employmentDate) : '-' },
         { label: 'Point Balance', value: `${detail?.pointsBalance?.toLocaleString?.() || 0}` },
       ],
       filters: [
