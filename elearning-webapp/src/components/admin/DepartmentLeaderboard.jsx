@@ -1,59 +1,83 @@
 import React from 'react';
-import { Award } from 'lucide-react';
+import { ArrowUpRight, Award } from 'lucide-react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, Cell
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
 
-const DepartmentLeaderboard = ({ data }) => {
-  const COLORS = ['#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899'];
+const COLORS = ['#4f46e5', '#7c3aed', '#a855f7', '#ec4899', '#f59e0b'];
 
+const DepartmentLeaderboard = ({ data, onSelectDepartment }) => {
   const sortedData = [...(data || [])]
-    .sort((a, b) => b.completion_rate - a.completion_rate)
+    .sort((left, right) => right.completion_rate - left.completion_rate)
     .slice(0, 5);
 
   return (
-    <div className="card flex min-w-0 flex-col p-6 card-no-lift">
-      <div className="flex items-center gap-2 mb-6">
-        <Award size={20} className="text-secondary" />
-        <h3 className="text-lg font-bold">Department Benchmarking</h3>
+    <div className="card card-no-lift flex min-w-0 flex-col p-6">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary/10 text-secondary">
+            <Award size={20} />
+          </div>
+          <div className="text-left">
+            <h3 className="text-lg font-bold text-slate-900">Department Benchmarking</h3>
+            <p className="text-sm text-slate-500">คลิกแผนกเพื่อดูรายชื่อผู้เรียนและผลการเรียนรายบุคคล</p>
+          </div>
+        </div>
       </div>
-      
+
       <div className="h-[300px] w-full min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={sortedData}
             layout="vertical"
-            margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+            margin={{ top: 5, right: 20, left: 28, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
+            <CartesianGrid strokeDasharray="3 3" horizontal vertical={false} stroke="#e2e8f0" />
             <XAxis type="number" domain={[0, 100]} hide />
-            <YAxis 
-              dataKey="name" 
-              type="category" 
-              tick={{ fill: '#64748b', fontSize: 11, fontWeight: 500 }}
-              width={80}
+            <YAxis
+              dataKey="name"
+              type="category"
+              tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }}
+              width={110}
             />
-            <Tooltip 
-              cursor={{ fill: '#f1f5f9' }}
-              contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-              formatter={(value) => [`${value}%`, 'Completion Rate']}
+            <Tooltip
+              cursor={{ fill: '#eef2ff' }}
+              contentStyle={{ borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 20px 45px -30px rgb(15 23 42 / 0.45)' }}
+              formatter={(value) => [`${Number(value).toFixed(1)}%`, 'Completion Rate']}
             />
-            <Bar dataKey="completion_rate" radius={[0, 4, 4, 0]} barSize={20}>
+            <Bar
+              dataKey="completion_rate"
+              radius={[0, 12, 12, 0]}
+              barSize={22}
+              onClick={onSelectDepartment}
+              className={onSelectDepartment ? 'cursor-pointer' : ''}
+            >
               {sortedData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
-      
+
       <div className="mt-4 flex flex-col gap-2">
-        {sortedData.map((dept, i) => (
-          <div key={dept.name} className="flex items-center justify-between text-xs">
-            <span className="text-slate-500 font-medium">{i + 1}. {dept.name}</span>
-            <span className="font-bold text-slate-800">{dept.completion_rate}%</span>
-          </div>
+        {sortedData.map((department, index) => (
+          <button
+            key={department.name}
+            type="button"
+            onClick={() => onSelectDepartment?.(department)}
+            className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-left transition-all hover:border-primary/20 hover:bg-primary/5"
+          >
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">อันดับ {index + 1}</div>
+              <div className="mt-1 text-sm font-semibold text-slate-800">{department.name}</div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-black text-slate-900">{Number(department.completion_rate || 0).toFixed(1)}%</span>
+              <ArrowUpRight size={16} className="text-slate-300" />
+            </div>
+          </button>
         ))}
       </div>
     </div>
