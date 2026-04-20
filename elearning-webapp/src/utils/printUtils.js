@@ -66,6 +66,7 @@ const renderTable = ({ columns = [], rows = [], emptyMessage = 'ไม่พบ�
 `;
 
 const normalizeReportData = (report = {}) => ({
+  type: report.type || 'table',
   fileName: report.fileName || 'report',
   reportTitle: report.reportTitle || 'รายงาน',
   subtitle: report.subtitle || '',
@@ -74,6 +75,7 @@ const normalizeReportData = (report = {}) => ({
   columns: Array.isArray(report.columns) ? report.columns : [],
   rows: Array.isArray(report.rows) ? report.rows : [],
   emptyMessage: report.emptyMessage || 'ไม่พบข้อมูล',
+  dashboardData: report.dashboardData || null,
   generatedAt: report.generatedAt || formatThaiDateTime(new Date(), true),
 });
 
@@ -362,6 +364,7 @@ export const getStoredPrintReport = (reportId) => {
 };
 
 export const openPrintReport = ({
+  type = 'table',
   fileName = 'report',
   reportTitle,
   subtitle,
@@ -370,6 +373,7 @@ export const openPrintReport = ({
   columns = [],
   rows = [],
   emptyMessage,
+  dashboardData = null,
 }) => {
   if (typeof window === 'undefined') {
     return;
@@ -379,6 +383,7 @@ export const openPrintReport = ({
 
   const reportId = `report-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
   const payload = {
+    type,
     fileName,
     reportTitle,
     subtitle,
@@ -387,6 +392,7 @@ export const openPrintReport = ({
     columns,
     rows,
     emptyMessage,
+    dashboardData,
     generatedAt: formatThaiDateTime(new Date(), true),
     createdAt: Date.now(),
   };

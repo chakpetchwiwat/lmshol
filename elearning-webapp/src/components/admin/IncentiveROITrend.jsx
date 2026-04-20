@@ -7,6 +7,35 @@ import {
 
 const IncentiveROITrend = ({ data, onSelectBucket }) => {
   const safeData = data || [];
+  const totalCompletions = safeData.reduce((sum, bucket) => sum + (bucket.completions || 0), 0);
+  const totalPoints = safeData.reduce((sum, bucket) => sum + (bucket.points || 0), 0);
+  const peakCompletionBucket = safeData.reduce(
+    (best, item) => ((item.completions || 0) > (best?.completions || 0) ? item : best),
+    null
+  );
+  const peakPointsBucket = safeData.reduce(
+    (best, item) => ((item.points || 0) > (best?.points || 0) ? item : best),
+    null
+  );
+  const summaryCards = [
+    {
+      label: 'เรียนจบทั้งหมด',
+      value: `${totalCompletions} จบ`,
+      subtext: 'รวมจากทุกช่วงเวลาตาม filter ปัจจุบัน',
+    },
+    {
+      label: 'แจก points ทั้งหมด',
+      value: `${totalPoints} points`,
+      subtext: 'คะแนนสะสมที่จ่ายออกทั้งหมด',
+    },
+    {
+      label: 'ช่วงที่ impact สูงสุด',
+      value: peakPointsBucket ? `${peakPointsBucket.month} • ${peakPointsBucket.points} points` : '-',
+      subtext: peakCompletionBucket
+        ? `Completion สูงสุด ${peakCompletionBucket.month} • ${peakCompletionBucket.completions} จบ`
+        : 'ยังไม่มีข้อมูล ROI',
+    },
+  ];
 
   return (
     <div className="card card-no-lift flex min-w-0 flex-col p-6">
@@ -79,22 +108,16 @@ const IncentiveROITrend = ({ data, onSelectBucket }) => {
         )}
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
-        {safeData.slice(-6).map((bucket) => (
-          <button
-            key={bucket.bucketKey || bucket.label}
-            type="button"
-            onClick={() => onSelectBucket?.(bucket)}
-            className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-left transition-all hover:border-primary/20 hover:bg-primary/5"
-          >
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{bucket.month}</div>
-              <div className="mt-1 text-sm font-semibold text-slate-800">
-                {bucket.completions} จบ / {bucket.points} points
-              </div>
+      <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-3">
+        {summaryCards.map((card) => (
+          <div key={card.label} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left">
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{card.label}</div>
+            <div className="mt-1 flex items-center justify-between gap-3">
+              <div className="min-w-0 text-sm font-semibold text-slate-800">{card.value}</div>
+              <ArrowUpRight size={16} className="shrink-0 text-slate-300" />
             </div>
-            <ArrowUpRight size={16} className="text-slate-300" />
-          </button>
+            <div className="mt-1 text-xs text-slate-500">{card.subtext}</div>
+          </div>
         ))}
       </div>
     </div>

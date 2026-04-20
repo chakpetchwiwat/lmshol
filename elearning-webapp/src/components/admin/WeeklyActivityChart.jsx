@@ -6,6 +6,30 @@ import {
 
 const WeeklyActivityChart = ({ data, onSelectBucket }) => {
   const safeData = data || [];
+  const totalStarts = safeData.reduce((sum, item) => sum + (item.count || 0), 0);
+  const activeBuckets = safeData.filter((item) => (item.count || 0) > 0);
+  const peakBucket = activeBuckets.reduce(
+    (best, item) => ((item.count || 0) > (best?.count || 0) ? item : best),
+    null
+  );
+  const quietBuckets = safeData.filter((item) => (item.count || 0) === 0).length;
+  const summaryCards = [
+    {
+      label: 'เริ่มเรียนทั้งหมด',
+      value: `${totalStarts} คน`,
+      subtext: 'รวมทุกช่วงเวลาตาม filter ปัจจุบัน',
+    },
+    {
+      label: 'ช่วงที่พีคสุด',
+      value: peakBucket ? `${peakBucket.date} • ${peakBucket.count} คน` : '-',
+      subtext: peakBucket?.label || 'ยังไม่มีการเริ่มเรียน',
+    },
+    {
+      label: 'ช่วงที่มีการเรียน',
+      value: `${activeBuckets.length} ช่วง`,
+      subtext: `ไม่มีการเริ่มเรียน ${quietBuckets} ช่วง`,
+    },
+  ];
 
   return (
     <div className="card card-no-lift flex min-w-0 flex-col p-6">
@@ -48,19 +72,15 @@ const WeeklyActivityChart = ({ data, onSelectBucket }) => {
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
-        {safeData.slice(-6).map((bucket) => (
-          <button
-            key={bucket.bucketKey || bucket.label}
-            type="button"
-            onClick={() => onSelectBucket?.(bucket)}
-            className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition-all hover:border-primary/20 hover:bg-primary/5"
-          >
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{bucket.date}</div>
-              <div className="mt-1 text-sm font-semibold text-slate-800">{bucket.count} คนเริ่มเรียน</div>
+        {summaryCards.map((card) => (
+          <div key={card.label} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left">
+            <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{card.label}</div>
+            <div className="mt-1 flex items-center justify-between gap-3">
+              <div className="min-w-0 text-sm font-semibold text-slate-800">{card.value}</div>
+              <ArrowUpRight size={16} className="shrink-0 text-slate-300" />
             </div>
-            <ArrowUpRight size={16} className="text-slate-300" />
-          </button>
+            <div className="mt-1 text-xs text-slate-500">{card.subtext}</div>
+          </div>
         ))}
       </div>
     </div>

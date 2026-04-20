@@ -204,6 +204,7 @@ const Dashboard = () => {
 
   const handlePrintDashboard = () => {
     openPrintReport({
+      type: 'dashboard',
       fileName: `dashboard-performance-${filters.year}-${filters.month || 'all'}`,
       reportTitle: isManagerView
         ? `รายงานผลการเรียน ${selectedDepartmentName}`
@@ -235,6 +236,19 @@ const Dashboard = () => {
         row.completedAt ? formatThaiDateTime(row.completedAt, true) : '-',
       ])),
       emptyMessage: 'ไม่มีข้อมูลผลการเรียนสำหรับตัวกรองนี้',
+      dashboardData: {
+        weeklyActivity: stats?.weeklyActivity || [],
+        typeDistribution: stats?.typeDistribution || [],
+        roiTrend: advancedStats?.roiTrend || [],
+        skillGap: (advancedStats?.skillGap || []).map((item) => ({
+          ...item,
+          label: SKILL_LABELS[item.type] || item.type,
+        })),
+        performanceRows: performanceRows.map((row) => ({
+          ...row,
+          statusLabel: STATUS_LABELS[row.status] || row.status,
+        })),
+      },
     });
   };
 

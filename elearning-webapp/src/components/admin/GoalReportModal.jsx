@@ -1,5 +1,5 @@
-import React from 'react';
-import { CheckCircle2, Printer, X, XCircle } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { BookOpen, CheckCircle2, Printer, X, XCircle } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import { openPrintReport } from '../../utils/printUtils';
 
@@ -9,18 +9,34 @@ const GoalReportModal = ({
   reportLoading,
   onClose,
 }) => {
+  const goalSource = reportData?.goal || reportGoal;
+  const targetCourses = useMemo(() => (
+    (goalSource?.courses || [])
+      .map((item) => item?.course?.title || item?.title || null)
+      .filter(Boolean)
+  ), [goalSource]);
+
   if (!reportGoal) return null;
 
   const successCount = reportData?.report?.filter((record) => record.isSuccess).length || 0;
   const pendingCount = reportData?.report?.filter((record) => !record.isSuccess).length || 0;
+  const goalTargetLabel = goalSource?.type === 'ANY'
+    ? `เรียนจบ ${goalSource?.targetCount || 0} คอร์ส`
+    : `เรียนจบ ${targetCourses.length} คอร์สที่ระบุ`;
 
   const handlePrint = () => {
     openPrintReport({
-      fileName: `goal-report-${reportGoal.title || 'report'}`,
+      fileName: `goal-report-${goalSource?.title || 'report'}`,
       reportTitle: 'รายงานเป้าหมายการเรียน',
-      subtitle: reportGoal.title,
+      subtitle: goalSource?.title,
       summary: [
-        { label: 'เป้าหมาย', value: reportGoal.type === 'ANY' ? `เรียนจบ ${reportGoal.targetCount} คอร์ส` : `เรียนจบ ${reportGoal.courses.length} คอร์สที่ระบุ` },
+        { label: 'เป้าหมาย', value: goalTargetLabel },
+        {
+          label: 'คอร์สในเป้าหมาย',
+          value: goalSource?.type === 'ANY'
+            ? 'นับทุกคอร์สที่เรียนจบภายในช่วงเวลาเป้าหมาย'
+            : (targetCourses.join(' | ') || '-'),
+        },
         { label: 'พนักงานทั้งหมด', value: `${reportData?.report?.length || 0} คน` },
         { label: 'สำเร็จแล้ว', value: `${successCount} คน` },
         { label: 'ยังไม่ผ่าน', value: `${pendingCount} คน` },
@@ -43,9 +59,9 @@ const GoalReportModal = ({
         <div className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl animate-slide-up">
           <div className="flex items-center justify-between border-b border-border bg-slate-50 p-6">
             <div>
-              <h3 className="text-xl font-black text-slate-800">รายงาน: {reportGoal.title}</h3>
+              <h3 className="text-xl font-black text-slate-800">รายงาน: {goalSource?.title}</h3>
               <p className="mt-1 text-xs font-bold uppercase tracking-widest text-slate-500">
-                เป้าหมาย: {reportGoal.type === 'ANY' ? `เรียนจบ ${reportGoal.targetCount} คอร์ส` : `เรียนจบ ${reportGoal.courses.length} คอร์สที่ระบุ`}
+                เป้าหมาย: {goalTargetLabel}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -71,6 +87,43 @@ const GoalReportModal = ({
               </div>
             ) : reportData ? (
               <div className="space-y-6">
+                <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50/80 p-5">
+                  <div className="mb-3 flex items-center gap-3 text-slate-800">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                      <BookOpen size={18} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-black uppercase tracking-[0.18em] text-slate-500">คอร์สในเป้าหมาย</h4>
+                      <p className="mt-1 text-sm font-semibold text-slate-700">
+                        {goalSource?.type === 'ANY'
+                          ? 'เป้าหมายนี้นับทุกคอร์สที่ผู้เรียนเรียนจบภายในช่วงเวลาของเป้าหมาย'
+                          : `ต้องเรียนคอร์สที่ระบุ ${targetCourses.length} รายการ`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {goalSource?.type === 'ANY' ? (
+                    <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-500">
+                      ไม่ได้ล็อกคอร์สเฉพาะ ระบบจะนับทุกคอร์สที่เรียนจบตามเงื่อนไขเป้าหมายนี้
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {targetCourses.length > 0 ? targetCourses.map((courseTitle) => (
+                        <span
+                          key={courseTitle}
+                          className="inline-flex rounded-full border border-primary/15 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm"
+                        >
+                          {courseTitle}
+                        </span>
+                      )) : (
+                        <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-500">
+                          ไม่พบรายการคอร์สที่ระบุในเป้าหมายนี้
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-center">
                     <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">พนักงานทั้งหมด</p>

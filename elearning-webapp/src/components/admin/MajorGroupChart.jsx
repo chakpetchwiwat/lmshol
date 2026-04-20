@@ -26,7 +26,7 @@ const MajorGroupChart = ({ data, onSelectGroup }) => {
         </span>
       </div>
 
-      <div className="flex flex-col items-center gap-6 lg:flex-row">
+      <div className="flex min-w-0 flex-col items-center gap-6 2xl:flex-row 2xl:items-start">
         <div className="relative h-[220px] w-full max-w-[220px] shrink-0 min-w-0">
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -57,13 +57,13 @@ const MajorGroupChart = ({ data, onSelectGroup }) => {
           </div>
         </div>
 
-        <div className="w-full flex-1 space-y-3">
+        <div className="w-full min-w-0 flex-1 space-y-3">
           {safeData.map((group, index) => (
             <button
               key={group.type || group.name}
               type="button"
               onClick={() => onSelectGroup?.(group)}
-              className="flex w-full items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-left transition-all hover:border-primary/20 hover:bg-primary/5"
+              className="flex w-full min-w-0 items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-left transition-all hover:border-primary/20 hover:bg-primary/5"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <div className="h-3 w-3 rounded-full shadow-sm" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
@@ -74,7 +74,7 @@ const MajorGroupChart = ({ data, onSelectGroup }) => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-2">
                 <span className="text-sm font-black text-slate-900">{group.value}</span>
                 <ArrowUpRight size={14} className="text-slate-300" />
               </div>

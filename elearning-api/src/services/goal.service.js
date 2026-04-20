@@ -162,7 +162,16 @@ const getGoalReport = async (goalId, authUser) => {
     const goal = await prisma.learningGoal.findUnique({
         where: { id: goalId },
         include: {
-            courses: true
+            courses: {
+                include: {
+                    course: {
+                        select: {
+                            id: true,
+                            title: true
+                        }
+                    }
+                }
+            }
         }
     });
 
