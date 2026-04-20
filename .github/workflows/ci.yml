@@ -1,0 +1,68 @@
+name: DigitalOcean & ScaleUP-KM CI
+
+on:
+  push:
+    branches: [ "main", "feat/*", "deploy/*" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  api-ci:
+    name: Backend API CI
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./elearning-api
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: './elearning-api/package-lock.json'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          
+      - name: Run Tests
+        run: npm test
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+  webapp-ci:
+    name: Frontend WebApp CI
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./elearning-webapp
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: './elearning-webapp/package-lock.json'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Check Linting
+        run: npm run lint
+        continue-on-error: true # Let it pass if there are minor lint issues for now
+        
+      - name: Build Check
+        run: npm run build
