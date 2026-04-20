@@ -21,6 +21,7 @@ const PointsHistory = lazy(() => import('./pages/user/PointsHistory'));
 const Profile = lazy(() => import('./pages/user/Profile'));
 const OngoingCourses = lazy(() => import('./pages/user/OngoingCourses'));
 const GoalDetail = lazy(() => import('./pages/user/GoalDetail'));
+const PrintReportPage = lazy(() => import('./pages/common/PrintReportPage'));
 
 // Admin Pages
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
@@ -79,6 +80,7 @@ function App() {
         
         {/* Auth */}
         <Route path="/login" element={<Login />} />
+        <Route path="/print/report/:reportId" element={<PrintReportPage />} />
 
         {/* User Area */}
         <Route element={<ProtectedRoute allowedRoles={['user', 'admin', 'manager']} />}>
