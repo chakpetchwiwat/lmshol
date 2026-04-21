@@ -125,19 +125,38 @@ const Dashboard = () => {
       };
 
       try {
-        const [dashboardResponse, analyticsResponse] = await Promise.all([
-          adminAPI.getDashboardStats(params),
-          adminAPI.getAdvancedAnalytics(params),
-        ]);
+        const dashboardResponse = await adminAPI.getDashboardStats(params);
 
         if (!isMounted) return;
 
         setStats(dashboardResponse.data);
-        setAdvancedStats(analyticsResponse.data);
+
+        try {
+          const analyticsResponse = await adminAPI.getAdvancedAnalytics(params);
+
+          if (!isMounted) return;
+          setAdvancedStats(analyticsResponse.data);
+        } catch (analyticsError) {
+          console.error('Fetch advanced analytics error:', analyticsError);
+          if (isMounted) {
+            setAdvancedStats({
+              skillGap: [],
+              benchmarking: [],
+              roiTrend: [],
+              atRisk: [],
+            });
+          }
+        }
       } catch (error) {
         console.error('Fetch dashboard stats error:', error);
         if (isMounted) {
           setErrorMessage('ไม่สามารถโหลดข้อมูล dashboard ได้ในขณะนี้');
+          setAdvancedStats({
+            skillGap: [],
+            benchmarking: [],
+            roiTrend: [],
+            atRisk: [],
+          });
         }
       } finally {
         if (isMounted) {
