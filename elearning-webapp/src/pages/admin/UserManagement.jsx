@@ -274,7 +274,7 @@ const UserManagement = () => {
     })
   ), [searchTerm, selectedDepartment, selectedTier, users]);
 
-  const columns = [
+  const columns = useMemo(() => [
     { label: 'ผู้ใช้งาน' },
     { label: 'Role ระบบ' },
     { label: 'แผนก' },
@@ -283,7 +283,7 @@ const UserManagement = () => {
     { label: 'คอร์สที่จบ', className: 'text-center' },
     { label: 'แต้มสะสม', className: 'text-right' },
     { label: 'จัดการ', className: 'text-right' },
-  ];
+  ], []);
 
   return (
     <div className="flex flex-col gap-6">
