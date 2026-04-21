@@ -21,7 +21,7 @@ const DashboardInsightModal = ({ insight, onClose, onPrint }) => {
 
   return (
     <ModalPortal>
-      <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 backdrop-blur-md animate-fade-in">
+      <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 backdrop-blur-md animate-fade-in">
         <button
           type="button"
           className="absolute inset-0 bg-slate-950/65"

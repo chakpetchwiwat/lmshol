@@ -18,6 +18,7 @@ import IncentiveROITrend from '../../components/admin/IncentiveROITrend';
 import RiskIdentificationWidget from '../../components/admin/RiskIdentificationWidget';
 import DashboardInsightModal from '../../components/admin/DashboardInsightModal';
 import DashboardPerformanceTable from '../../components/admin/DashboardPerformanceTable';
+import UserDetailModal from '../../components/admin/UserDetailModal';
 
 const MONTH_OPTIONS = [
   { value: '', label: 'ทุกเดือน' },
@@ -85,6 +86,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [insight, setInsight] = useState(null);
+  const [showUserDetailModal, setShowUserDetailModal] = useState(false);
+  const [userDetailLoading, setUserDetailLoading] = useState(false);
+  const [selectedUserDetail, setSelectedUserDetail] = useState(null);
 
   const yearOptions = useMemo(() => buildYearOptions(now.getFullYear()), [now]);
 
@@ -291,6 +295,32 @@ const Dashboard = () => {
     setInsight(nextInsight);
   };
 
+  const handleViewUser = async (userId) => {
+    if (!userId) return;
+    try {
+      setShowUserDetailModal(true);
+      setUserDetailLoading(true);
+      const response = await adminAPI.getUserDetails(userId);
+      setSelectedUserDetail(response.data);
+    } catch (error) {
+      console.error('Fetch user detail error:', error);
+      setErrorMessage('ไม่สามารถโหลดประวัติผู้ใช้งานได้');
+      setShowUserDetailModal(false);
+    } finally {
+      setUserDetailLoading(false);
+    }
+  };
+
+  const renderUserLink = (row) => (
+    <button
+      type="button"
+      onClick={() => handleViewUser(row.userId)}
+      className="font-bold text-slate-700 transition-colors hover:text-primary hover:underline text-left"
+    >
+      {row.userName}
+    </button>
+  );
+
   const openWeeklyInsight = (bucket) => {
     if (!bucket) return;
     openInsight({
@@ -302,7 +332,7 @@ const Dashboard = () => {
         { label: 'ขอบเขต', value: selectedDepartmentName },
       ],
       columns: [
-        { key: 'userName', label: 'ผู้เรียน' },
+        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
         { key: 'department', label: 'แผนก' },
         { key: 'courseTitle', label: 'คอร์ส' },
         { key: 'status', label: 'สถานะ', render: (row) => STATUS_LABELS[row.status] || row.status },
@@ -325,7 +355,7 @@ const Dashboard = () => {
         { label: 'คอร์สในกลุ่ม', value: group.courses?.length || 0 },
       ],
       columns: [
-        { key: 'userName', label: 'ผู้เรียน' },
+        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
         { key: 'department', label: 'แผนก' },
         { key: 'courseTitle', label: 'คอร์ส' },
         { key: 'status', label: 'สถานะ', render: (row) => STATUS_LABELS[row.status] || row.status },
@@ -347,7 +377,7 @@ const Dashboard = () => {
         { label: 'แผนก', value: selectedDepartmentName },
       ],
       columns: [
-        { key: 'userName', label: 'ผู้เรียน' },
+        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
         { key: 'department', label: 'แผนก' },
         { key: 'courseTitle', label: 'คอร์ส' },
         { key: 'status', label: 'สถานะ', render: (row) => STATUS_LABELS[row.status] || row.status },
@@ -368,7 +398,7 @@ const Dashboard = () => {
         { label: 'แผนก', value: selectedDepartmentName },
       ],
       columns: [
-        { key: 'userName', label: 'ผู้เรียน' },
+        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
         { key: 'department', label: 'แผนก' },
         { key: 'status', label: 'สถานะ', render: (row) => STATUS_LABELS[row.status] || row.status },
         { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
@@ -391,7 +421,7 @@ const Dashboard = () => {
         { label: 'แผนก', value: selectedDepartmentName },
       ],
       columns: [
-        { key: 'userName', label: 'ผู้เรียน' },
+        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
         { key: 'department', label: 'แผนก' },
         { key: 'courseTitle', label: 'คอร์ส' },
         { key: 'lessonTitle', label: 'แบบทดสอบ' },
@@ -414,7 +444,7 @@ const Dashboard = () => {
         { label: 'ช่วงเวลา', value: periodLabel },
       ],
       columns: [
-        { key: 'userName', label: 'ผู้เรียน' },
+        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
         { key: 'email', label: 'อีเมล' },
         { key: 'completedCourses', label: 'จบแล้ว' },
         { key: 'totalCourses', label: 'ทั้งหมด' },
@@ -437,7 +467,7 @@ const Dashboard = () => {
       ],
       columns: [
         { key: 'kind', label: 'ประเภท', render: (row) => row.kind === 'completion' ? 'เรียนจบ' : 'Points' },
-        { key: 'userName', label: 'ผู้เรียน' },
+        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
         { key: 'department', label: 'แผนก' },
         { key: 'courseTitle', label: 'รายการ' },
         { key: 'points', label: 'แต้ม', render: (row) => row.points || 0 },
@@ -460,7 +490,7 @@ const Dashboard = () => {
         { label: 'แผนก', value: selectedDepartmentName },
       ],
       columns: [
-        { key: 'userName', label: 'ผู้เรียน' },
+        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
         { key: 'department', label: 'แผนก' },
         { key: 'courseTitle', label: 'เป้าหมาย (Goal)' },
         { key: 'gapCount', label: 'ขาดอีก (รายการ)', render: (row) => row.gapCount > 0 ? `${row.gapCount} คอร์ส` : '-' },
@@ -655,6 +685,16 @@ const Dashboard = () => {
         insight={insight}
         onClose={() => setInsight(null)}
         onPrint={handlePrintInsight}
+      />
+
+      <UserDetailModal
+        isOpen={showUserDetailModal}
+        loading={userDetailLoading}
+        detail={selectedUserDetail}
+        onClose={() => {
+          setShowUserDetailModal(false);
+          setSelectedUserDetail(null);
+        }}
       />
     </div>
   );
