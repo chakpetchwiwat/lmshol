@@ -25,8 +25,8 @@ const RiskIdentificationWidget = ({ data, onSelectRisk, onViewAll }) => {
             <AlertCircle size={20} />
           </div>
           <div className="text-left">
-            <h3 className="text-lg font-bold text-slate-900">Risk Identification</h3>
-            <p className="text-sm text-slate-500">ผู้เรียนที่ใกล้ deadline หรือเลยกำหนด</p>
+            <h3 className="text-lg font-bold text-slate-900">ความเสี่ยงรายบุคคล</h3>
+            <p className="text-sm text-slate-500">ผู้เรียนที่เสี่ยงไม่บรรลุเป้าหมาย (Goal)</p>
           </div>
         </div>
         <span className="badge badge-error badge-sm">{safeData.length} ราย</span>
@@ -50,15 +50,20 @@ const RiskIdentificationWidget = ({ data, onSelectRisk, onViewAll }) => {
                     </p>
                   </div>
                   {risk.isOverdue && (
-                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-rose-600">Late</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-rose-600">Overdue</span>
                   )}
                 </div>
 
                 <div className="mb-2 flex items-center gap-2 text-xs text-slate-600">
                   <div className="rounded-lg bg-white p-1 shadow-sm group-hover:bg-rose-100">
-                    <Clock size={12} className={risk.isOverdue ? 'text-rose-500' : 'text-slate-400'} />
+                    <Calendar size={12} className={risk.isOverdue ? 'text-rose-500' : 'text-slate-400'} />
                   </div>
                   <span className="truncate font-medium">{risk.courseTitle}</span>
+                  {risk.gapCount > 0 && (
+                    <span className="ml-auto shrink-0 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-600">
+                      ขาดอีก {risk.gapCount} คอร์ส
+                    </span>
+                  )}
                 </div>
 
                 <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3">
