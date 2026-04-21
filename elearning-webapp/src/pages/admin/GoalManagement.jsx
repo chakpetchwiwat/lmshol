@@ -105,7 +105,7 @@ const GoalManagement = () => {
         e.preventDefault();
         try {
             await adminAPI.createGoal(formData);
-            toast.success('เธชเธฃเนเธฒเธเน€เธเนเธฒเธซเธกเธฒเธขเธชเธณเน€เธฃเนเธเนเธฅเนเธง');
+            toast.success('สร้างเป้าหมายสำเร็จแล้ว');
             setIsModalOpen(false);
             setFormData({
                 title: '',
@@ -119,15 +119,15 @@ const GoalManagement = () => {
             fetchData();
         } catch (err) {
             console.error('Failed to create goal', err);
-            toast.error(err.response?.data?.message || 'เน€เธเธดเธ”เธเนเธญเธเธดเธ”เธเธฅเธฒเธ”เนเธเธเธฒเธฃเธชเธฃเนเธฒเธเน€เธเนเธฒเธซเธกเธฒเธข');
+            toast.error(err.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้างเป้าหมาย');
         }
     };
 
     const handleDeleteGoal = useCallback(async (id) => {
         const ok = await confirm({
-            title: 'เธขเธทเธเธขเธฑเธเธเธฒเธฃเธฅเธเน€เธเนเธฒเธซเธกเธฒเธข',
-            message: 'เธเธธเธ“เนเธเนเนเธเธซเธฃเธทเธญเนเธกเนเธงเนเธฒเธ•เนเธญเธเธเธฒเธฃเธฅเธเน€เธเนเธฒเธซเธกเธฒเธขเธเธตเน?',
-            confirmLabel: 'เธฅเธเน€เธเนเธฒเธซเธกเธฒเธข',
+            title: 'ยืนยันการลบเป้าหมาย',
+            message: 'คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายนี้?',
+            confirmLabel: 'ลบเป้าหมาย',
             variant: 'danger',
         });
 
@@ -136,11 +136,11 @@ const GoalManagement = () => {
         try {
             await adminAPI.deleteGoal(id);
             invalidateGoalReportCache(id);
-            toast.success('เธฅเธเน€เธเนเธฒเธซเธกเธฒเธขเธชเธณเน€เธฃเนเธ');
+            toast.success('ลบเป้าหมายสำเร็จ');
             fetchData();
         } catch (err) {
             console.error('Failed to delete goal', err);
-            toast.error('เธฅเธเน€เธเนเธฒเธซเธกเธฒเธขเนเธกเนเธชเธณเน€เธฃเนเธ');
+            toast.error('ลบเป้าหมายไม่สำเร็จ');
         }
     }, [confirm, fetchData, invalidateGoalReportCache, toast]);
 
@@ -148,11 +148,11 @@ const GoalManagement = () => {
         try {
             await adminAPI.archiveGoal(id);
             invalidateGoalReportCache(id);
-            toast.success('เน€เธเนเธเน€เธเนเธฒเธซเธกเธฒเธขเน€เธเนเธฒเธเธฅเธฑเธเธชเธณเน€เธฃเนเธ');
+            toast.success('เก็บเป้าหมายเข้าคลังสำเร็จ');
             fetchData();
         } catch (err) {
             console.error('Failed to archive goal', err);
-            toast.error('เน€เธเนเธเน€เธเนเธฒเธซเธกเธฒเธขเนเธกเนเธชเธณเน€เธฃเนเธ');
+            toast.error('เก็บเป้าหมายไม่สำเร็จ');
         }
     }, [fetchData, invalidateGoalReportCache, toast]);
 
@@ -160,11 +160,11 @@ const GoalManagement = () => {
         try {
             await adminAPI.republishGoal(id);
             invalidateGoalReportCache(id);
-            toast.success('เธเธณเน€เธเนเธฒเธซเธกเธฒเธขเธเธฅเธฑเธเธกเธฒเนเธเนเธเธฒเธเธชเธณเน€เธฃเนเธ');
+            toast.success('นำเป้าหมายกลับมาใช้งานสำเร็จ');
             fetchData();
         } catch (err) {
             console.error('Failed to republish goal', err);
-            toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธเธณเน€เธเนเธฒเธซเธกเธฒเธขเธเธฅเธฑเธเธกเธฒเนเธเนเธเธฒเธเนเธ”เน');
+            toast.error('ไม่สามารถนำเป้าหมายกลับมาใช้งานได้');
         }
     }, [fetchData, invalidateGoalReportCache, toast]);
 
@@ -197,7 +197,7 @@ const GoalManagement = () => {
             }
 
             console.error('Failed to fetch report', err);
-            toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เนเธซเธฅเธ”เธเนเธญเธกเธนเธฅเธฃเธฒเธขเธเธฒเธเนเธ”เน');
+            toast.error('ไม่สามารถโหลดข้อมูลรายงานได้');
         } finally {
             if (goalReportRequestRef.current === controller) {
                 goalReportRequestRef.current = null;
@@ -242,17 +242,17 @@ const GoalManagement = () => {
     const displayGoals = viewMode === ENTITY_VIEW_STATUS.ACTIVE ? activeGoals : archivedGoals;
 
     const columns = useMemo(() => [
-        { label: 'เธเธทเนเธญเน€เธเนเธฒเธซเธกเธฒเธข' },
-        { label: 'เธเธฃเธฐเน€เธ เธ—' },
-        { label: 'เธฃเธฒเธขเธฅเธฐเน€เธญเธตเธขเธ”' },
-        { label: 'เธงเธฑเธเธซเธกเธ”เธญเธฒเธขเธธ' },
-        { label: 'เธเธญเธเน€เธเธ•' },
-        { label: 'เธเธฑเธ”เธเธฒเธฃ', className: 'text-center' }
+        { label: 'ชื่อเป้าหมาย' },
+        { label: 'ประเภท' },
+        { label: 'รายละเอียด' },
+        { label: 'วันหมดอายุ' },
+        { label: 'ขอบเขต' },
+        { label: 'จัดการ', className: 'text-center' }
     ], []);
 
     const tabs = useMemo(() => [
-        { key: ENTITY_VIEW_STATUS.ACTIVE, label: `เธเธณเธฅเธฑเธเนเธเนเธเธฒเธ (${activeGoals.length})`, icon: CalendarClock },
-        { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `เน€เธเนเธเน€เธเนเธฒเธเธฅเธฑเธ (${archivedGoals.length})`, icon: CalendarClock }
+        { key: ENTITY_VIEW_STATUS.ACTIVE, label: `กำลังใช้งาน (${activeGoals.length})`, icon: CalendarClock },
+        { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `เก็บเข้าคลัง (${archivedGoals.length})`, icon: CalendarClock }
     ], [activeGoals.length, archivedGoals.length]);
 
     if (loading) {
@@ -266,12 +266,12 @@ const GoalManagement = () => {
     return (
         <div className="flex flex-col gap-6">
             <AdminPageHeader
-                title="เธเธฑเธ”เธเธฒเธฃเน€เธเนเธฒเธซเธกเธฒเธขเธเธฒเธฃเน€เธฃเธตเธขเธเธฃเธนเน"
-                subtitle="เธเธณเธซเธเธ”เน€เธเนเธฒเธซเธกเธฒเธขเธเธฒเธฃเน€เธฃเธตเธขเธเธฃเธฒเธขเธชเธฑเธเธ”เธฒเธซเนเธซเธฃเธทเธญเธฃเธฒเธขเน€เธ”เธทเธญเธเธชเธณเธซเธฃเธฑเธเธเธเธฑเธเธเธฒเธเธ—เธธเธเธเธเธซเธฃเธทเธญเน€เธเธเธฒเธฐเนเธเธเธ"
+                title="จัดการเป้าหมายการเรียนรู้"
+                subtitle="กำหนดเป้าหมายการเรียนรายสัปดาห์หรือรายเดือนสำหรับพนักงานทุกคนหรือเฉพาะแผนก"
                 actions={(
                     <button type="button" onClick={() => setIsModalOpen(true)} className="btn btn-primary">
                         <Plus size={18} />
-                        เธชเธฃเนเธฒเธเน€เธเนเธฒเธซเธกเธฒเธขเนเธซเธกเน
+                        สร้างเป้าหมายใหม่
                     </button>
                 )}
             />
