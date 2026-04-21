@@ -18,6 +18,13 @@ import ViewToggleTabs from '../../components/common/ViewToggleTabs';
 const GoalManagement = () => {
     const toast = useToast();
     const { confirm, ConfirmDialogProps } = useConfirm();
+    
+    // Stabilize ConfirmDialogProps to prevent child re-render loops
+    const stableConfirmProps = useMemo(() => ConfirmDialogProps, [
+        ConfirmDialogProps.isOpen, 
+        ConfirmDialogProps.title, 
+        ConfirmDialogProps.message
+    ]);
     const [goals, setGoals] = useState([]);
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -104,7 +111,7 @@ const GoalManagement = () => {
         }
     };
 
-    const handleDeleteGoal = async (id) => {
+    const handleDeleteGoal = useCallback(async (id) => {
         const ok = await confirm({
             title: 'ยืนยันการลบเป้าหมาย',
             message: 'คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายนี้?',
@@ -120,9 +127,9 @@ const GoalManagement = () => {
             console.error('Failed to delete goal', err);
             toast.error('ลบเป้าหมายไม่สำเร็จ');
         }
-    };
+    }, [confirm, fetchData, toast]);
 
-    const handleArchiveGoal = async (id) => {
+    const handleArchiveGoal = useCallback(async (id) => {
         try {
             await adminAPI.archiveGoal(id);
             toast.success('เก็บเป้าหมายเข้าคลังสำเร็จ');
@@ -131,9 +138,9 @@ const GoalManagement = () => {
             console.error('Failed to archive goal', err);
             toast.error('เก็บเป้าหมายไม่สำเร็จ');
         }
-    };
+    }, [fetchData, toast]);
 
-    const handleRepublishGoal = async (id) => {
+    const handleRepublishGoal = useCallback(async (id) => {
         try {
             await adminAPI.republishGoal(id);
             toast.success('นำเป้าหมายกลับมาใช้งานสำเร็จ');
@@ -142,9 +149,9 @@ const GoalManagement = () => {
             console.error('Failed to republish goal', err);
             toast.error('ไม่สามารถนำเป้าหมายกลับมาใช้งานได้');
         }
-    };
+    }, [fetchData, toast]);
 
-    const handleViewReport = async (goal) => {
+    const handleViewReport = useCallback(async (goal) => {
         setReportGoal(goal);
         setReportLoading(true);
         try {
@@ -156,7 +163,12 @@ const GoalManagement = () => {
         } finally {
             setReportLoading(false);
         }
-    };
+    }, [toast]);
+
+    const handleCloseReport = useCallback(() => {
+        setReportGoal(null);
+        setReportData(null);
+    }, []);
 
     const filteredCourses = useMemo(() => {
         return courses.filter(c =>
@@ -187,14 +199,14 @@ const GoalManagement = () => {
     const displayGoals = viewMode === ENTITY_VIEW_STATUS.ACTIVE ? activeGoals : archivedGoals;
 
 
-    const columns = [
+    const columns = useMemo(() => [
         { label: 'ชื่อเป้าหมาย' },
         { label: 'ประเภท' },
         { label: 'รายละเอียด' },
         { label: 'วันหมดอายุ' },
         { label: 'ขอบเขต' },
         { label: 'จัดการ', className: 'text-center' }
-    ];
+    ], []);
 
     if (loading) {
         return (
@@ -220,10 +232,10 @@ const GoalManagement = () => {
             <ViewToggleTabs
                 viewMode={viewMode}
                 setViewMode={setViewMode}
-                tabs={[
+                tabs={useMemo(() => [
                     { key: ENTITY_VIEW_STATUS.ACTIVE, label: `กำลังใช้งาน (${activeGoals.length})`, icon: CalendarClock },
                     { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `เก็บเข้าคลัง (${archivedGoals.length})`, icon: CalendarClock }
-                ]}
+                ], [activeGoals.length, archivedGoals.length])}
             />
 
 
@@ -257,9 +269,9 @@ const GoalManagement = () => {
                 reportGoal={reportGoal}
                 reportData={reportData}
                 reportLoading={reportLoading}
-                onClose={() => { setReportGoal(null); setReportData(null); }}
+                onClose={handleCloseReport}
             />
-            <ConfirmDialog {...ConfirmDialogProps} />
+            <ConfirmDialog {...stableConfirmProps} />
         </div>
     );
 };
