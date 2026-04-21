@@ -15,14 +15,27 @@ const THAI_LAST_NAMES = [
     'ถิรวัฒน์', 'วงศ์สุวรรณ', 'มณีโชติ', 'รัตนโกสินทร์', 'บุญส่ง', 'ประเสริฐยิ่ง', 'ธรรมคุณ', 'ปัญญาสกุล', 'สิริวัฒนา', 'เกียรติขจร'
 ];
 
-const MODULE_TYPES = [
-    { type: 'STRAT_BUSINESS', name: 'Business Acumen / Corporate Knowledge', icon: 'Cpu' },
-    { type: 'STRAT_CORE', name: 'Core / Soft Skills', icon: 'User' },
-    { type: 'STRAT_FUNCTIONAL', name: 'Functional Skills', icon: 'Settings' },
-    { type: 'STRAT_LEADERSHIP', name: 'Leadership Skills', icon: 'Zap' },
-    { type: 'STRAT_COMPLIANCE', name: 'Compliance', icon: 'Shield' },
-    { type: 'STRAT_DIGITAL', name: 'Digital / Future Skills', icon: 'Code' }
+const MODULE_CATEGORIES = [
+    { type: 'STRAT_BUSINESS', name: 'ความเข้าใจธุรกิจและการค้า (Business Acumen)', icon: 'Briefcase' },
+    { type: 'STRAT_BUSINESS', name: 'นวัตกรรมองค์กร (Corporate Innovation)', icon: 'Lightbulb' },
+    { type: 'STRAT_CORE', name: 'การสื่อสารอย่างมีประสิทธิภาพ', icon: 'MessageSquare' },
+    { type: 'STRAT_CORE', name: 'การทำงานเป็นทีม (Team Collaboration)', icon: 'Users' },
+    { type: 'STRAT_FUNCTIONAL', name: 'ทักษะเฉพาะสายงานการตลาด', icon: 'Target' },
+    { type: 'STRAT_FUNCTIONAL', name: 'ทักษะการขายและการเจรจาต่อรอง', icon: 'TrendingUp' },
+    { type: 'STRAT_LEADERSHIP', name: 'การบริหารทีมและภาวะผู้นำ', icon: 'Crown' },
+    { type: 'STRAT_COMPLIANCE', name: 'จรรยาบรรณและข้อบังคับองค์กร', icon: 'ShieldCheck' },
+    { type: 'STRAT_DIGITAL', name: 'การวิเคราะห์ข้อมูลเบื้องต้น', icon: 'BarChart' },
+    { type: 'STRAT_DIGITAL', name: 'เทคโนโลยีปัญญาประดิษฐ์ (AI Technologies)', icon: 'Cpu' }
 ];
+
+const COURSE_TITLES: Record<string, string[]> = {
+    'STRAT_BUSINESS': ['วิเคราะห์งบการเงินเบื้องต้นสำหรับผู้บริหาร', 'กลยุทธ์การตัดสินใจทางธุรกิจยุคใหม่', 'ภาพรวมเศรษฐกิจอุตสาหกรรม 2026'],
+    'STRAT_CORE': ['ทักษะการนำเสนออย่างมืออาชีพ', 'การบริหารจัดการเวลา (Time Management)', 'การแก้ปัญหาเชิงตรรกะแบบ Design Thinking'],
+    'STRAT_FUNCTIONAL': ['กลยุทธ์การตลาดดิจิทัลขั้นสูง', 'ทักษะการปิดการขายแบบ B2B', 'การวิเคราะห์พฤติกรรมลูกค้าเชิงลึก'],
+    'STRAT_LEADERSHIP': ['การให้ Feedback อย่างสร้างสรรค์', 'ศิลปะการเป็นผู้นำยุคใหม่', 'การบริหารความขัดแย้งในทีม'],
+    'STRAT_COMPLIANCE': ['PDPA สำหรับพนักงาน 101', 'นโยบายความปลอดภัยไซเบอร์ (Cybersecurity)', 'มาตรฐานจริยธรรมวิชาชีพในสถานที่ทำงาน'],
+    'STRAT_DIGITAL': ['การใช้ AI ช่วยเพิ่มประสิทธิภาพการทำงาน', 'พื้นฐาน Data Science สำหรับธุรกิจ', 'เครื่องมือ Automation ในองค์กร']
+};
 
 const DEPARTMENTS = [
     'Management', 'IT', 'Human Resources', 'Accounting', 'Sales', 'Marketing', 'Operations', 'Finance'
@@ -30,6 +43,13 @@ const DEPARTMENTS = [
 
 async function main() {
     console.log('--- Start Robust Demo Seeding ---');
+
+    console.log('Cleaning up old data to prevent duplication issues...');
+    // We optionally clean up some data to start fresh, but let's rely on upsert for structure and delete attempts/enrollments to clear old data
+    await prisma.quizAttempt.deleteMany({});
+    await prisma.userCourse.deleteMany({});
+    await prisma.lesson.deleteMany({}); // Optional, cleans up old lessons
+    await prisma.course.deleteMany({}); // Cleans up old courses
 
     // 1. Ensure Departments exist
     console.log('Setting up departments...');
@@ -43,97 +63,107 @@ async function main() {
         deptRefs[d] = res.id;
     }
 
-    // 2. Ensure Modules (Categories) exist
+    // 2. Ensure Categories exist
     console.log('Setting up categories and modules...');
     const catRefs: any[] = [];
-    for (const m of MODULE_TYPES) {
+    for (const [index, m] of MODULE_CATEGORIES.entries()) {
         const res = await prisma.category.upsert({
             where: { name: m.name },
-            update: { type: m.type },
+            update: { type: m.type, icon: m.icon, order: index },
             create: { 
                 name: m.name, 
                 type: m.type, 
-                icon: m.icon 
+                icon: m.icon,
+                order: index
             }
         });
         catRefs.push(res);
     }
 
-    // 3. Create Courses (4 per module, some with no quiz)
+    // 3. Create Courses (Realistic titles, all with quizzes)
     console.log('Creating courses...');
     const courseRefs: any[] = [];
+    const quizLessonMap: Record<string, string> = {};
+
+    let courseIndex = 1;
     for (const cat of catRefs) {
-        for (let i = 1; i <= 4; i++) {
-            const hasQuiz = !(cat.type === 'STRAT_FUNCTIONAL' && i % 2 === 0); // Functional 2 & 4 have NO QUIZ
-            const course = await prisma.course.upsert({
-                where: { id: `demo-course-${cat.type}-${i}` },
-                update: {},
-                create: {
-                    id: `demo-course-${cat.type}-${i}`,
-                    title: `${cat.name} Level ${i}`,
-                    description: `This is a demo course for ${cat.name} module, focusing on phase ${i}.`,
+        const titles = COURSE_TITLES[cat.type] || [`หลักสูตรมาตรฐานสำหรับ ${cat.name}`];
+        for (let i = 0; i < titles.length; i++) {
+            const courseTitle = titles[i];
+            const courseId = `demo-course-${Date.now()}-${courseIndex++}`;
+            const course = await prisma.course.create({
+                data: {
+                    id: courseId,
+                    title: courseTitle,
+                    description: `คอร์สเรียน "${courseTitle}" ที่ออกแบบมาเพื่ออัปสกิลพนักงานในส่วนของ ${cat.name} ให้สอดคล้องกับเป้าหมายองค์กร`,
                     categoryId: cat.id,
                     status: 'PUBLISHED',
-                    points: i * 10,
-                    instructorName: 'Demo Expert',
-                    totalDuration: `${i * 30} mins`
+                    points: (i + 1) * 100,
+                    instructorName: 'ทีมวิทยากร ScaleUp',
+                    totalDuration: `${(i + 1) * 45} นาที`
                 }
             });
             courseRefs.push(course);
 
-            if (hasQuiz) {
-                // Add a lesson with quiz questions
-                const lesson = await prisma.lesson.create({
-                    data: {
-                        courseId: course.id,
-                        title: 'Final Assessment',
-                        type: 'video',
-                        content: 'Check your knowledge in this quiz.',
-                        order: 1,
-                        passScore: 70,
-                        questions: {
-                            create: [
-                                {
-                                    text: 'Common sense check: is this a demo course?',
-                                    choices: {
-                                        create: [
-                                            { text: 'Yes', isCorrect: true },
-                                            { text: 'No', isCorrect: false }
-                                        ]
-                                    }
+            // Add a video lesson
+            await prisma.lesson.create({
+                data: {
+                    courseId: course.id,
+                    title: `เนื้อหาบทเรียน: ${courseTitle}`,
+                    type: 'video',
+                    content: 'เนื้อหาและวิดีโอประกอบการเรียนรู้',
+                    order: 1
+                }
+            });
+
+            // Add a quiz lesson
+            const quizLesson = await prisma.lesson.create({
+                data: {
+                    courseId: course.id,
+                    title: `แบบทดสอบท้ายบท: ${courseTitle}`,
+                    type: 'quiz',
+                    content: 'ทำแบบทดสอบเพื่อวัดความเข้าใจจากเนื้อหาที่ได้เรียนไป',
+                    order: 2,
+                    passScore: 70,
+                    questions: {
+                        create: [
+                            {
+                                text: `จากเรื่อง ${courseTitle} ข้อใดคือหลักการที่สำคัญที่สุด?`,
+                                choices: {
+                                    create: [
+                                        { text: 'ตัวเลือกที่ 1 (ข้อที่ถูกต้อง)', isCorrect: true },
+                                        { text: 'ตัวเลือกที่ 2', isCorrect: false },
+                                        { text: 'ตัวเลือกที่ 3', isCorrect: false }
+                                    ]
                                 }
-                            ]
-                        }
+                            }
+                        ]
                     }
-                });
-            } else {
-                // Add a lesson with NO quiz questions
-                await prisma.lesson.create({
-                    data: {
-                        courseId: course.id,
-                        title: 'Learning Resource (No Quiz)',
-                        type: 'video',
-                        content: 'Please watch this video to complete the course.',
-                        order: 1
-                    }
-                });
-            }
+                }
+            });
+            quizLessonMap[course.id] = quizLesson.id;
         }
     }
 
-    // 4. Create 93 more Users (Total 100)
-    console.log('Generating 93 demo users...');
+    // 4. Create 93 more Users (Total 100) or just ensure 100 exist
+    console.log('Generating demo users...');
     const password = await bcrypt.hash('password123', 10);
     const users: any[] = [];
-    for (let i = 0; i < 93; i++) {
+    
+    // We won't delete users to avoid breaking other logic, but we'll create up to 100 users.
+    const existingUsers = await prisma.user.count({ where: { role: 'user' }});
+    const usersToCreate = Math.max(0, 100 - existingUsers);
+    
+    for (let i = 0; i < usersToCreate; i++) {
         const firstName = THAI_FIRST_NAMES[Math.floor(Math.random() * THAI_FIRST_NAMES.length)];
         const lastName = THAI_LAST_NAMES[Math.floor(Math.random() * THAI_LAST_NAMES.length)];
         const dept = DEPARTMENTS[Math.floor(Math.random() * DEPARTMENTS.length)];
+        const email = `user-v2-${Date.now()}-${i}@scaleup-demo.co.th`;
         
-        const user = await prisma.user.create({
+        await prisma.user.create({
             data: {
                 name: `${firstName} ${lastName}`,
-                email: `user${i + 8}@scaleup-demo.co.th`,
+                email,
                 password: password,
                 role: 'user',
                 departmentId: deptRefs[dept],
@@ -141,33 +171,42 @@ async function main() {
                 employmentDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000)
             }
         });
-        users.push(user);
     }
 
-    // 5. Create Enrollments with varied status
-    console.log('Assigning varied learning progress...');
-    const now = new Date();
-    for (const user of users) {
-        // Each user gets 3-5 random enrollments
-        const count = 3 + Math.floor(Math.random() * 3);
+    const allUsers = await prisma.user.findMany({ where: { role: 'user' } });
+
+    // 5. Create Enrollments and QuizAttempts
+    console.log('Assigning varied learning progress and quiz scores...');
+    for (const user of allUsers) {
+        // Each user gets 4-7 random enrollments
+        const count = 4 + Math.floor(Math.random() * 4);
         const shuffledCourses = courseRefs.sort(() => 0.5 - Math.random());
         const selectedCourses = shuffledCourses.slice(0, count);
 
         for (const course of selectedCourses) {
             let status = 'IN_PROGRESS';
             let progress = Math.floor(Math.random() * 100);
-            let deadline: Date | null = new Date(Date.now() + (Math.random() * 30 - 5) * 24 * 60 * 60 * 1000); // Some in past (-5 days)
+            let deadline: Date | null = new Date(Date.now() + (Math.random() * 30 - 5) * 24 * 60 * 60 * 1000); 
             let completedAt: Date | null = null;
+            let score = 0;
+            let quizStatus = 'FAILED';
 
             // Distribution
             const rand = Math.random();
-            if (rand < 0.25) {
+            if (rand < 0.35) { // 35% Completed
                 status = 'COMPLETED';
                 progress = 100;
                 completedAt = new Date(Date.now() - Math.random() * 15 * 24 * 60 * 60 * 1000);
-            } else if (rand < 0.45) {
+                score = 70 + Math.floor(Math.random() * 31); // 70-100
+                quizStatus = 'PASSED';
+            } else if (rand < 0.60) { // 25% Not Started
                 status = 'NOT_STARTED';
                 progress = 0;
+            } else {
+                // 40% In progress
+                if (Math.random() > 0.5) { // Half of 'in progress' tried the quiz but failed
+                    score = 20 + Math.floor(Math.random() * 40); // 20-59
+                }
             }
 
             await prisma.userCourse.create({
@@ -180,21 +219,21 @@ async function main() {
                     completedAt
                 }
             });
+
+            // Create Quiz Attempt if score > 0 or status is completed
+            if (status === 'COMPLETED' || score > 0) {
+                await prisma.quizAttempt.create({
+                    data: {
+                        userId: user.id,
+                        lessonId: quizLessonMap[course.id],
+                        score,
+                        status: quizStatus,
+                        createdAt: completedAt || new Date(Date.now() - Math.random() * 5 * 24 * 60 * 60 * 1000)
+                    }
+                });
+            }
         }
     }
-
-    // 6. Create some Learning Goals
-    console.log('Creating demo learning goals...');
-    await prisma.learningGoal.create({
-        data: {
-            title: 'Q2 Global Competency Mission',
-            type: 'ANY',
-            targetCount: 2,
-            expiryDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-            scope: 'GLOBAL',
-            status: 'ACTIVE'
-        }
-    });
 
     console.log('--- Robust Demo Seeding COMPLETED ---');
 }
