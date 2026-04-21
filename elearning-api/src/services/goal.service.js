@@ -192,52 +192,47 @@ const getGoalReport = async (goalId, authUser) => {
         }
     });
 
-    const report = [];
     const windowStart = goal.createdAt;
     const windowEnd = goal.expiryDate || new Date();
+    const userIds = users.map(u => u.id);
+    const courseIds = goal.courses.map(gc => gc.courseId);
 
-    for (const user of users) {
-        let enrollments = [];
-        const courseIds = goal.courses.map(gc => gc.courseId);
-
-        if (goal.type === 'ANY') {
-            // Fetch both completed and in-progress for ANY goal within window
-            enrollments = await prisma.userCourse.findMany({
-                where: {
-                    userId: user.id,
+    // 1. Batch fetch all relevant enrollments for all users in one query
+    const allEnrollments = await prisma.userCourse.findMany({
+        where: {
+            userId: { in: userIds },
+            ...(goal.type === 'ANY' 
+                ? {
                     OR: [
-                        {
-                            status: ENROLLMENT_STATUS.COMPLETED,
-                            completedAt: { gte: windowStart, lte: windowEnd }
-                        },
-                        {
-                            status: ENROLLMENT_STATUS.IN_PROGRESS
-                        }
+                        { status: ENROLLMENT_STATUS.COMPLETED, completedAt: { gte: windowStart, lte: windowEnd } },
+                        { status: ENROLLMENT_STATUS.IN_PROGRESS }
                     ]
-                },
-                include: {
-                    course: { select: { id: true, title: true } }
-                }
-            });
-        } else {
-            // Fetch both completed and in-progress for SPECIFIC courses
-            enrollments = await prisma.userCourse.findMany({
-                where: {
-                    userId: user.id,
-                    courseId: { in: courseIds }
-                },
-                include: {
-                    course: { select: { id: true, title: true } }
-                }
-            });
+                  }
+                : { courseId: { in: courseIds } }
+            )
+        },
+        include: {
+            course: { select: { id: true, title: true } }
         }
+    });
 
-        const completions = enrollments.filter(e => 
+    // 2. Map enrollments by userId for O(1) lookup
+    const enrollmentsByUserId = allEnrollments.reduce((acc, curr) => {
+        if (!acc[curr.userId]) acc[curr.userId] = [];
+        acc[curr.userId].push(curr);
+        return acc;
+    }, {});
+
+    // 3. Build report using the pre-fetched data
+    const report = users.map(user => {
+        const userEnrollments = enrollmentsByUserId[user.id] || [];
+        
+        const completions = userEnrollments.filter(e => 
             e.status === ENROLLMENT_STATUS.COMPLETED && 
             (goal.type === 'SPECIFIC' || (e.completedAt >= windowStart && e.completedAt <= windowEnd))
         );
 
-        const inProgress = enrollments.filter(e => e.status === ENROLLMENT_STATUS.IN_PROGRESS);
+        const inProgress = userEnrollments.filter(e => e.status === ENROLLMENT_STATUS.IN_PROGRESS);
         
         const completionCount = completions.length;
         const isSuccess = completionCount >= goal.targetCount;
@@ -253,7 +248,7 @@ const getGoalReport = async (goalId, authUser) => {
         // Map detailed course progress
         const courseProgress = goal.type === 'SPECIFIC' 
             ? goal.courses.map(gc => {
-                const enrollment = enrollments.find(e => e.courseId === gc.courseId);
+                const enrollment = userEnrollments.find(e => e.courseId === gc.courseId);
                 return {
                     courseId: gc.courseId,
                     title: gc.course.title,
@@ -270,7 +265,7 @@ const getGoalReport = async (goalId, authUser) => {
                 completedAt: c.completedAt
             }));
 
-        report.push({
+        return {
             userId: user.id,
             name: user.name,
             email: user.email,
@@ -280,8 +275,8 @@ const getGoalReport = async (goalId, authUser) => {
             isSuccess,
             userStatus,
             courseProgress
-        });
-    }
+        };
+    });
 
     return {
         goal,
