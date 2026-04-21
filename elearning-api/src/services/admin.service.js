@@ -302,6 +302,29 @@ const buildPointsHistory = async (userId) => {
     });
 };
 
+const getEnrollmentActivityTimestamp = (enrollment) => {
+    const activityDate = enrollment?.completedAt || enrollment?.startedAt;
+    return activityDate ? new Date(activityDate).getTime() : 0;
+};
+
+const buildUserTrackingSummary = (enrollments = []) => {
+    const latestEnrollment = [...enrollments].sort(
+        (left, right) => getEnrollmentActivityTimestamp(right) - getEnrollmentActivityTimestamp(left)
+    )[0];
+
+    return {
+        status: latestEnrollment?.status || ENROLLMENT_STATUS.NOT_STARTED,
+        latestCourseId: latestEnrollment?.courseId || null,
+        latestCourseTitle: latestEnrollment?.course?.title || null,
+        latestLearningAt: latestEnrollment?.completedAt || latestEnrollment?.startedAt || null,
+        latestStartedAt: latestEnrollment?.startedAt || null,
+        latestCompletedAt: latestEnrollment?.completedAt || null,
+        progressPercent: latestEnrollment ? Math.round(Number(latestEnrollment.progressPercent || 0)) : 0,
+        enrolledCourses: enrollments.length,
+        completedCourses: enrollments.filter((enrollment) => enrollment.status === ENROLLMENT_STATUS.COMPLETED).length
+    };
+};
+
 const ensureReferenceName = async (tx, modelName, id) => {
     if (!id) {
         return null;
@@ -1408,9 +1431,44 @@ const getUsers = async (authUser) => {
         balances.map((item) => [item.userId, item._sum.points || 0])
     );
 
+    const userIds = users.map((user) => user.id);
+    const enrollments = userIds.length > 0
+        ? await prisma.userCourse.findMany({
+            where: {
+                userId: {
+                    in: userIds
+                }
+            },
+            select: {
+                userId: true,
+                courseId: true,
+                status: true,
+                progressPercent: true,
+                startedAt: true,
+                completedAt: true,
+                course: {
+                    select: {
+                        id: true,
+                        title: true
+                    }
+                }
+            }
+        })
+        : [];
+
+    const enrollmentMap = enrollments.reduce((collection, enrollment) => {
+        if (!collection[enrollment.userId]) {
+            collection[enrollment.userId] = [];
+        }
+
+        collection[enrollment.userId].push(enrollment);
+        return collection;
+    }, {});
+
     return users.map((user) => ({
         ...mapUserRecord(user),
-        pointsBalance: balanceMap[user.id] ?? 0
+        pointsBalance: balanceMap[user.id] ?? 0,
+        tracking: buildUserTrackingSummary(enrollmentMap[user.id] || [])
     }));
 };
 

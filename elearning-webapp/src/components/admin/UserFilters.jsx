@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 import { FILTER_VALUES } from '../../utils/constants/filters';
+import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 import CustomSelect from '../common/CustomSelect';
 
 const UserFilters = ({
@@ -12,6 +13,8 @@ const UserFilters = ({
   selectedTier,
   onTierChange,
   tiers,
+  selectedStatus,
+  onStatusChange,
 }) => {
   return (
     <div className="flex flex-wrap gap-4 border-b border-border p-4">
@@ -32,7 +35,7 @@ const UserFilters = ({
         onChange={(event) => onDepartmentChange(event.target.value)}
         options={[
           { value: FILTER_VALUES.ALL, label: 'ทุกแผนก' },
-          ...departments.map((d) => ({ value: d.id, label: d.name }))
+          ...departments.map((department) => ({ value: department.id, label: department.name })),
         ]}
       />
 
@@ -42,7 +45,19 @@ const UserFilters = ({
         onChange={(event) => onTierChange(event.target.value)}
         options={[
           { value: FILTER_VALUES.ALL, label: 'ทุกระดับ' },
-          ...tiers.map((t) => ({ value: t.id, label: t.name }))
+          ...tiers.map((tier) => ({ value: tier.id, label: tier.name })),
+        ]}
+      />
+
+      <CustomSelect
+        className="w-full lg:w-52"
+        value={selectedStatus}
+        onChange={(event) => onStatusChange(event.target.value)}
+        options={[
+          { value: FILTER_VALUES.ALL, label: 'ทุกสถานะ' },
+          { value: ENROLLMENT_STATUS.NOT_STARTED, label: 'ยังไม่เรียน' },
+          { value: ENROLLMENT_STATUS.IN_PROGRESS, label: 'กำลังเรียน' },
+          { value: ENROLLMENT_STATUS.COMPLETED, label: 'เรียนจบแล้ว' },
         ]}
       />
     </div>
