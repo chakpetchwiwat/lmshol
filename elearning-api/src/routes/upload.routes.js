@@ -1,9 +1,16 @@
 const express = require('express');
 const multer = require('multer');
+const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
+const { getSecurityConfig } = require('../config/security');
+const { verifyToken, verifyAdminPanelAccess } = require('../middleware/auth');
+const { uploadRateLimiter } = require('../middleware/rateLimiters');
+const { logSecurityEvent } = require('../utils/securityEvents');
+const { validateUploadedFile, ALLOWED_UPLOAD_TYPES } = require('../utils/uploadValidation');
 
 const router = express.Router();
+const securityConfig = getSecurityConfig();
 
 // Initialize Supabase Client
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -13,21 +20,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Use Memory Storage for Serverless (Vercel)
 const storage = multer.memoryStorage();
 
-// File filter (Same as before)
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = [
-        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.ms-powerpoint',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        'text/plain'
-    ];
-
-    if (allowedTypes.includes(file.mimetype)) {
+    if (ALLOWED_UPLOAD_TYPES[file.mimetype]) {
         cb(null, true);
     } else {
         cb(new Error('Invalid file type.'), false);
@@ -37,37 +31,40 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage,
     fileFilter,
-    limits: { fileSize: 50 * 1024 * 1024 } // 50MB max
+    limits: { fileSize: securityConfig.uploadMaxFileSizeBytes }
 });
 
 // POST /api/upload - Upload to Supabase Storage
-router.post('/', upload.single('file'), async (req, res) => {
+router.post('/', verifyToken, verifyAdminPanelAccess, uploadRateLimiter, upload.single('file'), async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ message: 'Please select a file.' });
+        const fileValidation = validateUploadedFile(req.file);
+        if (!fileValidation.valid) {
+            logSecurityEvent('upload.rejected', req, {
+                reason: fileValidation.message,
+                mimeType: req.file?.mimetype || null,
+                originalName: req.file?.originalname || null
+            });
+
+            return res.status(400).json({ message: fileValidation.message });
         }
 
         const isImage = req.file.mimetype.startsWith('image/');
-        const bucketName = 'uploads'; // ** Ensure you create this bucket in Supabase **
+        const bucketName = 'uploads';
         const subDir = isImage ? 'images' : 'documents';
-        
-        // Generate unique filename
         const ext = path.extname(req.file.originalname);
-        const baseName = path.basename(req.file.originalname, ext).replace(/[^a-zA-Z0-9]/g, '_');
-        const fileName = `${subDir}/${Date.now()}_${baseName}${ext}`;
+        const fileName = `${subDir}/${crypto.randomUUID()}${ext.toLowerCase()}`;
 
-        // Upload to Supabase Storage
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
             .from(bucketName)
             .upload(fileName, req.file.buffer, {
                 contentType: req.file.mimetype,
-                upsert: true
+                upsert: false
             });
 
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
 
-        // Images can stay public for rendering.
-        // Documents return only a storage key so the app can request a short-lived signed URL later.
         const { data: { publicUrl } } = supabase.storage
             .from(bucketName)
             .getPublicUrl(fileName);
@@ -78,10 +75,13 @@ router.post('/', upload.single('file'), async (req, res) => {
             message: 'Upload successful!',
             fileUrl,
             fileKey: fileName,
-            fileName: fileName
+            fileName
         });
 
     } catch (err) {
+        logSecurityEvent('upload.failed', req, {
+            reason: err.message
+        });
         console.error('Upload Error:', err);
         res.status(500).json({ message: 'Upload failed', error: err.message });
     }

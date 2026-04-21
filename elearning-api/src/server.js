@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
+const helmet = require('helmet');
 const path = require('path');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
@@ -9,16 +10,26 @@ const adminRoutes = require('./routes/admin.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const settingRoutes = require('./routes/setting.routes');
 const goalRoutes = require('./routes/goal.routes');
+const {
+  buildCorsOptions,
+  buildHelmetOptions,
+  createDefaultApiLimiter,
+  getSecurityConfig
+} = require('./config/security');
 const errorHandler = require('./middleware/error');
 const { SERVER_DEFAULTS } = require('./utils/constants/config');
 
 const app = express();
+const securityConfig = getSecurityConfig();
+
+app.set('trust proxy', securityConfig.trustProxy);
 
 // Middleware
-app.use(cors());
-app.use(compression()); // Gzip all responses — ~70% size reduction
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(helmet(buildHelmetOptions()));
+app.use(cors(buildCorsOptions(securityConfig)));
+app.use(compression()); // Gzip all responses for smaller payloads
+app.use(express.json({ limit: securityConfig.bodyLimits.json }));
+app.use(express.urlencoded({ limit: securityConfig.bodyLimits.urlencoded, extended: true }));
 
 // Serve uploaded files as static (Only for local development)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -29,6 +40,7 @@ app.get('/', (req, res) => {
 });
 
 // API Routes
+app.use('/api', createDefaultApiLimiter(securityConfig));
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);

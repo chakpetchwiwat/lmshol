@@ -1,8 +1,8 @@
 const prisma = require('../utils/prisma');
 const bcrypt = require('bcryptjs');
 const authHelpers = require('../utils/auth.helpers');
-const { USER_ROLES } = require('../utils/constants/roles');
-const { ENTITY_STATUS, ENROLLMENT_STATUS, REDEEM_STATUS } = require('../utils/constants/statuses');
+const { USER_ROLES, MANAGED_USER_ROLES } = require('../utils/constants/roles');
+const { ENTITY_STATUS, ENROLLMENT_STATUS, REDEEM_STATUS, USER_STATUS } = require('../utils/constants/statuses');
 const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
 const { TRANSACTION_TIMEOUTS } = require('../utils/constants/config');
 const { ANNOUNCEMENT_SCOPES } = require('../utils/constants/scopes');
@@ -1741,30 +1741,99 @@ const archiveCourse = async (id) => {
 };
 
 const getCourseHistory = async (courseId, filters = {}) => {
-    const { departmentId, tierId, month, year } = filters;
-    
-    const whereClause = {
-        courseId
+    const { departmentId, tierId, month, year, status, dateField } = filters;
+    const effectiveDateField = dateField === 'completedAt' ? 'completedAt' : 'startedAt';
+
+    const course = await prisma.course.findUnique({
+        where: { id: courseId },
+        include: {
+            departmentAccess: {
+                select: {
+                    departmentId: true
+                }
+            },
+            tierAccess: {
+                include: {
+                    tier: {
+                        select: {
+                            order: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    if (!course) {
+        throw new Error('Course not found');
+    }
+
+    const accessibleDepartmentIds = course.departmentAccess.map((entry) => entry.departmentId);
+    const maxAllowedTierOrder = course.tierAccess.reduce((highestOrder, entry) => {
+        const entryOrder = entry.tier?.order;
+        if (entryOrder === undefined || entryOrder === null) {
+            return highestOrder;
+        }
+
+        return highestOrder === null ? entryOrder : Math.max(highestOrder, entryOrder);
+    }, null);
+
+    const userWhere = {
+        role: { in: MANAGED_USER_ROLES },
+        status: USER_STATUS.ACTIVE
     };
 
-    const userWhere = {};
-    if (departmentId) userWhere.departmentId = departmentId;
-    if (tierId) userWhere.tierId = tierId;
-    if (Object.keys(userWhere).length > 0) {
-        whereClause.user = userWhere;
+    if (departmentId) {
+        userWhere.departmentId = departmentId;
     }
 
-    if (month && year) {
-        const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
-        const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59, 999);
-        whereClause.startedAt = {
-            gte: startDate,
-            lte: endDate
-        };
+    if (tierId) {
+        userWhere.tierId = tierId;
     }
 
+    if (!course.visibleToAll) {
+        if (accessibleDepartmentIds.length > 0) {
+            userWhere.departmentId = departmentId
+                ? departmentId
+                : { in: accessibleDepartmentIds };
+        }
+
+        if (maxAllowedTierOrder !== null) {
+            userWhere.tier = {
+                is: {
+                    order: { lte: maxAllowedTierOrder }
+                }
+            };
+        }
+    }
+
+    const users = await prisma.user.findMany({
+        where: userWhere,
+        select: {
+            id: true,
+            name: true,
+            departmentRef: {
+                select: { name: true }
+            },
+            tier: {
+                select: { name: true }
+            }
+        },
+        orderBy: {
+            name: 'asc'
+        }
+    });
+
+    if (users.length === 0) {
+        return [];
+    }
+
+    const userIds = users.map((user) => user.id);
     const enrollments = await prisma.userCourse.findMany({
-        where: whereClause,
+        where: {
+            courseId,
+            userId: { in: userIds }
+        },
         include: {
             user: {
                 select: {
@@ -1778,13 +1847,10 @@ const getCourseHistory = async (courseId, filters = {}) => {
                     }
                 }
             }
-        },
-        orderBy: {
-            startedAt: 'desc'
         }
     });
 
-    const userIds = enrollments.map(e => e.user.id);
+    const enrollmentMap = new Map(enrollments.map((enrollment) => [enrollment.userId, enrollment]));
     const quizAttemptsContext = await prisma.quizAttempt.findMany({
         where: {
             userId: { in: userIds },
@@ -1800,21 +1866,66 @@ const getCourseHistory = async (courseId, filters = {}) => {
         }
     });
 
-    return enrollments.map(enrollment => ({
-        id: enrollment.id,
+    const records = users.map((user) => {
+        const enrollment = enrollmentMap.get(user.id);
+        const enrollmentStatus = enrollment?.status || ENROLLMENT_STATUS.NOT_STARTED;
+
+        return {
+        id: enrollment?.id || `not-started-${user.id}`,
         user: {
-            id: enrollment.user.id,
-            name: enrollment.user.name,
-            department: enrollment.user.departmentRef?.name || '-',
-            tier: enrollment.user.tier?.name || '-'
+            id: user.id,
+            name: user.name,
+            department: user.departmentRef?.name || '-',
+            tier: user.tier?.name || '-'
         },
-        status: enrollment.status,
-        progressPercent: enrollment.progressPercent,
-        startedAt: enrollment.startedAt,
-        completedAt: enrollment.completedAt,
-        quizScore: quizMap[enrollment.user.id]?.score ?? null,
-        quizPassed: quizMap[enrollment.user.id]?.status === 'PASSED'
-    }));
+        status: enrollmentStatus,
+        progressPercent: enrollment?.progressPercent || 0,
+        startedAt: enrollment?.startedAt || null,
+        completedAt: enrollment?.completedAt || null,
+        quizScore: quizMap[user.id]?.score ?? null,
+        quizPassed: quizMap[user.id]?.status === 'PASSED'
+    };
+    });
+
+    const filteredRecords = records.filter((record) => {
+        if (status && record.status !== status) {
+            return false;
+        }
+
+        if (month && year) {
+            const targetDate = record[effectiveDateField];
+            if (!targetDate) {
+                return false;
+            }
+
+            const selectedDate = new Date(targetDate);
+            const startDate = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
+            const endDate = new Date(parseInt(year, 10), parseInt(month, 10), 0, 23, 59, 59, 999);
+
+            return selectedDate >= startDate && selectedDate <= endDate;
+        }
+
+        return true;
+    });
+
+    return filteredRecords.sort((left, right) => {
+        const leftPrimaryDate = left[effectiveDateField] ? new Date(left[effectiveDateField]).getTime() : null;
+        const rightPrimaryDate = right[effectiveDateField] ? new Date(right[effectiveDateField]).getTime() : null;
+
+        if (leftPrimaryDate !== null && rightPrimaryDate !== null) {
+            return rightPrimaryDate - leftPrimaryDate;
+        }
+
+        if (leftPrimaryDate !== null) {
+            return -1;
+        }
+
+        if (rightPrimaryDate !== null) {
+            return 1;
+        }
+
+        return left.user.name.localeCompare(right.user.name, 'th');
+    });
 };
 
 const deleteCourse = async (id) => prisma.course.delete({ where: { id } });

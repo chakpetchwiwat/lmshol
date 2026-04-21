@@ -1,4 +1,5 @@
 export const ENROLLMENT_STATUS = Object.freeze({
+  NOT_STARTED: 'NOT_STARTED',
   IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'COMPLETED',
 });

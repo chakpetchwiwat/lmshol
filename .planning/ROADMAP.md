@@ -27,3 +27,19 @@ Current focus: Stabilizing core education and admin features.
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.3: Security Hardening & Edge Protection (BACKLOG)
+
+**Goal:** Establish a production-ready abuse-protection baseline before DigitalOcean rollout by closing brute-force, upload abuse, oversized payload, permissive CORS, and missing observability gaps.
+
+**Requirements:**
+- [ ] Protect `/api/auth/login` against brute-force and credential-stuffing with shared-store rate limiting and temporary lockouts.
+- [ ] Add proxy-aware rate limits for sensitive and expensive endpoints, including upload and admin analytics routes.
+- [ ] Harden request handling with strict CORS allowlists, safer body-size limits, security headers, and proxy-aware IP detection.
+- [ ] Require authenticated admin access for file uploads and tighten file validation beyond MIME type alone.
+- [ ] Add structured security event logging and a deployment runbook for edge-layer DDoS controls, alerts, and recovery steps.
+
+**Plans:** 1 plan
+
+Plans:
+- [ ] `999.3-PLAN.md` - security hardening and edge protection execution plan

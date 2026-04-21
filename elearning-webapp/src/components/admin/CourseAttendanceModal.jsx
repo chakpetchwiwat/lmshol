@@ -1,11 +1,49 @@
-import React, { useEffect, useState } from 'react';
-import { Printer, Search, Users, X } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { CalendarClock, Printer, Search, Users, X } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
 import CustomSelect from '../common/CustomSelect';
 import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 import { openPrintReport } from '../../utils/printUtils';
+import { useToast } from '../../context/useToast';
+import UserDetailModal from './UserDetailModal';
+
+const STATUS_OPTIONS = [
+  { value: '', label: 'ทั้งหมด' },
+  { value: ENROLLMENT_STATUS.COMPLETED, label: 'เรียนจบแล้ว' },
+  { value: ENROLLMENT_STATUS.IN_PROGRESS, label: 'กำลังเรียน' },
+  { value: ENROLLMENT_STATUS.NOT_STARTED, label: 'ยังไม่เริ่มเรียน' },
+];
+
+const DATE_FIELD_OPTIONS = [
+  { value: 'startedAt', label: 'วันที่เริ่มเรียน' },
+  { value: 'completedAt', label: 'วันที่เรียนจบ' },
+];
+
+const STATUS_LABELS = {
+  [ENROLLMENT_STATUS.COMPLETED]: 'เรียนจบแล้ว',
+  [ENROLLMENT_STATUS.IN_PROGRESS]: 'กำลังเรียน',
+  [ENROLLMENT_STATUS.NOT_STARTED]: 'ยังไม่เริ่มเรียน',
+};
+
+const SUMMARY_CARD_STYLES = {
+  completed: {
+    iconClassName: 'bg-emerald-100 text-emerald-600',
+    borderClassName: 'border-emerald-100',
+    bgClassName: 'bg-emerald-50/70',
+  },
+  inProgress: {
+    iconClassName: 'bg-blue-100 text-blue-600',
+    borderClassName: 'border-blue-100',
+    bgClassName: 'bg-blue-50/70',
+  },
+  notStarted: {
+    iconClassName: 'bg-slate-200 text-slate-600',
+    borderClassName: 'border-slate-200',
+    bgClassName: 'bg-slate-50',
+  },
+};
 
 const getStatusBadge = (status) => {
   if (status === ENROLLMENT_STATUS.COMPLETED) {
@@ -16,18 +54,37 @@ const getStatusBadge = (status) => {
     return <span className="inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700">กำลังเรียน</span>;
   }
 
-  return <span className="inline-flex rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-700">ยังไม่เริ่ม</span>;
+  return <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">ยังไม่เริ่มเรียน</span>;
+};
+
+const getProgressTone = (status, progressPercent) => {
+  if (status === ENROLLMENT_STATUS.COMPLETED || progressPercent >= 100) {
+    return 'bg-emerald-500';
+  }
+
+  if (status === ENROLLMENT_STATUS.NOT_STARTED || progressPercent <= 0) {
+    return 'bg-slate-300';
+  }
+
+  return 'bg-blue-500';
 };
 
 const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) => {
+  const toast = useToast();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showUserDetailModal, setShowUserDetailModal] = useState(false);
+  const [userDetailLoading, setUserDetailLoading] = useState(false);
+  const [selectedUserDetail, setSelectedUserDetail] = useState(null);
   const [filters, setFilters] = useState({
     departmentId: '',
     tierId: '',
     month: '',
     year: new Date().getFullYear().toString(),
+    status: '',
+    dateField: 'startedAt',
   });
+  const courseTitle = course?.title?.trim() || 'ไม่ระบุชื่อคอร์ส';
 
   const months = [
     { value: '', label: 'ทุกเดือน' },
@@ -64,6 +121,8 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
         const params = {};
         if (filters.departmentId) params.departmentId = filters.departmentId;
         if (filters.tierId) params.tierId = filters.tierId;
+        if (filters.status) params.status = filters.status;
+        if (filters.dateField) params.dateField = filters.dateField;
         if (filters.month) params.month = filters.month;
         if (filters.month && filters.year) params.year = filters.year;
 
@@ -77,7 +136,53 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
     };
 
     fetchHistory();
-  }, [course, filters.departmentId, filters.month, filters.tierId, filters.year, isOpen]);
+  }, [course, filters.dateField, filters.departmentId, filters.month, filters.status, filters.tierId, filters.year, isOpen]);
+
+  const statusSummary = useMemo(() => ({
+    completed: history.filter((record) => record.status === ENROLLMENT_STATUS.COMPLETED).length,
+    inProgress: history.filter((record) => record.status === ENROLLMENT_STATUS.IN_PROGRESS).length,
+    notStarted: history.filter((record) => record.status === ENROLLMENT_STATUS.NOT_STARTED).length,
+  }), [history]);
+
+  const summaryCards = useMemo(() => ([
+    {
+      key: 'completed',
+      label: 'เรียนจบแล้ว',
+      value: statusSummary.completed,
+      helper: 'ผู้ที่เรียนครบและปิดคอร์สแล้ว',
+    },
+    {
+      key: 'inProgress',
+      label: 'กำลังเรียน',
+      value: statusSummary.inProgress,
+      helper: 'ผู้ที่เริ่มเรียนแล้วแต่ยังไม่ครบ',
+    },
+    {
+      key: 'notStarted',
+      label: 'ยังไม่เริ่มเรียน',
+      value: statusSummary.notStarted,
+      helper: 'ผู้ที่เข้าถึงคอร์สได้แต่ยังไม่เริ่ม',
+    },
+  ]), [statusSummary]);
+
+  const handleViewUser = async (userId) => {
+    if (!userId) {
+      return;
+    }
+
+    try {
+      setShowUserDetailModal(true);
+      setUserDetailLoading(true);
+      const response = await adminAPI.getUserDetails(userId);
+      setSelectedUserDetail(response.data);
+    } catch (error) {
+      console.error('Failed to fetch user detail', error);
+      toast.error(error.response?.data?.message || 'ไม่สามารถโหลดประวัติพนักงานได้');
+      setShowUserDetailModal(false);
+    } finally {
+      setUserDetailLoading(false);
+    }
+  };
 
   const resetFilters = () => {
     setFilters({
@@ -85,35 +190,39 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
       tierId: '',
       month: '',
       year: new Date().getFullYear().toString(),
+      status: '',
+      dateField: 'startedAt',
     });
   };
 
   const handlePrint = () => {
     openPrintReport({
-      fileName: `course-attendance-${course?.title || 'report'}`,
+      fileName: `course-attendance-${courseTitle || 'report'}`,
       reportTitle: 'ประวัติการเข้าเรียน',
-      subtitle: course?.title || '',
+      subtitle: `คอร์ส: ${courseTitle}`,
       summary: [
+        { label: 'ชื่อคอร์ส', value: courseTitle },
         { label: 'จำนวนผู้เรียนตามตัวกรอง', value: `${history.length} รายการ` },
-        { label: 'เรียนจบแล้ว', value: `${history.filter((record) => record.status === ENROLLMENT_STATUS.COMPLETED).length} คน` },
-        { label: 'กำลังเรียน', value: `${history.filter((record) => record.status === ENROLLMENT_STATUS.IN_PROGRESS).length} คน` },
+        { label: 'เรียนจบแล้ว', value: `${statusSummary.completed} คน` },
+        { label: 'กำลังเรียน', value: `${statusSummary.inProgress} คน` },
+        { label: 'ยังไม่เริ่มเรียน', value: `${statusSummary.notStarted} คน` },
       ],
       filters: [
+        { label: 'คอร์ส', value: courseTitle },
         { label: 'แผนก', value: departments.find((department) => department.id === filters.departmentId)?.name || 'ทั้งหมด' },
         { label: 'ระดับผู้ใช้งาน', value: tiers.find((tier) => tier.id === filters.tierId)?.name || 'ทั้งหมด' },
+        { label: 'สถานะ', value: STATUS_OPTIONS.find((option) => option.value === filters.status)?.label || 'ทั้งหมด' },
+        { label: 'อิงวันที่', value: DATE_FIELD_OPTIONS.find((option) => option.value === filters.dateField)?.label || 'วันที่เริ่มเรียน' },
         { label: 'เดือน', value: months.find((month) => month.value === filters.month)?.label || 'ทุกเดือน' },
-        { label: 'ปี', value: years.find((year) => year.value === filters.year)?.label || 'ทุกปี' },
+        { label: 'ปี', value: filters.month ? (years.find((year) => year.value === filters.year)?.label || 'ทุกปี') : 'ทุกปี' },
       ],
-      columns: ['ชื่อผู้เรียน', 'แผนก / ระดับ', 'เริ่มเรียน', 'สถานะ', 'คะแนนแบบทดสอบ', 'เรียนจบ'],
+      columns: ['ชื่อผู้เรียน', 'แผนก / ระดับ', 'เริ่มเรียน', 'สถานะ', 'ความคืบหน้า', 'คะแนนแบบทดสอบ', 'เรียนจบ'],
       rows: history.map((record) => ([
         record.user?.name || '-',
         [record.user?.department, record.user?.tier].filter(Boolean).join(' / ') || '-',
         record.startedAt ? formatThaiDateTime(record.startedAt, true) : '-',
-        record.status === ENROLLMENT_STATUS.COMPLETED
-          ? 'เรียนจบแล้ว'
-          : record.status === ENROLLMENT_STATUS.IN_PROGRESS
-            ? 'กำลังเรียน'
-            : 'ยังไม่เริ่ม',
+        STATUS_LABELS[record.status] || 'ยังไม่เริ่มเรียน',
+        `${Math.round(record.progressPercent || 0)}%`,
         record.quizScore !== null && record.quizScore !== undefined
           ? `${record.quizScore}${record.quizPassed ? ' (ผ่าน)' : ' (ไม่ผ่าน)'}`
           : '-',
@@ -126,9 +235,10 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
   if (!isOpen) return null;
 
   return (
-    <ModalPortal isOpen={isOpen}>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md">
-        <div className="card flex h-full w-full max-w-6xl flex-col border border-slate-100 bg-white p-0 shadow-2xl">
+    <>
+      <ModalPortal isOpen={isOpen}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md">
+          <div className="card flex h-full w-full max-w-7xl flex-col border border-slate-100 bg-white p-0 shadow-2xl">
           <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
@@ -136,7 +246,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
               </div>
               <div>
                 <h4 className="text-lg font-bold text-slate-800">ประวัติการเข้าเรียน</h4>
-                <p className="text-sm text-slate-500">{course?.title}</p>
+                <p className="text-sm font-medium text-slate-500">คอร์ส: {courseTitle}</p>
               </div>
             </div>
             <button type="button" onClick={onClose} className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700">
@@ -166,6 +276,22 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
                   { value: '', label: 'ทั้งหมด' },
                   ...tiers.map((tier) => ({ value: tier.id, label: tier.name })),
                 ]}
+              />
+
+              <CustomSelect
+                label="สถานะ"
+                className="w-full sm:w-44"
+                value={filters.status}
+                onChange={(event) => setFilters({ ...filters, status: event.target.value })}
+                options={STATUS_OPTIONS}
+              />
+
+              <CustomSelect
+                label="อิงวันที่"
+                className="w-full sm:w-44"
+                value={filters.dateField}
+                onChange={(event) => setFilters({ ...filters, dateField: event.target.value })}
+                options={DATE_FIELD_OPTIONS}
               />
 
               <CustomSelect
@@ -202,6 +328,30 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
                 <span>Print to PDF</span>
               </button>
             </div>
+
+            <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
+              {summaryCards.map((card) => {
+                const style = SUMMARY_CARD_STYLES[card.key];
+
+                return (
+                  <div
+                    key={card.key}
+                    className={`rounded-2xl border p-4 ${style.borderClassName} ${style.bgClassName}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-slate-500">{card.label}</p>
+                        <p className="mt-2 text-3xl font-black text-slate-800">{card.value}</p>
+                        <p className="mt-1 text-xs font-medium text-slate-500">{card.helper}</p>
+                      </div>
+                      <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${style.iconClassName}`}>
+                        <CalendarClock size={18} />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <div className="flex-1 overflow-auto bg-slate-50/50">
@@ -224,66 +374,96 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
                     <th className="p-4 font-bold">แผนก / ระดับ</th>
                     <th className="p-4 font-bold">วันที่เริ่มเรียน</th>
                     <th className="p-4 font-bold">สถานะ</th>
+                    <th className="p-4 font-bold">ความคืบหน้า</th>
                     <th className="p-4 font-bold">คะแนนแบบทดสอบ</th>
                     <th className="p-4 font-bold">วันที่เรียนจบ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
-                  {history.map((record) => (
-                    <tr key={record.id} className="transition-colors hover:bg-slate-50/50">
-                      <td className="p-4">
-                        <div className="font-bold text-slate-700">{record.user?.name}</div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex flex-col gap-1 text-sm text-slate-600">
-                          <span className="font-medium">{record.user?.department}</span>
-                          <span className="w-fit rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-400">
-                            {record.user?.tier}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-sm font-medium text-slate-600">
-                        {formatThaiDateTime(record.startedAt, true)}
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-start gap-1.5">
-                          <div className="flex flex-col gap-1.5">
-                            {getStatusBadge(record.status)}
-                            <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
+                  {history.map((record) => {
+                    const progressPercent = Math.max(0, Math.min(100, Math.round(record.progressPercent || 0)));
+
+                    return (
+                      <tr key={record.id} className="transition-colors hover:bg-slate-50/50">
+                        <td className="p-4">
+                          {record.user?.id ? (
+                            <button
+                              type="button"
+                              onClick={() => handleViewUser(record.user.id)}
+                              className="font-bold text-slate-700 transition-colors hover:text-primary hover:underline"
+                            >
+                              {record.user?.name || '-'}
+                            </button>
+                          ) : (
+                            <div className="font-bold text-slate-700">{record.user?.name || '-'}</div>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex flex-col gap-1 text-sm text-slate-600">
+                            <span className="font-medium">{record.user?.department || '-'}</span>
+                            <span className="w-fit rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-400">
+                              {record.user?.tier || '-'}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-sm font-medium text-slate-600">
+                          {record.startedAt ? formatThaiDateTime(record.startedAt, true) : '-'}
+                        </td>
+                        <td className="p-4">
+                          {getStatusBadge(record.status)}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex min-w-[160px] flex-col gap-1.5">
+                            <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                              <span>{STATUS_LABELS[record.status] || 'ยังไม่เริ่มเรียน'}</span>
+                              <span>{progressPercent}%</span>
+                            </div>
+                            <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                               <div
-                                className={`h-full rounded-full transition-all duration-500 ${record.progressPercent >= 100 ? 'bg-emerald-500' : 'bg-blue-500'}`}
-                                style={{ width: `${record.progressPercent || 0}%` }}
+                                className={`h-full rounded-full transition-all duration-500 ${getProgressTone(record.status, progressPercent)}`}
+                                style={{ width: `${progressPercent}%` }}
                               />
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        {record.quizScore !== null && record.quizScore !== undefined ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg font-bold text-slate-700">{record.quizScore}</span>
-                            {record.quizPassed ? (
-                              <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-600">ผ่าน</span>
-                            ) : (
-                              <span className="rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-600">ไม่ผ่าน</span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-sm text-slate-400">-</span>
-                        )}
-                      </td>
-                      <td className="p-4 text-sm font-medium text-slate-500">
-                        {record.completedAt ? formatThaiDateTime(record.completedAt, true) : '-'}
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="p-4">
+                          {record.quizScore !== null && record.quizScore !== undefined ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg font-bold text-slate-700">{record.quizScore}</span>
+                              {record.quizPassed ? (
+                                <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-600">ผ่าน</span>
+                              ) : (
+                                <span className="rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-600">ไม่ผ่าน</span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-slate-400">-</span>
+                          )}
+                        </td>
+                        <td className="p-4 text-sm font-medium text-slate-500">
+                          {record.completedAt ? formatThaiDateTime(record.completedAt, true) : '-'}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
           </div>
+          </div>
         </div>
-      </div>
-    </ModalPortal>
+      </ModalPortal>
+
+      <UserDetailModal
+        isOpen={showUserDetailModal}
+        loading={userDetailLoading}
+        detail={selectedUserDetail}
+        onClose={() => {
+          setShowUserDetailModal(false);
+          setSelectedUserDetail(null);
+        }}
+      />
+    </>
   );
 };
 
