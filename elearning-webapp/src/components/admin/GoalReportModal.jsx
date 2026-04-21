@@ -9,17 +9,15 @@ const GoalReportModal = ({
   reportLoading,
   onClose,
 }) => {
-  const goalSource = reportData?.goal || reportGoal;
   const targetCourses = useMemo(() => (
-    (goalSource?.courses || [])
+    ((reportData?.goal || reportGoal)?.courses || [])
       .map((item) => item?.course?.title || item?.title || null)
       .filter(Boolean)
-  ), [goalSource]);
+  ), [reportGoal, reportData]);
+
   const numberedTargetCourses = useMemo(() => (
     targetCourses.map((courseTitle, index) => `${index + 1}. ${courseTitle}`).join('\n')
   ), [targetCourses]);
-
-  if (!reportGoal) return null;
 
   const statusCounts = useMemo(() => {
     const counts = {
@@ -33,6 +31,10 @@ const GoalReportModal = ({
     });
     return counts;
   }, [reportData]);
+
+  if (!reportGoal) return null;
+
+  const goalSource = reportData?.goal || reportGoal;
 
   const goalTargetLabel = goalSource?.type === 'ANY'
     ? `เรียนจบ ${goalSource?.targetCount || 0} คอร์ส`

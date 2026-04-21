@@ -144,7 +144,7 @@ const GoalManagement = () => {
         }
     };
 
-    const handleViewReport = async (goal) => {
+    const handleViewReport = useCallback(async (goal) => {
         setReportGoal(goal);
         setReportLoading(true);
         try {
@@ -156,7 +156,12 @@ const GoalManagement = () => {
         } finally {
             setReportLoading(false);
         }
-    };
+    }, [toast]);
+
+    const handleCloseReport = useCallback(() => {
+        setReportGoal(null);
+        setReportData(null);
+    }, []);
 
     const filteredCourses = useMemo(() => {
         return courses.filter(c => 
@@ -257,7 +262,7 @@ const GoalManagement = () => {
                 reportGoal={reportGoal}
                 reportData={reportData}
                 reportLoading={reportLoading}
-                onClose={() => {setReportGoal(null); setReportData(null);}}
+                onClose={handleCloseReport}
             />
             <ConfirmDialog {...ConfirmDialogProps} />
         </div>
