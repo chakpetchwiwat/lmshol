@@ -1,10 +1,27 @@
 const AuthService = require('../services/auth.service');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
+const { recordLoginFailure, resetLoginFailures } = require('../middleware/loginProtection');
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const result = await AuthService.login(email, password);
+
+  if (!email || !password) {
+    throw new ErrorResponse('Email and password are required', 400);
+  }
+
+  let result;
+  try {
+    result = await AuthService.login(email, password);
+  } catch (error) {
+    if (error.statusCode === 401) {
+      recordLoginFailure(req, email);
+    }
+
+    throw error;
+  }
+
+  resetLoginFailures(req, email);
   res.json({ success: true, data: result });
 });
 

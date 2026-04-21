@@ -25,8 +25,8 @@ const RiskIdentificationWidget = ({ data, onSelectRisk, onViewAll }) => {
             <AlertCircle size={20} />
           </div>
           <div className="text-left">
-            <h3 className="text-lg font-bold text-slate-900">Risk Identification</h3>
-            <p className="text-sm text-slate-500">ผู้เรียนที่ใกล้ deadline หรือเลยกำหนด</p>
+            <h3 className="text-lg font-bold text-slate-900">ความเสี่ยงรายบุคคล</h3>
+            <p className="text-sm text-slate-500">ผู้เรียนที่เสี่ยงไม่บรรลุเป้าหมาย (Goal)</p>
           </div>
         </div>
         <span className="badge badge-error badge-sm">{safeData.length} ราย</span>
@@ -35,7 +35,7 @@ const RiskIdentificationWidget = ({ data, onSelectRisk, onViewAll }) => {
       <div className="flex-1 overflow-auto">
         {safeData.length > 0 ? (
           <div className="flex flex-col gap-4">
-            {safeData.map((risk) => (
+            {safeData.slice(0, 5).map((risk) => (
               <button
                 key={`${risk.userId}-${risk.courseId}`}
                 type="button"
@@ -50,15 +50,20 @@ const RiskIdentificationWidget = ({ data, onSelectRisk, onViewAll }) => {
                     </p>
                   </div>
                   {risk.isOverdue && (
-                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-rose-600">Late</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.18em] text-rose-600">Overdue</span>
                   )}
                 </div>
 
                 <div className="mb-2 flex items-center gap-2 text-xs text-slate-600">
-                  <div className="rounded-lg bg-slate-100 p-1 group-hover:bg-rose-100">
-                    <Clock size={12} className={risk.isOverdue ? 'text-rose-500' : 'text-slate-400'} />
+                  <div className="rounded-lg bg-white p-1 shadow-sm group-hover:bg-rose-100">
+                    <Calendar size={12} className={risk.isOverdue ? 'text-rose-500' : 'text-slate-400'} />
                   </div>
                   <span className="truncate font-medium">{risk.courseTitle}</span>
+                  {risk.gapCount > 0 && (
+                    <span className="ml-auto shrink-0 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-600">
+                      ขาดอีก {risk.gapCount} คอร์ส
+                    </span>
+                  )}
                 </div>
 
                 <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3">
@@ -76,21 +81,23 @@ const RiskIdentificationWidget = ({ data, onSelectRisk, onViewAll }) => {
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50">
               <AlertCircle size={24} className="text-slate-200" />
             </div>
-            <p className="text-sm font-bold text-slate-400">No immediate risks detected</p>
-            <p className="text-xs text-slate-300">All learners are currently within safe deadlines.</p>
+            <p className="text-sm font-bold text-slate-400">ไม่พบความเสี่ยงในขณะนี้</p>
+            <p className="text-xs text-slate-300">พนักงานทุกคนยังอยู่ในช่วงเวลาที่กำหนด</p>
           </div>
         )}
       </div>
 
-      <div className="mt-6">
-        <button
-          type="button"
-          onClick={() => onViewAll?.(safeData)}
-          className="btn btn-ghost btn-sm w-full text-xs font-bold text-slate-500 hover:text-primary"
-        >
-          View All At-Risk Learners
-        </button>
-      </div>
+      {safeData.length > 5 && (
+        <div className="mt-6 border-t border-slate-100 pt-6">
+          <button
+            type="button"
+            onClick={() => onViewAll?.(safeData)}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-50 py-3 text-sm font-bold text-slate-600 transition-all hover:bg-slate-100 hover:text-primary active:scale-[0.98]"
+          >
+            <span>ดูรายชื่อพนักงานกลุ่มเสี่ยงทั้งหมด ({safeData.length})</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BellPlus, CalendarClock, Search } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
@@ -9,7 +9,6 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 import ViewToggleTabs from '../../components/common/ViewToggleTabs';
 
-// Sub-components
 import AnnouncementTable from '../../components/admin/AnnouncementTable';
 import AnnouncementModal from '../../components/admin/AnnouncementModal';
 import AnnouncementHistoryModal from '../../components/admin/AnnouncementHistoryModal';
@@ -20,9 +19,8 @@ const getDefaultForm = (departmentId = '') => ({
   description: '',
   image: '',
   departmentId,
-  scope: 'DEPARTMENT', // 'GLOBAL' | 'DEPARTMENT'
+  scope: 'DEPARTMENT',
   type: 'article',
-
   contentUrl: '',
   content: '',
   duration: 0,
@@ -31,10 +29,12 @@ const getDefaultForm = (departmentId = '') => ({
   expiredAt: '',
 });
 
+const isCanceledRequest = (error) => error?.code === 'ERR_CANCELED' || error?.name === 'CanceledError';
+
 const AnnouncementManagement = () => {
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
-  
+
   const [user] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'));
   const isFullAdmin = canEditAdminUsers(user);
 
@@ -48,12 +48,30 @@ const AnnouncementManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
   const [form, setForm] = useState(getDefaultForm());
-  
-  // History Modal State
+
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [currentAnnouncementTitle, setCurrentAnnouncementTitle] = useState('');
+
+  const announcementHistoryCacheRef = useRef(new Map());
+  const announcementHistoryRequestRef = useRef(null);
+
+  const invalidateAnnouncementHistoryCache = useCallback((announcementId) => {
+    if (!announcementId) {
+      announcementHistoryCacheRef.current.clear();
+      return;
+    }
+
+    announcementHistoryCacheRef.current.delete(announcementId);
+  }, []);
+
+  const cancelAnnouncementHistoryRequest = useCallback(() => {
+    if (announcementHistoryRequestRef.current) {
+      announcementHistoryRequestRef.current.abort();
+      announcementHistoryRequestRef.current = null;
+    }
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -68,8 +86,7 @@ const AnnouncementManagement = () => {
 
       setAnnouncements(nextAnnouncements);
       setDepartments(nextDepartments);
-      
-      // Initialize form with first department if not set
+
       setForm((current) => {
         if (current.departmentId) return current;
         if (!nextDepartments.length) return current;
@@ -86,6 +103,10 @@ const AnnouncementManagement = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => () => {
+    cancelAnnouncementHistoryRequest();
+  }, [cancelAnnouncementHistoryRequest]);
 
   const resetForm = () => {
     setEditingAnnouncement(null);
@@ -186,7 +207,6 @@ const AnnouncementManagement = () => {
       return;
     }
 
-
     try {
       const payload = {
         ...form,
@@ -195,9 +215,9 @@ const AnnouncementManagement = () => {
         departmentId: form.scope === 'GLOBAL' ? null : form.departmentId,
       };
 
-
       if (editingAnnouncement) {
         await adminAPI.updateAnnouncement(editingAnnouncement.id, payload);
+        invalidateAnnouncementHistoryCache(editingAnnouncement.id);
         toast.success('อัปเดตประกาศเรียบร้อย');
       } else {
         await adminAPI.createAnnouncement(payload);
@@ -225,6 +245,7 @@ const AnnouncementManagement = () => {
 
     try {
       await adminAPI.archiveAnnouncement(announcement.id);
+      invalidateAnnouncementHistoryCache(announcement.id);
       toast.success('เก็บประกาศเข้าคลังเรียบร้อย');
       await fetchData();
     } catch (error) {
@@ -245,6 +266,7 @@ const AnnouncementManagement = () => {
 
     try {
       await adminAPI.republishAnnouncement(announcement.id);
+      invalidateAnnouncementHistoryCache(announcement.id);
       toast.success('นำประกาศกลับมาใช้งานเรียบร้อย');
       await fetchData();
     } catch (error) {
@@ -265,6 +287,7 @@ const AnnouncementManagement = () => {
 
     try {
       await adminAPI.deleteAnnouncement(announcement.id);
+      invalidateAnnouncementHistoryCache(announcement.id);
       toast.success('ลบประกาศเรียบร้อย');
       await fetchData();
     } catch (error) {
@@ -273,33 +296,69 @@ const AnnouncementManagement = () => {
     }
   };
 
-  const handleViewHistory = async (announcement) => {
+  const handleCloseHistoryModal = useCallback(() => {
+    cancelAnnouncementHistoryRequest();
+    setShowHistoryModal(false);
+    setHistoryLoading(false);
+  }, [cancelAnnouncementHistoryRequest]);
+
+  const handleViewHistory = useCallback(async (announcement) => {
+    const announcementId = announcement?.id;
+    if (!announcementId) return;
+
+    setCurrentAnnouncementTitle(announcement.title);
+    setShowHistoryModal(true);
+
+    const cachedHistory = announcementHistoryCacheRef.current.get(announcementId);
+    if (cachedHistory) {
+      setHistoryData(cachedHistory);
+      setHistoryLoading(false);
+      return;
+    }
+
+    cancelAnnouncementHistoryRequest();
+
+    const controller = new AbortController();
+    announcementHistoryRequestRef.current = controller;
+    setHistoryLoading(true);
+
     try {
-      setHistoryLoading(true);
-      setCurrentAnnouncementTitle(announcement.title);
-      setShowHistoryModal(true);
-      const response = await adminAPI.getAnnouncementHistory(announcement.id);
-      setHistoryData(Array.isArray(response.data) ? response.data : []);
+      const response = await adminAPI.getAnnouncementHistory(announcementId, {
+        signal: controller.signal,
+      });
+
+      if (announcementHistoryRequestRef.current !== controller) {
+        return;
+      }
+
+      const nextHistory = Array.isArray(response?.data) ? response.data : [];
+      announcementHistoryCacheRef.current.set(announcementId, nextHistory);
+      setHistoryData(nextHistory);
     } catch (error) {
+      if (isCanceledRequest(error)) {
+        return;
+      }
+
       console.error('View history error:', error);
       toast.error('ไม่สามารถโหลดข้อมูลประวัติได้');
+      setHistoryData([]);
     } finally {
-      setHistoryLoading(false);
+      if (announcementHistoryRequestRef.current === controller) {
+        announcementHistoryRequestRef.current = null;
+        setHistoryLoading(false);
+      }
     }
-  };
+  }, [cancelAnnouncementHistoryRequest, toast]);
 
   const filteredAnnouncements = useMemo(() => {
     const now = new Date();
     return announcements.filter((announcement) => {
-      // 1. Role-based department access
       if (!isFullAdmin && announcement.scope !== 'GLOBAL' && announcement.departmentId !== user?.departmentId) {
         return false;
       }
 
-
       const isArchived = announcement.expiredAt ? new Date(announcement.expiredAt) <= now : false;
       const matchesView = viewMode === ENTITY_VIEW_STATUS.ARCHIVED ? isArchived : !isArchived;
-
       const keyword = `${announcement.title} ${announcement.department?.name || ''}`.toLowerCase();
       const matchesSearch = keyword.includes(searchTerm.toLowerCase());
 
@@ -311,7 +370,6 @@ const AnnouncementManagement = () => {
     () => announcements.filter((announcement) => {
       if (!isFullAdmin && announcement.scope !== 'GLOBAL' && announcement.departmentId !== user?.departmentId) return false;
       return !announcement.expiredAt || new Date(announcement.expiredAt) > new Date();
-
     }).length,
     [announcements, isFullAdmin, user?.departmentId],
   );
@@ -320,7 +378,6 @@ const AnnouncementManagement = () => {
     () => announcements.filter((announcement) => {
       if (!isFullAdmin && announcement.scope !== 'GLOBAL' && announcement.departmentId !== user?.departmentId) return false;
       return announcement.expiredAt && new Date(announcement.expiredAt) <= new Date();
-
     }).length,
     [announcements, isFullAdmin, user?.departmentId],
   );
@@ -403,7 +460,7 @@ const AnnouncementManagement = () => {
 
       <AnnouncementHistoryModal
         isOpen={showHistoryModal}
-        onClose={() => setShowHistoryModal(false)}
+        onClose={handleCloseHistoryModal}
         title={currentAnnouncementTitle}
         loading={historyLoading}
         historyData={historyData}

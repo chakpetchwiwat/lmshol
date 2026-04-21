@@ -2,6 +2,7 @@
 
 - **CRITICAL**: When adding new Lucide icons, UI components, or utilities, ALWAYS verify that the necessary imports are added to the top of the file to prevent ReferenceErrors at runtime.
 - **CRITICAL (Encoding)**: ALWAYS ensure all files are saved in **UTF-8** encoding. Thai characters must remain readable and not corrupted by system-default encodings (like CP874).
+- **CRITICAL (Mojibake Prevention)**: NEVER copy Thai text from terminals, diffs, logs, or shells if it appears garbled (e.g. `เธ`, `เน€`). When shell output is mojibake, retype the Thai text from a UTF-8-safe editor/source or use explicit Unicode escapes (`\u0e..`) for labels/strings. After editing files that contain Thai text, verify the saved source or rendered UI still displays proper Thai before finishing.
 - Maintain Thai language support in all UI and file content (UTF-8).
 - Prioritize high-end aesthetics (Glassmorphism, gradients, modern typography).
 - Verify design consistency across different screen sizes before completion.
@@ -32,4 +33,3 @@
     - **Localization**: No hardcoded Thai strings in UI code. Add all labels to `src/locales/th.json` and use the `t()` translation hook.
     - **Date Standardization**: Static date formatting must use `dateUtils.js`. Thai year conversion must use the `toThaiYear` helper.
     - **Database Security**: Never hardcode credentials. Use `.env` variables and ensure `DATABASE_URL` (pooler) and `DIRECT_URL` (direct) are correctly mapped in production (Vercel).
-

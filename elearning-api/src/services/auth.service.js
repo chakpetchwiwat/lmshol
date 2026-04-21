@@ -2,9 +2,11 @@ const prisma = require('../utils/prisma');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const authHelpers = require('../utils/auth.helpers');
+const ErrorResponse = require('../utils/errorResponse');
 const { USER_STATUS } = require('../utils/constants/statuses');
 
 const mapPublicUser = authHelpers.mapUserRecord;
+const INVALID_LOGIN_MESSAGE = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
 
 const login = async (email, password) => {
     const user = await prisma.user.findUnique({
@@ -16,16 +18,16 @@ const login = async (email, password) => {
     });
 
     if (!user) {
-        throw new Error('อีเมล หรือ รหัสผ่านไม่ถูกต้อง');
+        throw new ErrorResponse(INVALID_LOGIN_MESSAGE, 401);
     }
 
     if (user.status !== USER_STATUS.ACTIVE) {
-        throw new Error('บัญชีนี้ถูกระงับการใช้งาน');
+        throw new ErrorResponse(INVALID_LOGIN_MESSAGE, 401);
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-        throw new Error('อีเมล หรือ รหัสผ่านไม่ถูกต้อง');
+        throw new ErrorResponse(INVALID_LOGIN_MESSAGE, 401);
     }
 
     const token = jwt.sign(

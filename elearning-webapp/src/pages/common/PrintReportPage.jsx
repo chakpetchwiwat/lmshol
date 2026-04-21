@@ -285,6 +285,15 @@ const PrintReportPage = () => {
           text-overflow: ellipsis;
         }
 
+        .print-toolbar-subtitle {
+          margin-top: 4px;
+          font-size: 13px;
+          color: #64748b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
         .print-toolbar-actions {
           display: flex;
           align-items: center;
@@ -442,6 +451,7 @@ const PrintReportPage = () => {
           <div className="print-toolbar-copy">
             <div className="print-toolbar-label">Print Preview</div>
             <div className="print-toolbar-title">{report.reportTitle}</div>
+            {report.subtitle ? <div className="print-toolbar-subtitle">{report.subtitle}</div> : null}
           </div>
 
           <div className="print-toolbar-actions">

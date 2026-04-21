@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BookOpen, CheckCircle2, Printer, X, XCircle } from 'lucide-react';
+import { BookOpen, CheckCircle2, Printer, Search, X, XCircle } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import { openPrintReport } from '../../utils/printUtils';
 
@@ -15,14 +15,26 @@ const GoalReportModal = ({
       .map((item) => item?.course?.title || item?.title || null)
       .filter(Boolean)
   ), [goalSource]);
+
   const numberedTargetCourses = useMemo(() => (
     targetCourses.map((courseTitle, index) => `${index + 1}. ${courseTitle}`).join('\n')
   ), [targetCourses]);
 
+  const statusCounts = useMemo(() => {
+    const counts = {
+      COMPLETED: 0,
+      IN_PROGRESS: 0,
+      NOT_STARTED: 0,
+    };
+    reportData?.report?.forEach((record) => {
+      const status = record.userStatus || (record.isSuccess ? 'COMPLETED' : 'IN_PROGRESS');
+      counts[status] = (counts[status] || 0) + 1;
+    });
+    return counts;
+  }, [reportData]);
+
   if (!reportGoal) return null;
 
-  const successCount = reportData?.report?.filter((record) => record.isSuccess).length || 0;
-  const pendingCount = reportData?.report?.filter((record) => !record.isSuccess).length || 0;
   const goalTargetLabel = goalSource?.type === 'ANY'
     ? `เรียนจบ ${goalSource?.targetCount || 0} คอร์ส`
     : `เรียนจบ ${targetCourses.length} คอร์สที่ระบุ`;
@@ -41,16 +53,19 @@ const GoalReportModal = ({
             : (numberedTargetCourses || '-'),
         },
         { label: 'พนักงานทั้งหมด', value: `${reportData?.report?.length || 0} คน` },
-        { label: 'สำเร็จแล้ว', value: `${successCount} คน` },
-        { label: 'ยังไม่ผ่าน', value: `${pendingCount} คน` },
+        { label: 'เรียนครบทั้งหมด', value: `${statusCounts.COMPLETED} คน` },
+        { label: 'กำลังเรียน', value: `${statusCounts.IN_PROGRESS} คน` },
+        { label: 'ยังไม่เริ่ม', value: `${statusCounts.NOT_STARTED} คน` },
       ],
-      columns: ['พนักงาน', 'อีเมล', 'แผนก', 'ความคืบหน้า', 'สถานะ'],
+      columns: ['พนักงาน', 'แผนก', 'ความคืบหน้า', 'สถานะ', 'รายละเอียด'],
       rows: (reportData?.report || []).map((record) => ([
         record.name || '-',
-        record.email || '-',
         record.department || '-',
         `${record.completionCount} / ${record.targetCount}`,
-        record.isSuccess ? 'สำเร็จ' : 'ยังไม่ผ่าน',
+        record.userStatus === 'COMPLETED' ? 'เรียนครบ' : (record.userStatus === 'IN_PROGRESS' ? 'กำลังเรียน' : 'ยังไม่เริ่ม'),
+        (record.courseProgress || []).map(cp =>
+          `${cp.title}: ${cp.status === 'COMPLETED' ? 'เสร็จสิ้น' : (cp.progressPercent + '%')}`
+        ).join('\n')
       ])),
       emptyMessage: 'ไม่สามารถโหลดข้อมูลรายงานได้',
     });
@@ -59,7 +74,7 @@ const GoalReportModal = ({
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md animate-fade-in">
-        <div className="flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl animate-slide-up">
+        <div className="flex h-[85vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl animate-slide-up">
           <div className="flex items-center justify-between border-b border-border bg-slate-50 p-6">
             <div>
               <h3 className="text-xl font-black text-slate-800">รายงาน: {goalSource?.title}</h3>
@@ -128,17 +143,17 @@ const GoalReportModal = ({
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-center">
-                    <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">พนักงานทั้งหมด</p>
-                    <p className="text-3xl font-black text-slate-800">{reportData.report.length}</p>
-                  </div>
                   <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-center">
-                    <p className="mb-1 text-[10px] font-bold uppercase text-emerald-500">ทำสำเร็จแล้ว</p>
-                    <p className="text-3xl font-black text-emerald-600">{successCount}</p>
+                    <p className="mb-1 text-[10px] font-bold uppercase text-emerald-500">เรียนครบทั้งหมด</p>
+                    <p className="text-3xl font-black text-emerald-600">{statusCounts.COMPLETED}</p>
                   </div>
                   <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-center">
-                    <p className="mb-1 text-[10px] font-bold uppercase text-amber-500">อยู่ระหว่างดำเนินการ</p>
-                    <p className="text-3xl font-black text-amber-600">{pendingCount}</p>
+                    <p className="mb-1 text-[10px] font-bold uppercase text-amber-500">กำลังเรียน</p>
+                    <p className="text-3xl font-black text-amber-600">{statusCounts.IN_PROGRESS}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
+                    <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">ยังไม่เริ่ม</p>
+                    <p className="text-3xl font-black text-slate-800">{statusCounts.NOT_STARTED}</p>
                   </div>
                 </div>
 
@@ -149,6 +164,7 @@ const GoalReportModal = ({
                         <th className="p-4 text-left text-[10px] font-bold uppercase">พนักงาน</th>
                         <th className="p-4 text-left text-[10px] font-bold uppercase">แผนก</th>
                         <th className="p-4 text-center text-[10px] font-bold uppercase">ความคืบหน้า</th>
+                        <th className="p-4 text-left text-[10px] font-bold uppercase">รายละเอียดรายคอร์ส</th>
                         <th className="p-4 text-right text-[10px] font-bold uppercase">สถานะ</th>
                       </tr>
                     </thead>
@@ -163,22 +179,48 @@ const GoalReportModal = ({
                           <td className="p-4">
                             <div className="flex flex-col items-center gap-1">
                               <span className="font-black text-slate-800">{record.completionCount} / {record.targetCount}</span>
-                              <div className="h-1 w-24 overflow-hidden rounded-full bg-slate-100">
+                              <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
                                 <div
-                                  className={`h-full ${record.isSuccess ? 'bg-emerald-500' : 'bg-primary'}`}
+                                  className={`h-full ${record.userStatus === 'COMPLETED' ? 'bg-emerald-500' : 'bg-primary'}`}
                                   style={{ width: `${Math.min(100, (record.completionCount / record.targetCount) * 100)}%` }}
                                 />
                               </div>
                             </div>
                           </td>
+                          <td className="p-4">
+                            <div className="flex flex-col gap-2">
+                              {(record.courseProgress || []).map((cp) => (
+                                <div key={cp.courseId} className="flex items-center gap-2">
+                                  <div className="flex-1 truncate text-xs font-semibold text-slate-600" title={cp.title}>
+                                    {cp.title}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
+                                      <div
+                                        className={`h-full ${cp.status === 'COMPLETED' ? 'bg-emerald-500' : 'bg-blue-400'}`}
+                                        style={{ width: `${cp.progressPercent}%` }}
+                                      />
+                                    </div>
+                                    <span className={`min-w-[45px] text-[10px] font-bold ${cp.status === 'COMPLETED' ? 'text-emerald-600' : (cp.status === 'IN_PROGRESS' ? 'text-blue-500' : 'text-slate-400')}`}>
+                                      {cp.status === 'COMPLETED' ? 'เรียนจบ' : (cp.status === 'IN_PROGRESS' ? `${Math.round(cp.progressPercent)}%` : 'ยังไม่เริ่ม')}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </td>
                           <td className="p-4 text-right">
-                            {record.isSuccess ? (
+                            {record.userStatus === 'COMPLETED' ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
-                                <CheckCircle2 size={14} /> สำเร็จ
+                                <CheckCircle2 size={14} /> เรียนครบ
+                              </span>
+                            ) : record.userStatus === 'IN_PROGRESS' ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">
+                                <Search size={14} /> กำลังเรียน
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400">
-                                <XCircle size={14} /> ยังไม่ผ่าน
+                                <XCircle size={14} /> ยังไม่เริ่ม
                               </span>
                             )}
                           </td>

@@ -125,19 +125,38 @@ const Dashboard = () => {
       };
 
       try {
-        const [dashboardResponse, analyticsResponse] = await Promise.all([
-          adminAPI.getDashboardStats(params),
-          adminAPI.getAdvancedAnalytics(params),
-        ]);
+        const dashboardResponse = await adminAPI.getDashboardStats(params);
 
         if (!isMounted) return;
 
         setStats(dashboardResponse.data);
-        setAdvancedStats(analyticsResponse.data);
+
+        try {
+          const analyticsResponse = await adminAPI.getAdvancedAnalytics(params);
+
+          if (!isMounted) return;
+          setAdvancedStats(analyticsResponse.data);
+        } catch (analyticsError) {
+          console.error('Fetch advanced analytics error:', analyticsError);
+          if (isMounted) {
+            setAdvancedStats({
+              skillGap: [],
+              benchmarking: [],
+              roiTrend: [],
+              atRisk: [],
+            });
+          }
+        }
       } catch (error) {
         console.error('Fetch dashboard stats error:', error);
         if (isMounted) {
           setErrorMessage('ไม่สามารถโหลดข้อมูล dashboard ได้ในขณะนี้');
+          setAdvancedStats({
+            skillGap: [],
+            benchmarking: [],
+            roiTrend: [],
+            atRisk: [],
+          });
         }
       } finally {
         if (isMounted) {
@@ -434,8 +453,8 @@ const Dashboard = () => {
     if (!rows.length) return;
 
     openInsight({
-      title: singleRisk ? `At Risk: ${singleRisk.userName}` : 'ผู้เรียนที่เสี่ยงไม่ทันกำหนด',
-      subtitle: 'ผู้เรียนที่ใกล้ deadline หรือเลยกำหนด พร้อมคะแนนล่าสุด',
+      title: singleRisk ? `Risk: ${singleRisk.userName}` : 'ผู้เรียนที่เสี่ยงไม่บรรลุเป้าหมาย',
+      subtitle: 'ผู้เรียนที่ทำคะแนนหรือจำนวนคอร์สไม่ครบตามเป้าหมาย (Goal) ที่ใกล้หมดอายุ',
       summary: [
         { label: 'จำนวนรายการ', value: rows.length },
         { label: 'แผนก', value: selectedDepartmentName },
@@ -443,10 +462,10 @@ const Dashboard = () => {
       columns: [
         { key: 'userName', label: 'ผู้เรียน' },
         { key: 'department', label: 'แผนก' },
-        { key: 'courseTitle', label: 'คอร์ส' },
-        { key: 'score', label: 'คะแนนล่าสุด', render: (row) => row.score ?? '-' },
-        { key: 'deadline', label: 'กำหนดส่ง', render: (row) => formatThaiDateTime(row.deadline, true) },
-        { key: 'isOverdue', label: 'สถานะ', render: (row) => row.isOverdue ? 'เกินกำหนด' : 'ใกล้ครบกำหนด' },
+        { key: 'courseTitle', label: 'เป้าหมาย (Goal)' },
+        { key: 'gapCount', label: 'ขาดอีก (รายการ)', render: (row) => row.gapCount > 0 ? `${row.gapCount} คอร์ส` : '-' },
+        { key: 'deadline', label: 'วันหมดอายุเป้าหมาย', render: (row) => formatThaiDateTime(row.deadline, true) },
+        { key: 'isOverdue', label: 'สถานะ', render: (row) => row.isOverdue ? 'เลยกำหนด' : 'ใกล้หมดเวลา' },
       ],
       rows,
       emptyMessage: 'ไม่พบผู้เรียนที่เสี่ยงในช่วงเวลานี้',
@@ -536,13 +555,7 @@ const Dashboard = () => {
 
       {isManagerView ? (
         <>
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_0.9fr]">
-            <DashboardPerformanceTable
-              rows={performanceRows}
-              title="ผลการเรียนรายบุคคล"
-              subtitle="ดูว่าใครเรียนคอร์สไหน จบหรือยัง และได้กี่คะแนน"
-            />
-
+          <div className="grid grid-cols-1 gap-6">
             <RiskIdentificationWidget
               data={advancedStats?.atRisk}
               onSelectRisk={(risk) => openRiskInsight(null, risk)}
@@ -628,11 +641,7 @@ const Dashboard = () => {
             />
           </div>
 
-          <DashboardPerformanceTable
-            rows={performanceRows}
-            title="ผลการเรียนรายบุคคล"
-            subtitle="ใช้เป็นฐานข้อมูลกลางสำหรับ audit, coaching และพิมพ์รายงาน PDF"
-          />
+
         </>
       )}
 

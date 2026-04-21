@@ -1,6 +1,29 @@
 const goalService = require('../services/goal.service');
 const asyncHandler = require('../middleware/async');
 
+const appendServerTiming = (res, metricName, durationMs) => {
+    const metricValue = `${metricName};dur=${durationMs}`;
+    const existingHeader = res.getHeader('Server-Timing');
+
+    if (!existingHeader) {
+        res.setHeader('Server-Timing', metricValue);
+        return;
+    }
+
+    res.setHeader('Server-Timing', `${existingHeader}, ${metricValue}`);
+};
+
+const logGoalTiming = (event, req, durationMs, extra = {}) => {
+    console.info('[goal-timing]', JSON.stringify({
+        event,
+        durationMs,
+        goalId: req.params?.id || null,
+        userId: req.user?.userId || null,
+        role: req.user?.role || null,
+        ...extra
+    }));
+};
+
 const createGoal = asyncHandler(async (req, res) => {
     const goal = await goalService.createGoal(req.body, req.user);
     res.status(201).json({
@@ -52,7 +75,16 @@ const deleteGoal = asyncHandler(async (req, res) => {
 });
 
 const getGoalReport = asyncHandler(async (req, res) => {
+    const startedAt = Date.now();
     const report = await goalService.getGoalReport(req.params.id, req.user);
+    const durationMs = Date.now() - startedAt;
+    appendServerTiming(res, 'goal-report', durationMs);
+    logGoalTiming('goal.report.completed', req, durationMs, {
+        rows: report?.report?.length || 0,
+        goalType: report?.goal?.type || null,
+        goalScope: report?.goal?.scope || null,
+        courseCount: report?.goal?.courses?.length || 0
+    });
     res.json({
         success: true,
         data: report
