@@ -198,7 +198,6 @@ const GoalManagement = () => {
 
     const displayGoals = viewMode === ENTITY_VIEW_STATUS.ACTIVE ? activeGoals : archivedGoals;
 
-
     const columns = useMemo(() => [
         { label: 'ชื่อเป้าหมาย' },
         { label: 'ประเภท' },
@@ -207,6 +206,11 @@ const GoalManagement = () => {
         { label: 'ขอบเขต' },
         { label: 'จัดการ', className: 'text-center' }
     ], []);
+
+    const tabs = useMemo(() => [
+        { key: ENTITY_VIEW_STATUS.ACTIVE, label: `กำลังใช้งาน (${activeGoals.length})`, icon: CalendarClock },
+        { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `เก็บเข้าคลัง (${archivedGoals.length})`, icon: CalendarClock }
+    ], [activeGoals.length, archivedGoals.length]);
 
     if (loading) {
         return (
@@ -232,12 +236,8 @@ const GoalManagement = () => {
             <ViewToggleTabs
                 viewMode={viewMode}
                 setViewMode={setViewMode}
-                tabs={useMemo(() => [
-                    { key: ENTITY_VIEW_STATUS.ACTIVE, label: `กำลังใช้งาน (${activeGoals.length})`, icon: CalendarClock },
-                    { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `เก็บเข้าคลัง (${archivedGoals.length})`, icon: CalendarClock }
-                ], [activeGoals.length, archivedGoals.length])}
+                tabs={tabs}
             />
-
 
             <GoalList
                 goals={displayGoals}
