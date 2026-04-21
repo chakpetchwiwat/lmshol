@@ -89,7 +89,7 @@ const DashboardInsightModal = ({ insight, onClose, onPrint }) => {
                     <tr key={row.id || row.userId || index} className="border-t border-slate-100">
                       {columns.map((column) => (
                         <td key={column.key} className="px-4 py-3 text-sm text-slate-700">
-                          {formatCellValue(typeof column.render === 'function' ? column.render(row) : row[column.key])}
+                          {column.render ? column.render(row) : formatCellValue(row[column.key])}
                         </td>
                       ))}
                     </tr>
