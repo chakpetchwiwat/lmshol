@@ -94,7 +94,7 @@ const AnnouncementManagement = () => {
       });
     } catch (error) {
       console.error('Fetch announcement data error:', error);
-      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เนเธซเธฅเธ”เธเนเธญเธกเธนเธฅเธเธฃเธฐเธเธฒเธจเนเธ”เน');
+      toast.error('ไม่สามารถโหลดข้อมูลประกาศได้');
     } finally {
       setLoading(false);
     }
@@ -147,10 +147,10 @@ const AnnouncementManagement = () => {
       const compressedFile = await compressImage(file);
       const response = await adminAPI.uploadFile(compressedFile);
       setForm((current) => ({ ...current, image: response.data.fileUrl }));
-      toast.success('เธญเธฑเธเนเธซเธฅเธ”เธ เธฒเธเธเธฃเธฐเธเธฒเธจเน€เธฃเธตเธขเธเธฃเนเธญเธข');
+      toast.success('อัปโหลดภาพประกาศเรียบร้อย');
     } catch (error) {
       console.error('Upload announcement image error:', error);
-      toast.error('เธญเธฑเธเนเธซเธฅเธ”เธ เธฒเธเนเธกเนเธชเธณเน€เธฃเนเธ');
+      toast.error('อัปโหลดภาพไม่สำเร็จ');
     } finally {
       setUploading(false);
     }
@@ -165,10 +165,10 @@ const AnnouncementManagement = () => {
       const compressedFile = file.type.startsWith('image/') ? await compressImage(file) : file;
       const response = await adminAPI.uploadFile(compressedFile);
       setForm((current) => ({ ...current, contentUrl: response.data.fileUrl }));
-      toast.success('เธญเธฑเธเนเธซเธฅเธ”เนเธเธฅเนเน€เธเธทเนเธญเธซเธฒเธเธฃเธฐเธเธฒเธจเน€เธฃเธตเธขเธเธฃเนเธญเธข');
+      toast.success('อัปโหลดไฟล์เนื้อหาประกาศเรียบร้อย');
     } catch (error) {
       console.error('Upload announcement document error:', error);
-      toast.error('เธญเธฑเธเนเธซเธฅเธ”เนเธเธฅเนเนเธกเนเธชเธณเน€เธฃเนเธ');
+      toast.error('อัปโหลดไฟล์ไม่สำเร็จ');
     } finally {
       setUploading(false);
     }
@@ -176,7 +176,7 @@ const AnnouncementManagement = () => {
 
   const handleEditorImageUpload = async (file) => {
     if (!file?.type?.startsWith('image/')) {
-      toast.error('เธฃเธญเธเธฃเธฑเธเน€เธเธเธฒเธฐเนเธเธฅเนเธฃเธนเธเธ เธฒเธ');
+      toast.error('รองรับเฉพาะไฟล์รูปภาพ');
       return '';
     }
 
@@ -187,7 +187,7 @@ const AnnouncementManagement = () => {
       return response.data.fileUrl;
     } catch (error) {
       console.error('Upload announcement editor image error:', error);
-      toast.error('เธญเธฑเธเนเธซเธฅเธ”เธฃเธนเธเนเธเน€เธเธทเนเธญเธซเธฒเนเธกเนเธชเธณเน€เธฃเนเธ');
+      toast.error('อัปโหลดรูปในเนื้อหาไม่สำเร็จ');
       return '';
     } finally {
       setEditorImageUploading(false);
@@ -198,12 +198,12 @@ const AnnouncementManagement = () => {
     event.preventDefault();
 
     if (!form.expiredAt) {
-      toast.error('เธเธฃเธธเธ“เธฒเธเธณเธซเธเธ”เธงเธฑเธเธซเธกเธ”เธญเธฒเธขเธธเธเธญเธเธเธฃเธฐเธเธฒเธจ');
+      toast.error('กรุณากำหนดวันหมดอายุของประกาศ');
       return;
     }
 
     if (form.scope === 'DEPARTMENT' && !form.departmentId) {
-      toast.error('เธเธฃเธธเธ“เธฒเน€เธฅเธทเธญเธเนเธเธเธ');
+      toast.error('กรุณาเลือกแผนก');
       return;
     }
 
@@ -218,10 +218,10 @@ const AnnouncementManagement = () => {
       if (editingAnnouncement) {
         await adminAPI.updateAnnouncement(editingAnnouncement.id, payload);
         invalidateAnnouncementHistoryCache(editingAnnouncement.id);
-        toast.success('เธญเธฑเธเน€เธ”เธ•เธเธฃเธฐเธเธฒเธจเน€เธฃเธตเธขเธเธฃเนเธญเธข');
+        toast.success('อัปเดตประกาศเรียบร้อย');
       } else {
         await adminAPI.createAnnouncement(payload);
-        toast.success('เธชเธฃเนเธฒเธเธเธฃเธฐเธเธฒเธจเน€เธฃเธตเธขเธเธฃเนเธญเธข');
+        toast.success('สร้างประกาศเรียบร้อย');
       }
 
       setShowModal(false);
@@ -229,15 +229,15 @@ const AnnouncementManagement = () => {
       await fetchData();
     } catch (error) {
       console.error('Save announcement error:', error);
-      toast.error(error.response?.data?.message || 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธเธฑเธเธ—เธถเธเธเธฃเธฐเธเธฒเธจเนเธ”เน');
+      toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกประกาศได้');
     }
   };
 
   const handleArchive = async (announcement) => {
     const ok = await confirm({
-      title: 'เธ•เนเธญเธเธเธฒเธฃเน€เธเนเธเธเธฃเธฐเธเธฒเธจเน€เธเนเธฒเธเธฅเธฑเธ?',
-      message: `เธเธฃเธฐเธเธฒเธจ "${announcement.title}" เธเธฐเธซเธกเธ”เธญเธฒเธขเธธเธ—เธฑเธเธ—เธตเนเธฅเธฐเธ–เธนเธเธขเนเธฒเธขเนเธเธขเธฑเธเนเธ—เนเธ "เธซเธกเธ”เธญเธฒเธขเธธเนเธฅเนเธง" เธเธธเธ“เธ•เนเธญเธเธเธฒเธฃเธ”เธณเน€เธเธดเธเธเธฒเธฃเธ•เนเธญเนเธเนเธซเธฃเธทเธญเนเธกเน?`,
-      confirmLabel: 'เน€เธเนเธเน€เธเนเธฒเธเธฅเธฑเธ',
+      title: 'ต้องการเก็บประกาศเข้าคลัง?',
+      message: `ประกาศ "${announcement.title}" จะหมดอายุทันทีและถูกย้ายไปยังแท็บ "หมดอายุแล้ว" คุณต้องการดำเนินการต่อใช่หรือไม่?`,
+      confirmLabel: 'เก็บเข้าคลัง',
       variant: 'warning',
     });
 
@@ -246,19 +246,19 @@ const AnnouncementManagement = () => {
     try {
       await adminAPI.archiveAnnouncement(announcement.id);
       invalidateAnnouncementHistoryCache(announcement.id);
-      toast.success('เน€เธเนเธเธเธฃเธฐเธเธฒเธจเน€เธเนเธฒเธเธฅเธฑเธเน€เธฃเธตเธขเธเธฃเนเธญเธข');
+      toast.success('เก็บประกาศเข้าคลังเรียบร้อย');
       await fetchData();
     } catch (error) {
       console.error('Archive announcement error:', error);
-      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เน€เธเนเธเธเธฃเธฐเธเธฒเธจเน€เธเนเธฒเธเธฅเธฑเธเนเธ”เน');
+      toast.error('ไม่สามารถเก็บประกาศเข้าคลังได้');
     }
   };
 
   const handleRepublish = async (announcement) => {
     const ok = await confirm({
-      title: 'เธ•เนเธญเธเธเธฒเธฃเธเธณเธเธฃเธฐเธเธฒเธจเธเธฅเธฑเธเธกเธฒเนเธเนเธเธฒเธ?',
-      message: `เธเธฃเธฐเธเธฒเธจ "${announcement.title}" เธเธฐเธ–เธนเธเธขเนเธฒเธขเธเธฅเธฑเธเนเธเธขเธฑเธเนเธ—เนเธ "เธเธฃเธฐเธเธฒเธจเธ—เธตเนเธขเธฑเธเนเธเนเธเธฒเธ" เธเธธเธ“เธ•เนเธญเธเธเธฒเธฃเธ”เธณเน€เธเธดเธเธเธฒเธฃเธ•เนเธญเนเธเนเธซเธฃเธทเธญเนเธกเน?`,
-      confirmLabel: 'เธเธณเธเธฅเธฑเธเธกเธฒเนเธเนเธเธฒเธ',
+      title: 'ต้องการนำประกาศกลับมาใช้งาน?',
+      message: `ประกาศ "${announcement.title}" จะถูกย้ายกลับไปยังแท็บ "ประกาศที่ยังใช้งาน" คุณต้องการดำเนินการต่อใช่หรือไม่?`,
+      confirmLabel: 'นำกลับมาใช้งาน',
       variant: 'primary',
     });
 
@@ -267,19 +267,19 @@ const AnnouncementManagement = () => {
     try {
       await adminAPI.republishAnnouncement(announcement.id);
       invalidateAnnouncementHistoryCache(announcement.id);
-      toast.success('เธเธณเธเธฃเธฐเธเธฒเธจเธเธฅเธฑเธเธกเธฒเนเธเนเธเธฒเธเน€เธฃเธตเธขเธเธฃเนเธญเธข');
+      toast.success('นำประกาศกลับมาใช้งานเรียบร้อย');
       await fetchData();
     } catch (error) {
       console.error('Republish announcement error:', error);
-      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธเธณเธเธฃเธฐเธเธฒเธจเธเธฅเธฑเธเธกเธฒเนเธเนเธเธฒเธเนเธ”เน');
+      toast.error('ไม่สามารถนำประกาศกลับมาใช้งานได้');
     }
   };
 
   const handleDelete = async (announcement) => {
     const ok = await confirm({
-      title: 'เธขเธทเธเธขเธฑเธเธเธฒเธฃเธฅเธเธเธฃเธฐเธเธฒเธจ',
-      message: `เธเธธเธ“เธ•เนเธญเธเธเธฒเธฃเธฅเธเธเธฃเธฐเธเธฒเธจ "${announcement.title}" เนเธเนเธซเธฃเธทเธญเนเธกเน? เธเธฒเธฃเธ”เธณเน€เธเธดเธเธเธฒเธฃเธเธตเนเนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธขเนเธญเธเธเธฅเธฑเธเนเธ”เน`,
-      confirmLabel: 'เธฅเธ',
+      title: 'ยืนยันการลบประกาศ',
+      message: `คุณต้องการลบประกาศ "${announcement.title}" ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้`,
+      confirmLabel: 'ลบ',
       variant: 'danger',
     });
 
@@ -288,11 +288,11 @@ const AnnouncementManagement = () => {
     try {
       await adminAPI.deleteAnnouncement(announcement.id);
       invalidateAnnouncementHistoryCache(announcement.id);
-      toast.success('เธฅเธเธเธฃเธฐเธเธฒเธจเน€เธฃเธตเธขเธเธฃเนเธญเธข');
+      toast.success('ลบประกาศเรียบร้อย');
       await fetchData();
     } catch (error) {
       console.error('Delete announcement error:', error);
-      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธฅเธเธเธฃเธฐเธเธฒเธจเนเธ”เน');
+      toast.error('ไม่สามารถลบประกาศได้');
     }
   };
 
@@ -340,7 +340,7 @@ const AnnouncementManagement = () => {
       }
 
       console.error('View history error:', error);
-      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เนเธซเธฅเธ”เธเนเธญเธกเธนเธฅเธเธฃเธฐเธงเธฑเธ•เธดเนเธ”เน');
+      toast.error('ไม่สามารถโหลดข้อมูลประวัติได้');
       setHistoryData([]);
     } finally {
       if (announcementHistoryRequestRef.current === controller) {
@@ -383,22 +383,22 @@ const AnnouncementManagement = () => {
   );
 
   const columns = [
-    { label: 'เธเธฃเธฐเธเธฒเธจ' },
-    { label: 'เนเธเธเธ', className: 'min-w-[140px]' },
-    { label: 'เธเธเธดเธ”เธซเธเนเธฒ', className: 'min-w-[120px]' },
-    { label: 'เธซเธกเธ”เธญเธฒเธขเธธ', className: 'min-w-[180px]' },
-    { label: 'เธเธฑเธ”เธเธฒเธฃ', className: 'w-[100px] text-center' },
+    { label: 'ประกาศ' },
+    { label: 'แผนก', className: 'min-w-[140px]' },
+    { label: 'ชนิดหน้า', className: 'min-w-[120px]' },
+    { label: 'หมดอายุ', className: 'min-w-[180px]' },
+    { label: 'จัดการ', className: 'w-[100px] text-center' },
   ];
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <AdminPageHeader
-        title="เธเธฑเธ”เธเธฒเธฃเธเธฃเธฐเธเธฒเธจเนเธเธเธ"
-        subtitle={isFullAdmin ? 'เธชเธฃเนเธฒเธเนเธฅเธฐเธ”เธนเธเธฃเธฐเธเธฒเธจเนเธ”เนเธ—เธธเธเนเธเธเธ' : `เธ”เธนเนเธฅเธเธฃเธฐเธเธฒเธจเธชเธณเธซเธฃเธฑเธเนเธเธเธ ${user?.department || 'เธเธญเธเธเธธเธ“'}`}
+        title="จัดการประกาศแผนก"
+        subtitle={isFullAdmin ? 'สร้างและดูประกาศได้ทุกแผนก' : `ดูแลประกาศสำหรับแผนก ${user?.department || 'ของคุณ'}`}
         actions={(
           <button type="button" onClick={openCreateModal} className="btn btn-primary gap-2">
             <BellPlus size={18} />
-            เธชเธฃเนเธฒเธเธเธฃเธฐเธเธฒเธจ
+            สร้างประกาศ
           </button>
         )}
       />
@@ -408,8 +408,8 @@ const AnnouncementManagement = () => {
           viewMode={viewMode}
           setViewMode={setViewMode}
           tabs={[
-            { key: ENTITY_VIEW_STATUS.ACTIVE, label: `เธเธฃเธฐเธเธฒเธจเธ—เธตเนเธขเธฑเธเนเธเนเธเธฒเธ (${activeCount})`, icon: CalendarClock },
-            { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `เธซเธกเธ”เธญเธฒเธขเธธเนเธฅเนเธง (${archivedCount})`, icon: CalendarClock },
+            { key: ENTITY_VIEW_STATUS.ACTIVE, label: `ประกาศที่ยังใช้งาน (${activeCount})`, icon: CalendarClock },
+            { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `หมดอายุแล้ว (${archivedCount})`, icon: CalendarClock },
           ]}
         />
 
@@ -420,7 +420,7 @@ const AnnouncementManagement = () => {
               <input
                 type="text"
                 className="w-full rounded-md border border-border bg-gray-50 py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none"
-                placeholder="เธเนเธเธซเธฒเธเธทเนเธญเธเธฃเธฐเธเธฒเธจเธซเธฃเธทเธญเนเธเธเธ..."
+                placeholder="ค้นหาชื่อประกาศหรือแผนก..."
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
               />
