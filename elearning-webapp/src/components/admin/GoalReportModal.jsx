@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { BookOpen, CheckCircle2, Printer, X, XCircle } from 'lucide-react';
+import { BookOpen, CheckCircle2, Printer, Search, X, XCircle } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import { openPrintReport } from '../../utils/printUtils';
 

@@ -60,11 +60,16 @@ const GoalManagement = () => {
 
             // Intelligent default: if user has a department, set it as the default scope
             if (user?.departmentId) {
-                setFormData(prev => ({
-                    ...prev,
-                    scope: 'DEPARTMENT',
-                    departmentId: user.departmentId
-                }));
+                setFormData(prev => {
+                    if (prev.departmentId === user.departmentId && prev.scope === 'DEPARTMENT') {
+                        return prev;
+                    }
+                    return {
+                        ...prev,
+                        scope: 'DEPARTMENT',
+                        departmentId: user.departmentId
+                    };
+                });
             }
         } catch (err) {
             console.error('Failed to fetch data', err);

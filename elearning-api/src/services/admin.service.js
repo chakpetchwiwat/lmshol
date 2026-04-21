@@ -1431,44 +1431,9 @@ const getUsers = async (authUser) => {
         balances.map((item) => [item.userId, item._sum.points || 0])
     );
 
-    const userIds = users.map((user) => user.id);
-    const enrollments = userIds.length > 0
-        ? await prisma.userCourse.findMany({
-            where: {
-                userId: {
-                    in: userIds
-                }
-            },
-            select: {
-                userId: true,
-                courseId: true,
-                status: true,
-                progressPercent: true,
-                startedAt: true,
-                completedAt: true,
-                course: {
-                    select: {
-                        id: true,
-                        title: true
-                    }
-                }
-            }
-        })
-        : [];
-
-    const enrollmentMap = enrollments.reduce((collection, enrollment) => {
-        if (!collection[enrollment.userId]) {
-            collection[enrollment.userId] = [];
-        }
-
-        collection[enrollment.userId].push(enrollment);
-        return collection;
-    }, {});
-
     return users.map((user) => ({
         ...mapUserRecord(user),
-        pointsBalance: balanceMap[user.id] ?? 0,
-        tracking: buildUserTrackingSummary(enrollmentMap[user.id] || [])
+        pointsBalance: balanceMap[user.id] ?? 0
     }));
 };
 
