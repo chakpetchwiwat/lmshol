@@ -524,16 +524,20 @@ const buildCategoryMutationPayload = async (tx, input) => {
     await ensureReferenceIdsExist(tx, 'department', visibleDepartmentIds);
     await ensureReferenceIdsExist(tx, 'tier', visibleTierIds);
 
-    return {
-        data: {
-            name: sanitizeName(input.name, 'Category'),
-            icon: input.icon || 'Grid',
-            type: input.type || 'KM_COURSE',
-            order: parseInteger(input.order, 0),
+    const mutationData = {
+        name: sanitizeName(input.name, 'Category'),
+        icon: input.icon || 'Grid',
+        type: input.type || 'KM_COURSE',
+        visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true,
+        ...temporaryState
+    };
 
-            visibleToAll: input.visibleToAll !== undefined ? Boolean(input.visibleToAll) : true,
-            ...temporaryState
-        },
+    if (input.order !== undefined) {
+        mutationData.order = parseInteger(input.order, 0);
+    }
+
+    return {
+        data: mutationData,
         visibleDepartmentIds,
         visibleTierIds
     };
