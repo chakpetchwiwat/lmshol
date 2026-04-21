@@ -11,29 +11,10 @@ import { FILTER_VALUES } from '../../utils/constants/filters';
 import { REDEEM_STATUS } from '../../utils/constants/statuses';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import { openPrintReport } from '../../utils/printUtils';
+import { MONTH_OPTIONS, REDEEM_STATUS_LABELS } from '../../utils/constants/dashboard';
 
-const MONTH_OPTIONS = [
-  { value: FILTER_VALUES.ALL, label: 'ทุกเดือน' },
-  { value: '1', label: 'มกราคม' },
-  { value: '2', label: 'กุมภาพันธ์' },
-  { value: '3', label: 'มีนาคม' },
-  { value: '4', label: 'เมษายน' },
-  { value: '5', label: 'พฤษภาคม' },
-  { value: '6', label: 'มิถุนายน' },
-  { value: '7', label: 'กรกฎาคม' },
-  { value: '8', label: 'สิงหาคม' },
-  { value: '9', label: 'กันยายน' },
-  { value: '10', label: 'ตุลาคม' },
-  { value: '11', label: 'พฤศจิกายน' },
-  { value: '12', label: 'ธันวาคม' },
-];
 
-const STATUS_LABELS = {
-  [REDEEM_STATUS.PENDING]: 'รอดำเนินการ',
-  [REDEEM_STATUS.APPROVED]: 'อนุมัติแล้ว',
-  [REDEEM_STATUS.REJECTED]: 'ปฏิเสธ',
-  [REDEEM_STATUS.FULFILLED]: 'จัดส่งแล้ว',
-};
+
 
 const getRequestDate = (request) => request.requestedAt || request.createdAt || null;
 const getRequestRef = (request) => `REQ-${request.id?.replace(/\D/g, '').substring(0, 5) || request.id}`;
@@ -166,7 +147,7 @@ const RedeemRequests = () => {
       filters: [
         {
           label: 'สถานะ',
-          value: statusFilter === FILTER_VALUES.ALL ? 'ทั้งหมด' : STATUS_LABELS[statusFilter] || statusFilter,
+          value: statusFilter === FILTER_VALUES.ALL ? 'ทั้งหมด' : REDEEM_STATUS_LABELS[statusFilter] || statusFilter,
         },
         { label: 'เดือน / ปี', value: periodValue },
       ],
@@ -178,7 +159,7 @@ const RedeemRequests = () => {
         request.reward?.name || '-',
         request.reward?.pointsCost ?? '-',
         formatThaiDateTime(getRequestDate(request), true),
-        STATUS_LABELS[request.status] || request.status || '-',
+        REDEEM_STATUS_LABELS[request.status] || request.status || '-',
       ]),
       emptyMessage: 'ไม่พบรายการ Redeem ตามตัวกรองที่เลือก',
     });

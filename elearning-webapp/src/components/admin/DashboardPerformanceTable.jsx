@@ -1,6 +1,8 @@
 import React from 'react';
 import { CheckCircle2, Clock3 } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
+import UserLink from './UserLink';
+
 
 const STATUS_STYLES = {
   COMPLETED: 'bg-emerald-50 text-emerald-700',
@@ -8,7 +10,8 @@ const STATUS_STYLES = {
   NOT_STARTED: 'bg-slate-100 text-slate-600',
 };
 
-const DashboardPerformanceTable = ({ rows, title, subtitle }) => {
+const DashboardPerformanceTable = ({ rows, title, subtitle, onViewUser }) => {
+
   const safeRows = rows || [];
 
   return (
@@ -39,8 +42,13 @@ const DashboardPerformanceTable = ({ rows, title, subtitle }) => {
             {safeRows.map((item) => (
               <tr key={item.id} className="border-b border-slate-100 last:border-0">
                 <td className="py-4 align-top">
-                  <div className="font-bold text-slate-900">{item.userName}</div>
+                  <UserLink
+                    userId={item.userId}
+                    userName={item.userName}
+                    onViewUser={onViewUser}
+                  />
                   <div className="mt-1 text-xs text-slate-500">
+
                     {item.department || '-'}
                     {item.email ? ` • ${item.email}` : ''}
                   </div>

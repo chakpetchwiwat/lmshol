@@ -4,8 +4,10 @@ import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { canEditAdminUsers } from '../../utils/roles';
 import { USER_ROLES } from '../../utils/constants/roles';
+import { FILTER_VALUES } from '../../utils/constants/filters';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import { openPrintReport } from '../../utils/printUtils';
+import { MONTH_OPTIONS, SKILL_LABELS, ENROLLMENT_STATUS_LABELS } from '../../utils/constants/dashboard';
 
 import StatCards from '../../components/admin/StatCards';
 import WeeklyActivityChart from '../../components/admin/WeeklyActivityChart';
@@ -19,37 +21,12 @@ import RiskIdentificationWidget from '../../components/admin/RiskIdentificationW
 import DashboardInsightModal from '../../components/admin/DashboardInsightModal';
 import DashboardPerformanceTable from '../../components/admin/DashboardPerformanceTable';
 import UserDetailModal from '../../components/admin/UserDetailModal';
+import UserLink from '../../components/admin/UserLink';
+import * as InsightConfigs from './InsightConfigs';
 
-const MONTH_OPTIONS = [
-  { value: '', label: 'ทุกเดือน' },
-  { value: '1', label: 'มกราคม' },
-  { value: '2', label: 'กุมภาพันธ์' },
-  { value: '3', label: 'มีนาคม' },
-  { value: '4', label: 'เมษายน' },
-  { value: '5', label: 'พฤษภาคม' },
-  { value: '6', label: 'มิถุนายน' },
-  { value: '7', label: 'กรกฎาคม' },
-  { value: '8', label: 'สิงหาคม' },
-  { value: '9', label: 'กันยายน' },
-  { value: '10', label: 'ตุลาคม' },
-  { value: '11', label: 'พฤศจิกายน' },
-  { value: '12', label: 'ธันวาคม' },
-];
 
-const SKILL_LABELS = {
-  STRAT_BUSINESS: 'Business Acumen / Corporate Knowledge',
-  STRAT_CORE: 'Core / Soft Skills',
-  STRAT_FUNCTIONAL: 'Functional Skills',
-  STRAT_LEADERSHIP: 'Leadership Skills',
-  STRAT_COMPLIANCE: 'Compliance',
-  STRAT_DIGITAL: 'Digital / Future Skills',
-};
 
-const STATUS_LABELS = {
-  COMPLETED: 'เรียนจบ',
-  IN_PROGRESS: 'กำลังเรียน',
-  NOT_STARTED: 'ยังไม่เริ่ม',
-};
+
 
 const safeValue = (value) => {
   if (value === null || value === undefined || value === '') return '-';
@@ -124,7 +101,7 @@ const Dashboard = () => {
 
       const params = {
         year: filters.year,
-        ...(filters.month ? { month: filters.month } : {}),
+        ...(filters.month && filters.month !== FILTER_VALUES.ALL ? { month: filters.month } : {}),
         ...(isFullAdmin && filters.departmentId ? { departmentId: filters.departmentId } : {}),
       };
 
@@ -253,7 +230,7 @@ const Dashboard = () => {
         safeValue(row.department),
         safeValue(row.courseTitle),
         safeValue(row.categoryName),
-        STATUS_LABELS[row.status] || row.status,
+        ENROLLMENT_STATUS_LABELS[row.status] || row.status,
         row.score ?? '-',
         safeValue(formatThaiDateTime(row.startedAt, true)),
         row.completedAt ? formatThaiDateTime(row.completedAt, true) : '-',
@@ -269,7 +246,7 @@ const Dashboard = () => {
         })),
         performanceRows: performanceRows.map((row) => ({
           ...row,
-          statusLabel: STATUS_LABELS[row.status] || row.status,
+          statusLabel: ENROLLMENT_STATUS_LABELS[row.status] || row.status,
         })),
       },
     });
@@ -312,194 +289,52 @@ const Dashboard = () => {
   };
 
   const renderUserLink = (row) => (
-    <button
-      type="button"
-      onClick={() => handleViewUser(row.userId)}
-      className="font-bold text-slate-700 transition-colors hover:text-primary hover:underline text-left"
-    >
-      {row.userName}
-    </button>
+    <UserLink
+      userId={row.userId}
+      userName={row.userName}
+      onViewUser={handleViewUser}
+    />
   );
 
   const openWeeklyInsight = (bucket) => {
     if (!bucket) return;
-    openInsight({
-      title: `ผู้เริ่มเรียนช่วง ${bucket.label || bucket.date}`,
-      subtitle: 'รายละเอียดผู้เรียนที่เริ่มลงเรียนในช่วงเวลานี้',
-      summary: [
-        { label: 'ช่วงเวลา', value: bucket.label || bucket.date },
-        { label: 'ผู้เริ่มเรียน', value: bucket.count || 0 },
-        { label: 'ขอบเขต', value: selectedDepartmentName },
-      ],
-      columns: [
-        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-        { key: 'department', label: 'แผนก' },
-        { key: 'courseTitle', label: 'คอร์ส' },
-        { key: 'status', label: 'สถานะ', render: (row) => STATUS_LABELS[row.status] || row.status },
-        { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
-        { key: 'startedAt', label: 'เริ่มเรียน', render: (row) => formatThaiDateTime(row.startedAt, true) },
-      ],
-      rows: bucket.details || [],
-      emptyMessage: 'ไม่มีผู้เริ่มเรียนในช่วงเวลานี้',
-    });
+    setInsight(InsightConfigs.getWeeklyInsightConfig(bucket, selectedDepartmentName, renderUserLink));
   };
 
   const openTypeInsight = (group) => {
     if (!group) return;
-    openInsight({
-      title: group.name,
-      subtitle: 'รายชื่อผู้เรียนที่มี enrollment อยู่ใน competency group นี้',
-      summary: [
-        { label: 'หมวดในกลุ่ม', value: group.value || 0 },
-        { label: 'จำนวน enrollment', value: group.enrollmentCount || 0 },
-        { label: 'คอร์สในกลุ่ม', value: group.courses?.length || 0 },
-      ],
-      columns: [
-        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-        { key: 'department', label: 'แผนก' },
-        { key: 'courseTitle', label: 'คอร์ส' },
-        { key: 'status', label: 'สถานะ', render: (row) => STATUS_LABELS[row.status] || row.status },
-        { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
-        { key: 'completedAt', label: 'จบเมื่อ', render: (row) => row.completedAt ? formatThaiDateTime(row.completedAt, true) : '-' },
-      ],
-      rows: group.details || [],
-      emptyMessage: 'ไม่พบ enrollment ใน competency group นี้',
-    });
+    setInsight(InsightConfigs.getTypeInsightConfig(group, renderUserLink));
   };
 
   const openCategoryInsight = (category) => {
     if (!category) return;
-    openInsight({
-      title: `หมวดหมู่: ${category.name}`,
-      subtitle: 'ผู้เรียนและคอร์สที่อยู่ภายใต้หมวดหมู่นี้',
-      summary: [
-        { label: 'จำนวน enrollment', value: category.value || 0 },
-        { label: 'แผนก', value: selectedDepartmentName },
-      ],
-      columns: [
-        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-        { key: 'department', label: 'แผนก' },
-        { key: 'courseTitle', label: 'คอร์ส' },
-        { key: 'status', label: 'สถานะ', render: (row) => STATUS_LABELS[row.status] || row.status },
-        { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
-      ],
-      rows: category.details || [],
-      emptyMessage: 'ไม่พบข้อมูลในหมวดหมู่นี้',
-    });
+    setInsight(InsightConfigs.getCategoryInsightConfig(category, selectedDepartmentName, renderUserLink));
   };
 
   const openCourseInsight = (course) => {
     if (!course) return;
-    openInsight({
-      title: `คอร์ส: ${course.title}`,
-      subtitle: 'รายชื่อผู้เรียนที่ลงทะเบียนและผลลัพธ์ของคอร์สนี้',
-      summary: [
-        { label: 'ผู้ลงทะเบียน', value: course.students || 0 },
-        { label: 'แผนก', value: selectedDepartmentName },
-      ],
-      columns: [
-        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-        { key: 'department', label: 'แผนก' },
-        { key: 'status', label: 'สถานะ', render: (row) => STATUS_LABELS[row.status] || row.status },
-        { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
-        { key: 'startedAt', label: 'เริ่มเรียน', render: (row) => formatThaiDateTime(row.startedAt, true) },
-        { key: 'completedAt', label: 'จบเมื่อ', render: (row) => row.completedAt ? formatThaiDateTime(row.completedAt, true) : '-' },
-      ],
-      rows: course.details || [],
-      emptyMessage: 'ยังไม่มีผู้ลงทะเบียนในคอร์สนี้',
-    });
+    setInsight(InsightConfigs.getCourseInsightConfig(course, selectedDepartmentName, renderUserLink));
   };
 
   const openSkillGapInsight = (skill) => {
     if (!skill) return;
-    openInsight({
-      title: `Skill Gap: ${SKILL_LABELS[skill.type] || skill.type}`,
-      subtitle: 'แสดงรายชื่อผู้เรียนและคะแนนสอบตาม competency area ที่เลือก',
-      summary: [
-        { label: 'คะแนนเฉลี่ย', value: `${Number(skill.average_mastery || 0).toFixed(1)}%` },
-        { label: 'จำนวนรายการสอบ', value: skill.details?.length || 0 },
-        { label: 'แผนก', value: selectedDepartmentName },
-      ],
-      columns: [
-        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-        { key: 'department', label: 'แผนก' },
-        { key: 'courseTitle', label: 'คอร์ส' },
-        { key: 'lessonTitle', label: 'แบบทดสอบ' },
-        { key: 'score', label: 'คะแนน' },
-        { key: 'attemptedAt', label: 'สอบล่าสุด', render: (row) => formatThaiDateTime(row.attemptedAt, true) },
-      ],
-      rows: skill.details || [],
-      emptyMessage: 'ยังไม่มีข้อมูล skill gap ใน competency นี้',
-    });
+    setInsight(InsightConfigs.getSkillGapInsightConfig(skill, selectedDepartmentName, renderUserLink));
   };
 
   const openDepartmentInsight = (department) => {
     if (!department) return;
-    openInsight({
-      title: `Department: ${department.name}`,
-      subtitle: 'ผลการเรียนรายบุคคลของผู้เรียนภายในแผนกนี้',
-      summary: [
-        { label: 'Completion Rate', value: `${Number(department.completion_rate || 0).toFixed(1)}%` },
-        { label: 'จำนวนผู้เรียน', value: department.details?.length || 0 },
-        { label: 'ช่วงเวลา', value: periodLabel },
-      ],
-      columns: [
-        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-        { key: 'email', label: 'อีเมล' },
-        { key: 'completedCourses', label: 'จบแล้ว' },
-        { key: 'totalCourses', label: 'ทั้งหมด' },
-        { key: 'avgScore', label: 'คะแนนเฉลี่ย', render: (row) => row.avgScore ?? '-' },
-      ],
-      rows: department.details || [],
-      emptyMessage: 'ไม่พบข้อมูลผู้เรียนในแผนกนี้',
-    });
+    setInsight(InsightConfigs.getDepartmentInsightConfig(department, periodLabel, renderUserLink));
   };
 
   const openRoiInsight = (bucket) => {
     if (!bucket) return;
-    openInsight({
-      title: `ROI Trend: ${bucket.label || bucket.month}`,
-      subtitle: 'รายละเอียดการเรียนจบและการได้รับคะแนนสะสมในช่วงเวลานี้',
-      summary: [
-        { label: 'Learning Completions', value: bucket.completions || 0 },
-        { label: 'Points Distributed', value: bucket.points || 0 },
-        { label: 'จำนวนรายการ', value: bucket.details?.length || 0 },
-      ],
-      columns: [
-        { key: 'kind', label: 'ประเภท', render: (row) => row.kind === 'completion' ? 'เรียนจบ' : 'Points' },
-        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-        { key: 'department', label: 'แผนก' },
-        { key: 'courseTitle', label: 'รายการ' },
-        { key: 'points', label: 'แต้ม', render: (row) => row.points || 0 },
-        { key: 'completedAt', label: 'เวลา', render: (row) => formatThaiDateTime(row.completedAt, true) },
-      ],
-      rows: bucket.details || [],
-      emptyMessage: 'ยังไม่มีข้อมูล ROI ในช่วงเวลานี้',
-    });
+    setInsight(InsightConfigs.getRoiInsightConfig(bucket, selectedDepartmentName, renderUserLink));
   };
 
   const openRiskInsight = (riskRows, singleRisk = null) => {
     const rows = Array.isArray(riskRows) ? riskRows : singleRisk ? [singleRisk] : [];
     if (!rows.length) return;
-
-    openInsight({
-      title: singleRisk ? `Risk: ${singleRisk.userName}` : 'ผู้เรียนที่เสี่ยงไม่บรรลุเป้าหมาย',
-      subtitle: 'ผู้เรียนที่ทำคะแนนหรือจำนวนคอร์สไม่ครบตามเป้าหมาย (Goal) ที่ใกล้หมดอายุ',
-      summary: [
-        { label: 'จำนวนรายการ', value: rows.length },
-        { label: 'แผนก', value: selectedDepartmentName },
-      ],
-      columns: [
-        { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-        { key: 'department', label: 'แผนก' },
-        { key: 'courseTitle', label: 'เป้าหมาย (Goal)' },
-        { key: 'gapCount', label: 'ขาดอีก (รายการ)', render: (row) => row.gapCount > 0 ? `${row.gapCount} คอร์ส` : '-' },
-        { key: 'deadline', label: 'วันหมดอายุเป้าหมาย', render: (row) => formatThaiDateTime(row.deadline, true) },
-        { key: 'isOverdue', label: 'สถานะ', render: (row) => row.isOverdue ? 'เลยกำหนด' : 'ใกล้หมดเวลา' },
-      ],
-      rows,
-      emptyMessage: 'ไม่พบผู้เรียนที่เสี่ยงในช่วงเวลานี้',
-    });
+    setInsight(InsightConfigs.getRiskInsightConfig(rows, selectedDepartmentName, renderUserLink, singleRisk));
   };
 
   const managerSubtitle = `${selectedDepartmentName} • โฟกัสเฉพาะผลการเรียนรายบุคคล คะแนนสอบ และความเสี่ยงในการเรียนไม่จบ`;
