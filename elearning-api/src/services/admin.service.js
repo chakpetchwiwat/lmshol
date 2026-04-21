@@ -2,10 +2,10 @@ const prisma = require('../utils/prisma');
 const bcrypt = require('bcryptjs');
 const authHelpers = require('../utils/auth.helpers');
 const { USER_ROLES, MANAGED_USER_ROLES } = require('../utils/constants/roles');
-const { ENTITY_STATUS, ENROLLMENT_STATUS, REDEEM_STATUS, USER_STATUS } = require('../utils/constants/statuses');
+const { ENTITY_STATUS, ENROLLMENT_STATUS, REDEEM_STATUS, USER_STATUS, GOAL_STATUS } = require('../utils/constants/statuses');
 const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
 const { TRANSACTION_TIMEOUTS } = require('../utils/constants/config');
-const { ANNOUNCEMENT_SCOPES } = require('../utils/constants/scopes');
+const { ANNOUNCEMENT_SCOPES, GOAL_SCOPES } = require('../utils/constants/scopes');
 
 
 const courseInclude = {
