@@ -355,7 +355,7 @@ const Dashboard = () => {
         subtitle={isManagerView ? managerSubtitle : adminSubtitle}
         actions={(
           <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:flex-wrap lg:items-center lg:justify-end">
-            <div className="flex flex-wrap items-center gap-2 rounded-[1.5rem] border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+            <div className="flex flex-wrap items-center gap-2 rounded-[1.5rem] border border-slate-200 bg-white px-4 py-3 shadow-sm">
               <div className="flex items-center gap-2 px-1 text-sm font-semibold text-slate-600">
                 <SlidersHorizontal size={16} />
                 <span>Filter</span>
@@ -365,7 +365,7 @@ const Dashboard = () => {
                 value={filters.month}
                 onChange={handleFilterChange('month')}
                 size="sm"
-                className="w-32"
+                className="w-36"
                 options={MONTH_OPTIONS}
               />
 
@@ -382,7 +382,7 @@ const Dashboard = () => {
                   value={filters.departmentId}
                   onChange={handleFilterChange('departmentId')}
                   size="sm"
-                  className="w-40 lg:w-44"
+                  className="w-44 lg:w-48"
                   placeholder="ทุกแผนก"
                   options={[
                     { value: '', label: 'ทุกแผนก' },

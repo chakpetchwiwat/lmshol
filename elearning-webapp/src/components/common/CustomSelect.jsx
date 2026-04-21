@@ -47,7 +47,7 @@ const CustomSelect = ({
           disabled={disabled}
           onClick={() => setIsOpen(!isOpen)}
           className={`group flex items-center justify-between rounded-2xl border bg-white text-sm font-bold transition-all ${
-            size === 'sm' ? 'px-3 py-2' : 'px-4 py-3'
+            size === 'sm' ? 'px-4 py-2.5' : 'px-4 py-3'
           } ${
             isOpen 
               ? 'border-primary ring-4 ring-primary/5 shadow-sm' 
