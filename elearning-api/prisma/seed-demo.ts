@@ -235,6 +235,38 @@ async function main() {
         }
     }
 
+    // 6. Create Learning Goals for all Departments
+    console.log('Creating demo learning goals for all departments...');
+    const goalExpiryBase = new Date();
+    
+    // Global Goals
+    await prisma.learningGoal.create({
+        data: {
+            title: 'Q2 Core Competency (Global)',
+            type: 'ANY',
+            targetCount: 3,
+            expiryDate: new Date(goalExpiryBase.getTime() + 5 * 24 * 60 * 60 * 1000), // Expires in 5 days
+            scope: 'GLOBAL',
+            status: 'ACTIVE'
+        }
+    });
+
+    // Department Specific Goals
+    for (const d of DEPARTMENTS) {
+        const deptId = deptRefs[d];
+        await prisma.learningGoal.create({
+            data: {
+                title: `${d} Professional Development`,
+                type: 'ANY',
+                targetCount: 2,
+                expiryDate: new Date(goalExpiryBase.getTime() + (Math.random() * 15 + 2) * 24 * 60 * 60 * 1000), 
+                scope: 'DEPARTMENT',
+                departmentId: deptId,
+                status: 'ACTIVE'
+            }
+        });
+    }
+
     console.log('--- Robust Demo Seeding COMPLETED ---');
 }
 

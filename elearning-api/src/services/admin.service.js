@@ -1337,64 +1337,104 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
             details: roiBucketMap[bucket.key]?.details || []
         }));
 
+        // AT-RISK LEARNERS: Aligned with Learning Goals
         const now = new Date();
-        const threeDaysLater = new Date();
-        threeDaysLater.setDate(now.getDate() + 3);
+        const warningWindow = new Date();
+        warningWindow.setDate(now.getDate() + 10);
 
-        const atRiskRaw = await prisma.userCourse.findMany({
+        // 1. Fetch active goals that are expiring soon or overdue
+        const activeGoals = await prisma.learningGoal.findMany({
             where: {
-                user: learnerWhere,
-                course: visibleCourseWhere,
-                status: { not: ENROLLMENT_STATUS.COMPLETED },
-                deadline: {
-                    lte: threeDaysLater,
-                    not: null
-                }
+                status: GOAL_STATUS.ACTIVE,
+                expiryDate: { lte: warningWindow },
+                ...(scopeFilters.departmentId ? {
+                    OR: [
+                        { scope: GOAL_SCOPES.GLOBAL },
+                        { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId }
+                    ]
+                } : {})
             },
             include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        department: true,
-                        departmentRef: {
-                            select: {
-                                name: true
-                            }
-                        }
-                    }
-                },
-                course: {
-                    select: {
-                        id: true,
-                        title: true
-                    }
-                }
-            },
-            orderBy: { deadline: 'asc' }
+                courses: { select: { courseId: true } }
+            }
         });
 
-        const atRisk = atRiskRaw.map((item) => {
-            const latestScore = latestScoreMap[`${item.userId}:${item.courseId}`];
-            return {
-                userId: item.user.id,
-                userName: item.user.name,
-                email: item.user.email,
-                department: item.user.departmentRef?.name || item.user.department || null,
-                courseId: item.course.id,
-                courseTitle: item.course.title,
-                deadline: item.deadline,
-                isOverdue: item.deadline < now,
-                score: latestScore?.score ?? null
-            };
-        });
+        const atRisk = [];
+        if (activeGoals.length > 0) {
+            const goalIds = activeGoals.map(g => g.id);
+            const goalCourseIds = Array.from(new Set(activeGoals.flatMap(g => g.courses.map(gc => gc.courseId))));
+            
+            // 2. Fetch users relevant to current filter
+            const targetUsers = await prisma.user.findMany({
+                where: learnerWhere,
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    department: true,
+                    departmentRef: { select: { name: true } }
+                }
+            });
+
+            const userIds = targetUsers.map(u => u.id);
+
+            // 3. Fetch completions for these users
+            const completions = await prisma.userCourse.findMany({
+                where: {
+                    userId: { in: userIds },
+                    status: ENROLLMENT_STATUS.COMPLETED
+                },
+                select: { userId: true, courseId: true, completedAt: true }
+            });
+
+            const userCompletionsMap = completions.reduce((acc, curr) => {
+                if (!acc[curr.userId]) acc[curr.userId] = [];
+                acc[curr.userId].push(curr);
+                return acc;
+            }, {});
+
+            // 4. Evaluate each user against each relevant goal
+            for (const goal of activeGoals) {
+                const goalCourses = new Set(goal.courses.map(gc => gc.courseId));
+                
+                for (const user of targetUsers) {
+                    // Filter users by goal scope if not matching
+                    if (goal.scope === GOAL_SCOPES.DEPARTMENT && goal.departmentId !== user.departmentId) continue;
+
+                    const userCompletions = userCompletionsMap[user.id] || [];
+                    const validCompletions = userCompletions.filter(c => {
+                        const isInCategory = goal.type === 'ANY' || goalCourses.has(c.courseId);
+                        const isInWindow = goal.type === 'SPECIFIC' || (c.completedAt >= goal.createdAt && (!goal.expiryDate || c.completedAt <= goal.expiryDate));
+                        return isInCategory && isInWindow;
+                    });
+
+                    if (validCompletions.length < goal.targetCount) {
+                        atRisk.push({
+                            userId: user.id,
+                            userName: user.name,
+                            email: user.email,
+                            department: user.departmentRef?.name || user.department || null,
+                            courseId: goal.id, // Using Goal ID as key
+                            courseTitle: goal.title, // Map Goal Title to courseTitle for UI compatibility
+                            deadline: goal.expiryDate,
+                            isOverdue: goal.expiryDate < now,
+                            score: null, // Goals don't have a single score
+                            gapCount: goal.targetCount - validCompletions.length
+                        });
+                    }
+                }
+            }
+        }
+
+        // Sort by deadline and limit to keep dashboard clean
+        atRisk.sort((a, b) => (a.deadline || 0) - (b.deadline || 0));
+        const limitedAtRisk = atRisk.slice(0, 50);
 
         return {
             skillGap,
             benchmarking,
             roiTrend,
-            atRisk
+            atRisk: limitedAtRisk
         };
     } catch (error) {
         console.error('Error in getAdvancedAnalytics:', error);
