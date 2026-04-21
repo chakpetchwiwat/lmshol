@@ -40,7 +40,9 @@ const parseTrustProxy = (value = process.env.TRUST_PROXY) => {
     const normalizedValue = String(value).trim().toLowerCase();
 
     if (normalizedValue === 'true') {
-        return true;
+        // express-rate-limit rejects a permissive boolean true because it trusts
+        // every forwarded hop. Treat "true" as a single trusted proxy instead.
+        return 1;
     }
 
     if (normalizedValue === 'false') {

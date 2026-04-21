@@ -35,7 +35,7 @@ test('getAllowedOrigins does not inject localhost origins in production', () => 
 });
 
 test('parseTrustProxy supports booleans, hop counts, and proxy keywords', () => {
-    assert.equal(parseTrustProxy('true'), true);
+    assert.equal(parseTrustProxy('true'), 1);
     assert.equal(parseTrustProxy('false'), false);
     assert.equal(parseTrustProxy('2'), 2);
     assert.equal(parseTrustProxy('loopback'), 'loopback');
