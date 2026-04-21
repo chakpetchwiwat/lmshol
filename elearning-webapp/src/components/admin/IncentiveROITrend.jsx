@@ -20,7 +20,7 @@ const IncentiveROITrend = ({ data, onSelectBucket }) => {
   const summaryCards = [
     {
       label: 'เรียนจบทั้งหมด',
-      value: `${totalCompletions} จบ`,
+      value: `${totalCompletions} คอร์ส`,
       subtext: 'รวมจากทุกช่วงเวลาตาม filter ปัจจุบัน',
     },
     {
@@ -32,7 +32,7 @@ const IncentiveROITrend = ({ data, onSelectBucket }) => {
       label: 'ช่วงที่ impact สูงสุด',
       value: peakPointsBucket ? `${peakPointsBucket.month} • ${peakPointsBucket.points} points` : '-',
       subtext: peakCompletionBucket
-        ? `Completion สูงสุด ${peakCompletionBucket.month} • ${peakCompletionBucket.completions} จบ`
+        ? `Completion สูงสุด ${peakCompletionBucket.month} • ${peakCompletionBucket.completions} คอร์ส`
         : 'ยังไม่มีข้อมูล ROI',
     },
   ];
