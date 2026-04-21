@@ -73,11 +73,10 @@ const GoalManagement = () => {
             }
         } catch (err) {
             console.error('Failed to fetch data', err);
-            toast.error('ไม่สามารถโหลดข้อมูลเป้าหมายได้');
         } finally {
             setLoading(false);
         }
-    }, [toast]);
+    }, []);
 
     useEffect(() => {
         fetchData();
