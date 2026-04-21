@@ -190,9 +190,19 @@ const CategoryManagementModal = ({
     }
   };
 
-  const filteredCategories = useMemo(() => (
-    categories.filter((category) => (categoryView === ENTITY_VIEW_STATUS.ARCHIVED ? Boolean(category.isArchived) : !category.isArchived))
-  ), [categories, categoryView]);
+  const filteredCategories = useMemo(() => {
+    const subset = categories.filter((category) => (
+      categoryView === ENTITY_VIEW_STATUS.ARCHIVED ? Boolean(category.isArchived) : !category.isArchived
+    ));
+
+    // Explicitly sort by isTemporary desc, then order asc
+    return subset.sort((a, b) => {
+      if (a.isTemporary !== b.isTemporary) {
+        return a.isTemporary ? -1 : 1;
+      }
+      return (a.order || 0) - (b.order || 0);
+    });
+  }, [categories, categoryView]);
 
   const activeCount = categories.filter((category) => !category.isArchived).length;
   const archivedCount = categories.filter((category) => category.isArchived).length;
@@ -459,7 +469,7 @@ const CategoryManagementModal = ({
                                     : [...ids, department.id],
                                 });
                               }}
-                              className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
+                              className={`rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${
                                 isSelected
                                   ? 'bg-primary/10 text-primary ring-1 ring-primary/30'
                                   : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
@@ -491,7 +501,7 @@ const CategoryManagementModal = ({
                                     : [...ids, tier.id],
                                 });
                               }}
-                              className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
+                              className={`rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${
                                 isSelected
                                   ? 'bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/30'
                                   : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
