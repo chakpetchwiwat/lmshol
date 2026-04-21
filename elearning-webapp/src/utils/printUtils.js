@@ -178,31 +178,44 @@ export const getPrintReportStyles = () => `
 
   .meta-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--surface);
+    overflow: hidden;
   }
 
   .meta-card {
-    min-height: 88px;
-    padding: 14px 16px;
-    border: 1px solid var(--line);
-    border-radius: 18px;
+    padding: 20px 24px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .meta-card:last-child {
+    border-right: none;
+  }
+
+  .meta-card:nth-child(even) {
     background: var(--surface-alt);
   }
 
   .meta-label {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     font-size: 11px;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--muted);
   }
 
   .meta-value {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
-    line-height: 1.4;
+    line-height: 1.5;
+    color: var(--ink);
     white-space: pre-line;
   }
 

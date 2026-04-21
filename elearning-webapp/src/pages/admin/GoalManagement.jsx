@@ -30,7 +30,7 @@ const GoalManagement = () => {
     const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
 
 
-    
+
     // Form state
     const [formData, setFormData] = useState({
         title: '',
@@ -144,7 +144,7 @@ const GoalManagement = () => {
         }
     };
 
-    const handleViewReport = useCallback(async (goal) => {
+    const handleViewReport = async (goal) => {
         setReportGoal(goal);
         setReportLoading(true);
         try {
@@ -156,16 +156,11 @@ const GoalManagement = () => {
         } finally {
             setReportLoading(false);
         }
-    }, [toast]);
-
-    const handleCloseReport = useCallback(() => {
-        setReportGoal(null);
-        setReportData(null);
-    }, []);
+    };
 
     const filteredCourses = useMemo(() => {
-        return courses.filter(c => 
-            c.title.toLowerCase().includes(courseSearch.toLowerCase()) && 
+        return courses.filter(c =>
+            c.title.toLowerCase().includes(courseSearch.toLowerCase()) &&
             !formData.courseIds.includes(c.id)
         );
     }, [courses, courseSearch, formData.courseIds]);
@@ -173,7 +168,7 @@ const GoalManagement = () => {
     const toggleCourse = (courseId) => {
         setFormData(prev => ({
             ...prev,
-            courseIds: prev.courseIds.includes(courseId) 
+            courseIds: prev.courseIds.includes(courseId)
                 ? prev.courseIds.filter(id => id !== courseId)
                 : [...prev.courseIds, courseId]
         }));
@@ -211,7 +206,7 @@ const GoalManagement = () => {
 
     return (
         <div className="flex flex-col gap-6">
-            <AdminPageHeader 
+            <AdminPageHeader
                 title="จัดการเป้าหมายการเรียนรู้"
                 subtitle="กำหนดเป้าหมายการเรียนรายสัปดาห์หรือรายเดือนสำหรับพนักงานทุกคนหรือเฉพาะแผนก"
                 actions={
@@ -232,7 +227,7 @@ const GoalManagement = () => {
             />
 
 
-            <GoalList 
+            <GoalList
                 goals={displayGoals}
                 columns={columns}
                 viewMode={viewMode}
@@ -243,7 +238,7 @@ const GoalManagement = () => {
             />
 
 
-            <CreateGoalModal 
+            <CreateGoalModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 formData={formData}
@@ -258,11 +253,11 @@ const GoalManagement = () => {
                 toggleCourse={toggleCourse}
             />
 
-            <GoalReportModal 
+            <GoalReportModal
                 reportGoal={reportGoal}
                 reportData={reportData}
                 reportLoading={reportLoading}
-                onClose={handleCloseReport}
+                onClose={() => { setReportGoal(null); setReportData(null); }}
             />
             <ConfirmDialog {...ConfirmDialogProps} />
         </div>
