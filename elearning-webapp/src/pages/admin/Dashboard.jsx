@@ -365,7 +365,8 @@ const Dashboard = () => {
                 value={filters.month}
                 onChange={handleFilterChange('month')}
                 size="sm"
-                className="w-36"
+                fullWidth={false}
+                className="w-32"
                 options={MONTH_OPTIONS}
               />
 
@@ -373,8 +374,9 @@ const Dashboard = () => {
                 value={filters.year}
                 onChange={handleFilterChange('year')}
                 size="sm"
+                fullWidth={false}
                 className="w-24"
-              options={yearOptions.map((year) => ({ value: year, label: year }))}
+                options={yearOptions.map((year) => ({ value: year, label: year }))}
               />
 
               {isFullAdmin ? (
@@ -382,7 +384,8 @@ const Dashboard = () => {
                   value={filters.departmentId}
                   onChange={handleFilterChange('departmentId')}
                   size="sm"
-                  className="w-44 lg:w-48"
+                  fullWidth={false}
+                  className="w-40 lg:w-44"
                   placeholder="ทุกแผนก"
                   options={[
                     { value: '', label: 'ทุกแผนก' },
