@@ -355,8 +355,8 @@ const Dashboard = () => {
         subtitle={isManagerView ? managerSubtitle : adminSubtitle}
         actions={(
           <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:flex-wrap lg:items-center lg:justify-end">
-            <div className="flex flex-wrap items-center gap-3 rounded-[1.5rem] border border-slate-200 bg-white px-4 py-3 shadow-sm">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-600">
+            <div className="flex flex-wrap items-center gap-2 rounded-[1.5rem] border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+              <div className="flex items-center gap-2 px-1 text-sm font-semibold text-slate-600">
                 <SlidersHorizontal size={16} />
                 <span>Filter</span>
               </div>
@@ -365,8 +365,7 @@ const Dashboard = () => {
                 value={filters.month}
                 onChange={handleFilterChange('month')}
                 size="sm"
-                fullWidth={false}
-                className="min-w-[140px]"
+                className="w-32"
                 options={MONTH_OPTIONS}
               />
 
@@ -374,9 +373,8 @@ const Dashboard = () => {
                 value={filters.year}
                 onChange={handleFilterChange('year')}
                 size="sm"
-                fullWidth={false}
-                className="min-w-[100px]"
-                options={yearOptions.map((year) => ({ value: year, label: year }))}
+                className="w-24"
+              options={yearOptions.map((year) => ({ value: year, label: year }))}
               />
 
               {isFullAdmin ? (
@@ -384,8 +382,7 @@ const Dashboard = () => {
                   value={filters.departmentId}
                   onChange={handleFilterChange('departmentId')}
                   size="sm"
-                  fullWidth={false}
-                  className="min-w-[160px]"
+                  className="w-40 lg:w-44"
                   placeholder="ทุกแผนก"
                   options={[
                     { value: '', label: 'ทุกแผนก' },
