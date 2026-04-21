@@ -3,14 +3,54 @@ const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
 const { REDEEM_STATUS } = require('../utils/constants/statuses');
 
+const appendServerTiming = (res, metricName, durationMs) => {
+  const metricValue = `${metricName};dur=${durationMs}`;
+  const existingHeader = res.getHeader('Server-Timing');
+
+  if (!existingHeader) {
+    res.setHeader('Server-Timing', metricValue);
+    return;
+  }
+
+  res.setHeader('Server-Timing', `${existingHeader}, ${metricValue}`);
+};
+
+const logAdminTiming = (event, req, durationMs, extra = {}) => {
+  console.info('[admin-timing]', JSON.stringify({
+    event,
+    durationMs,
+    userId: req.user?.userId || null,
+    role: req.user?.role || null,
+    departmentId: req.query?.departmentId || req.user?.departmentId || null,
+    month: req.query?.month || null,
+    year: req.query?.year || null,
+    ...extra
+  }));
+};
+
 // DASHBOARD
 const getDashboardStats = asyncHandler(async (req, res) => {
+  const startedAt = Date.now();
   const stats = await AdminService.getDashboardStats(req.user, req.query);
+  const durationMs = Date.now() - startedAt;
+  appendServerTiming(res, 'admin-dashboard', durationMs);
+  logAdminTiming('admin.dashboard.completed', req, durationMs, {
+    enrollments: stats?.totalEnrollments || 0,
+    users: stats?.totalUsers || 0
+  });
   res.json({ success: true, data: stats });
 });
 
 const getAdvancedAnalytics = asyncHandler(async (req, res) => {
+  const startedAt = Date.now();
   const analytics = await AdminService.getAdvancedAnalytics(req.user, req.query);
+  const durationMs = Date.now() - startedAt;
+  appendServerTiming(res, 'admin-analytics', durationMs);
+  logAdminTiming('admin.analytics.completed', req, durationMs, {
+    skillGapBuckets: analytics?.skillGap?.length || 0,
+    benchmarkingDepartments: analytics?.benchmarking?.length || 0,
+    atRiskCount: analytics?.atRisk?.length || 0
+  });
   res.json({ success: true, data: analytics });
 });
 
@@ -141,7 +181,16 @@ const archiveCourse = asyncHandler(async (req, res) => {
 });
 
 const getCourseHistory = asyncHandler(async (req, res) => {
+  const startedAt = Date.now();
   const history = await AdminService.getCourseHistory(req.params.courseId || req.params.id, req.query);
+  const durationMs = Date.now() - startedAt;
+  appendServerTiming(res, 'admin-course-history', durationMs);
+  logAdminTiming('admin.course_history.completed', req, durationMs, {
+    courseId: req.params.courseId || req.params.id || null,
+    rows: history?.length || 0,
+    status: req.query?.status || null,
+    dateField: req.query?.dateField || 'startedAt'
+  });
   res.json({ success: true, data: history });
 });
 
@@ -178,7 +227,14 @@ const republishAnnouncement = asyncHandler(async (req, res) => {
 });
 
 const getAnnouncementHistory = asyncHandler(async (req, res) => {
+  const startedAt = Date.now();
   const history = await AdminService.getAnnouncementHistory(req.params.id, req.user);
+  const durationMs = Date.now() - startedAt;
+  appendServerTiming(res, 'admin-announcement-history', durationMs);
+  logAdminTiming('admin.announcement_history.completed', req, durationMs, {
+    announcementId: req.params.id || null,
+    rows: history?.length || 0
+  });
   res.json({ success: true, data: history });
 });
 
@@ -288,7 +344,14 @@ const reorderLessons = asyncHandler(async (req, res) => {
 
 // QUIZ REPORTS
 const getCourseQuizAttempts = asyncHandler(async (req, res) => {
+  const startedAt = Date.now();
   const attempts = await AdminService.getCourseQuizAttempts(req.params.courseId);
+  const durationMs = Date.now() - startedAt;
+  appendServerTiming(res, 'admin-course-quiz-attempts', durationMs);
+  logAdminTiming('admin.course_quiz_attempts.completed', req, durationMs, {
+    courseId: req.params.courseId || null,
+    rows: attempts?.length || 0
+  });
   res.json({ success: true, data: attempts });
 });
 

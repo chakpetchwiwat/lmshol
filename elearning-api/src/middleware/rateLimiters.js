@@ -57,8 +57,22 @@ const adminAnalyticsRateLimiter = rateLimit({
     )
 });
 
+const goalReportRateLimiter = rateLimit({
+    windowMs: securityConfig.goalReportRateLimit.windowMs,
+    limit: securityConfig.goalReportRateLimit.max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
+    keyGenerator: getActorOrIpKey,
+    handler: buildLimiterHandler(
+        'goal.report.rate_limited',
+        'Too many goal report requests. Please try again later.'
+    )
+});
+
 module.exports = {
     adminAnalyticsRateLimiter,
     authLoginRateLimiter,
+    goalReportRateLimiter,
     uploadRateLimiter
 };

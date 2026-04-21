@@ -157,6 +157,16 @@ const getSecurityConfig = (env = process.env) => ({
             SECURITY_DEFAULTS.ADMIN_ANALYTICS_RATE_LIMIT_MAX
         )
     },
+    goalReportRateLimit: {
+        windowMs: parsePositiveInteger(
+            env.GOAL_REPORT_RATE_LIMIT_WINDOW_MS,
+            SECURITY_DEFAULTS.GOAL_REPORT_RATE_LIMIT_WINDOW_MS
+        ),
+        max: parsePositiveInteger(
+            env.GOAL_REPORT_RATE_LIMIT_MAX,
+            SECURITY_DEFAULTS.GOAL_REPORT_RATE_LIMIT_MAX
+        )
+    },
     uploadMaxFileSizeBytes: parsePositiveInteger(
         env.UPLOAD_MAX_FILE_SIZE_MB,
         SECURITY_DEFAULTS.UPLOAD_MAX_FILE_SIZE_MB

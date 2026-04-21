@@ -84,6 +84,121 @@ const parseInteger = (value, fallback = 0) => {
     return Number.isNaN(parsed) ? fallback : parsed;
 };
 
+const DASHBOARD_CACHE_TTL_MS = (() => {
+    const parsed = parseInt(process.env.DASHBOARD_CACHE_TTL_MS || '30000', 10);
+    return Number.isNaN(parsed) ? 30000 : Math.max(parsed, 0);
+})();
+
+const dashboardQueryCache = new Map();
+const announcementHistoryCache = new Map();
+
+const pruneDashboardCache = () => {
+    if (dashboardQueryCache.size <= 100) {
+        return;
+    }
+
+    const now = Date.now();
+    for (const [key, entry] of dashboardQueryCache.entries()) {
+        if (!entry?.promise && (!entry?.expiresAt || entry.expiresAt <= now)) {
+            dashboardQueryCache.delete(key);
+        }
+    }
+};
+
+const getDashboardCacheKey = (namespace, actor, scopeFilters) => JSON.stringify({
+    namespace,
+    role: actor.effectiveRole || actor.role || null,
+    actorDepartmentId: actor.departmentId || null,
+    scope: scopeFilters.scope || null,
+    departmentId: scopeFilters.departmentId || null,
+    month: scopeFilters.month || null,
+    year: scopeFilters.year || null
+});
+
+const resolveDashboardCache = async (cacheKey, producer) => {
+    if (DASHBOARD_CACHE_TTL_MS <= 0) {
+        return producer();
+    }
+
+    pruneDashboardCache();
+
+    const now = Date.now();
+    const existingEntry = dashboardQueryCache.get(cacheKey);
+
+    if (existingEntry?.value !== undefined && existingEntry.expiresAt > now) {
+        return existingEntry.value;
+    }
+
+    if (existingEntry?.promise) {
+        return existingEntry.promise;
+    }
+
+    const pendingPromise = producer()
+        .then((value) => {
+            dashboardQueryCache.set(cacheKey, {
+                value,
+                expiresAt: Date.now() + DASHBOARD_CACHE_TTL_MS
+            });
+            return value;
+        })
+        .catch((error) => {
+            dashboardQueryCache.delete(cacheKey);
+            throw error;
+        });
+
+    dashboardQueryCache.set(cacheKey, { promise: pendingPromise });
+    return pendingPromise;
+};
+
+const getAnnouncementHistoryCacheKey = (announcementId, actor) => JSON.stringify({
+    namespace: 'announcement-history',
+    announcementId,
+    role: actor.effectiveRole || actor.role || null,
+    departmentId: actor.departmentId || null
+});
+
+const resolveAnnouncementHistoryCache = async (cacheKey, producer) => {
+    if (DASHBOARD_CACHE_TTL_MS <= 0) {
+        return producer();
+    }
+
+    const now = Date.now();
+    const existingEntry = announcementHistoryCache.get(cacheKey);
+
+    if (existingEntry?.value !== undefined && existingEntry.expiresAt > now) {
+        return existingEntry.value;
+    }
+
+    if (existingEntry?.promise) {
+        return existingEntry.promise;
+    }
+
+    const pendingPromise = producer()
+        .then((value) => {
+            announcementHistoryCache.set(cacheKey, {
+                value,
+                expiresAt: Date.now() + DASHBOARD_CACHE_TTL_MS
+            });
+            return value;
+        })
+        .catch((error) => {
+            announcementHistoryCache.delete(cacheKey);
+            throw error;
+        });
+
+    announcementHistoryCache.set(cacheKey, { promise: pendingPromise });
+    return pendingPromise;
+};
+
+const clearAnnouncementHistoryCache = (announcementId) => {
+    const cacheFragment = `"announcementId":"${announcementId}"`;
+    for (const cacheKey of announcementHistoryCache.keys()) {
+        if (cacheKey.includes(cacheFragment)) {
+            announcementHistoryCache.delete(cacheKey);
+        }
+    }
+};
+
 const parseFloatValue = (value, fallback = undefined) => {
     if (value === undefined || value === null || value === '') {
         return fallback;
@@ -323,6 +438,181 @@ const buildUserTrackingSummary = (enrollments = []) => {
         enrolledCourses: enrollments.length,
         completedCourses: enrollments.filter((enrollment) => enrollment.status === ENROLLMENT_STATUS.COMPLETED).length
     };
+};
+
+const buildAtRiskLearners = async ({ learnerWhere, scopeFilters, now, warningWindow }) => {
+    const activeGoals = await prisma.learningGoal.findMany({
+        where: {
+            status: GOAL_STATUS.ACTIVE,
+            expiryDate: { lte: warningWindow },
+            ...(scopeFilters.departmentId ? {
+                OR: [
+                    { scope: GOAL_SCOPES.GLOBAL },
+                    { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId }
+                ]
+            } : {})
+        },
+        select: {
+            id: true,
+            title: true,
+            type: true,
+            targetCount: true,
+            expiryDate: true,
+            createdAt: true,
+            scope: true,
+            departmentId: true,
+            courses: {
+                select: {
+                    courseId: true
+                }
+            }
+        },
+        orderBy: [
+            { expiryDate: 'asc' },
+            { createdAt: 'desc' }
+        ]
+    });
+
+    if (activeGoals.length === 0) {
+        return [];
+    }
+
+    const targetUsers = await prisma.user.findMany({
+        where: learnerWhere,
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            departmentId: true,
+            department: true,
+            departmentRef: {
+                select: {
+                    name: true
+                }
+            }
+        }
+    });
+
+    if (targetUsers.length === 0) {
+        return [];
+    }
+
+    const userIds = targetUsers.map((user) => user.id);
+    const anyGoals = activeGoals.filter((goal) => goal.type === 'ANY');
+    const specificGoals = activeGoals.filter((goal) => goal.type === 'SPECIFIC');
+    const specificGoalCourseIds = [...new Set(
+        specificGoals.flatMap((goal) => goal.courses.map((goalCourse) => goalCourse.courseId))
+    )];
+
+    const anyGoalDateRange = anyGoals.length > 0
+        ? {
+            start: anyGoals.reduce(
+                (earliestDate, goal) => (goal.createdAt < earliestDate ? goal.createdAt : earliestDate),
+                anyGoals[0].createdAt
+            ),
+            end: anyGoals.reduce((latestDate, goal) => {
+                const goalEnd = goal.expiryDate || now;
+                return goalEnd > latestDate ? goalEnd : latestDate;
+            }, anyGoals[0].expiryDate || now)
+        }
+        : null;
+
+    const completionFilters = [];
+
+    if (anyGoalDateRange) {
+        completionFilters.push({
+            completedAt: {
+                gte: anyGoalDateRange.start,
+                lte: anyGoalDateRange.end
+            }
+        });
+    }
+
+    if (specificGoalCourseIds.length > 0) {
+        completionFilters.push({
+            courseId: {
+                in: specificGoalCourseIds
+            }
+        });
+    }
+
+    if (completionFilters.length === 0) {
+        return [];
+    }
+
+    const completions = await prisma.userCourse.findMany({
+        where: {
+            userId: { in: userIds },
+            status: ENROLLMENT_STATUS.COMPLETED,
+            OR: completionFilters
+        },
+        select: {
+            userId: true,
+            courseId: true,
+            completedAt: true
+        }
+    });
+
+    const userCompletionsMap = completions.reduce((collection, completion) => {
+        if (!collection[completion.userId]) {
+            collection[completion.userId] = [];
+        }
+
+        collection[completion.userId].push(completion);
+        return collection;
+    }, {});
+
+    const usersByDepartmentId = targetUsers.reduce((collection, user) => {
+        const departmentKey = user.departmentId || '__NO_DEPARTMENT__';
+        if (!collection[departmentKey]) {
+            collection[departmentKey] = [];
+        }
+
+        collection[departmentKey].push(user);
+        return collection;
+    }, {});
+
+    const atRisk = [];
+
+    activeGoals.forEach((goal) => {
+        const goalCourses = new Set(goal.courses.map((goalCourse) => goalCourse.courseId));
+        const eligibleUsers = goal.scope === GOAL_SCOPES.DEPARTMENT
+            ? (usersByDepartmentId[goal.departmentId || '__NO_DEPARTMENT__'] || [])
+            : targetUsers;
+
+        eligibleUsers.forEach((user) => {
+            const userCompletions = userCompletionsMap[user.id] || [];
+            const validCompletions = userCompletions.filter((completion) => {
+                if (goal.type === 'SPECIFIC') {
+                    return goalCourses.has(completion.courseId);
+                }
+
+                return completion.completedAt >= goal.createdAt &&
+                    (!goal.expiryDate || completion.completedAt <= goal.expiryDate);
+            });
+
+            if (validCompletions.length >= goal.targetCount) {
+                return;
+            }
+
+            atRisk.push({
+                userId: user.id,
+                userName: user.name,
+                email: user.email,
+                department: user.departmentRef?.name || user.department || null,
+                courseId: goal.id,
+                courseTitle: goal.title,
+                deadline: goal.expiryDate,
+                isOverdue: goal.expiryDate ? goal.expiryDate < now : false,
+                score: null,
+                gapCount: goal.targetCount - validCompletions.length
+            });
+        });
+    });
+
+    return atRisk
+        .sort((left, right) => (left.deadline || 0) - (right.deadline || 0))
+        .slice(0, 50);
 };
 
 const ensureReferenceName = async (tx, modelName, id) => {
@@ -756,6 +1046,31 @@ const buildTimeBuckets = ({ start, end, mode }) => {
 
 const roundToOneDecimal = (value) => Number((value || 0).toFixed(1));
 
+const getDashboardUserSummary = (user) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    department: user.departmentRef?.name || user.department || null
+});
+
+const getMonthDateRange = (month, year) => {
+    if (!month || !year) {
+        return null;
+    }
+
+    const parsedMonth = parseInt(month, 10);
+    const parsedYear = parseInt(year, 10);
+
+    if (Number.isNaN(parsedMonth) || Number.isNaN(parsedYear)) {
+        return null;
+    }
+
+    return {
+        start: new Date(parsedYear, parsedMonth - 1, 1, 0, 0, 0, 0),
+        end: new Date(parsedYear, parsedMonth, 0, 23, 59, 59, 999)
+    };
+};
+
 const buildLatestCourseScoreMap = (attempts = []) => {
     const scoreMap = {};
 
@@ -780,321 +1095,22 @@ const buildLatestCourseScoreMap = (attempts = []) => {
 const getDashboardStats = async (authUser, filters = {}) => {
     const actor = await getActorContext(authUser);
     const scopeFilters = buildDashboardScope(actor, filters);
-    const period = buildDashboardPeriod(scopeFilters);
-    const learnerWhere = buildLearnerWhere(scopeFilters.departmentId);
-    const visibleCourseWhere = buildVisibleCourseWhereForDashboard(scopeFilters.departmentId);
+    const cacheKey = getDashboardCacheKey('dashboard-stats', actor, scopeFilters);
 
-    const [totalUsers, activeCourses, categories, enrollments, quizAttempts, selectedDepartment] = await Promise.all([
-        prisma.user.count({ where: learnerWhere }),
-        prisma.course.count({ where: visibleCourseWhere }),
-        prisma.category.findMany({
-            where: {
-                courses: {
-                    some: visibleCourseWhere
-                }
-            }
-        }),
-        prisma.userCourse.findMany({
-            where: {
-                user: learnerWhere,
-                course: visibleCourseWhere,
-                ...buildDateOverlapWhere(period.start, period.end)
-            },
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        department: true,
-                        departmentRef: {
-                            select: {
-                                id: true,
-                                name: true
-                            }
-                        }
-                    }
-                },
-                course: {
-                    select: {
-                        id: true,
-                        title: true,
-                        points: true,
-                        category: {
-                            select: {
-                                id: true,
-                                name: true,
-                                type: true
-                            }
-                        }
-                    }
-                }
-            },
-            orderBy: [
-                { completedAt: 'desc' },
-                { startedAt: 'desc' }
-            ]
-        }),
-        prisma.quizAttempt.findMany({
-            where: {
-                user: learnerWhere,
-                lesson: {
-                    course: visibleCourseWhere
-                }
-            },
-            include: {
-                lesson: {
-                    select: {
-                        title: true,
-                        courseId: true
-                    }
-                }
-            },
-            orderBy: { createdAt: 'desc' }
-        }),
-        scopeFilters.departmentId
-            ? prisma.department.findUnique({
-                where: { id: scopeFilters.departmentId },
-                select: { id: true, name: true }
-            })
-            : Promise.resolve(null)
-    ]);
+    return resolveDashboardCache(cacheKey, async () => {
+        const period = buildDashboardPeriod(scopeFilters);
+        const learnerWhere = buildLearnerWhere(scopeFilters.departmentId);
+        const visibleCourseWhere = buildVisibleCourseWhereForDashboard(scopeFilters.departmentId);
 
-    const latestCourseScoreMap = buildLatestCourseScoreMap(quizAttempts);
-
-    const learnerPerformance = enrollments.map((enrollment) => {
-        const latestScore = latestCourseScoreMap[`${enrollment.userId}:${enrollment.courseId}`];
-        const departmentName = enrollment.user.departmentRef?.name || enrollment.user.department || null;
-
-        return {
-            id: enrollment.id,
-            userId: enrollment.userId,
-            userName: enrollment.user.name,
-            email: enrollment.user.email,
-            departmentId: enrollment.user.departmentRef?.id || null,
-            department: departmentName,
-            courseId: enrollment.courseId,
-            courseTitle: enrollment.course.title,
-            categoryId: enrollment.course.category?.id || null,
-            categoryName: enrollment.course.category?.name || 'Uncategorized',
-            categoryType: enrollment.course.category?.type || DASHBOARD_TYPES[0],
-            status: enrollment.status,
-            progressPercent: roundToOneDecimal(enrollment.progressPercent),
-            startedAt: enrollment.startedAt,
-            completedAt: enrollment.completedAt,
-            score: latestScore?.score ?? null,
-            quizStatus: latestScore?.status || null,
-            quizLessonTitle: latestScore?.lessonTitle || null
-        };
-    });
-
-    const totalEnrollments = learnerPerformance.length;
-    const completedEnrollments = learnerPerformance.filter((item) => item.status === ENROLLMENT_STATUS.COMPLETED).length;
-    const scoredRecords = learnerPerformance.filter((item) => typeof item.score === 'number');
-    const averageQuizScore = scoredRecords.length
-        ? roundToOneDecimal(scoredRecords.reduce((sum, item) => sum + item.score, 0) / scoredRecords.length)
-        : 0;
-
-    const bucketTemplate = buildTimeBuckets(period).map((bucket) => ({
-        ...bucket,
-        count: 0,
-        details: []
-    }));
-    const weeklyActivityMap = Object.fromEntries(bucketTemplate.map((bucket) => [bucket.key, bucket]));
-
-    learnerPerformance
-        .filter((item) => item.startedAt >= period.start && item.startedAt <= period.end)
-        .forEach((item) => {
-            const key = getTimeBucketKey(item.startedAt, period.mode);
-            if (!weeklyActivityMap[key]) return;
-            weeklyActivityMap[key].count += 1;
-            weeklyActivityMap[key].details.push({
-                userId: item.userId,
-                userName: item.userName,
-                department: item.department,
-                courseTitle: item.courseTitle,
-                startedAt: item.startedAt,
-                status: item.status,
-                score: item.score
-            });
-        });
-
-    const weeklyActivity = bucketTemplate.map((bucket) => ({
-        date: bucket.label,
-        label: bucket.fullLabel,
-        bucketKey: bucket.key,
-        count: weeklyActivityMap[bucket.key]?.count || 0,
-        details: weeklyActivityMap[bucket.key]?.details || []
-    }));
-
-    const typeMap = Object.fromEntries(DASHBOARD_TYPES.map((type) => [type, {
-        type,
-        name: DASHBOARD_TYPE_LABELS[type],
-        value: 0,
-        enrollmentCount: 0,
-        courses: [],
-        details: []
-    }]));
-
-    const categoryMap = {};
-    const popularCourseMap = {};
-
-    learnerPerformance.forEach((item) => {
-        const typeGroup = typeMap[item.categoryType] || typeMap[DASHBOARD_TYPES[0]];
-        typeGroup.enrollmentCount += 1;
-        typeGroup.details.push({
-            userId: item.userId,
-            userName: item.userName,
-            department: item.department,
-            courseTitle: item.courseTitle,
-            status: item.status,
-            score: item.score,
-            completedAt: item.completedAt,
-            startedAt: item.startedAt
-        });
-
-        if (!typeGroup.courses.some((course) => course.id === item.courseId)) {
-            typeGroup.courses.push({
-                id: item.courseId,
-                title: item.courseTitle,
-                students: 0
-            });
-        }
-
-        const typeCourse = typeGroup.courses.find((course) => course.id === item.courseId);
-        typeCourse.students += 1;
-
-        if (!categoryMap[item.categoryName]) {
-            categoryMap[item.categoryName] = {
-                name: item.categoryName,
-                value: 0,
-                details: []
-            };
-        }
-        categoryMap[item.categoryName].value += 1;
-        categoryMap[item.categoryName].details.push({
-            userId: item.userId,
-            userName: item.userName,
-            department: item.department,
-            courseTitle: item.courseTitle,
-            status: item.status,
-            score: item.score
-        });
-
-        if (!popularCourseMap[item.courseId]) {
-            popularCourseMap[item.courseId] = {
-                id: item.courseId,
-                title: item.courseTitle,
-                students: 0,
-                details: []
-            };
-        }
-        popularCourseMap[item.courseId].students += 1;
-        popularCourseMap[item.courseId].details.push({
-            userId: item.userId,
-            userName: item.userName,
-            department: item.department,
-            status: item.status,
-            score: item.score,
-            completedAt: item.completedAt,
-            startedAt: item.startedAt
-        });
-    });
-
-    categories.forEach((category) => {
-        const typeGroup = typeMap[category.type] || typeMap[DASHBOARD_TYPES[0]];
-        typeGroup.value += 1;
-    });
-
-    const typeDistribution = Object.values(typeMap)
-        .filter((group) => group.value > 0 || group.enrollmentCount > 0)
-        .map((group) => ({
-            ...group,
-            courses: group.courses.sort((left, right) => right.students - left.students)
-        }));
-
-    const categoryDistribution = Object.values(categoryMap)
-        .sort((left, right) => right.value - left.value);
-
-    const popularCourses = Object.values(popularCourseMap)
-        .sort((left, right) => right.students - left.students)
-        .slice(0, 8);
-
-    return {
-        scope: scopeFilters.scope,
-        department: selectedDepartment?.name || actor.department || null,
-        filters: {
-            month: scopeFilters.month,
-            year: scopeFilters.year,
-            departmentId: scopeFilters.departmentId
-        },
-        totalUsers,
-        activeCourses,
-        totalEnrollments,
-        completedEnrollments,
-        averageQuizScore,
-        learnerPerformance,
-        popularCourses,
-        weeklyActivity,
-        categoryDistribution,
-        typeDistribution
-    };
-};
-
-const getAdvancedAnalytics = async (authUser, filters = {}) => {
-    const actor = await getActorContext(authUser);
-    const scopeFilters = buildDashboardScope(actor, filters);
-    const period = buildDashboardPeriod(scopeFilters);
-    const learnerWhere = buildLearnerWhere(scopeFilters.departmentId);
-    const visibleCourseWhere = buildVisibleCourseWhereForDashboard(scopeFilters.departmentId);
-
-    try {
-        const [quizAttempts, enrollments, learningPoints, departments] = await Promise.all([
-            prisma.quizAttempt.findMany({
+        const [totalUsers, activeCourses, categories, enrollments, selectedDepartment] = await Promise.all([
+            prisma.user.count({ where: learnerWhere }),
+            prisma.course.count({ where: visibleCourseWhere }),
+            prisma.category.findMany({
                 where: {
-                    user: learnerWhere,
-                    createdAt: {
-                        gte: period.start,
-                        lte: period.end
-                    },
-                    lesson: {
-                        course: visibleCourseWhere
+                    courses: {
+                        some: visibleCourseWhere
                     }
-                },
-                include: {
-                    user: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true,
-                            department: true,
-                            departmentRef: {
-                                select: {
-                                    id: true,
-                                    name: true
-                                }
-                            }
-                        }
-                    },
-                    lesson: {
-                        select: {
-                            title: true,
-                            course: {
-                                select: {
-                                    id: true,
-                                    title: true,
-                                    category: {
-                                        select: {
-                                            type: true,
-                                            name: true
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                orderBy: { createdAt: 'desc' }
+                }
             }),
             prisma.userCourse.findMany({
                 where: {
@@ -1120,47 +1136,368 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
                     course: {
                         select: {
                             id: true,
-                            title: true
-                        }
-                    }
-                }
-            }),
-            prisma.pointsLedger.findMany({
-                where: {
-                    user: learnerWhere,
-                    points: { gt: 0 },
-                    createdAt: {
-                        gte: period.start,
-                        lte: period.end
-                    }
-                },
-                include: {
-                    user: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true,
-                            department: true,
-                            departmentRef: {
+                            title: true,
+                            points: true,
+                            category: {
                                 select: {
                                     id: true,
-                                    name: true
+                                    name: true,
+                                    type: true
                                 }
                             }
                         }
                     }
                 },
-                orderBy: { createdAt: 'desc' }
+                orderBy: [
+                    { completedAt: 'desc' },
+                    { startedAt: 'desc' }
+                ]
             }),
             scopeFilters.departmentId
-                ? prisma.department.findMany({
+                ? prisma.department.findUnique({
                     where: { id: scopeFilters.departmentId },
                     select: { id: true, name: true }
                 })
-                : prisma.department.findMany({
-                    select: { id: true, name: true }
-                })
+                : Promise.resolve(null)
         ]);
+
+        const enrollmentUserIds = [...new Set(enrollments.map((enrollment) => enrollment.userId))];
+        const enrollmentCourseIds = [...new Set(enrollments.map((enrollment) => enrollment.courseId))];
+        const quizAttempts = enrollmentUserIds.length > 0 && enrollmentCourseIds.length > 0
+            ? await prisma.quizAttempt.findMany({
+                where: {
+                    userId: {
+                        in: enrollmentUserIds
+                    },
+                    createdAt: {
+                        lte: period.end
+                    },
+                    lesson: {
+                        courseId: {
+                            in: enrollmentCourseIds
+                        }
+                    }
+                },
+                include: {
+                    lesson: {
+                        select: {
+                            title: true,
+                            courseId: true
+                        }
+                    }
+                },
+                orderBy: { createdAt: 'desc' }
+            })
+            : [];
+
+        const latestCourseScoreMap = buildLatestCourseScoreMap(quizAttempts);
+
+        const learnerPerformance = enrollments.map((enrollment) => {
+            const latestScore = latestCourseScoreMap[`${enrollment.userId}:${enrollment.courseId}`];
+            const departmentName = enrollment.user.departmentRef?.name || enrollment.user.department || null;
+
+            return {
+                id: enrollment.id,
+                userId: enrollment.userId,
+                userName: enrollment.user.name,
+                email: enrollment.user.email,
+                departmentId: enrollment.user.departmentRef?.id || null,
+                department: departmentName,
+                courseId: enrollment.courseId,
+                courseTitle: enrollment.course.title,
+                categoryId: enrollment.course.category?.id || null,
+                categoryName: enrollment.course.category?.name || 'Uncategorized',
+                categoryType: enrollment.course.category?.type || DASHBOARD_TYPES[0],
+                status: enrollment.status,
+                progressPercent: roundToOneDecimal(enrollment.progressPercent),
+                startedAt: enrollment.startedAt,
+                completedAt: enrollment.completedAt,
+                score: latestScore?.score ?? null,
+                quizStatus: latestScore?.status || null,
+                quizLessonTitle: latestScore?.lessonTitle || null
+            };
+        });
+
+        const totalEnrollments = learnerPerformance.length;
+        const completedEnrollments = learnerPerformance.filter((item) => item.status === ENROLLMENT_STATUS.COMPLETED).length;
+        const scoredRecords = learnerPerformance.filter((item) => typeof item.score === 'number');
+        const averageQuizScore = scoredRecords.length
+            ? roundToOneDecimal(scoredRecords.reduce((sum, item) => sum + item.score, 0) / scoredRecords.length)
+            : 0;
+
+        const bucketTemplate = buildTimeBuckets(period).map((bucket) => ({
+            ...bucket,
+            count: 0,
+            details: []
+        }));
+        const weeklyActivityMap = Object.fromEntries(bucketTemplate.map((bucket) => [bucket.key, bucket]));
+
+        learnerPerformance
+            .filter((item) => item.startedAt >= period.start && item.startedAt <= period.end)
+            .forEach((item) => {
+                const key = getTimeBucketKey(item.startedAt, period.mode);
+                if (!weeklyActivityMap[key]) return;
+                weeklyActivityMap[key].count += 1;
+                weeklyActivityMap[key].details.push({
+                    userId: item.userId,
+                    userName: item.userName,
+                    department: item.department,
+                    courseTitle: item.courseTitle,
+                    startedAt: item.startedAt,
+                    status: item.status,
+                    score: item.score
+                });
+            });
+
+        const weeklyActivity = bucketTemplate.map((bucket) => ({
+            date: bucket.label,
+            label: bucket.fullLabel,
+            bucketKey: bucket.key,
+            count: weeklyActivityMap[bucket.key]?.count || 0,
+            details: weeklyActivityMap[bucket.key]?.details || []
+        }));
+
+        const typeMap = Object.fromEntries(DASHBOARD_TYPES.map((type) => [type, {
+            type,
+            name: DASHBOARD_TYPE_LABELS[type],
+            value: 0,
+            enrollmentCount: 0,
+            courses: [],
+            details: []
+        }]));
+
+        const categoryMap = {};
+        const popularCourseMap = {};
+
+        learnerPerformance.forEach((item) => {
+            const typeGroup = typeMap[item.categoryType] || typeMap[DASHBOARD_TYPES[0]];
+            typeGroup.enrollmentCount += 1;
+            typeGroup.details.push({
+                userId: item.userId,
+                userName: item.userName,
+                department: item.department,
+                courseTitle: item.courseTitle,
+                status: item.status,
+                score: item.score,
+                completedAt: item.completedAt,
+                startedAt: item.startedAt
+            });
+
+            if (!typeGroup.courses.some((course) => course.id === item.courseId)) {
+                typeGroup.courses.push({
+                    id: item.courseId,
+                    title: item.courseTitle,
+                    students: 0
+                });
+            }
+
+            const typeCourse = typeGroup.courses.find((course) => course.id === item.courseId);
+            typeCourse.students += 1;
+
+            if (!categoryMap[item.categoryName]) {
+                categoryMap[item.categoryName] = {
+                    name: item.categoryName,
+                    value: 0,
+                    details: []
+                };
+            }
+            categoryMap[item.categoryName].value += 1;
+            categoryMap[item.categoryName].details.push({
+                userId: item.userId,
+                userName: item.userName,
+                department: item.department,
+                courseTitle: item.courseTitle,
+                status: item.status,
+                score: item.score
+            });
+
+            if (!popularCourseMap[item.courseId]) {
+                popularCourseMap[item.courseId] = {
+                    id: item.courseId,
+                    title: item.courseTitle,
+                    students: 0,
+                    details: []
+                };
+            }
+            popularCourseMap[item.courseId].students += 1;
+            popularCourseMap[item.courseId].details.push({
+                userId: item.userId,
+                userName: item.userName,
+                department: item.department,
+                status: item.status,
+                score: item.score,
+                completedAt: item.completedAt,
+                startedAt: item.startedAt
+            });
+        });
+
+        categories.forEach((category) => {
+            const typeGroup = typeMap[category.type] || typeMap[DASHBOARD_TYPES[0]];
+            typeGroup.value += 1;
+        });
+
+        const typeDistribution = Object.values(typeMap)
+            .filter((group) => group.value > 0 || group.enrollmentCount > 0)
+            .map((group) => ({
+                ...group,
+                courses: group.courses.sort((left, right) => right.students - left.students)
+            }));
+
+        const categoryDistribution = Object.values(categoryMap)
+            .sort((left, right) => right.value - left.value);
+
+        const popularCourses = Object.values(popularCourseMap)
+            .sort((left, right) => right.students - left.students)
+            .slice(0, 8);
+
+        return {
+            scope: scopeFilters.scope,
+            department: selectedDepartment?.name || actor.department || null,
+            filters: {
+                month: scopeFilters.month,
+                year: scopeFilters.year,
+                departmentId: scopeFilters.departmentId
+            },
+            totalUsers,
+            activeCourses,
+            totalEnrollments,
+            completedEnrollments,
+            averageQuizScore,
+            learnerPerformance,
+            popularCourses,
+            weeklyActivity,
+            categoryDistribution,
+            typeDistribution
+        };
+    });
+};
+
+const getAdvancedAnalytics = async (authUser, filters = {}) => {
+    const actor = await getActorContext(authUser);
+    const scopeFilters = buildDashboardScope(actor, filters);
+    const cacheKey = getDashboardCacheKey('advanced-analytics', actor, scopeFilters);
+
+    return resolveDashboardCache(cacheKey, async () => {
+        const period = buildDashboardPeriod(scopeFilters);
+        const learnerWhere = buildLearnerWhere(scopeFilters.departmentId);
+        const visibleCourseWhere = buildVisibleCourseWhereForDashboard(scopeFilters.departmentId);
+
+        try {
+            const scopedUsers = await prisma.user.findMany({
+                where: learnerWhere,
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    department: true,
+                    departmentRef: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    }
+                }
+            });
+
+            if (scopedUsers.length === 0) {
+                return {
+                    skillGap: [],
+                    benchmarking: [],
+                    roiTrend: buildTimeBuckets(period).map((bucket) => ({
+                        month: bucket.label,
+                        label: bucket.fullLabel,
+                        bucketKey: bucket.key,
+                        points: 0,
+                        completions: 0,
+                        details: []
+                    })),
+                    atRisk: []
+                };
+            }
+
+            const userIds = scopedUsers.map((user) => user.id);
+            const userDirectory = Object.fromEntries(
+                scopedUsers.map((user) => [user.id, getDashboardUserSummary(user)])
+            );
+            const departmentNames = [...new Set(scopedUsers
+                .map((user) => user.departmentRef?.name || user.department || 'Unassigned')
+                .filter(Boolean))];
+
+            const [quizAttempts, enrollments, learningPoints] = await Promise.all([
+                prisma.quizAttempt.findMany({
+                    where: {
+                        userId: { in: userIds },
+                        createdAt: {
+                            gte: period.start,
+                            lte: period.end
+                        },
+                        lesson: {
+                            course: visibleCourseWhere
+                        }
+                    },
+                    select: {
+                        userId: true,
+                        score: true,
+                        status: true,
+                        createdAt: true,
+                        lesson: {
+                            select: {
+                                title: true,
+                                course: {
+                                    select: {
+                                        id: true,
+                                        title: true,
+                                        category: {
+                                            select: {
+                                                type: true,
+                                                name: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    orderBy: { createdAt: 'desc' }
+                }),
+                prisma.userCourse.findMany({
+                    where: {
+                        userId: { in: userIds },
+                        course: visibleCourseWhere,
+                        ...buildDateOverlapWhere(period.start, period.end)
+                    },
+                    select: {
+                        userId: true,
+                        courseId: true,
+                        status: true,
+                        completedAt: true,
+                        startedAt: true,
+                        course: {
+                            select: {
+                                id: true,
+                                title: true
+                            }
+                        }
+                    }
+                }),
+                prisma.pointsLedger.findMany({
+                    where: {
+                        userId: { in: userIds },
+                        points: { gt: 0 },
+                        createdAt: {
+                            gte: period.start,
+                            lte: period.end
+                        }
+                    },
+                    select: {
+                        userId: true,
+                        points: true,
+                        note: true,
+                        createdAt: true
+                    },
+                    orderBy: { createdAt: 'desc' }
+                })
+            ]);
 
         const skillGapAccumulator = Object.fromEntries(DASHBOARD_TYPES.map((type) => [type, {
             totalScore: 0,
@@ -1170,14 +1507,15 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
 
         quizAttempts.forEach((attempt) => {
             const type = attempt.lesson?.course?.category?.type || DASHBOARD_TYPES[0];
-            const departmentName = attempt.user.departmentRef?.name || attempt.user.department || null;
+            const user = userDirectory[attempt.userId];
+            const departmentName = user?.department || null;
             const bucket = skillGapAccumulator[type] || skillGapAccumulator[DASHBOARD_TYPES[0]];
             bucket.totalScore += attempt.score;
             bucket.count += 1;
             bucket.details.push({
-                userId: attempt.user.id,
-                userName: attempt.user.name,
-                email: attempt.user.email,
+                userId: attempt.userId,
+                userName: user?.name || '-',
+                email: user?.email || null,
                 department: departmentName,
                 courseTitle: attempt.lesson?.course?.title || '-',
                 lessonTitle: attempt.lesson?.title || '-',
@@ -1197,7 +1535,6 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
         const latestScoreMap = buildLatestCourseScoreMap(
             quizAttempts.map((attempt) => ({
                 ...attempt,
-                userId: attempt.user.id,
                 lesson: {
                     courseId: attempt.lesson?.course?.id,
                     title: attempt.lesson?.title
@@ -1206,9 +1543,9 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
         );
 
         const benchmarkMap = {};
-        departments.forEach((department) => {
-            benchmarkMap[department.name] = {
-                name: department.name,
+        departmentNames.forEach((departmentName) => {
+            benchmarkMap[departmentName] = {
+                name: departmentName,
                 completion_rate: 0,
                 total: 0,
                 completed: 0,
@@ -1217,7 +1554,8 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
         });
 
         enrollments.forEach((enrollment) => {
-            const departmentName = enrollment.user.departmentRef?.name || enrollment.user.department || 'Unassigned';
+            const user = userDirectory[enrollment.userId];
+            const departmentName = user?.department || 'Unassigned';
             if (!benchmarkMap[departmentName]) {
                 benchmarkMap[departmentName] = {
                     name: departmentName,
@@ -1237,14 +1575,15 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
 
         const userBenchmarkMap = {};
         enrollments.forEach((enrollment) => {
-            const departmentName = enrollment.user.departmentRef?.name || enrollment.user.department || 'Unassigned';
-            const userKey = `${departmentName}:${enrollment.user.id}`;
+            const user = userDirectory[enrollment.userId];
+            const departmentName = user?.department || 'Unassigned';
+            const userKey = `${departmentName}:${enrollment.userId}`;
             if (!userBenchmarkMap[userKey]) {
                 userBenchmarkMap[userKey] = {
                     departmentName,
-                    userId: enrollment.user.id,
-                    userName: enrollment.user.name,
-                    email: enrollment.user.email,
+                    userId: enrollment.userId,
+                    userName: user?.name || '-',
+                    email: user?.email || null,
                     completedCourses: 0,
                     totalCourses: 0,
                     scores: []
@@ -1297,14 +1636,15 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
         enrollments
             .filter((enrollment) => enrollment.status === ENROLLMENT_STATUS.COMPLETED && enrollment.completedAt)
             .forEach((enrollment) => {
-                const departmentName = enrollment.user.departmentRef?.name || enrollment.user.department || null;
+                const user = userDirectory[enrollment.userId];
+                const departmentName = user?.department || null;
                 const key = getTimeBucketKey(enrollment.completedAt, period.mode);
                 if (!roiBucketMap[key]) return;
                 roiBucketMap[key].completions += 1;
                 roiBucketMap[key].details.push({
                     kind: 'completion',
-                    userId: enrollment.user.id,
-                    userName: enrollment.user.name,
+                    userId: enrollment.userId,
+                    userName: user?.name || '-',
                     department: departmentName,
                     courseTitle: enrollment.course.title,
                     completedAt: enrollment.completedAt,
@@ -1313,14 +1653,15 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
             });
 
         learningPoints.forEach((entry) => {
-            const departmentName = entry.user.departmentRef?.name || entry.user.department || null;
+            const user = userDirectory[entry.userId];
+            const departmentName = user?.department || null;
             const key = getTimeBucketKey(entry.createdAt, period.mode);
             if (!roiBucketMap[key]) return;
             roiBucketMap[key].points += entry.points;
             roiBucketMap[key].details.push({
                 kind: 'points',
-                userId: entry.user.id,
-                userName: entry.user.name,
+                userId: entry.userId,
+                userName: user?.name || '-',
                 department: departmentName,
                 courseTitle: entry.note || 'Learning reward',
                 completedAt: entry.createdAt,
@@ -1337,114 +1678,39 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
             details: roiBucketMap[bucket.key]?.details || []
         }));
 
-        // AT-RISK LEARNERS: Aligned with Learning Goals
+        // AT-RISK LEARNERS: keep this isolated so the rest of analytics can still render.
         const now = new Date();
         const warningWindow = new Date();
         warningWindow.setDate(now.getDate() + 10);
 
-        // 1. Fetch active goals that are expiring soon or overdue
-        const activeGoals = await prisma.learningGoal.findMany({
-            where: {
-                status: GOAL_STATUS.ACTIVE,
-                expiryDate: { lte: warningWindow },
-                ...(scopeFilters.departmentId ? {
-                    OR: [
-                        { scope: GOAL_SCOPES.GLOBAL },
-                        { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId }
-                    ]
-                } : {})
-            },
-            include: {
-                courses: { select: { courseId: true } }
-            }
-        });
-
-        const atRisk = [];
-        if (activeGoals.length > 0) {
-            const goalIds = activeGoals.map(g => g.id);
-            const goalCourseIds = Array.from(new Set(activeGoals.flatMap(g => g.courses.map(gc => gc.courseId))));
-            
-            // 2. Fetch users relevant to current filter
-            const targetUsers = await prisma.user.findMany({
-                where: learnerWhere,
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    department: true,
-                    departmentRef: { select: { name: true } }
-                }
+        let atRisk = [];
+        try {
+            atRisk = await buildAtRiskLearners({
+                learnerWhere,
+                scopeFilters,
+                now,
+                warningWindow
             });
-
-            const userIds = targetUsers.map(u => u.id);
-
-            // 3. Fetch completions for these users
-            const completions = await prisma.userCourse.findMany({
-                where: {
-                    userId: { in: userIds },
-                    status: ENROLLMENT_STATUS.COMPLETED
-                },
-                select: { userId: true, courseId: true, completedAt: true }
-            });
-
-            const userCompletionsMap = completions.reduce((acc, curr) => {
-                if (!acc[curr.userId]) acc[curr.userId] = [];
-                acc[curr.userId].push(curr);
-                return acc;
-            }, {});
-
-            // 4. Evaluate each user against each relevant goal
-            for (const goal of activeGoals) {
-                const goalCourses = new Set(goal.courses.map(gc => gc.courseId));
-                
-                for (const user of targetUsers) {
-                    // Filter users by goal scope if not matching
-                    if (goal.scope === GOAL_SCOPES.DEPARTMENT && goal.departmentId !== user.departmentId) continue;
-
-                    const userCompletions = userCompletionsMap[user.id] || [];
-                    const validCompletions = userCompletions.filter(c => {
-                        const isInCategory = goal.type === 'ANY' || goalCourses.has(c.courseId);
-                        const isInWindow = goal.type === 'SPECIFIC' || (c.completedAt >= goal.createdAt && (!goal.expiryDate || c.completedAt <= goal.expiryDate));
-                        return isInCategory && isInWindow;
-                    });
-
-                    if (validCompletions.length < goal.targetCount) {
-                        atRisk.push({
-                            userId: user.id,
-                            userName: user.name,
-                            email: user.email,
-                            department: user.departmentRef?.name || user.department || null,
-                            courseId: goal.id, // Using Goal ID as key
-                            courseTitle: goal.title, // Map Goal Title to courseTitle for UI compatibility
-                            deadline: goal.expiryDate,
-                            isOverdue: goal.expiryDate < now,
-                            score: null, // Goals don't have a single score
-                            gapCount: goal.targetCount - validCompletions.length
-                        });
-                    }
-                }
-            }
+        } catch (riskError) {
+            console.error('Error building at-risk analytics:', riskError);
         }
 
-        // Sort by deadline and limit to keep dashboard clean
-        atRisk.sort((a, b) => (a.deadline || 0) - (b.deadline || 0));
-        const limitedAtRisk = atRisk.slice(0, 50);
-
-        return {
-            skillGap,
-            benchmarking,
-            roiTrend,
-            atRisk: limitedAtRisk
-        };
-    } catch (error) {
-        console.error('Error in getAdvancedAnalytics:', error);
-        return {
-            skillGap: [],
-            benchmarking: [],
-            roiTrend: [],
-            atRisk: []
-        };
-    }
+            return {
+                skillGap,
+                benchmarking,
+                roiTrend,
+                atRisk
+            };
+        } catch (error) {
+            console.error('Error in getAdvancedAnalytics:', error);
+            return {
+                skillGap: [],
+                benchmarking: [],
+                roiTrend: [],
+                atRisk: []
+            };
+        }
+    });
 };
 
 // USERS
@@ -1810,6 +2076,8 @@ const archiveCourse = async (id) => {
 const getCourseHistory = async (courseId, filters = {}) => {
     const { departmentId, tierId, month, year, status, dateField } = filters;
     const effectiveDateField = dateField === 'completedAt' ? 'completedAt' : 'startedAt';
+    const dateRange = getMonthDateRange(month, year);
+    const hasDateFilter = Boolean(dateRange);
 
     const course = await prisma.course.findUnique({
         where: { id: courseId },
@@ -1874,34 +2142,31 @@ const getCourseHistory = async (courseId, filters = {}) => {
         }
     }
 
-    const users = await prisma.user.findMany({
-        where: userWhere,
-        select: {
-            id: true,
-            name: true,
-            departmentRef: {
-                select: { name: true }
-            },
-            tier: {
-                select: { name: true }
-            }
-        },
-        orderBy: {
-            name: 'asc'
-        }
-    });
+    const enrollmentWhere = {
+        courseId,
+        user: userWhere
+    };
 
-    if (users.length === 0) {
-        return [];
+    if (status && status !== ENROLLMENT_STATUS.NOT_STARTED) {
+        enrollmentWhere.status = status;
     }
 
-    const userIds = users.map((user) => user.id);
+    if (hasDateFilter) {
+        enrollmentWhere[effectiveDateField] = {
+            gte: dateRange.start,
+            lte: dateRange.end
+        };
+    }
+
     const enrollments = await prisma.userCourse.findMany({
-        where: {
-            courseId,
-            userId: { in: userIds }
-        },
-        include: {
+        where: enrollmentWhere,
+        select: {
+            id: true,
+            userId: true,
+            status: true,
+            progressPercent: true,
+            startedAt: true,
+            completedAt: true,
             user: {
                 select: {
                     id: true,
@@ -1914,62 +2179,115 @@ const getCourseHistory = async (courseId, filters = {}) => {
                     }
                 }
             }
-        }
-    });
-
-    const enrollmentMap = new Map(enrollments.map((enrollment) => [enrollment.userId, enrollment]));
-    const quizAttemptsContext = await prisma.quizAttempt.findMany({
-        where: {
-            userId: { in: userIds },
-            lesson: { courseId }
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: [
+            { completedAt: 'desc' },
+            { startedAt: 'desc' }
+        ]
     });
 
-    const quizMap = {};
-    quizAttemptsContext.forEach(attempt => {
-        if (!quizMap[attempt.userId]) {
-            quizMap[attempt.userId] = attempt;
-        }
-    });
+    const enrolledUserIds = enrollments.map((enrollment) => enrollment.userId);
+    const shouldIncludeNotStarted = !hasDateFilter && (!status || status === ENROLLMENT_STATUS.NOT_STARTED);
 
-    const records = users.map((user) => {
-        const enrollment = enrollmentMap.get(user.id);
-        const enrollmentStatus = enrollment?.status || ENROLLMENT_STATUS.NOT_STARTED;
+    let notStartedUsers = [];
+    if (shouldIncludeNotStarted) {
+        notStartedUsers = await prisma.user.findMany({
+            where: {
+                ...userWhere,
+                ...(enrolledUserIds.length > 0
+                    ? {
+                        id: {
+                            notIn: enrolledUserIds
+                        }
+                    }
+                    : {})
+            },
+            select: {
+                id: true,
+                name: true,
+                departmentRef: {
+                    select: { name: true }
+                },
+                tier: {
+                    select: { name: true }
+                }
+            },
+            orderBy: {
+                name: 'asc'
+            }
+        });
+    }
 
-        return {
-        id: enrollment?.id || `not-started-${user.id}`,
+    let quizMap = {};
+    if (enrolledUserIds.length > 0) {
+        const quizAttemptsContext = await prisma.quizAttempt.findMany({
+            where: {
+                userId: { in: enrolledUserIds },
+                lesson: { courseId }
+            },
+            select: {
+                userId: true,
+                score: true,
+                status: true,
+                createdAt: true
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        quizMap = quizAttemptsContext.reduce((acc, attempt) => {
+            if (!acc[attempt.userId]) {
+                acc[attempt.userId] = attempt;
+            }
+
+            return acc;
+        }, {});
+    }
+
+    const records = enrollments.map((enrollment) => ({
+        id: enrollment.id,
+        user: {
+            id: enrollment.user.id,
+            name: enrollment.user.name,
+            department: enrollment.user.departmentRef?.name || '-',
+            tier: enrollment.user.tier?.name || '-'
+        },
+        status: enrollment.status,
+        progressPercent: enrollment?.progressPercent || 0,
+        startedAt: enrollment?.startedAt || null,
+        completedAt: enrollment?.completedAt || null,
+        quizScore: quizMap[enrollment.userId]?.score ?? null,
+        quizPassed: quizMap[enrollment.userId]?.status === 'PASSED'
+    }));
+
+    const notStartedRecords = notStartedUsers.map((user) => ({
+        id: `not-started-${user.id}`,
         user: {
             id: user.id,
             name: user.name,
             department: user.departmentRef?.name || '-',
             tier: user.tier?.name || '-'
         },
-        status: enrollmentStatus,
-        progressPercent: enrollment?.progressPercent || 0,
-        startedAt: enrollment?.startedAt || null,
-        completedAt: enrollment?.completedAt || null,
-        quizScore: quizMap[user.id]?.score ?? null,
-        quizPassed: quizMap[user.id]?.status === 'PASSED'
-    };
-    });
+        status: ENROLLMENT_STATUS.NOT_STARTED,
+        progressPercent: 0,
+        startedAt: null,
+        completedAt: null,
+        quizScore: null,
+        quizPassed: false
+    }));
 
-    const filteredRecords = records.filter((record) => {
+    const filteredRecords = [...records, ...notStartedRecords].filter((record) => {
         if (status && record.status !== status) {
             return false;
         }
 
-        if (month && year) {
+        if (hasDateFilter) {
             const targetDate = record[effectiveDateField];
             if (!targetDate) {
                 return false;
             }
 
             const selectedDate = new Date(targetDate);
-            const startDate = new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
-            const endDate = new Date(parseInt(year, 10), parseInt(month, 10), 0, 23, 59, 59, 999);
-
-            return selectedDate >= startDate && selectedDate <= endDate;
+            return selectedDate >= dateRange.start && selectedDate <= dateRange.end;
         }
 
         return true;
@@ -2068,6 +2386,9 @@ const updateAnnouncement = async (id, authUser, input) => prisma.$transaction(as
 }, {
     maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT,
     timeout: TRANSACTION_TIMEOUTS.LONG_RUNNING_TIMEOUT
+}).then((result) => {
+    clearAnnouncementHistoryCache(id);
+    return result;
 });
 
 const deleteAnnouncement = async (id, authUser) => {
@@ -2083,6 +2404,9 @@ const deleteAnnouncement = async (id, authUser) => {
 
     return prisma.announcement.delete({
         where: { id }
+    }).then((result) => {
+        clearAnnouncementHistoryCache(id);
+        return result;
     });
 };
 
@@ -2424,6 +2748,9 @@ const archiveAnnouncement = async (id, authUser) => {
         data: {
             expiredAt: new Date()
         }
+    }).then((result) => {
+        clearAnnouncementHistoryCache(id);
+        return result;
     });
 };
 
@@ -2436,6 +2763,9 @@ const republishAnnouncement = async (id, authUser) => {
         data: {
             expiredAt: null
         }
+    }).then((result) => {
+        clearAnnouncementHistoryCache(id);
+        return result;
     });
 };
 
@@ -2451,33 +2781,42 @@ const getAnnouncementHistory = async (id, authUser) => {
         throw new Error('Announcement not found');
     }
 
-    const views = await prisma.announcementView.findMany({
-        where: { announcementId: id },
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    department: true,
-                    departmentRef: {
-                        select: {
-                            name: true
+    const cacheKey = getAnnouncementHistoryCacheKey(id, actor);
+
+    return resolveAnnouncementHistoryCache(cacheKey, async () => {
+        const views = await prisma.announcementView.findMany({
+            where: { announcementId: id },
+            select: {
+                id: true,
+                score: true,
+                passed: true,
+                viewedAt: true,
+                updatedAt: true,
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        department: true,
+                        departmentRef: {
+                            select: {
+                                name: true
+                            }
                         }
                     }
                 }
-            }
-        },
-        orderBy: { viewedAt: 'desc' }
-    });
+            },
+            orderBy: { viewedAt: 'desc' }
+        });
 
-    return views.map((view) => ({
-        ...view,
-        user: {
-            ...view.user,
-            department: view.user.departmentRef?.name || view.user.department || null
-        }
-    }));
+        return views.map((view) => ({
+            ...view,
+            user: {
+                ...view.user,
+                department: view.user.departmentRef?.name || view.user.department || null
+            }
+        }));
+    });
 };
 
 module.exports = {
