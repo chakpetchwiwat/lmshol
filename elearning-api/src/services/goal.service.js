@@ -197,46 +197,89 @@ const getGoalReport = async (goalId, authUser) => {
     const windowEnd = goal.expiryDate || new Date();
 
     for (const user of users) {
-        let completions = [];
+        let enrollments = [];
+        const courseIds = goal.courses.map(gc => gc.courseId);
+
         if (goal.type === 'ANY') {
-            completions = await prisma.userCourse.findMany({
+            // Fetch both completed and in-progress for ANY goal within window
+            enrollments = await prisma.userCourse.findMany({
                 where: {
                     userId: user.id,
-                    status: ENROLLMENT_STATUS.COMPLETED,
-                    completedAt: {
-                        gte: windowStart,
-                        lte: windowEnd
-                    }
+                    OR: [
+                        {
+                            status: ENROLLMENT_STATUS.COMPLETED,
+                            completedAt: { gte: windowStart, lte: windowEnd }
+                        },
+                        {
+                            status: ENROLLMENT_STATUS.IN_PROGRESS
+                        }
+                    ]
+                },
+                include: {
+                    course: { select: { id: true, title: true } }
                 }
             });
         } else {
-            const courseIds = goal.courses.map(gc => gc.courseId);
-            completions = await prisma.userCourse.findMany({
+            // Fetch both completed and in-progress for SPECIFIC courses
+            enrollments = await prisma.userCourse.findMany({
                 where: {
                     userId: user.id,
-                    courseId: { in: courseIds },
-                    status: ENROLLMENT_STATUS.COMPLETED,
-                    completedAt: {
-                        gte: windowStart,
-                        lte: windowEnd
-                    }
+                    courseId: { in: courseIds }
+                },
+                include: {
+                    course: { select: { id: true, title: true } }
                 }
             });
         }
 
-        const isSuccess = completions.length >= goal.targetCount;
+        const completions = enrollments.filter(e => 
+            e.status === ENROLLMENT_STATUS.COMPLETED && 
+            (goal.type === 'SPECIFIC' || (e.completedAt >= windowStart && e.completedAt <= windowEnd))
+        );
+
+        const inProgress = enrollments.filter(e => e.status === ENROLLMENT_STATUS.IN_PROGRESS);
+        
+        const completionCount = completions.length;
+        const isSuccess = completionCount >= goal.targetCount;
+        
+        // Status logic
+        let userStatus = 'NOT_STARTED';
+        if (isSuccess) {
+            userStatus = 'COMPLETED';
+        } else if (completionCount > 0 || inProgress.length > 0) {
+            userStatus = 'IN_PROGRESS';
+        }
+
+        // Map detailed course progress
+        const courseProgress = goal.type === 'SPECIFIC' 
+            ? goal.courses.map(gc => {
+                const enrollment = enrollments.find(e => e.courseId === gc.courseId);
+                return {
+                    courseId: gc.courseId,
+                    title: gc.course.title,
+                    status: enrollment?.status || 'NOT_STARTED',
+                    progressPercent: enrollment?.progressPercent || 0,
+                    completedAt: enrollment?.completedAt || null
+                };
+            })
+            : completions.map(c => ({
+                courseId: c.courseId,
+                title: c.course.title,
+                status: 'COMPLETED',
+                progressPercent: 100,
+                completedAt: c.completedAt
+            }));
+
         report.push({
             userId: user.id,
             name: user.name,
             email: user.email,
             department: user.departmentRef?.name || '-',
-            completionCount: completions.length,
+            completionCount,
             targetCount: goal.targetCount,
             isSuccess,
-            completions: completions.map(c => ({
-                id: c.id,
-                completedAt: c.completedAt
-            }))
+            userStatus,
+            courseProgress
         });
     }
 

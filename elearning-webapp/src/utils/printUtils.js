@@ -229,6 +229,7 @@ export const getPrintReportStyles = () => `
     vertical-align: top;
     font-size: 13px;
     line-height: 1.55;
+    white-space: pre-line;
   }
 
   th {

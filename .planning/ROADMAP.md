@@ -10,6 +10,7 @@ Current focus: Stabilizing core education and admin features.
 - [x] Phase 1: Instructor Management & Presets
 - [x] Phase 2: Action Menu Positioning Fixes
 - [ ] Phase 3: Enhanced Course Discovery
+- [ ] Phase 4: Detailed Learning Goal Reporting
 
 ## Backlog
 
