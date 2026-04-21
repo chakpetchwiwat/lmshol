@@ -32,7 +32,7 @@ export const SKILL_LABELS = {
 };
 
 export const ENROLLMENT_STATUS_LABELS = {
-  COMPLETED: 'เรียนจบ',
+  COMPLETED: 'สำเร็จ',
   IN_PROGRESS: 'กำลังเรียน',
   NOT_STARTED: 'ยังไม่เริ่ม',
 };

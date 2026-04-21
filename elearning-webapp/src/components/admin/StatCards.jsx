@@ -29,7 +29,7 @@ const StatCards = ({ stats, isFullAdmin }) => {
           bg: 'bg-warning-bg',
         },
         {
-          title: 'เรียนจบแล้ว',
+          title: 'สำเร็จแล้ว',
           value: formatValue(completedEnrollments),
           detail: `จากทั้งหมด ${formatValue(totalEnrollments)} enrollment`,
           icon: <CheckCircle2 size={22} />,
@@ -55,7 +55,7 @@ const StatCards = ({ stats, isFullAdmin }) => {
           bg: 'bg-primary-light',
         },
         {
-          title: 'เรียนจบแล้ว',
+          title: 'สำเร็จแล้ว',
           value: formatValue(completedEnrollments),
           detail: `จากทั้งหมด ${formatValue(totalEnrollments)} enrollment`,
           icon: <CheckCircle2 size={22} />,
@@ -65,7 +65,7 @@ const StatCards = ({ stats, isFullAdmin }) => {
         {
           title: 'Completion Rate',
           value: `${completionRate}%`,
-          detail: 'อัตราการเรียนจบของทีมในช่วงเวลาที่เลือก',
+          detail: 'อัตราการเรียนสำเร็จของทีมในช่วงเวลาที่เลือก',
           icon: <BookOpen size={22} />,
           color: 'text-warning',
           bg: 'bg-warning-bg',

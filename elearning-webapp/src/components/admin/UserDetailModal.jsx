@@ -67,7 +67,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
     csvContent += `วันที่ส่งออก,${formatThaiDateTime(new Date())}\n\n`;
 
     if (activeTab === 'learning') {
-      csvContent += 'คอร์ส,หมวดหมู่,เริ่มเรียน,เรียนจบ,ความคืบหน้า,สถานะ\n';
+      csvContent += 'คอร์ส,หมวดหมู่,เริ่มเรียน,สำเร็จเมื่อ,ความคืบหน้า,สถานะ\n';
       data.forEach((item) => {
         const started = item.startedAt ? formatThaiDateTime(item.startedAt) : '-';
         const completed = item.completedAt ? formatThaiDateTime(item.completedAt) : '-';
@@ -117,7 +117,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
         { label: 'ปี', value: filterYear === FILTER_VALUES.ALL ? 'ทุกปี' : String(parseInt(filterYear, 10) + 543) },
       ],
       columns: activeTab === 'learning'
-        ? ['คอร์ส', 'หมวดหมู่', 'เริ่มเรียน', 'เรียนจบ', 'ความคืบหน้า', 'สถานะ']
+        ? ['คอร์ส', 'หมวดหมู่', 'เริ่มเรียน', 'สำเร็จเมื่อ', 'ความคืบหน้า', 'สถานะ']
         : ['ประเภท', 'ที่มา / การใช้งาน', 'หมายเหตุ', 'Point', 'เวลา'],
       rows: activeTab === 'learning'
         ? data.map((item) => ([
@@ -290,7 +290,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                               <th className="px-5 py-3 font-semibold">คอร์ส</th>
                               <th className="px-5 py-3 font-semibold">หมวดหมู่</th>
                               <th className="px-5 py-3 font-semibold">เริ่มเรียน</th>
-                              <th className="px-5 py-3 font-semibold">เรียนจบ</th>
+                              <th className="px-5 py-3 font-semibold">สำเร็จเมื่อ</th>
                               <th className="px-5 py-3 font-semibold">ความคืบหน้า</th>
                               <th className="px-5 py-3 font-semibold">สถานะ</th>
                             </tr>
@@ -371,7 +371,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                   <div className="rounded-3xl border border-slate-100 bg-slate-50/70 p-5">
                     <div className="mb-2 flex items-center gap-2 text-slate-400">
                       <CheckCircle2 size={16} />
-                      <span className="text-xs font-bold uppercase tracking-[0.18em]">เรียนจบ</span>
+                      <span className="text-xs font-bold uppercase tracking-[0.18em]">สำเร็จเมื่อ</span>
                     </div>
                     <div className="text-2xl font-black text-slate-900">
                       {enrollments.filter((item) => item.status === ENROLLMENT_STATUS.COMPLETED).length}

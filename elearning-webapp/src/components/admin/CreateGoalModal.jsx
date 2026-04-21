@@ -109,7 +109,7 @@ const CreateGoalModal = ({
 
             {formData.type === 'ANY' ? (
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">จำนวนคอร์สที่ต้องเรียนจบ</label>
+                <label className="text-sm font-bold text-slate-700">จำนวนคอร์สที่ต้องเรียนสำเร็จ</label>
                 <input 
                   required
                   type="number" 

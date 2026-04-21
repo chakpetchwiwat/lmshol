@@ -36,8 +36,8 @@ const GoalReportModal = ({
   if (!reportGoal) return null;
 
   const goalTargetLabel = goalSource?.type === 'ANY'
-    ? `เรียนจบ ${goalSource?.targetCount || 0} คอร์ส`
-    : `เรียนจบ ${targetCourses.length} คอร์สที่ระบุ`;
+    ? `สำเร็จ ${goalSource?.targetCount || 0} คอร์ส`
+    : `สำเร็จ ${targetCourses.length} คอร์สที่ระบุ`;
 
   const handlePrint = () => {
     openPrintReport({
@@ -62,7 +62,7 @@ const GoalReportModal = ({
         record.name || '-',
         record.department || '-',
         `${record.completionCount} / ${record.targetCount}`,
-        record.userStatus === 'COMPLETED' ? 'เรียนครบ' : (record.userStatus === 'IN_PROGRESS' ? 'กำลังเรียน' : 'ยังไม่เริ่ม'),
+        record.userStatus === 'COMPLETED' ? 'สำเร็จ' : (record.userStatus === 'IN_PROGRESS' ? 'กำลังเรียน' : 'ยังไม่เริ่ม'),
         (record.courseProgress || []).map(cp =>
           `${cp.title}: ${cp.status === 'COMPLETED' ? 'เสร็จสิ้น' : (cp.progressPercent + '%')}`
         ).join('\n')
@@ -114,7 +114,7 @@ const GoalReportModal = ({
                       <h4 className="text-sm font-black uppercase tracking-[0.18em] text-slate-500">คอร์สในเป้าหมาย</h4>
                       <p className="mt-1 text-sm font-semibold text-slate-700">
                         {goalSource?.type === 'ANY'
-                          ? 'เป้าหมายนี้นับทุกคอร์สที่ผู้เรียนเรียนจบภายในช่วงเวลาของเป้าหมาย'
+                          ? 'เป้าหมายนี้นับทุกคอร์สที่ผู้เรียนเรียนสำเร็จภายในช่วงเวลาของเป้าหมาย'
                           : `ต้องเรียนคอร์สที่ระบุ ${targetCourses.length} รายการ`}
                       </p>
                     </div>
@@ -122,7 +122,7 @@ const GoalReportModal = ({
 
                   {goalSource?.type === 'ANY' ? (
                     <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-500">
-                      ไม่ได้ล็อกคอร์สเฉพาะ ระบบจะนับทุกคอร์สที่เรียนจบตามเงื่อนไขเป้าหมายนี้
+                      ไม่ได้ล็อกคอร์สเฉพาะ ระบบจะนับทุกคอร์สที่เรียนสำเร็จตามเงื่อนไขเป้าหมายนี้
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2">
@@ -144,7 +144,7 @@ const GoalReportModal = ({
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-center">
-                    <p className="mb-1 text-[10px] font-bold uppercase text-emerald-500">เรียนครบทั้งหมด</p>
+                    <p className="mb-1 text-[10px] font-bold uppercase text-emerald-500">สำเร็จตามเป้าหมาย</p>
                     <p className="text-3xl font-black text-emerald-600">{statusCounts.COMPLETED}</p>
                   </div>
                   <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-center">
@@ -202,7 +202,7 @@ const GoalReportModal = ({
                                       />
                                     </div>
                                     <span className={`min-w-[45px] text-[10px] font-bold ${cp.status === 'COMPLETED' ? 'text-emerald-600' : (cp.status === 'IN_PROGRESS' ? 'text-blue-500' : 'text-slate-400')}`}>
-                                      {cp.status === 'COMPLETED' ? 'เรียนจบ' : (cp.status === 'IN_PROGRESS' ? `${Math.round(cp.progressPercent)}%` : 'ยังไม่เริ่ม')}
+                                      {cp.status === 'COMPLETED' ? 'สำเร็จ' : (cp.status === 'IN_PROGRESS' ? `${Math.round(cp.progressPercent)}%` : 'ยังไม่เริ่ม')}
                                     </span>
                                   </div>
                                 </div>
@@ -212,7 +212,7 @@ const GoalReportModal = ({
                           <td className="p-4 text-right">
                             {record.userStatus === 'COMPLETED' ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
-                                <CheckCircle2 size={14} /> เรียนครบ
+                                <CheckCircle2 size={14} /> สำเร็จ
                               </span>
                             ) : record.userStatus === 'IN_PROGRESS' ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-600">

@@ -19,7 +19,6 @@ import DepartmentLeaderboard from '../../components/admin/DepartmentLeaderboard'
 import IncentiveROITrend from '../../components/admin/IncentiveROITrend';
 import RiskIdentificationWidget from '../../components/admin/RiskIdentificationWidget';
 import DashboardInsightModal from '../../components/admin/DashboardInsightModal';
-import DashboardPerformanceTable from '../../components/admin/DashboardPerformanceTable';
 import UserDetailModal from '../../components/admin/UserDetailModal';
 import UserLink from '../../components/admin/UserLink';
 import * as InsightConfigs from './InsightConfigs';
@@ -224,7 +223,7 @@ const Dashboard = () => {
         { label: 'แผนก', value: selectedDepartmentName },
         { label: 'มุมมอง', value: isManagerView ? 'Manager' : 'Superadmin' },
       ],
-      columns: ['ผู้เรียน', 'แผนก', 'คอร์ส', 'หมวดหมู่', 'สถานะ', 'คะแนน', 'เริ่มเรียน', 'จบเมื่อ'],
+      columns: ['ผู้เรียน', 'แผนก', 'คอร์ส', 'หมวดหมู่', 'สถานะ', 'คะแนน', 'เริ่มเรียน', 'สำเร็จเมื่อ'],
       rows: performanceRows.map((row) => ([
         safeValue(row.userName),
         safeValue(row.department),

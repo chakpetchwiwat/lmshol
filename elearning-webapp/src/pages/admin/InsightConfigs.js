@@ -41,7 +41,7 @@ export const getTypeInsightConfig = (group, renderUserLink) => ({
     { key: 'courseTitle', label: 'คอร์ส' },
     { key: 'status', label: 'สถานะ', render: (row) => ENROLLMENT_STATUS_LABELS[row.status] || row.status },
     { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
-    { key: 'completedAt', label: 'จบเมื่อ', render: (row) => row.completedAt ? formatThaiDateTime(row.completedAt, true) : '-' },
+    { key: 'completedAt', label: 'สำเร็จเมื่อ', render: (row) => row.completedAt ? formatThaiDateTime(row.completedAt, true) : '-' },
   ],
   rows: group.details || [],
   emptyMessage: 'ไม่พบ enrollment ใน competency group นี้',
@@ -78,7 +78,7 @@ export const getCourseInsightConfig = (course, selectedDepartmentName, renderUse
     { key: 'status', label: 'สถานะ', render: (row) => ENROLLMENT_STATUS_LABELS[row.status] || row.status },
     { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
     { key: 'startedAt', label: 'เริ่มเรียน', render: (row) => formatThaiDateTime(row.startedAt, true) },
-    { key: 'completedAt', label: 'จบเมื่อ', render: (row) => row.completedAt ? formatThaiDateTime(row.completedAt, true) : '-' },
+    { key: 'completedAt', label: 'สำเร็จเมื่อ', render: (row) => row.completedAt ? formatThaiDateTime(row.completedAt, true) : '-' },
   ],
   rows: course.details || [],
   emptyMessage: 'ยังไม่มีผู้ลงทะเบียนในคอร์สนี้',
@@ -114,8 +114,8 @@ export const getDepartmentInsightConfig = (department, periodLabel, renderUserLi
   ],
   columns: [
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-    { key: 'email', label: 'อีเมล' },
-    { key: 'completedCourses', label: 'จบแล้ว' },
+    { key: 'tier', label: 'ตำแหน่ง' },
+    { key: 'completedCourses', label: 'สำเร็จแล้ว' },
     { key: 'totalCourses', label: 'ทั้งหมด' },
     { key: 'avgScore', label: 'คะแนนเฉลี่ย', render: (row) => row.avgScore ?? '-' },
   ],
@@ -125,14 +125,14 @@ export const getDepartmentInsightConfig = (department, periodLabel, renderUserLi
 
 export const getRoiInsightConfig = (bucket, selectedDepartmentName, renderUserLink) => ({
   title: `ROI Trend: ${bucket.label || bucket.month}`,
-  subtitle: 'รายละเอียดการเรียนจบและการได้รับคะแนนสะสมในช่วงเวลานี้',
+  subtitle: 'รายละเอียดการเรียนสำเร็จและการได้รับคะแนนสะสมในช่วงเวลานี้',
   summary: [
     { label: 'Learning Completions', value: bucket.completions || 0 },
     { label: 'Points Distributed', value: bucket.points || 0 },
     { label: 'จำนวนรายการ', value: bucket.details?.length || 0 },
   ],
   columns: [
-    { key: 'kind', label: 'ประเภท', render: (row) => row.kind === 'completion' ? 'เรียนจบ' : 'Points' },
+    { key: 'kind', label: 'ประเภท', render: (row) => row.kind === 'completion' ? 'สำเร็จ' : 'Points' },
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
     { key: 'department', label: 'แผนก' },
     { key: 'courseTitle', label: 'รายการ' },
