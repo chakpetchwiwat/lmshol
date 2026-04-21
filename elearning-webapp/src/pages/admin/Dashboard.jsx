@@ -21,6 +21,7 @@ import RiskIdentificationWidget from '../../components/admin/RiskIdentificationW
 import DashboardInsightModal from '../../components/admin/DashboardInsightModal';
 import UserDetailModal from '../../components/admin/UserDetailModal';
 import UserLink from '../../components/admin/UserLink';
+import CustomSelect from '../../components/common/CustomSelect';
 import * as InsightConfigs from './InsightConfigs';
 
 
@@ -360,40 +361,37 @@ const Dashboard = () => {
                 <span>Filter</span>
               </div>
 
-              <select
+              <CustomSelect
                 value={filters.month}
                 onChange={handleFilterChange('month')}
-                className="min-h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 outline-none transition-all focus:border-primary/40"
-              >
-                {MONTH_OPTIONS.map((month) => (
-                  <option key={month.value || 'all'} value={month.value}>{month.label}</option>
-                ))}
-              </select>
+                size="sm"
+                fullWidth={false}
+                className="min-w-[140px]"
+                options={MONTH_OPTIONS}
+              />
 
-              <select
+              <CustomSelect
                 value={filters.year}
                 onChange={handleFilterChange('year')}
-                className="min-h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 outline-none transition-all focus:border-primary/40"
-              >
-                {yearOptions.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
+                size="sm"
+                fullWidth={false}
+                className="min-w-[100px]"
+                options={yearOptions.map((year) => ({ value: year, label: year }))}
+              />
 
               {isFullAdmin ? (
-                <div className="relative">
-                  <Building2 size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <select
-                    value={filters.departmentId}
-                    onChange={handleFilterChange('departmentId')}
-                    className="min-h-11 rounded-2xl border border-slate-200 bg-white py-0 pl-11 pr-4 text-sm font-medium text-slate-700 outline-none transition-all focus:border-primary/40"
-                  >
-                    <option value="">ทุกแผนก</option>
-                    {departments.map((department) => (
-                      <option key={department.id} value={department.id}>{department.name}</option>
-                    ))}
-                  </select>
-                </div>
+                <CustomSelect
+                  value={filters.departmentId}
+                  onChange={handleFilterChange('departmentId')}
+                  size="sm"
+                  fullWidth={false}
+                  className="min-w-[160px]"
+                  placeholder="ทุกแผนก"
+                  options={[
+                    { value: '', label: 'ทุกแผนก' },
+                    ...departments.map((d) => ({ value: d.id, label: d.name }))
+                  ]}
+                />
               ) : null}
             </div>
 
