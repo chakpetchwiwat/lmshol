@@ -536,13 +536,7 @@ const Dashboard = () => {
 
       {isManagerView ? (
         <>
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_0.9fr]">
-            <DashboardPerformanceTable
-              rows={performanceRows}
-              title="ผลการเรียนรายบุคคล"
-              subtitle="ดูว่าใครเรียนคอร์สไหน จบหรือยัง และได้กี่คะแนน"
-            />
-
+          <div className="grid grid-cols-1 gap-6">
             <RiskIdentificationWidget
               data={advancedStats?.atRisk}
               onSelectRisk={(risk) => openRiskInsight(null, risk)}
@@ -628,11 +622,7 @@ const Dashboard = () => {
             />
           </div>
 
-          <DashboardPerformanceTable
-            rows={performanceRows}
-            title="ผลการเรียนรายบุคคล"
-            subtitle="ใช้เป็นฐานข้อมูลกลางสำหรับ audit, coaching และพิมพ์รายงาน PDF"
-          />
+
         </>
       )}
 
