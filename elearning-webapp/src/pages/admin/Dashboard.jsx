@@ -41,8 +41,14 @@ const buildYearOptions = (currentYear) => Array.from({ length: 5 }, (_, index) =
 const buildPrintRowsFromInsight = (insight) => (
   (insight?.rows || []).map((row) => (
     (insight.columns || []).map((column) => {
-      const rawValue = typeof column.render === 'function' ? column.render(row) : row[column.key];
-      return safeValue(rawValue);
+      const renderedValue = typeof column.render === 'function' ? column.render(row) : row[column.key];
+
+      // If the rendered value is a React component/object, fallback to the raw data key for printing
+      if (renderedValue && typeof renderedValue === 'object' && !Array.isArray(renderedValue)) {
+        return safeValue(row[column.key]);
+      }
+
+      return safeValue(renderedValue);
     })
   ))
 );
