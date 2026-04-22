@@ -444,7 +444,10 @@ const buildAtRiskLearners = async ({ learnerWhere, scopeFilters, now, warningWin
     const activeGoals = await prisma.learningGoal.findMany({
         where: {
             status: GOAL_STATUS.ACTIVE,
-            expiryDate: { lte: warningWindow },
+            expiryDate: {
+                gte: now,
+                lte: warningWindow
+            },
             ...(scopeFilters.departmentId ? {
                 OR: [
                     { scope: GOAL_SCOPES.GLOBAL },
@@ -601,6 +604,7 @@ const buildAtRiskLearners = async ({ learnerWhere, scopeFilters, now, warningWin
                 email: user.email,
                 department: user.departmentRef?.name || user.department || null,
                 courseId: goal.id,
+                goalId: goal.id,
                 courseTitle: goal.title,
                 deadline: goal.expiryDate,
                 isOverdue: goal.expiryDate ? goal.expiryDate < now : false,
@@ -612,7 +616,7 @@ const buildAtRiskLearners = async ({ learnerWhere, scopeFilters, now, warningWin
 
     return atRisk
         .sort((left, right) => (left.deadline || 0) - (right.deadline || 0))
-        .slice(0, 50);
+        .slice(0, 500);
 };
 
 const ensureReferenceName = async (tx, modelName, id) => {
@@ -722,8 +726,23 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
 
     const tierId = normalizeNullableId(baseData.tierId);
     if (tierId !== undefined) {
-        const tier = await ensureReferenceName(tx, 'tier', tierId);
-        data.tierId = tier?.id || null;
+        if (tierId) {
+            const tier = await tx.tier.findUnique({
+                where: { id: tierId },
+                select: { id: true, accessAdmin: true }
+            });
+            if (!tier) throw new Error('Tier not found');
+            data.tierId = tier.id;
+
+            // Auto-sync role based on tier's accessAdmin
+            // Only sync if current role is not ADMIN to prevent downgrading superadmins
+            const targetRole = tier.accessAdmin ? USER_ROLES.MANAGER : USER_ROLES.USER;
+            if (data.role !== USER_ROLES.ADMIN) {
+                data.role = targetRole;
+            }
+        } else {
+            data.tierId = null;
+        }
     }
 
     if (baseData.employmentDate !== undefined) {
@@ -1102,7 +1121,16 @@ const getDashboardStats = async (authUser, filters = {}) => {
         const learnerWhere = buildLearnerWhere(scopeFilters.departmentId);
         const visibleCourseWhere = buildVisibleCourseWhereForDashboard(scopeFilters.departmentId);
 
-        const [totalUsers, activeCourses, categories, enrollments, selectedDepartment] = await Promise.all([
+        const [
+            totalUsers, 
+            activeCourses, 
+            categories, 
+            enrollmentCount, 
+            completedEnrollmentCount, 
+            enrollments, 
+            selectedDepartment, 
+            dashboardGoals
+        ] = await Promise.all([
             prisma.user.count({ where: learnerWhere }),
             prisma.course.count({ where: visibleCourseWhere }),
             prisma.category.findMany({
@@ -1112,12 +1140,28 @@ const getDashboardStats = async (authUser, filters = {}) => {
                     }
                 }
             }),
+            prisma.userCourse.count({
+                where: {
+                    user: learnerWhere,
+                    course: visibleCourseWhere,
+                    ...buildDateOverlapWhere(period.start, period.end)
+                }
+            }),
+            prisma.userCourse.count({
+                where: {
+                    user: learnerWhere,
+                    course: visibleCourseWhere,
+                    status: ENROLLMENT_STATUS.COMPLETED,
+                    ...buildDateOverlapWhere(period.start, period.end)
+                }
+            }),
             prisma.userCourse.findMany({
                 where: {
                     user: learnerWhere,
                     course: visibleCourseWhere,
                     ...buildDateOverlapWhere(period.start, period.end)
                 },
+                // Fetch all for now to keep charts accurate, but with optimized counts above
                 include: {
                     user: {
                         select: {
@@ -1158,8 +1202,31 @@ const getDashboardStats = async (authUser, filters = {}) => {
                     where: { id: scopeFilters.departmentId },
                     select: { id: true, name: true }
                 })
-                : Promise.resolve(null)
+                : Promise.resolve(null),
+            prisma.learningGoal.findMany({
+                where: {
+                    status: GOAL_STATUS.ACTIVE,
+                    ...(scopeFilters.departmentId ? {
+                        OR: [
+                            { scope: GOAL_SCOPES.GLOBAL },
+                            { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId }
+                        ]
+                    } : {})
+                },
+                include: {
+                    courses: {
+                        select: {
+                            courseId: true
+                        }
+                    }
+                }
+            })
         ]);
+
+        const totalEnrollments = enrollmentCount || 0;
+        const completedEnrollments = completedEnrollmentCount || 0;
+        const recentEnrollments = enrollments || [];
+        const activeGoals = dashboardGoals || [];
 
         const enrollmentUserIds = [...new Set(enrollments.map((enrollment) => enrollment.userId))];
         const enrollmentCourseIds = [...new Set(enrollments.map((enrollment) => enrollment.courseId))];
@@ -1218,11 +1285,72 @@ const getDashboardStats = async (authUser, filters = {}) => {
             };
         });
 
-        const totalEnrollments = learnerPerformance.length;
-        const completedEnrollments = learnerPerformance.filter((item) => item.status === ENROLLMENT_STATUS.COMPLETED).length;
         const scoredRecords = learnerPerformance.filter((item) => typeof item.score === 'number');
         const averageQuizScore = scoredRecords.length
             ? roundToOneDecimal(scoredRecords.reduce((sum, item) => sum + item.score, 0) / scoredRecords.length)
+            : 0;
+
+        // GOAL COMPLIANCE CALCULATION
+        let goalTotalAssignments = 0;
+        let goalSuccessfulAssignments = 0;
+
+        if (activeGoals.length > 0) {
+            const usersForCompliance = await prisma.user.findMany({
+                where: learnerWhere,
+                select: {
+                    id: true,
+                    departmentId: true
+                }
+            });
+
+            const usersByDept = usersForCompliance.reduce((acc, user) => {
+                const deptId = user.departmentId || '__NONE__';
+                if (!acc[deptId]) acc[deptId] = [];
+                acc[deptId].push(user.id);
+                return acc;
+            }, {});
+
+            const allComplianceUserIds = usersForCompliance.map(u => u.id);
+            const userCompletionCountMap = enrollments
+                .filter(e => e.status === ENROLLMENT_STATUS.COMPLETED)
+                .reduce((acc, e) => {
+                    if (!acc[e.userId]) acc[e.userId] = new Set();
+                    acc[e.userId].add(e.courseId);
+                    return acc;
+                }, {});
+
+            activeGoals.forEach(goal => {
+                const targetUserIds = goal.scope === GOAL_SCOPES.GLOBAL
+                    ? allComplianceUserIds
+                    : (usersByDept[goal.departmentId] || []);
+
+                if (targetUserIds.length === 0) return;
+
+                const goalCourseIds = goal.courses.map(c => c.courseId);
+                
+                targetUserIds.forEach(userId => {
+                    goalTotalAssignments++;
+                    const userCompletedCourseIds = userCompletionCountMap[userId] || new Set();
+                    
+                    let isGoalMet = false;
+                    if (goal.type === 'ANY') {
+                        // For ANY goals, we need to check completions within the goal's lifespan
+                        // Since dashboard enrollments are already period-filtered, we check count
+                        // (This is an approximation for the dashboard view)
+                        const count = [...userCompletedCourseIds].length; 
+                        isGoalMet = count >= goal.targetCount;
+                    } else {
+                        const completedSpecificCount = goalCourseIds.filter(id => userCompletedCourseIds.has(id)).length;
+                        isGoalMet = completedSpecificCount >= goal.targetCount;
+                    }
+
+                    if (isGoalMet) goalSuccessfulAssignments++;
+                });
+            });
+        }
+
+        const complianceRate = goalTotalAssignments > 0
+            ? roundToOneDecimal((goalSuccessfulAssignments / goalTotalAssignments) * 100)
             : 0;
 
         const bucketTemplate = buildTimeBuckets(period).map((bucket) => ({
@@ -1363,6 +1491,11 @@ const getDashboardStats = async (authUser, filters = {}) => {
             totalEnrollments,
             completedEnrollments,
             averageQuizScore,
+            complianceRate,
+            goalStats: {
+                totalAssignments: goalTotalAssignments,
+                successfulAssignments: goalSuccessfulAssignments
+            },
             learnerPerformance,
             popularCourses,
             weeklyActivity,
@@ -1720,8 +1853,9 @@ const getUsers = async (authUser) => {
         where: buildAdminManagedUsersWhere(actor),
         include: userInclude,
         orderBy: [
+            { tier: { order: 'asc' } },
             { role: 'asc' },
-            { pointsBalance: 'desc' }
+            { name: 'asc' }
         ]
     });
 

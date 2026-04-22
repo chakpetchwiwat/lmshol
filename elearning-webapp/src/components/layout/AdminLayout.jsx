@@ -61,6 +61,7 @@ const AdminLayout = () => {
 
   const menuItems = [
     { path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
+    { path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' },
     ...(isFullAdmin
       ? [{ path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' }]
       : []),
@@ -68,9 +69,8 @@ const AdminLayout = () => {
     ...(isFullAdmin
       ? [{ path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' }]
       : []),
-    { path: '/admin/users', icon: <Users size={20} />, label: 'ผู้ใช้งาน' },
-    { path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' },
     { path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายการ Redeem' },
+    { path: '/admin/users', icon: <Users size={20} />, label: 'ผู้ใช้งาน' },
   ];
 
   return (

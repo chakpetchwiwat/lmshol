@@ -9,6 +9,7 @@ const GoalReportModal = ({
   reportLoading,
   onClose,
 }) => {
+  const [filterStatus, setFilterStatus] = React.useState('ALL');
   const goalSource = reportData?.goal || reportGoal;
   const targetCourses = useMemo(() => (
     (goalSource?.courses || [])
@@ -142,7 +143,11 @@ const GoalReportModal = ({
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+                    <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">พนักงานทั้งหมด</p>
+                    <p className="text-3xl font-black text-slate-700">{reportData?.report?.length || 0}</p>
+                  </div>
                   <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-center">
                     <p className="mb-1 text-[10px] font-bold uppercase text-emerald-500">สำเร็จตามเป้าหมาย</p>
                     <p className="text-3xl font-black text-emerald-600">{statusCounts.COMPLETED}</p>
@@ -151,9 +156,33 @@ const GoalReportModal = ({
                     <p className="mb-1 text-[10px] font-bold uppercase text-amber-500">กำลังเรียน</p>
                     <p className="text-3xl font-black text-amber-600">{statusCounts.IN_PROGRESS}</p>
                   </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
-                    <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">ยังไม่เริ่ม</p>
-                    <p className="text-3xl font-black text-slate-800">{statusCounts.NOT_STARTED}</p>
+                  <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-center">
+                    <p className="mb-1 text-[10px] font-bold uppercase text-rose-500">ยังไม่เริ่ม</p>
+                    <p className="text-3xl font-black text-rose-600">{statusCounts.NOT_STARTED}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <h4 className="text-sm font-black uppercase tracking-widest text-slate-400">รายชื่อพนักงาน</h4>
+                  <div className="flex gap-1 rounded-2xl bg-slate-100 p-1">
+                    {[
+                      { key: 'ALL', label: 'ทั้งหมด' },
+                      { key: 'COMPLETED', label: 'สำเร็จ' },
+                      { key: 'IN_PROGRESS', label: 'กำลังเรียน' },
+                      { key: 'NOT_STARTED', label: 'ยังไม่เริ่ม' }
+                    ].map((tab) => (
+                      <button
+                        key={tab.key}
+                        onClick={() => setFilterStatus(tab.key)}
+                        className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
+                          filterStatus === tab.key 
+                            ? 'bg-white text-primary shadow-sm' 
+                            : 'text-slate-500 hover:bg-white/50'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
@@ -169,7 +198,7 @@ const GoalReportModal = ({
                       </tr>
                     </thead>
                     <tbody>
-                      {reportData.report.map((record) => (
+                      {(reportData.report || []).filter(r => filterStatus === 'ALL' || r.userStatus === filterStatus).map((record) => (
                         <tr key={record.userId} className="border-b border-slate-50 transition-colors hover:bg-slate-50/50">
                           <td className="p-4">
                             <div className="font-bold text-slate-800">{record.name}</div>
@@ -219,7 +248,7 @@ const GoalReportModal = ({
                                 <Search size={14} /> กำลังเรียน
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-400">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-3 py-1 text-xs font-bold text-rose-600">
                                 <XCircle size={14} /> ยังไม่เริ่ม
                               </span>
                             )}

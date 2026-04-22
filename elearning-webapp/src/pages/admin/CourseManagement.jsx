@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { toUTCISOString, toLocalInputValue } from '../../utils/dateUtils';
 import { compressImage } from '../../utils/imageUtils';
@@ -11,6 +11,7 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
 import CategoryManagementModal from '../../components/admin/CategoryManagementModal';
+import InstructorPresetModal from '../../components/admin/InstructorPresetModal';
 import CourseFilters from '../../components/admin/CourseFilters';
 import CourseTable from '../../components/admin/CourseTable';
 import CourseAttendanceModal from '../../components/admin/CourseAttendanceModal';
@@ -92,6 +93,7 @@ const CourseManagement = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [editorImageUploading, setEditorImageUploading] = useState(false);
+  const [showInstructorPresetModal, setShowInstructorPresetModal] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -256,6 +258,25 @@ const CourseManagement = () => {
     }
   };
 
+  const handleInstructorPresetDelete = async (id, name) => {
+    const ok = await confirm({
+      title: 'ยืนยันการลบข้อมูลวิทยากร',
+      message: `ต้องการลบข้อมูลวิทยากร "${name}" ใช่หรือไม่?`,
+      confirmLabel: 'ลบ',
+      variant: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      await adminAPI.deleteInstructorPreset(id);
+      toast.success('ลบข้อมูลวิทยากรเรียบร้อย');
+      await fetchData();
+    } catch (error) {
+      console.error('Delete instructor preset error:', error);
+      toast.error(error.response?.data?.message || 'ลบข้อมูลวิทยากรไม่สำเร็จ');
+    }
+  };
+
   const handleSaveLesson = async (event) => {
     event.preventDefault();
 
@@ -414,6 +435,10 @@ const CourseManagement = () => {
           <button type="button" onClick={() => { setShowCategoryModal(true); }} className="btn btn-outline">
             จัดการหมวดหมู่
           </button>
+          <button type="button" onClick={() => setShowInstructorPresetModal(true)} className="btn btn-outline">
+            <Sparkles size={18} />
+            จัดการวิทยากร
+          </button>
           <button type="button" onClick={openAddCourse} className="btn btn-primary shadow-lg shadow-primary/20">
             <Plus size={18} />
             สร้างคอร์สใหม่
@@ -508,6 +533,24 @@ const CourseManagement = () => {
         onDocUpload={handleDocUpload}
         onEditorImageUpload={handleEditorImageUpload}
         isEditing={!!editingLesson}
+      />
+
+      <InstructorPresetModal
+        isOpen={showInstructorPresetModal}
+        presets={instructorPresets}
+        loading={loading}
+        onClose={() => setShowInstructorPresetModal(false)}
+        onCreate={async (payload) => {
+          await adminAPI.createInstructorPreset(payload);
+          toast.success('สร้างข้อมูลวิทยากรเรียบร้อย');
+          await fetchData();
+        }}
+        onUpdate={async (id, payload) => {
+          await adminAPI.updateInstructorPreset(id, payload);
+          toast.success('อัปเดตข้อมูลวิทยากรเรียบร้อย');
+          await fetchData();
+        }}
+        onDelete={handleInstructorPresetDelete}
       />
       <ConfirmDialog {...ConfirmDialogProps} />
     </div>

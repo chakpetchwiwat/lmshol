@@ -23,6 +23,7 @@ import UserDetailModal from '../../components/admin/UserDetailModal';
 import UserLink from '../../components/admin/UserLink';
 import CustomSelect from '../../components/common/CustomSelect';
 import * as InsightConfigs from './InsightConfigs';
+import GoalReportModal from '../../components/admin/GoalReportModal';
 
 
 
@@ -30,6 +31,18 @@ import * as InsightConfigs from './InsightConfigs';
 
 const safeValue = (value) => {
   if (value === null || value === undefined || value === '') return '-';
+  
+  // Handle objects and React elements
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    // If it's a React element (has props), try to get children
+    if (value.props && value.props.children) {
+      return safeValue(value.props.children);
+    }
+    
+    // Fallback to common display properties
+    return value.name || value.title || value.label || String(value);
+  }
+  
   return String(value);
 };
 
@@ -40,8 +53,21 @@ const buildYearOptions = (currentYear) => Array.from({ length: 5 }, (_, index) =
 const buildPrintRowsFromInsight = (insight) => (
   (insight?.rows || []).map((row) => (
     (insight.columns || []).map((column) => {
-      const rawValue = typeof column.render === 'function' ? column.render(row) : row[column.key];
-      return safeValue(rawValue);
+      const renderedValue = typeof column.render === 'function' ? column.render(row) : row[column.key];
+
+      // If the rendered value is a React component/object, fallback to the raw data key for printing
+      if (renderedValue && typeof renderedValue === 'object' && !Array.isArray(renderedValue)) {
+        // Try to get a string value from the row data instead of the component
+        const rawValue = row[column.key];
+        if (rawValue && typeof rawValue !== 'object') {
+          return safeValue(rawValue);
+        }
+        
+        // If the raw value is also an object, let safeValue handle it
+        return safeValue(renderedValue);
+      }
+
+      return safeValue(renderedValue);
     })
   ))
 );
@@ -66,6 +92,9 @@ const Dashboard = () => {
   const [showUserDetailModal, setShowUserDetailModal] = useState(false);
   const [userDetailLoading, setUserDetailLoading] = useState(false);
   const [selectedUserDetail, setSelectedUserDetail] = useState(null);
+  const [reportGoal, setReportGoal] = useState(null);
+  const [reportData, setReportData] = useState(null);
+  const [reportLoading, setReportLoading] = useState(false);
 
   const yearOptions = useMemo(() => buildYearOptions(now.getFullYear()), [now]);
 
@@ -268,9 +297,7 @@ const Dashboard = () => {
     });
   };
 
-  const openInsight = (nextInsight) => {
-    setInsight(nextInsight);
-  };
+
 
   const handleViewUser = async (userId) => {
     if (!userId) return;
@@ -294,6 +321,36 @@ const Dashboard = () => {
       userName={row.userName}
       onViewUser={handleViewUser}
     />
+  );
+
+  const handleViewGoalReport = async (goal) => {
+    if (!goal || !goal.id) return;
+    try {
+      setReportGoal(goal);
+      setReportLoading(true);
+      const response = await adminAPI.getGoalReport(goal.id);
+      setReportData(response.data);
+    } catch (error) {
+      console.error('Fetch goal report error:', error);
+      setErrorMessage('ไม่สามารถโหลดรายงานเป้าหมายได้');
+      setReportGoal(null);
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
+  const renderGoalLink = (row) => (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleViewGoalReport({ id: row.goalId || row.courseId, title: row.courseTitle });
+      }}
+      className="inline-block text-left font-bold text-primary hover:text-primary-dark hover:underline transition-all cursor-pointer relative z-[5]"
+    >
+      {row.courseTitle}
+    </button>
   );
 
   const openWeeklyInsight = (bucket) => {
@@ -334,7 +391,7 @@ const Dashboard = () => {
   const openRiskInsight = (riskRows, singleRisk = null) => {
     const rows = Array.isArray(riskRows) ? riskRows : singleRisk ? [singleRisk] : [];
     if (!rows.length) return;
-    setInsight(InsightConfigs.getRiskInsightConfig(rows, selectedDepartmentName, renderUserLink, singleRisk));
+    setInsight(InsightConfigs.getRiskInsightConfig(rows, selectedDepartmentName, renderUserLink, renderGoalLink, singleRisk));
   };
 
   const managerSubtitle = `${selectedDepartmentName} • โฟกัสเฉพาะผลการเรียนรายบุคคล คะแนนสอบ และความเสี่ยงในการเรียนไม่จบ`;
@@ -526,6 +583,16 @@ const Dashboard = () => {
         onClose={() => {
           setShowUserDetailModal(false);
           setSelectedUserDetail(null);
+        }}
+      />
+
+      <GoalReportModal
+        reportGoal={reportGoal}
+        reportData={reportData}
+        reportLoading={reportLoading}
+        onClose={() => {
+          setReportGoal(null);
+          setReportData(null);
         }}
       />
     </div>

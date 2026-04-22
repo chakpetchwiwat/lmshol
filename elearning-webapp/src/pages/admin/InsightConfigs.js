@@ -143,7 +143,7 @@ export const getRoiInsightConfig = (bucket, selectedDepartmentName, renderUserLi
   emptyMessage: 'ยังไม่มีข้อมูล ROI ในช่วงเวลานี้',
 });
 
-export const getRiskInsightConfig = (rows, selectedDepartmentName, renderUserLink, singleRisk = null) => ({
+export const getRiskInsightConfig = (rows, selectedDepartmentName, renderUserLink, renderGoalLink, singleRisk = null) => ({
   title: singleRisk ? `Risk: ${singleRisk.userName}` : 'ผู้เรียนที่เสี่ยงไม่บรรลุเป้าหมาย',
   subtitle: 'ผู้เรียนที่ทำคะแนนหรือจำนวนคอร์สไม่ครบตามเป้าหมาย (Goal) ที่ใกล้หมดอายุ',
   summary: [
@@ -153,7 +153,7 @@ export const getRiskInsightConfig = (rows, selectedDepartmentName, renderUserLin
   columns: [
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
     { key: 'department', label: 'แผนก' },
-    { key: 'courseTitle', label: 'เป้าหมาย (Goal)' },
+    { key: 'courseTitle', label: 'เป้าหมาย (Goal)', render: renderGoalLink },
     { key: 'gapCount', label: 'ขาดอีก (รายการ)', render: (row) => row.gapCount > 0 ? `${row.gapCount} คอร์ส` : '-' },
     { key: 'deadline', label: 'วันหมดอายุเป้าหมาย', render: (row) => formatThaiDateTime(row.deadline, true) },
     { key: 'isOverdue', label: 'สถานะ', render: (row) => row.isOverdue ? 'เลยกำหนด' : 'ใกล้หมดเวลา' },

@@ -209,6 +209,7 @@ export const adminAPI = {
   // Goals
   getGoals: () => api.get('/goals?includeExpired=true'),
   createGoal: (data) => api.post('/goals', data),
+  updateGoal: (id, data) => api.put(`/goals/${id}`, data),
   archiveGoal: (id) => api.put(`/goals/${id}/archive`),
   republishGoal: (id) => api.put(`/goals/${id}/republish`),
   deleteGoal: (id) => api.delete(`/goals/${id}`),

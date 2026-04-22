@@ -154,13 +154,14 @@ const buildUserManagementWhere = (actor, extraWhere = {}) => {
  * End users (and managers) see only PUBLISHED and within scope.
  */
 const buildVisibilityWhere = (actor, { status = ENTITY_STATUS.PUBLISHED, referenceDate = new Date() } = {}) => {
-    // Admin override: See everything regardless of scope or temporary status
-    if (actor.isAdmin) {
-        return {};
-    }
-
     // Temporary items visibility logic
     const temporaryWhere = buildTimedVisibilityWhere({ referenceDate });
+
+    // Admin override: Bypass scope and status, but STILL honor timed visibility (archived/expired)
+    // to ensure admins see a clean view in user-facing modules.
+    if (actor.isAdmin) {
+        return temporaryWhere;
+    }
 
     const departmentConditions = [{ departmentAccess: { none: {} } }];
     if (actor.departmentId) {
@@ -196,12 +197,13 @@ const buildVisibilityWhere = (actor, { status = ENTITY_STATUS.PUBLISHED, referen
  */
 const canAccessEntity = (actor, entity, referenceDate = new Date()) => {
     if (!entity) return true;
-    if (actor.isAdmin) return true;
 
-    // 1. Temporary status check
+    // 1. Temporary status check - Always check this even for admins to keep user views clean
     if (isTimedEntityExpired(entity, { referenceDate })) {
         return false;
     }
+
+    if (actor.isAdmin) return true;
 
     // 2. Draft check for non-admins
     if (entity.status && entity.status !== ENTITY_STATUS.PUBLISHED) {

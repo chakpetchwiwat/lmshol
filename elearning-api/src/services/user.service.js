@@ -1132,7 +1132,13 @@ const getCategories = async (userId) => {
     const userContext = await getVisibleCourseQuery(userId);
     const referenceDate = new Date();
     const categories = await prisma.category.findMany({
-        where: buildCategoryVisibilityWhere(userContext, referenceDate),
+        where: {
+            AND: [
+                buildCategoryVisibilityWhere(userContext, referenceDate),
+                // Force-hide expired/archived categories even for admins in interest selection
+                authHelpers.buildTimedVisibilityWhere({ referenceDate })
+            ]
+        },
         include: {
             departmentAccess: {
                 include: {

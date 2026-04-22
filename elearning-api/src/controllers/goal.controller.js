@@ -66,6 +66,16 @@ const republishGoal = asyncHandler(async (req, res) => {
     });
 });
 
+const updateGoal = asyncHandler(async (req, res) => {
+    const goal = await goalService.updateGoal(req.params.id, req.body, req.user);
+    res.json({
+        success: true,
+        message: 'Goal updated successfully',
+        data: goal
+    });
+});
+
+
 const deleteGoal = asyncHandler(async (req, res) => {
     await goalService.deleteGoal(req.params.id, req.user);
     res.json({
@@ -97,6 +107,7 @@ module.exports = {
     getGoalDetails,
     archiveGoal,
     republishGoal,
+    updateGoal,
     deleteGoal,
     getGoalReport
 };

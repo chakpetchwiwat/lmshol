@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
@@ -15,6 +15,22 @@ const UserModal = ({
   tiers,
   canEditRole = true,
 }) => {
+  // Sync Role with Tier managerAccess
+  useEffect(() => {
+    // Protected: Don't sync for superadmins (they shouldn't be downgraded by changing tier)
+    if (formData.role === 'admin') return;
+
+    if (formData.tierId) {
+      const selectedTier = tiers.find((t) => t.id === formData.tierId);
+      if (selectedTier) {
+        const targetRole = selectedTier.accessAdmin ? 'manager' : 'user';
+        if (formData.role !== targetRole) {
+          setFormData((prev) => ({ ...prev, role: targetRole }));
+        }
+      }
+    }
+  }, [formData.tierId, tiers, formData.role, setFormData]);
+
   if (!isOpen) {
     return null;
   }
@@ -29,7 +45,7 @@ const UserModal = ({
               {editingUser ? 'แก้ไขข้อมูลผู้ใช้งาน' : 'เพิ่มผู้ใช้งานใหม่'}
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              กำหนดแผนก ระดับผู้เรียน และสิทธิ์การใช้งานของบัญชีนี้
+              กำหนดแผนก ระดับ และสิทธิ์การใช้งานของบัญชีนี้
             </p>
           </div>
           <button
@@ -84,15 +100,24 @@ const UserModal = ({
             </div>
 
             {canEditRole && (
-              <CustomSelect
-                label="สิทธิ์ระบบ"
-                value={formData.role}
-                onChange={(event) => setFormData({ ...formData, role: event.target.value })}
-                options={[
-                  { value: 'user', label: 'User' },
-                  { value: 'manager', label: 'Manager' }
-                ]}
-              />
+              <div className="relative">
+                <CustomSelect
+                  label="สิทธิ์ระบบ"
+                  value={formData.role}
+                  disabled={!!formData.tierId && formData.role !== 'admin'}
+                  onChange={(event) => setFormData({ ...formData, role: event.target.value })}
+                  options={[
+                    { value: 'user', label: 'User' },
+                    { value: 'manager', label: 'Manager' },
+                    ...(canEditRole || formData.role === 'admin' ? [{ value: 'admin', label: 'Admin (Superadmin)' }] : [])
+                  ]}
+                />
+                {formData.tierId && formData.role !== 'admin' && (
+                  <p className="mt-1 ml-1 text-[11px] font-medium text-slate-400 italic">
+                    * สิทธิ์ระบบจะถูกกำหนดโดยอัตโนมัติตาม "ระดับ" ที่คุณเลือก
+                  </p>
+                )}
+              </div>
             )}
 
             <div className="grid gap-5 md:grid-cols-2">
@@ -107,7 +132,7 @@ const UserModal = ({
               />
 
               <CustomSelect
-                label="ระดับผู้เรียน"
+                label="ระดับ"
                 value={formData.tierId}
                 onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
                 options={[
@@ -118,7 +143,7 @@ const UserModal = ({
             </div>
 
             <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-700">
-              การมองเห็นคอร์สแบบลำดับขั้นจะอิงจาก "ระดับผู้เรียน" เช่น ถ้าเปิดให้เริ่มจาก Supervisor ผู้ที่อยู่ระดับสูงกว่าอย่าง Manager และ Director จะเห็นด้วย
+              การมองเห็นคอร์สแบบลำดับขั้นจะอิงจาก "ระดับ" เช่น ถ้าเปิดให้เริ่มจาก Supervisor ผู้ที่อยู่ระดับสูงกว่าอย่าง Manager และ Director จะเห็นด้วย
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">

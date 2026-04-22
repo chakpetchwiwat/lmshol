@@ -207,6 +207,56 @@ const republishGoal = async (id, authUser) => {
     return updatedGoal;
 };
 
+const updateGoal = async (id, data, authUser) => {
+    const { title, type, targetCount, expiryDate, scope, departmentId, courseIds } = data;
+    const actor = await authHelpers.getActorContext(prisma, authUser);
+    
+    const goal = await prisma.learningGoal.findUnique({ where: { id } });
+    if (!goal) throw new Error('Goal not found');
+
+    if (!actor.isAdmin && goal.departmentId !== actor.departmentId) {
+        throw new Error('Not authorized to update this goal');
+    }
+
+    let finalScope = goal.scope;
+    let finalDeptId = goal.departmentId;
+
+    if (actor.isAdmin) {
+        if (scope) {
+            finalScope = scope;
+            finalDeptId = scope === GOAL_SCOPES.GLOBAL ? null : (departmentId || goal.departmentId);
+        }
+    }
+
+    return await prisma.$transaction(async (tx) => {
+        const updatedGoal = await tx.learningGoal.update({
+            where: { id },
+            data: {
+                title: title !== undefined ? title : goal.title,
+                type: type !== undefined ? type : goal.type,
+                targetCount: type === 'ANY' ? parseInt(targetCount) : (courseIds?.length || goal.targetCount),
+                expiryDate: expiryDate !== undefined ? (expiryDate ? new Date(expiryDate) : null) : goal.expiryDate,
+                scope: finalScope,
+                departmentId: finalDeptId
+            }
+        });
+
+        if (courseIds && (type === 'SPECIFIC' || (type === undefined && goal.type === 'SPECIFIC'))) {
+            await tx.goalCourse.deleteMany({ where: { goalId: id } });
+            await tx.goalCourse.createMany({
+                data: courseIds.map(courseId => ({
+                    goalId: id,
+                    courseId
+                }))
+            });
+        }
+
+        clearGoalReportCache(id);
+        return updatedGoal;
+    });
+};
+
+
 const deleteGoal = async (id, authUser) => {
     const actor = await authHelpers.getActorContext(prisma, authUser);
     const goal = await prisma.learningGoal.findUnique({ where: { id } });
@@ -381,6 +431,7 @@ module.exports = {
     getGoalDetails,
     archiveGoal,
     republishGoal,
+    updateGoal,
     deleteGoal,
     getGoalReport
 };

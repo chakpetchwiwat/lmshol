@@ -10,16 +10,17 @@ import GoalList from '../../components/admin/GoalList';
 import CreateGoalModal from '../../components/admin/CreateGoalModal';
 import GoalReportModal from '../../components/admin/GoalReportModal';
 import ViewToggleTabs from '../../components/common/ViewToggleTabs';
+import CustomSelect from '../../components/common/CustomSelect';
+import { MONTH_OPTIONS } from '../../utils/constants/dashboard';
+import { FILTER_VALUES } from '../../utils/constants/filters';
+import { SlidersHorizontal } from 'lucide-react';
+import { isSuperAdmin } from '../../utils/roles';
 
 const GoalManagement = () => {
     const toast = useToast();
     const { confirm, ConfirmDialogProps } = useConfirm();
 
-    const stableConfirmProps = useMemo(() => ConfirmDialogProps, [
-        ConfirmDialogProps.isOpen,
-        ConfirmDialogProps.title,
-        ConfirmDialogProps.message
-    ]);
+    const stableConfirmProps = useMemo(() => ConfirmDialogProps, [ConfirmDialogProps]);
 
     const [goals, setGoals] = useState([]);
     const [courses, setCourses] = useState([]);
@@ -28,6 +29,8 @@ const GoalManagement = () => {
     const [reportGoal, setReportGoal] = useState(null);
     const [reportData, setReportData] = useState(null);
     const [reportLoading, setReportLoading] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     const [departments, setDepartments] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
@@ -41,6 +44,19 @@ const GoalManagement = () => {
         courseIds: []
     });
     const [courseSearch, setCourseSearch] = useState('');
+    const [filters, setFilters] = useState({
+        month: String(new Date().getMonth() + 1),
+        year: String(new Date().getFullYear()),
+        departmentId: ''
+    });
+
+    const yearOptions = useMemo(() => {
+        const currentYear = new Date().getFullYear();
+        return Array.from({ length: 5 }, (_, index) => ({
+            value: String(currentYear - 2 + index),
+            label: String(currentYear - 2 + index)
+        }));
+    }, []);
     const goalReportCacheRef = useRef(new Map());
     const goalReportRequestRef = useRef(null);
 
@@ -101,12 +117,20 @@ const GoalManagement = () => {
         cancelGoalReportRequest();
     }, [cancelGoalReportRequest]);
 
-    const handleCreateGoal = async (e) => {
+    const handleSaveGoal = async (e) => {
         e.preventDefault();
         try {
-            await adminAPI.createGoal(formData);
-            toast.success('สร้างเป้าหมายสำเร็จแล้ว');
+            if (isEditing) {
+                await adminAPI.updateGoal(editingId, formData);
+                toast.success('แก้ไขเป้าหมายสำเร็จแล้ว');
+            } else {
+                await adminAPI.createGoal(formData);
+                toast.success('สร้างเป้าหมายสำเร็จแล้ว');
+            }
+            
             setIsModalOpen(false);
+            setIsEditing(false);
+            setEditingId(null);
             setFormData({
                 title: '',
                 type: 'ANY',
@@ -118,10 +142,40 @@ const GoalManagement = () => {
             });
             fetchData();
         } catch (err) {
-            console.error('Failed to create goal', err);
-            toast.error(err.response?.data?.message || 'เกิดข้อผิดพลาดในการสร้างเป้าหมาย');
+            console.error('Failed to save goal', err);
+            toast.error(err.response?.data?.message || 'เกิดข้อผิดพลาดในการบันทึกเป้าหมาย');
         }
     };
+
+    const handleEditGoal = useCallback((goal) => {
+        setFormData({
+            title: goal.title,
+            type: goal.type,
+            targetCount: goal.targetCount,
+            expiryDate: goal.expiryDate ? goal.expiryDate.split('T')[0] : '',
+            scope: goal.scope,
+            departmentId: goal.departmentId || '',
+            courseIds: goal.courses.map(c => c.courseId)
+        });
+        setEditingId(goal.id);
+        setIsEditing(true);
+        setIsModalOpen(true);
+    }, []);
+
+    const handleCloseModal = useCallback(() => {
+        setIsModalOpen(false);
+        setIsEditing(false);
+        setEditingId(null);
+        setFormData({
+            title: '',
+            type: 'ANY',
+            targetCount: 1,
+            expiryDate: '',
+            scope: currentUser?.departmentId ? 'DEPARTMENT' : 'GLOBAL',
+            departmentId: currentUser?.departmentId || '',
+            courseIds: []
+        });
+    }, [currentUser]);
 
     const handleDeleteGoal = useCallback(async (id) => {
         const ok = await confirm({
@@ -239,7 +293,26 @@ const GoalManagement = () => {
         return goals.filter((goal) => goal.status === 'ARCHIVED' || (goal.expiryDate && new Date(goal.expiryDate) <= now));
     }, [goals]);
 
-    const displayGoals = viewMode === ENTITY_VIEW_STATUS.ACTIVE ? activeGoals : archivedGoals;
+    const displayGoals = useMemo(() => {
+        let baseGoals = viewMode === ENTITY_VIEW_STATUS.ACTIVE ? activeGoals : archivedGoals;
+        
+        return baseGoals.filter((goal) => {
+            const date = new Date(goal.createdAt);
+            const matchesYear = !filters.year || String(date.getFullYear()) === filters.year;
+            const matchesMonth = filters.month === FILTER_VALUES.ALL || String(date.getMonth() + 1) === filters.month;
+            
+            let matchesScope = true;
+            if (isSuperAdmin(currentUser) && filters.departmentId) {
+                if (filters.departmentId === 'GLOBAL') {
+                    matchesScope = goal.scope === 'GLOBAL';
+                } else {
+                    matchesScope = goal.scope === 'DEPARTMENT' && goal.departmentId === filters.departmentId;
+                }
+            }
+
+            return matchesYear && matchesMonth && matchesScope;
+        });
+    }, [viewMode, activeGoals, archivedGoals, filters.month, filters.year, filters.departmentId, currentUser]);
 
     const columns = useMemo(() => [
         { label: 'ชื่อเป้าหมาย' },
@@ -276,17 +349,62 @@ const GoalManagement = () => {
                 )}
             />
 
-            <ViewToggleTabs
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-                tabs={tabs}
-            />
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white p-4 rounded-[2rem] border border-slate-100 shadow-sm">
+                <ViewToggleTabs
+                    viewMode={viewMode}
+                    setViewMode={setViewMode}
+                    tabs={tabs}
+                    className="!mb-0"
+                />
+
+                <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2 px-1 text-sm font-semibold text-slate-400">
+                        <SlidersHorizontal size={16} />
+                        <span>Filter</span>
+                    </div>
+
+                    <CustomSelect
+                        value={filters.month}
+                        onChange={(e) => setFilters(prev => ({ ...prev, month: e.target.value }))}
+                        options={MONTH_OPTIONS}
+                        size="sm"
+                        fullWidth={false}
+                        className="w-32"
+                    />
+
+                    <CustomSelect
+                        value={filters.year}
+                        onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value }))}
+                        options={yearOptions}
+                        size="sm"
+                        fullWidth={false}
+                        className="w-24"
+                    />
+
+                    {isSuperAdmin(currentUser) && (
+                        <CustomSelect
+                            value={filters.departmentId}
+                            onChange={(e) => setFilters(prev => ({ ...prev, departmentId: e.target.value }))}
+                            options={[
+                                { value: '', label: 'ทุกขอบเขต' },
+                                { value: 'GLOBAL', label: 'ทั้งองค์กร' },
+                                ...departments.map(d => ({ value: d.id, label: d.name }))
+                            ]}
+                            size="sm"
+                            fullWidth={false}
+                            className="w-40 lg:w-44"
+                            placeholder="เลือกขอบเขต"
+                        />
+                    )}
+                </div>
+            </div>
 
             <GoalList
                 goals={displayGoals}
                 columns={columns}
                 viewMode={viewMode}
                 onViewReport={handleViewReport}
+                onEditGoal={handleEditGoal}
                 onDeleteGoal={handleDeleteGoal}
                 onArchiveGoal={handleArchiveGoal}
                 onRepublishGoal={handleRepublishGoal}
@@ -294,13 +412,14 @@ const GoalManagement = () => {
 
             <CreateGoalModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={handleCloseModal}
                 formData={formData}
                 setFormData={setFormData}
                 currentUser={currentUser}
                 departments={departments}
                 courses={courses}
-                onSave={handleCreateGoal}
+                onSave={handleSaveGoal}
+                isEditing={isEditing}
                 courseSearch={courseSearch}
                 setCourseSearch={setCourseSearch}
                 filteredCourses={filteredCourses}

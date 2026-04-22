@@ -4,7 +4,6 @@ import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import UserModal from '../../components/admin/UserModal';
 import ReferenceDataModal from '../../components/admin/ReferenceDataModal';
-import InstructorPresetModal from '../../components/admin/InstructorPresetModal';
 import UserDetailModal from '../../components/admin/UserDetailModal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { canEditAdminUsers } from '../../utils/roles';
@@ -42,7 +41,6 @@ const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [tiers, setTiers] = useState([]);
-  const [instructorPresets, setInstructorPresets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [referenceLoading, setReferenceLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,7 +53,6 @@ const UserManagement = () => {
 
   const [showDepartmentModal, setShowDepartmentModal] = useState(false);
   const [showTierModal, setShowTierModal] = useState(false);
-  const [showInstructorPresetModal, setShowInstructorPresetModal] = useState(false);
 
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -82,12 +79,10 @@ const UserManagement = () => {
       const requests = [
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
-        canEditUsers ? adminAPI.getInstructorPresets() : Promise.resolve({ data: [] }),
       ];
-      const [departmentResponse, tierResponse, instructorPresetResponse] = await Promise.all(requests);
+      const [departmentResponse, tierResponse] = await Promise.all(requests);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
-      setInstructorPresets(instructorPresetResponse.data);
     } catch (error) {
       console.error('Fetch reference data error:', error);
     } finally {
@@ -215,7 +210,7 @@ const UserManagement = () => {
 
     try {
       await adminAPI.deleteTier(id);
-      toast.success('ลบระดับผู้เรียนเรียบร้อย');
+      toast.success('ลบระดับเรียบร้อย');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete tier error:', error);
@@ -228,7 +223,7 @@ const UserManagement = () => {
       const tierIds = reorderedItems.map(item => item.id);
       setTiers(reorderedItems); // Optimistic update
       await adminAPI.reorderTiers(tierIds);
-      toast.success('บันทึกลำดับระดับผู้เรียนเรียบร้อย');
+      toast.success('บันทึกลำดับระดับเรียบร้อย');
     } catch (error) {
       console.error('Reorder tiers error:', error);
       toast.error('ไม่สามารถบันทึกลำดับได้');
@@ -236,49 +231,42 @@ const UserManagement = () => {
     }
   };
 
-  const handleInstructorPresetDelete = async (id, name) => {
-    const ok = await confirm({
-      title: 'ยืนยันการลบข้อมูลวิทยากร',
-      message: `ต้องการลบข้อมูลวิทยากร "${name}" ใช่หรือไม่?`,
-      confirmLabel: 'ลบ',
-      variant: 'danger',
-    });
-    if (!ok) return;
+  const filteredUsers = useMemo(() => {
+    const tierOrderMap = Object.fromEntries(tiers.map((t) => [t.id, t.order]));
+    
+    return users
+      .filter((user) => {
+        const keyword = searchTerm.trim().toLowerCase();
+        const matchesKeyword =
+          !keyword ||
+          user.name.toLowerCase().includes(keyword) ||
+          user.email.toLowerCase().includes(keyword);
 
-    try {
-      await adminAPI.deleteInstructorPreset(id);
-      toast.success('ลบข้อมูลวิทยากรเรียบร้อย');
-      await fetchReferenceData();
-    } catch (error) {
-      console.error('Delete instructor preset error:', error);
-      toast.error(error.response?.data?.message || 'ลบข้อมูลวิทยากรไม่สำเร็จ');
-    }
-  };
+        const matchesDepartment =
+          selectedDepartment === FILTER_VALUES.ALL || user.departmentId === selectedDepartment;
 
+        const matchesTier =
+          selectedTier === FILTER_VALUES.ALL || user.tierId === selectedTier;
 
-  const filteredUsers = useMemo(() => (
-    users.filter((user) => {
-      const keyword = searchTerm.trim().toLowerCase();
-      const matchesKeyword =
-        !keyword ||
-        user.name.toLowerCase().includes(keyword) ||
-        user.email.toLowerCase().includes(keyword);
-
-      const matchesDepartment =
-        selectedDepartment === FILTER_VALUES.ALL || user.departmentId === selectedDepartment;
-
-      const matchesTier =
-        selectedTier === FILTER_VALUES.ALL || user.tierId === selectedTier;
-
-      return matchesKeyword && matchesDepartment && matchesTier;
-    })
-  ), [searchTerm, selectedDepartment, selectedTier, users]);
+        return matchesKeyword && matchesDepartment && matchesTier;
+      })
+      .sort((a, b) => {
+        const orderA = tierOrderMap[a.tierId] ?? 999;
+        const orderB = tierOrderMap[b.tierId] ?? 999;
+        
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        
+        return a.name.localeCompare(b.name, 'th');
+      });
+  }, [searchTerm, selectedDepartment, selectedTier, users, tiers]);
 
   const columns = useMemo(() => [
     { label: 'ผู้ใช้งาน' },
     { label: 'Role ระบบ' },
     { label: 'แผนก' },
-    { label: 'ระดับผู้เรียน' },
+    { label: 'ระดับ' },
     { label: 'เริ่มงาน' },
     { label: 'คอร์สที่จบ', className: 'text-center' },
     { label: 'แต้มสะสม', className: 'text-right' },
@@ -302,11 +290,7 @@ const UserManagement = () => {
                 </button>
                 <button type="button" onClick={() => setShowTierModal(true)} className="btn btn-outline">
                   <Sparkles size={18} />
-                  จัดการระดับผู้เรียน
-                </button>
-                <button type="button" onClick={() => setShowInstructorPresetModal(true)} className="btn btn-outline">
-                  <Sparkles size={18} />
-                  จัดการวิทยากร
+                  จัดการระดับ
                 </button>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
@@ -355,20 +339,20 @@ const UserManagement = () => {
 
           <ReferenceDataModal
             isOpen={showTierModal}
-            title="จัดการระดับผู้เรียน"
-            description="ระดับผู้เรียนจะถูกใช้แบบลำดับขั้น เช่น ตั้งแต่ Supervisor จะครอบคลุม Manager และ Director ที่สูงกว่า"
+            title="จัดการระดับ"
+            description="ระดับจะถูกใช้แบบลำดับขั้น เช่น ตั้งแต่ Supervisor จะครอบคลุม Manager และ Director ที่สูงกว่า"
             itemLabel="ระดับ"
             items={tiers}
             loading={referenceLoading}
             onClose={() => setShowTierModal(false)}
             onCreate={async (payload) => {
               await adminAPI.createTier(payload);
-              toast.success('สร้างระดับผู้เรียนเรียบร้อย');
+              toast.success('สร้างระดับเรียบร้อย');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
             onUpdate={async (id, payload) => {
               await adminAPI.updateTier(id, payload);
-              toast.success('อัปเดตระดับผู้เรียนเรียบร้อย');
+              toast.success('อัปเดตระดับเรียบร้อย');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
             onDelete={handleTierDelete}
@@ -376,23 +360,6 @@ const UserManagement = () => {
             showAccessToggle={true}
           />
 
-          <InstructorPresetModal
-            isOpen={showInstructorPresetModal}
-            presets={instructorPresets}
-            loading={referenceLoading}
-            onClose={() => setShowInstructorPresetModal(false)}
-            onCreate={async (payload) => {
-              await adminAPI.createInstructorPreset(payload);
-              toast.success('สร้างข้อมูลวิทยากรเรียบร้อย');
-              await fetchReferenceData();
-            }}
-            onUpdate={async (id, payload) => {
-              await adminAPI.updateInstructorPreset(id, payload);
-              toast.success('อัปเดตข้อมูลวิทยากรเรียบร้อย');
-              await fetchReferenceData();
-            }}
-            onDelete={handleInstructorPresetDelete}
-          />
         </>
       )}
 
