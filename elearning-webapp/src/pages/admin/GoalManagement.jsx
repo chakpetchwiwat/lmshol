@@ -164,9 +164,9 @@ const GoalManagement = () => {
             scope: goal.scope,
             departmentId: goal.departmentId || '',
             courseIds: goal.courses.map(c => c.courseId),
-            postAssignmentReminderDays: goal.postAssignmentReminderDays ? String(goal.postAssignmentReminderDays) : '',
-            preDeadlineReminderDays: goal.preDeadlineReminderDays ? String(goal.preDeadlineReminderDays) : '',
-            postAssignmentReminderTime: goal.postAssignmentReminderTime || '',
+            postAssignmentReminderDays: goal.postAssignmentReminderDays !== null && goal.postAssignmentReminderDays !== undefined ? String(goal.postAssignmentReminderDays) : '',
+            preDeadlineReminderDays: goal.preDeadlineReminderDays !== null && goal.preDeadlineReminderDays !== undefined ? String(goal.preDeadlineReminderDays) : '',
+            postAssignmentReminderTime: goal.postAssignmentReminderDays === 0 ? '' : (goal.postAssignmentReminderTime || ''),
             preDeadlineReminderTime: goal.preDeadlineReminderTime || ''
         });
         setEditingId(goal.id);

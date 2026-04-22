@@ -56,11 +56,13 @@ const createGoalReminderNotifications = async (tx, goal, assignmentBaseDate = ne
     const now = new Date();
 
     if (goal.postAssignmentReminderDays !== null) {
-        const { date: scheduledFor } = addThailandDays(
-            assignmentBaseDate,
-            goal.postAssignmentReminderDays,
-            goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME
-        );
+        const scheduledFor = goal.postAssignmentReminderDays === 0
+            ? new Date(Math.max(new Date(assignmentBaseDate).getTime(), now.getTime()))
+            : addThailandDays(
+                assignmentBaseDate,
+                goal.postAssignmentReminderDays,
+                goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME
+            ).date;
 
         notifications.push(...targetUsers.map((user) => ({
             userId: user.id,
@@ -168,9 +170,9 @@ const createGoal = async (data, authUser) => {
     const finalPostAssignmentReminderDays = normalizeReminderDays(postAssignmentReminderDays, 'Post-assignment reminder');
     const normalizedPreDeadlineReminderDays = normalizeReminderDays(preDeadlineReminderDays, 'Pre-deadline reminder');
     const finalPreDeadlineReminderDays = expiryDate ? normalizedPreDeadlineReminderDays : null;
-    const finalPostAssignmentReminderTime = finalPostAssignmentReminderDays
-        ? normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time')
-        : null;
+    const finalPostAssignmentReminderTime = finalPostAssignmentReminderDays === null || finalPostAssignmentReminderDays === 0
+        ? null
+        : normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time');
     const finalPreDeadlineReminderTime = finalPreDeadlineReminderDays
         ? normalizeGoalReminderTime(preDeadlineReminderTime, 'Pre-deadline reminder time')
         : null;
@@ -367,8 +369,12 @@ const updateGoal = async (id, data, authUser) => {
         ? (nextExpiryDate ? normalizeReminderDays(preDeadlineReminderDays, 'Pre-deadline reminder') : null)
         : goal.preDeadlineReminderDays;
     const finalPostAssignmentReminderTime = postAssignmentReminderTime !== undefined
-        ? (finalPostAssignmentReminderDays ? normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time') : null)
-        : goal.postAssignmentReminderTime;
+        ? ((finalPostAssignmentReminderDays === null || finalPostAssignmentReminderDays === 0)
+            ? null
+            : normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time'))
+        : ((finalPostAssignmentReminderDays === null || finalPostAssignmentReminderDays === 0)
+            ? null
+            : (goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME));
     const finalPreDeadlineReminderTime = preDeadlineReminderTime !== undefined
         ? (finalPreDeadlineReminderDays ? normalizeGoalReminderTime(preDeadlineReminderTime, 'Pre-deadline reminder time') : null)
         : (finalPreDeadlineReminderDays ? (goal.preDeadlineReminderTime || DEFAULT_REMINDER_TIME) : null);
