@@ -1106,7 +1106,7 @@ const getDashboardStats = async (authUser, filters = {}) => {
         const learnerWhere = buildLearnerWhere(scopeFilters.departmentId);
         const visibleCourseWhere = buildVisibleCourseWhereForDashboard(scopeFilters.departmentId);
 
-        const [totalUsers, activeCourses, categories, enrollments, selectedDepartment] = await Promise.all([
+        const [totalUsers, activeCourses, categories, enrollments, selectedDepartment, dashboardGoals] = await Promise.all([
             prisma.user.count({ where: learnerWhere }),
             prisma.course.count({ where: visibleCourseWhere }),
             prisma.category.findMany({
