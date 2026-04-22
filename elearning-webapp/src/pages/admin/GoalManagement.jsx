@@ -372,6 +372,7 @@ const GoalManagement = () => {
                         onChange={(e) => setFilters(prev => ({ ...prev, month: e.target.value }))}
                         options={MONTH_OPTIONS}
                         size="sm"
+                        fullWidth={false}
                         className="w-32"
                     />
 
@@ -380,6 +381,7 @@ const GoalManagement = () => {
                         onChange={(e) => setFilters(prev => ({ ...prev, year: e.target.value }))}
                         options={yearOptions}
                         size="sm"
+                        fullWidth={false}
                         className="w-24"
                     />
 
@@ -393,6 +395,7 @@ const GoalManagement = () => {
                                 ...departments.map(d => ({ value: d.id, label: d.name }))
                             ]}
                             size="sm"
+                            fullWidth={false}
                             className="w-40 lg:w-44"
                             placeholder="เลือกขอบเขต"
                         />

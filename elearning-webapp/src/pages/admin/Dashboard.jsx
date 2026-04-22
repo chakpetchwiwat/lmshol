@@ -319,8 +319,12 @@ const Dashboard = () => {
   const renderGoalLink = (row) => (
     <button
       type="button"
-      onClick={() => handleViewGoalReport({ id: row.goalId, title: row.courseTitle })}
-      className="text-left font-bold text-primary hover:underline transition-all"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        handleViewGoalReport({ id: row.goalId || row.courseId, title: row.courseTitle });
+      }}
+      className="inline-block text-left font-bold text-primary hover:text-primary-dark hover:underline transition-all cursor-pointer relative z-[5]"
     >
       {row.courseTitle}
     </button>

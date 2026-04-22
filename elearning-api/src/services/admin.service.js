@@ -604,6 +604,7 @@ const buildAtRiskLearners = async ({ learnerWhere, scopeFilters, now, warningWin
                 email: user.email,
                 department: user.departmentRef?.name || user.department || null,
                 courseId: goal.id,
+                goalId: goal.id,
                 courseTitle: goal.title,
                 deadline: goal.expiryDate,
                 isOverdue: goal.expiryDate ? goal.expiryDate < now : false,
