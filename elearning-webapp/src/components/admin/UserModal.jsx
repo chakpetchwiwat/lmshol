@@ -23,7 +23,7 @@ const UserModal = ({
     if (formData.tierId) {
       const selectedTier = tiers.find((t) => t.id === formData.tierId);
       if (selectedTier) {
-        const targetRole = selectedTier.managerAccess ? 'manager' : 'user';
+        const targetRole = selectedTier.accessAdmin ? 'manager' : 'user';
         if (formData.role !== targetRole) {
           setFormData((prev) => ({ ...prev, role: targetRole }));
         }
