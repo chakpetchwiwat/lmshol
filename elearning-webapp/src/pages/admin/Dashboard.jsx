@@ -252,7 +252,7 @@ const Dashboard = () => {
         const goalsResponse = await adminAPI.getGoals();
         const activeGoals = (goalsResponse.data || []).filter(isGoalCurrentlyActive);
 
-        const reports = await Promise.all(activeGoals.map(async (goal) => {
+        const reportResults = await Promise.allSettled(activeGoals.map(async (goal) => {
           const response = await adminAPI.getGoalReport(goal.id);
           const allRows = response.data?.report || [];
           const visibleRows = isFullAdmin && filters.departmentId && selectedDepartmentName
@@ -270,6 +270,16 @@ const Dashboard = () => {
             },
           };
         }));
+
+        const reports = reportResults
+          .filter((result) => result.status === 'fulfilled')
+          .map((result) => result.value);
+
+        reportResults
+          .filter((result) => result.status === 'rejected')
+          .forEach((result) => {
+            console.error('Fetch goal tracking item error:', result.reason);
+          });
 
         reports.sort((left, right) => {
           const leftDate = new Date(left.expiryDate || '9999-12-31').getTime();

@@ -1,19 +1,57 @@
-import React from 'react';
-import { Grid } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+
+const SCROLL_EPSILON = 4;
 
 const CategoryPills = ({
-  categories,
+  categories = [],
   activeCat,
   onSelect,
-  onViewAll,
-  showViewAll = true,
   className = '',
 }) => {
+  const scrollRef = useRef(null);
+  const [showLeftFade, setShowLeftFade] = useState(false);
+  const [showRightFade, setShowRightFade] = useState(false);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return undefined;
+
+    const updateFadeState = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      const maxScrollLeft = Math.max(0, scrollWidth - clientWidth);
+
+      setShowLeftFade(scrollLeft > SCROLL_EPSILON);
+      setShowRightFade(maxScrollLeft - scrollLeft > SCROLL_EPSILON);
+    };
+
+    updateFadeState();
+
+    container.addEventListener('scroll', updateFadeState, { passive: true });
+    window.addEventListener('resize', updateFadeState);
+
+    return () => {
+      container.removeEventListener('scroll', updateFadeState);
+      window.removeEventListener('resize', updateFadeState);
+    };
+  }, [categories]);
+
   return (
     <div className={`relative ${className}`}>
-      <div className="pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-10 bg-gradient-to-l from-[#f8fafc] to-transparent md:w-8" />
+      <div
+        className={`pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-10 bg-gradient-to-r from-[#f8fafc] via-[#f8fafc]/90 to-transparent transition-opacity duration-200 md:w-8 ${
+          showLeftFade ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+      <div
+        className={`pointer-events-none absolute bottom-0 right-0 top-0 z-10 w-10 bg-gradient-to-l from-[#f8fafc] via-[#f8fafc]/90 to-transparent transition-opacity duration-200 md:w-8 ${
+          showRightFade ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
 
-      <div className="flex items-center gap-3 overflow-x-auto px-5 py-2 no-scrollbar md:gap-6 md:px-0 md:pb-1 md:pt-0 md:border-b md:border-gray-200/60">
+      <div
+        ref={scrollRef}
+        className="flex items-center gap-3 overflow-x-auto overflow-y-hidden px-5 py-2 no-scrollbar md:gap-6 md:px-0 md:pb-1 md:pt-0 md:border-b md:border-gray-200/60"
+      >
         {categories.map((category) => {
           const isActive = activeCat === category.name;
 
@@ -30,29 +68,19 @@ const CategoryPills = ({
             >
               <span className="inline-flex items-center gap-2">
                 {category.name}
-                {category.isTemporary && (
+                {category.isTemporary ? (
                   <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.12em] text-amber-700 md:text-[8px]">
                     Time
                   </span>
-                )}
+                ) : null}
               </span>
-              {isActive && (
+
+              {isActive ? (
                 <span className="absolute bottom-[-1px] left-0 hidden h-[3px] w-full rounded-t-full bg-slate-900 md:block" />
-              )}
+              ) : null}
             </button>
           );
         })}
-
-        {showViewAll && (
-          <button
-            type="button"
-            onClick={onViewAll}
-            className="ml-1 flex min-h-[46px] shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm font-bold text-primary transition-all hover:bg-primary/10 md:ml-2 md:min-h-0 md:rounded-none md:border-transparent md:bg-transparent md:px-0 md:py-0 md:pb-3 md:text-[15px] md:hover:bg-transparent md:hover:text-primary/80"
-          >
-            <Grid size={16} />
-            ดูทั้งหมด
-          </button>
-        )}
       </div>
     </div>
   );

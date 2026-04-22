@@ -178,8 +178,6 @@ const Home = () => {
               categories={categories.slice(0, 6)}
               activeCat={''}
               onSelect={(catName) => navigate(`/user/courses?category=${encodeURIComponent(catName)}`)}
-              onViewAll={() => setIsCatModalOpen(true)}
-              showViewAll={categories.length > 6}
             />
           </div>
         </div>

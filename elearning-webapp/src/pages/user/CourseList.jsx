@@ -117,7 +117,6 @@ const CourseList = () => {
             categories={categories}
             activeCat={activeCat}
             onSelect={setActiveCat}
-            onViewAll={() => setIsCatModalOpen(true)}
             className="mt-1"
           />
         </div>

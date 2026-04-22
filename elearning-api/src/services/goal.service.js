@@ -528,6 +528,12 @@ const getGoalReport = async (goalId, authUser) => {
             return acc;
         }, {});
 
+        const specificGoalCourses = goal.courses
+            .map((goalCourse) => ({
+                courseId: goalCourse.courseId,
+                title: goalCourse.course?.title || 'คอร์สถูกลบหรือไม่พร้อมใช้งาน'
+            }));
+
         const report = users.map((user) => {
             const userEnrollments = enrollmentsByUserId[user.id] || [];
 
@@ -552,11 +558,11 @@ const getGoalReport = async (goalId, authUser) => {
             }
 
             const courseProgress = goal.type === 'SPECIFIC'
-                ? goal.courses.map((goalCourse) => {
+                ? specificGoalCourses.map((goalCourse) => {
                     const enrollment = userEnrollments.find((item) => item.courseId === goalCourse.courseId);
                     return {
                         courseId: goalCourse.courseId,
-                        title: goalCourse.course.title,
+                        title: goalCourse.title,
                         status: enrollment?.status || ENROLLMENT_STATUS.NOT_STARTED,
                         progressPercent: enrollment?.progressPercent || 0,
                         completedAt: enrollment?.completedAt || null
@@ -564,7 +570,7 @@ const getGoalReport = async (goalId, authUser) => {
                 })
                 : completions.map((completion) => ({
                     courseId: completion.courseId,
-                    title: completion.course.title,
+                    title: completion.course?.title || 'คอร์สถูกลบหรือไม่พร้อมใช้งาน',
                     status: ENROLLMENT_STATUS.COMPLETED,
                     progressPercent: 100,
                     completedAt: completion.completedAt
