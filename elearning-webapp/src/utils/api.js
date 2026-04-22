@@ -115,6 +115,8 @@ export const userAPI = {
   getPointsHistory: () => api.get('/user/points'), // Alias for clarity
   getNotifications: () => api.get('/user/notifications'),
   markNotificationRead: (notificationId) => api.put(`/user/notifications/${notificationId}/read`),
+  markAllNotificationsRead: () => api.put('/user/notifications/read-all'),
+  clearAllNotifications: () => api.delete('/user/notifications'),
   uploadFile: (file) => {
     const formData = new FormData();
     formData.append('file', file);

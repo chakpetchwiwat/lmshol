@@ -87,53 +87,111 @@ const UserLayout = () => {
     navigate('/login');
   };
 
+  const handleMarkAllRead = async () => {
+    try {
+      const response = await userAPI.markAllNotificationsRead();
+      setNotifications(response.data.items || []);
+      setUnreadNotificationCount(response.data.unreadCount || 0);
+    } catch (error) {
+      console.error('Failed to mark all notifications as read', error);
+    }
+  };
+  
+  const handleClearAll = async () => {
+    if (!window.confirm('คุณต้องการล้างรายการแจ้งเตือนทั้งหมดใช่หรือไม่?')) return;
+    try {
+      const response = await userAPI.clearAllNotifications();
+      setNotifications(response.data.items || []);
+      setUnreadNotificationCount(response.data.unreadCount || 0);
+    } catch (error) {
+      console.error('Failed to clear all notifications', error);
+    }
+  };
+
+  const displayNotifications = useMemo(() => {
+    // Basic de-duplication: show only the latest notification per goalId + type
+    const seen = new Set();
+    return notifications.filter(n => {
+      const key = `${n.goalId || n.id}-${n.type}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [notifications]);
+
   const renderNotificationPanel = (positionClasses = "right-0") => (
-    <div className={`absolute ${positionClasses} top-full z-50 mt-3 w-[min(24rem,88vw)] overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-2xl`}>
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Notifications</p>
-          <h3 className="mt-1 text-sm font-bold text-slate-800">การแจ้งเตือนเป้าหมายการเรียน</h3>
+    <div className={`absolute ${positionClasses} top-full z-50 mt-3 w-[min(24rem,88vw)] overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-2xl animate-fade-in`}>
+      <div className="border-b border-slate-100 px-4 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Notifications</p>
+            <h3 className="mt-0.5 text-[15px] font-bold text-slate-800">การแจ้งเตือนของคุณ</h3>
+          </div>
+          {unreadNotificationCount > 0 ? (
+            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-primary">
+              {unreadNotificationCount} ใหม่
+            </span>
+          ) : null}
         </div>
-        {unreadNotificationCount > 0 ? (
-          <span className="rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-rose-600">
-            {unreadNotificationCount} ใหม่
-          </span>
-        ) : null}
+        
+        {notifications.length > 0 && (
+          <div className="mt-3 flex items-center gap-2">
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleMarkAllRead(); }}
+              className="text-[11px] font-bold text-primary hover:text-primary-dark transition-colors px-2 py-1 rounded-lg hover:bg-primary/5"
+            >
+              ทำเป็นอ่านแล้วทั้งหมด
+            </button>
+            <div className="h-3 w-px bg-slate-200" />
+            <button 
+              onClick={(e) => { e.stopPropagation(); handleClearAll(); }}
+              className="text-[11px] font-bold text-slate-400 hover:text-rose-500 transition-colors px-2 py-1 rounded-lg hover:bg-rose-50"
+            >
+              ล้างทั้งหมด
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="max-h-[24rem] overflow-y-auto">
-        {notifications.length > 0 ? notifications.map((notification) => (
+      <div className="max-h-[26rem] overflow-y-auto no-scrollbar overscroll-contain">
+        {displayNotifications.length > 0 ? displayNotifications.map((notification) => (
           <button
             key={notification.id}
             type="button"
             onClick={() => handleNotificationClick(notification)}
-            className={`flex w-full items-start gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors hover:bg-slate-50 ${
-              notification.readAt ? 'bg-white' : 'bg-rose-50/40'
+            className={`flex w-full items-start gap-3 border-b border-slate-50 px-4 py-4 text-left transition-all hover:bg-slate-50/80 active:scale-[0.98] ${
+              notification.readAt ? 'bg-white' : 'bg-primary/[0.02]'
             }`}
           >
-            <div className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
-              notification.readAt ? 'bg-slate-100 text-slate-500' : 'bg-rose-100 text-rose-600'
+            <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+              notification.readAt ? 'bg-slate-100 text-slate-400' : 'bg-primary/10 text-primary'
             }`}>
               <Target size={18} />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-3">
-                <p className="text-sm font-bold text-slate-800">{notification.title}</p>
-                {!notification.readAt ? <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-rose-500" /> : null}
+                <p className={`text-sm leading-tight transition-colors ${notification.readAt ? 'font-medium text-slate-600' : 'font-bold text-slate-900'}`}>
+                  {notification.title}
+                </p>
+                {!notification.readAt ? <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary shadow-sm shadow-primary/20" /> : null}
               </div>
-              <p className="mt-1 text-sm leading-5 text-slate-500">{notification.message}</p>
-              <p className="mt-2 text-[11px] font-semibold text-slate-400">
-                {formatThaiDateTime(notification.scheduledFor, true)}
-              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-500 line-clamp-3">{notification.message}</p>
+              <div className="mt-2.5 flex items-center gap-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md">
+                  {formatThaiDateTime(notification.scheduledFor, true)}
+                </p>
+              </div>
             </div>
           </button>
         )) : (
-          <div className="px-5 py-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-              <Bell size={20} />
+          <div className="px-5 py-12 text-center bg-slate-50/30">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[1.25rem] bg-white border border-slate-100 text-slate-300 shadow-sm">
+              <Bell size={24} />
             </div>
-            <p className="mt-3 text-sm font-bold text-slate-700">ยังไม่มีการแจ้งเตือน</p>
-            <p className="mt-1 text-xs font-medium text-slate-400">เมื่อถึงเวลาที่ระบบแจ้งเตือนเป้าหมาย รายการจะแสดงที่นี่</p>
+            <p className="mt-4 text-[15px] font-bold text-slate-700">ยังไม่มีการแจ้งเตือน</p>
+            <p className="mt-1 text-xs font-medium text-slate-400 max-w-[180px] mx-auto leading-relaxed">
+              เมื่อถึงเวลาที่ระบบแจ้งเตือนเป้าหมาย รายการจะแสดงที่นี่
+            </p>
           </div>
         )}
       </div>

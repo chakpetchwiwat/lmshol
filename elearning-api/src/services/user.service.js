@@ -1362,6 +1362,39 @@ const markNotificationAsRead = async (userId, notificationId) => {
     return getNotifications(userId);
 };
 
+const markAllNotificationsAsRead = async (userId) => {
+    await prisma.userNotification.updateMany({
+        where: {
+            userId,
+            readAt: null,
+            scheduledFor: {
+                lte: new Date()
+            }
+        },
+        data: {
+            readAt: new Date()
+        }
+    });
+
+    return getNotifications(userId);
+};
+
+const clearAllNotifications = async (userId) => {
+    await prisma.userNotification.deleteMany({
+        where: {
+            userId,
+            scheduledFor: {
+                lte: new Date()
+            }
+        }
+    });
+
+    return {
+        unreadCount: 0,
+        items: []
+    };
+};
+
 module.exports = {
     getCourses,
     getAnnouncements,
@@ -1383,5 +1416,7 @@ module.exports = {
     getAnnouncementDocumentAccess,
     getAnnouncementDocumentStream,
     getNotifications,
-    markNotificationAsRead
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    clearAllNotifications
 };

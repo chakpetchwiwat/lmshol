@@ -151,6 +151,16 @@ const markNotificationAsRead = asyncHandler(async (req, res) => {
   res.json({ success: true, data: notifications });
 });
 
+const markAllNotificationsAsRead = asyncHandler(async (req, res) => {
+  const notifications = await UserService.markAllNotificationsAsRead(req.user.userId);
+  res.json({ success: true, data: notifications });
+});
+
+const clearAllNotifications = asyncHandler(async (req, res) => {
+  const notifications = await UserService.clearAllNotifications(req.user.userId);
+  res.json({ success: true, data: notifications });
+});
+
 module.exports = {
   getCourses,
   getAnnouncements,
@@ -172,5 +182,7 @@ module.exports = {
   getAnnouncementDocumentAccess,
   getAnnouncementDocumentStream,
   getNotifications,
-  markNotificationAsRead
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  clearAllNotifications
 };
