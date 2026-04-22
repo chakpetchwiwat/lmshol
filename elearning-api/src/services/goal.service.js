@@ -467,8 +467,16 @@ const getGoalReport = async (goalId, authUser) => {
 
     return resolveGoalReportCache(cacheKey, async () => {
         let userWhere = { status: USER_STATUS.ACTIVE };
+        
+        // 1. If it's a departmental goal, filter by that department
         if (goal.scope === GOAL_SCOPES.DEPARTMENT) {
             userWhere.departmentId = goal.departmentId;
+        }
+
+        // 2. Security: If actor is NOT an admin, they MUST only see their own department's users
+        // even for GLOBAL goals.
+        if (!actor.isAdmin && actor.departmentId) {
+            userWhere.departmentId = actor.departmentId;
         }
 
         const users = await prisma.user.findMany({
