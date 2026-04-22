@@ -17,6 +17,7 @@ const UserLayout = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -97,12 +98,16 @@ const UserLayout = () => {
     }
   };
   
-  const handleClearAll = async () => {
-    if (!window.confirm('คุณต้องการล้างรายการแจ้งเตือนทั้งหมดใช่หรือไม่?')) return;
+  const handleClearAll = () => {
+    setShowClearConfirm(true);
+  };
+
+  const performClearAll = async () => {
     try {
       const response = await userAPI.clearAllNotifications();
       setNotifications(response.data.items || []);
       setUnreadNotificationCount(response.data.unreadCount || 0);
+      setShowClearConfirm(false);
     } catch (error) {
       console.error('Failed to clear all notifications', error);
     }
@@ -334,6 +339,43 @@ const UserLayout = () => {
           </div>
         </nav>
       </div>
+      {/* Premium Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
+            onClick={() => setShowClearConfirm(false)}
+          />
+          <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] bg-white p-8 shadow-2xl animate-scale-in">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-50 text-rose-500 mb-6">
+                <Bell size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900">ล้างการแจ้งเตือน?</h3>
+              <p className="mt-2 text-sm font-medium leading-relaxed text-slate-500">
+                คุณต้องการล้างรายการแจ้งเตือนทั้งหมดใช่หรือไม่?<br />
+                การดำเนินการนี้ไม่สามารถเรียกคืนได้
+              </p>
+              <div className="mt-8 flex w-full flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={performClearAll}
+                  className="flex h-12 w-full items-center justify-center rounded-2xl bg-rose-500 font-bold text-white shadow-lg shadow-rose-200 transition-all hover:bg-rose-600 active:scale-95"
+                >
+                  ใช่, ล้างทั้งหมด
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowClearConfirm(false)}
+                  className="flex h-12 w-full items-center justify-center rounded-2xl bg-slate-100 font-bold text-slate-600 transition-all hover:bg-slate-200 active:scale-95"
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
