@@ -8,24 +8,23 @@ import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 import { openPrintReport } from '../../utils/printUtils';
 import { useToast } from '../../context/useToast';
 import UserDetailModal from './UserDetailModal';
+import UserLink from './UserLink';
+import { ENROLLMENT_STATUS_LABELS } from '../../utils/constants/dashboard';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'ทั้งหมด' },
-  { value: ENROLLMENT_STATUS.COMPLETED, label: 'เรียนจบแล้ว' },
+  { value: ENROLLMENT_STATUS.COMPLETED, label: 'สำเร็จแล้ว' },
   { value: ENROLLMENT_STATUS.IN_PROGRESS, label: 'กำลังเรียน' },
   { value: ENROLLMENT_STATUS.NOT_STARTED, label: 'ยังไม่เริ่มเรียน' },
 ];
 
 const DATE_FIELD_OPTIONS = [
   { value: 'startedAt', label: 'วันที่เริ่มเรียน' },
-  { value: 'completedAt', label: 'วันที่เรียนจบ' },
+  { value: 'completedAt', label: 'สำเร็จเมื่อ' },
 ];
 
-const STATUS_LABELS = {
-  [ENROLLMENT_STATUS.COMPLETED]: 'เรียนจบแล้ว',
-  [ENROLLMENT_STATUS.IN_PROGRESS]: 'กำลังเรียน',
-  [ENROLLMENT_STATUS.NOT_STARTED]: 'ยังไม่เริ่มเรียน',
-};
+
+
 
 const SUMMARY_CARD_STYLES = {
   completed: {
@@ -47,7 +46,7 @@ const SUMMARY_CARD_STYLES = {
 
 const getStatusBadge = (status) => {
   if (status === ENROLLMENT_STATUS.COMPLETED) {
-    return <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">เรียนจบแล้ว</span>;
+    return <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700">สำเร็จแล้ว</span>;
   }
 
   if (status === ENROLLMENT_STATUS.IN_PROGRESS) {
@@ -147,7 +146,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
   const summaryCards = useMemo(() => ([
     {
       key: 'completed',
-      label: 'เรียนจบแล้ว',
+      label: 'สำเร็จแล้ว',
       value: statusSummary.completed,
       helper: 'ผู้ที่เรียนครบและปิดคอร์สแล้ว',
     },
@@ -203,7 +202,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
       summary: [
         { label: 'ชื่อคอร์ส', value: courseTitle },
         { label: 'จำนวนผู้เรียนตามตัวกรอง', value: `${history.length} รายการ` },
-        { label: 'เรียนจบแล้ว', value: `${statusSummary.completed} คน` },
+        { label: 'สำเร็จแล้ว', value: `${statusSummary.completed} คน` },
         { label: 'กำลังเรียน', value: `${statusSummary.inProgress} คน` },
         { label: 'ยังไม่เริ่มเรียน', value: `${statusSummary.notStarted} คน` },
       ],
@@ -216,12 +215,12 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
         { label: 'เดือน', value: months.find((month) => month.value === filters.month)?.label || 'ทุกเดือน' },
         { label: 'ปี', value: filters.month ? (years.find((year) => year.value === filters.year)?.label || 'ทุกปี') : 'ทุกปี' },
       ],
-      columns: ['ชื่อผู้เรียน', 'แผนก / ระดับ', 'เริ่มเรียน', 'สถานะ', 'ความคืบหน้า', 'คะแนนแบบทดสอบ', 'เรียนจบ'],
+      columns: ['ชื่อผู้เรียน', 'แผนก / ระดับ', 'เริ่มเรียน', 'สถานะ', 'ความคืบหน้า', 'คะแนนแบบทดสอบ', 'สำเร็จเมื่อ'],
       rows: history.map((record) => ([
         record.user?.name || '-',
         [record.user?.department, record.user?.tier].filter(Boolean).join(' / ') || '-',
         record.startedAt ? formatThaiDateTime(record.startedAt, true) : '-',
-        STATUS_LABELS[record.status] || 'ยังไม่เริ่มเรียน',
+        ENROLLMENT_STATUS_LABELS[record.status] || 'ยังไม่เริ่มเรียน',
         `${Math.round(record.progressPercent || 0)}%`,
         record.quizScore !== null && record.quizScore !== undefined
           ? `${record.quizScore}${record.quizPassed ? ' (ผ่าน)' : ' (ไม่ผ่าน)'}`
@@ -376,7 +375,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
                     <th className="p-4 font-bold">สถานะ</th>
                     <th className="p-4 font-bold">ความคืบหน้า</th>
                     <th className="p-4 font-bold">คะแนนแบบทดสอบ</th>
-                    <th className="p-4 font-bold">วันที่เรียนจบ</th>
+                    <th className="p-4 font-bold">สำเร็จเมื่อ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 bg-white">
@@ -386,17 +385,11 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
                     return (
                       <tr key={record.id} className="transition-colors hover:bg-slate-50/50">
                         <td className="p-4">
-                          {record.user?.id ? (
-                            <button
-                              type="button"
-                              onClick={() => handleViewUser(record.user.id)}
-                              className="font-bold text-slate-700 transition-colors hover:text-primary hover:underline"
-                            >
-                              {record.user?.name || '-'}
-                            </button>
-                          ) : (
-                            <div className="font-bold text-slate-700">{record.user?.name || '-'}</div>
-                          )}
+                          <UserLink
+                            userId={record.user?.id}
+                            userName={record.user?.name}
+                            onViewUser={handleViewUser}
+                          />
                         </td>
                         <td className="p-4">
                           <div className="flex flex-col gap-1 text-sm text-slate-600">
@@ -415,7 +408,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
                         <td className="p-4">
                           <div className="flex min-w-[160px] flex-col gap-1.5">
                             <div className="flex items-center justify-between text-xs font-bold text-slate-500">
-                              <span>{STATUS_LABELS[record.status] || 'ยังไม่เริ่มเรียน'}</span>
+                              <span>{ENROLLMENT_STATUS_LABELS[record.status] || 'ยังไม่เริ่มเรียน'}</span>
                               <span>{progressPercent}%</span>
                             </div>
                             <div className="h-2 overflow-hidden rounded-full bg-slate-100">

@@ -19,7 +19,7 @@ const IncentiveROITrend = ({ data, onSelectBucket }) => {
   );
   const summaryCards = [
     {
-      label: 'เรียนจบทั้งหมด',
+      label: 'สำเร็จทั้งหมด',
       value: `${totalCompletions} คอร์ส`,
       subtext: 'รวมจากทุกช่วงเวลาตาม filter ปัจจุบัน',
     },
@@ -46,7 +46,7 @@ const IncentiveROITrend = ({ data, onSelectBucket }) => {
           </div>
           <div className="text-left">
             <h3 className="text-lg font-bold text-slate-900">Incentive ROI Trend</h3>
-            <p className="text-sm text-slate-500">ดูความสัมพันธ์ของการเรียนจบและคะแนนสะสมในแต่ละช่วงเวลา</p>
+            <p className="text-sm text-slate-500">ดูความสัมพันธ์ของการเรียนสำเร็จและคะแนนสะสมในแต่ละช่วงเวลา</p>
           </div>
         </div>
       </div>

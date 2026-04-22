@@ -28,7 +28,7 @@ const GoalList = ({ goals, columns, viewMode, onViewReport, onDeleteGoal, onArch
             </td>
             <td className="p-4 text-sm text-slate-600">
               {goal.type === 'ANY' ? (
-                <span>เรียนจบ {goal.targetCount} คอร์ส</span>
+                <span>สำเร็จ {goal.targetCount} คอร์ส</span>
               ) : (
                 <div className="flex flex-col gap-1">
                   <span className="font-medium">{goal.courses.length} คอร์สที่กำหนด</span>
