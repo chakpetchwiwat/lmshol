@@ -6,9 +6,6 @@ const formatValue = (value, suffix = '') => `${Number(value || 0).toLocaleString
 const StatCards = ({ stats, isFullAdmin }) => {
   const totalEnrollments = stats?.totalEnrollments || 0;
   const completedEnrollments = stats?.completedEnrollments || 0;
-  const completionRate = totalEnrollments > 0
-    ? ((completedEnrollments / totalEnrollments) * 100).toFixed(1)
-    : '0.0';
 
   const statCardsData = isFullAdmin
     ? [

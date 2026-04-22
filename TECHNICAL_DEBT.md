@@ -96,6 +96,7 @@ Required action:
 - [x] centralize authorization rules into shared helpers (`auth.helpers.js`) [RESOLVED]
 - [x] standardize actor resolution for `admin`, `manager`, `tier access`, and end-user scope [RESOLVED]
 - [x] add focused logic for visibility querying [RESOLVED for Goals, Courses, Categories]
+- [x] enforce department-level data isolation for Manager roles [RESOLVED]
 
 ### 2.2 RLS is a future option, not the immediate remediation
 
@@ -247,143 +248,16 @@ Required action:
 - [x] centralize Buddhist Era year calculation (`toThaiYear`) [RESOLVED]
 - [x] implement centralized visibility filtering for goals and timed items [RESOLVED]
 
-## Corrected Priorities
-
-The previous report mixed real debt with recommendations that were not aligned to the current stack. The corrected priority order should be:
-
-1. Secret hygiene and credential rotation
-2. Authorization hardening and permission centralization
-3. Centralized brand CI rollout
-4. Decomposition of oversized components
-5. Notification infrastructure
-6. Testing for permission, enrollment, progress, and formatting flows
-7. Localization extraction
-
-## Strategic Roadmap
-
-## Wave 0 - Immediate Risk Reduction
-
-### Goal
-
-Remove critical exposure and prevent avoidable production risk.
-
-### Tasks
-
-- move Prisma `directUrl` out of source-controlled schema
-- rotate exposed database credentials
-- audit other config files for embedded secrets
-- document environment variable contract
-
-### Exit criteria
-
-- no live credentials remain committed in tracked source files
-
-## Wave 1 - Authorization Foundation
-
-### Goal
-
-Make access control easier to reason about and safer to extend.
-
-### Tasks
-
-- extract shared permission helpers for user, manager, admin, and tier-based admin access
-- reduce duplicated scope logic in services
-- add focused tests around admin-panel access and user data isolation
-- document the current auth model clearly
-
-### Exit criteria
-
-- new endpoints can reuse one authorization model instead of re-implementing checks
-
-## Wave 2 - Brand CI and Design System
-
-### Goal
-
-Centralize branding so the product can be re-skinned for clients with minimal code changes.
-
-### Tasks
-
-- execute [implementation_plan.md](d:/งาน/AI%20Project/implementation_plan.md)
-- start with token contract and shared primitives
-- then migrate high-impact user/admin screens
-
-### Exit criteria
-
-- changing theme tokens updates major user/admin surfaces without local color edits
-
-## Wave 3 - Component Decomposition
-
-### Goal
-
-Lower the maintenance cost of the highest-risk files.
-
-### Primary targets
-
-- [CourseManagement.jsx](d:/งาน/AI%20Project/elearning-webapp/src/pages/admin/CourseManagement.jsx:1)
-- [LessonPlayer.jsx](d:/งาน/AI%20Project/elearning-webapp/src/pages/user/LessonPlayer.jsx:1)
-- [CourseModal.jsx](d:/งาน/AI%20Project/elearning-webapp/src/components/admin/CourseModal.jsx:1)
-- [CourseDetail.jsx](d:/งาน/AI%20Project/elearning-webapp/src/pages/user/CourseDetail.jsx:1)
-
-### Tasks
-
-- split data/action logic into custom hooks
-- split repeated UI into focused subcomponents
-- reduce prop drilling by tightening boundaries
-- make files smaller without changing product behavior
-
-### Exit criteria
-
-- critical components become easier to test, review, and extend
-
-## Wave 4 - Feedback and Interaction Infrastructure [COMPLETED]
-
-### Goal
-
-Replace blocking feedback patterns with a system-level notification approach.
-
-### Status
-
-- **100% Completed**: Native `alert()` calls have been eliminated from the `src` directory.
-
-### Exit criteria
-
-- [x] no critical user flow depends on browser-native alerts
-
-## Wave 5 - Regression Defense
-
-### Goal
-
-Stop core bugs from recurring.
-
-### Minimum useful test coverage
-
-- auth and permission checks
-- course enrollment flow
-- lesson progress and quiz submission
-- reward redemption rules
-- date formatting utilities
-
-### Exit criteria
-
-- the most expensive regressions are covered by automated checks
-
-## Wave 6 - Localization Readiness
-
-### Goal
-
-Reduce the cost of future multi-language support.
-
-### Tasks
-
-- define translation file structure
-- extract shared/common UI copy first
-- migrate high-traffic user/admin surfaces incrementally
-
-### Exit criteria
-
-- new screens follow a documented copy strategy instead of embedding literals by default
-
 ## Success Metrics
+
+### Security
+- 0 live credentials committed in tracked source
+- permission-sensitive endpoints covered by centralized authorization helpers
+- [ ] Implement Redis-backed shared store for multi-instance rate limiting
+
+### Maintainability
+- [ ] Standardize shared UI components (Buttons, Modals, Inputs) to remove ad-hoc styling
+- [ ] Refactor API service layer for unified error response structure
 
 ### Security
 

@@ -1006,7 +1006,7 @@ const buildDashboardScope = (actor, filters = {}) => {
 };
 
 const buildLearnerWhere = (departmentId = null) => ({
-    role: USER_ROLES.USER,
+    status: USER_STATUS.ACTIVE,
     ...(departmentId ? { departmentId } : {})
 });
 

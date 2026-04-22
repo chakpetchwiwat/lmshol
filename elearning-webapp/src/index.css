@@ -516,26 +516,14 @@
 }
 
 .no-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .no-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-.no-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.no-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.7);
-  border-radius: 999px;
-}
-
-.no-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.85);
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .points-pill {
@@ -573,6 +561,15 @@
 
 .animate-slide-up {
   animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(32px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes float {

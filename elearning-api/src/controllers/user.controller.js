@@ -141,6 +141,26 @@ const getAnnouncementDocumentStream = asyncHandler(async (req, res) => {
   Readable.fromWeb(upstreamResponse.body).pipe(res);
 });
 
+const getNotifications = asyncHandler(async (req, res) => {
+  const notifications = await UserService.getNotifications(req.user.userId);
+  res.json({ success: true, data: notifications });
+});
+
+const markNotificationAsRead = asyncHandler(async (req, res) => {
+  const notifications = await UserService.markNotificationAsRead(req.user.userId, req.params.id);
+  res.json({ success: true, data: notifications });
+});
+
+const markAllNotificationsAsRead = asyncHandler(async (req, res) => {
+  const notifications = await UserService.markAllNotificationsAsRead(req.user.userId);
+  res.json({ success: true, data: notifications });
+});
+
+const clearAllNotifications = asyncHandler(async (req, res) => {
+  const notifications = await UserService.clearAllNotifications(req.user.userId);
+  res.json({ success: true, data: notifications });
+});
+
 module.exports = {
   getCourses,
   getAnnouncements,
@@ -160,5 +180,9 @@ module.exports = {
   getLessonDocumentAccess,
   getLessonDocumentStream,
   getAnnouncementDocumentAccess,
-  getAnnouncementDocumentStream
+  getAnnouncementDocumentStream,
+  getNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  clearAllNotifications
 };

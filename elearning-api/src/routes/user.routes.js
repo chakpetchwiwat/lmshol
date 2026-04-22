@@ -24,6 +24,10 @@ router.get('/announcements/:id/document-access', userController.getAnnouncementD
 router.get('/points', userController.getPointsHistory);
 router.get('/rewards', userController.getRewards);
 router.get('/categories', userController.getCategories);
+router.get('/notifications', userController.getNotifications);
+router.put('/notifications/read-all', userController.markAllNotificationsAsRead);
+router.put('/notifications/:id/read', userController.markNotificationAsRead);
+router.delete('/notifications', userController.clearAllNotifications);
 router.post('/redeem/:id', userController.requestRedeem);
 router.put('/profile', userController.updateProfile);
 
