@@ -272,9 +272,7 @@ const Dashboard = () => {
     });
   };
 
-  const openInsight = (nextInsight) => {
-    setInsight(nextInsight);
-  };
+
 
   const handleViewUser = async (userId) => {
     if (!userId) return;

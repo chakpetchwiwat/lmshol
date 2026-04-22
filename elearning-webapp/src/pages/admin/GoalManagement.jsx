@@ -20,11 +20,7 @@ const GoalManagement = () => {
     const toast = useToast();
     const { confirm, ConfirmDialogProps } = useConfirm();
 
-    const stableConfirmProps = useMemo(() => ConfirmDialogProps, [
-        ConfirmDialogProps.isOpen,
-        ConfirmDialogProps.title,
-        ConfirmDialogProps.message
-    ]);
+    const stableConfirmProps = useMemo(() => ConfirmDialogProps, [ConfirmDialogProps]);
 
     const [goals, setGoals] = useState([]);
     const [courses, setCourses] = useState([]);
