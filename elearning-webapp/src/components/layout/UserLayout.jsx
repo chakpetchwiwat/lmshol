@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Home, BookOpen, Gift, User, BookMarked, LogOut, Settings, Bell, Target } from 'lucide-react';
 import { userAPI } from '../../utils/api';
