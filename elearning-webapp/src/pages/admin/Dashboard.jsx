@@ -18,6 +18,7 @@ import SkillGapRadarChart from '../../components/admin/SkillGapRadarChart';
 import DepartmentLeaderboard from '../../components/admin/DepartmentLeaderboard';
 import IncentiveROITrend from '../../components/admin/IncentiveROITrend';
 import RiskIdentificationWidget from '../../components/admin/RiskIdentificationWidget';
+import GoalTrackingWidget from '../../components/admin/GoalTrackingWidget';
 import DashboardInsightModal from '../../components/admin/DashboardInsightModal';
 import UserDetailModal from '../../components/admin/UserDetailModal';
 import UserLink from '../../components/admin/UserLink';
@@ -72,6 +73,42 @@ const buildPrintRowsFromInsight = (insight) => (
   ))
 );
 
+const isGoalCurrentlyActive = (goal) => {
+  if (!goal || goal.status !== 'ACTIVE') return false;
+  if (!goal.expiryDate) return true;
+  return new Date(goal.expiryDate).getTime() >= Date.now();
+};
+
+const getGoalScopeLabel = (goal) => {
+  if (goal?.scope === 'DEPARTMENT') {
+    return goal?.department?.name || 'Department';
+  }
+
+  return 'ทั้งองค์กร';
+};
+
+const buildGoalTargetLabel = (goal) => {
+  if (!goal) return '-';
+  if (goal.type === 'ANY') {
+    return `${goal.targetCount || 0} คอร์ส`;
+  }
+
+  const totalCourses = goal.courses?.length || goal.targetCount || 0;
+  return `${totalCourses} คอร์สที่กำหนด`;
+};
+
+const countGoalStatuses = (rows = []) => rows.reduce((accumulator, row) => {
+  const status = row.userStatus || 'NOT_STARTED';
+  accumulator.ALL += 1;
+  accumulator[status] = (accumulator[status] || 0) + 1;
+  return accumulator;
+}, {
+  ALL: 0,
+  COMPLETED: 0,
+  IN_PROGRESS: 0,
+  NOT_STARTED: 0,
+});
+
 const Dashboard = () => {
   const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const isFullAdmin = canEditAdminUsers(currentUser);
@@ -92,9 +129,12 @@ const Dashboard = () => {
   const [showUserDetailModal, setShowUserDetailModal] = useState(false);
   const [userDetailLoading, setUserDetailLoading] = useState(false);
   const [selectedUserDetail, setSelectedUserDetail] = useState(null);
+  const [goalTrackingItems, setGoalTrackingItems] = useState([]);
+  const [goalTrackingLoading, setGoalTrackingLoading] = useState(false);
   const [reportGoal, setReportGoal] = useState(null);
   const [reportData, setReportData] = useState(null);
   const [reportLoading, setReportLoading] = useState(false);
+  const [reportInitialFilterStatus, setReportInitialFilterStatus] = useState('ALL');
 
   const yearOptions = useMemo(() => buildYearOptions(thaiNow?.year || new Date().getFullYear()), [thaiNow]);
 
@@ -201,6 +241,63 @@ const Dashboard = () => {
     }
     return `${monthLabel} ${filters.year}`;
   }, [filters.month, filters.year]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchGoalTracking = async () => {
+      setGoalTrackingLoading(true);
+
+      try {
+        const goalsResponse = await adminAPI.getGoals();
+        const activeGoals = (goalsResponse.data || []).filter(isGoalCurrentlyActive);
+
+        const reports = await Promise.all(activeGoals.map(async (goal) => {
+          const response = await adminAPI.getGoalReport(goal.id);
+          const allRows = response.data?.report || [];
+          const visibleRows = isFullAdmin && filters.departmentId && selectedDepartmentName
+            ? allRows.filter((row) => row.department === selectedDepartmentName)
+            : allRows;
+
+          return {
+            ...goal,
+            scopeLabel: getGoalScopeLabel(goal),
+            targetLabel: buildGoalTargetLabel(goal),
+            counts: countGoalStatuses(visibleRows),
+            reportData: {
+              ...response.data,
+              report: visibleRows,
+            },
+          };
+        }));
+
+        reports.sort((left, right) => {
+          const leftDate = new Date(left.expiryDate || '9999-12-31').getTime();
+          const rightDate = new Date(right.expiryDate || '9999-12-31').getTime();
+          return leftDate - rightDate;
+        });
+
+        if (isMounted) {
+          setGoalTrackingItems(reports);
+        }
+      } catch (error) {
+        console.error('Fetch goal tracking error:', error);
+        if (isMounted) {
+          setGoalTrackingItems([]);
+        }
+      } finally {
+        if (isMounted) {
+          setGoalTrackingLoading(false);
+        }
+      }
+    };
+
+    fetchGoalTracking();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [filters.departmentId, isFullAdmin, selectedDepartmentName]);
 
   const performanceRows = useMemo(() => {
     const rows = [...(stats?.learnerPerformance || [])];
@@ -323,17 +420,39 @@ const Dashboard = () => {
     />
   );
 
-  const handleViewGoalReport = async (goal) => {
+  const openGoalReportModal = (goal, nextReportData, initialStatus = 'ALL') => {
+    setReportGoal(goal);
+    setReportData(nextReportData);
+    setReportInitialFilterStatus(initialStatus);
+    setReportLoading(false);
+  };
+
+  const handleOpenTrackedGoalReport = (goal, initialStatus = 'ALL') => {
+    if (!goal) return;
+    openGoalReportModal(goal, goal.reportData, initialStatus);
+  };
+
+  const handleViewGoalReport = async (goal, initialStatus = 'ALL') => {
     if (!goal || !goal.id) return;
     try {
       setReportGoal(goal);
       setReportLoading(true);
+      setReportInitialFilterStatus(initialStatus);
       const response = await adminAPI.getGoalReport(goal.id);
-      setReportData(response.data);
+      const allRows = response.data?.report || [];
+      const visibleRows = isFullAdmin && filters.departmentId && selectedDepartmentName
+        ? allRows.filter((row) => row.department === selectedDepartmentName)
+        : allRows;
+
+      openGoalReportModal(goal, {
+        ...response.data,
+        report: visibleRows,
+      }, initialStatus);
     } catch (error) {
       console.error('Fetch goal report error:', error);
       setErrorMessage('ไม่สามารถโหลดรายงานเป้าหมายได้');
       setReportGoal(null);
+      setReportData(null);
     } finally {
       setReportLoading(false);
     }
@@ -472,6 +591,13 @@ const Dashboard = () => {
 
       <StatCards stats={stats} isFullAdmin={isFullAdmin} />
 
+      <GoalTrackingWidget
+        goals={goalTrackingItems}
+        loading={goalTrackingLoading}
+        selectedDepartmentName={selectedDepartmentName}
+        onOpenGoalReport={handleOpenTrackedGoalReport}
+      />
+
       {isManagerView ? (
         <>
           <div className="grid grid-cols-1 gap-6">
@@ -590,9 +716,11 @@ const Dashboard = () => {
         reportGoal={reportGoal}
         reportData={reportData}
         reportLoading={reportLoading}
+        initialFilterStatus={reportInitialFilterStatus}
         onClose={() => {
           setReportGoal(null);
           setReportData(null);
+          setReportInitialFilterStatus('ALL');
         }}
       />
     </div>

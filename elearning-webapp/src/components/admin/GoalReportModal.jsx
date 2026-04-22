@@ -7,9 +7,10 @@ const GoalReportModal = ({
   reportGoal,
   reportData,
   reportLoading,
+  initialFilterStatus = 'ALL',
   onClose,
 }) => {
-  const [filterStatus, setFilterStatus] = React.useState('ALL');
+  const [filterStatus, setFilterStatus] = React.useState(initialFilterStatus);
   const goalSource = reportData?.goal || reportGoal;
   const targetCourses = useMemo(() => (
     (goalSource?.courses || [])
@@ -20,6 +21,12 @@ const GoalReportModal = ({
   const numberedTargetCourses = useMemo(() => (
     targetCourses.map((courseTitle, index) => `${index + 1}. ${courseTitle}`).join('\n')
   ), [targetCourses]);
+
+  React.useEffect(() => {
+    if (reportGoal) {
+      setFilterStatus(initialFilterStatus || 'ALL');
+    }
+  }, [initialFilterStatus, reportGoal]);
 
   const statusCounts = useMemo(() => {
     const counts = {
@@ -34,6 +41,18 @@ const GoalReportModal = ({
     return counts;
   }, [reportData]);
 
+  const filteredRows = useMemo(() => (
+    (reportData?.report || []).filter((record) => filterStatus === 'ALL' || record.userStatus === filterStatus)
+  ), [filterStatus, reportData]);
+
+  const filterLabel = filterStatus === 'COMPLETED'
+    ? 'สำเร็จแล้ว'
+    : filterStatus === 'IN_PROGRESS'
+      ? 'กำลังเรียน'
+      : filterStatus === 'NOT_STARTED'
+        ? 'ยังไม่เริ่มเรียน'
+        : 'ทั้งหมด';
+
   if (!reportGoal) return null;
 
   const goalTargetLabel = goalSource?.type === 'ANY'
@@ -44,7 +63,7 @@ const GoalReportModal = ({
     openPrintReport({
       fileName: `goal-report-${goalSource?.title || 'report'}`,
       reportTitle: 'รายงานเป้าหมายการเรียน',
-      subtitle: goalSource?.title,
+      subtitle: `${goalSource?.title} (${filterLabel})`,
       summary: [
         { label: 'เป้าหมาย', value: goalTargetLabel },
         {
@@ -59,7 +78,7 @@ const GoalReportModal = ({
         { label: 'ยังไม่เริ่ม', value: `${statusCounts.NOT_STARTED} คน` },
       ],
       columns: ['พนักงาน', 'แผนก', 'ความคืบหน้า', 'สถานะ', 'รายละเอียด'],
-      rows: (reportData?.report || []).map((record) => ([
+      rows: filteredRows.map((record) => ([
         record.name || '-',
         record.department || '-',
         `${record.completionCount} / ${record.targetCount}`,
@@ -198,7 +217,13 @@ const GoalReportModal = ({
                       </tr>
                     </thead>
                     <tbody>
-                      {(reportData.report || []).filter(r => filterStatus === 'ALL' || r.userStatus === filterStatus).map((record) => (
+                      {filteredRows.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="p-8 text-center text-sm font-semibold text-slate-400">
+                            ไม่พบรายชื่อพนักงานในสถานะที่เลือก
+                          </td>
+                        </tr>
+                      ) : filteredRows.map((record) => (
                         <tr key={record.userId} className="border-b border-slate-50 transition-colors hover:bg-slate-50/50">
                           <td className="p-4">
                             <div className="font-bold text-slate-800">{record.name}</div>

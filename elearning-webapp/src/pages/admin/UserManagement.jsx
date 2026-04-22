@@ -88,7 +88,7 @@ const UserManagement = () => {
     } finally {
       setReferenceLoading(false);
     }
-  }, [canEditUsers]);
+  }, []);
 
   useEffect(() => {
     const bootstrap = async () => {
