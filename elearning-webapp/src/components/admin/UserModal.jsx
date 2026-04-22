@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
@@ -15,6 +15,22 @@ const UserModal = ({
   tiers,
   canEditRole = true,
 }) => {
+  // Sync Role with Tier managerAccess
+  useEffect(() => {
+    // Protected: Don't sync for superadmins (they shouldn't be downgraded by changing tier)
+    if (formData.role === 'admin') return;
+
+    if (formData.tierId) {
+      const selectedTier = tiers.find((t) => t.id === formData.tierId);
+      if (selectedTier) {
+        const targetRole = selectedTier.managerAccess ? 'manager' : 'user';
+        if (formData.role !== targetRole) {
+          setFormData((prev) => ({ ...prev, role: targetRole }));
+        }
+      }
+    }
+  }, [formData.tierId, tiers, formData.role, setFormData]);
+
   if (!isOpen) {
     return null;
   }
@@ -84,15 +100,24 @@ const UserModal = ({
             </div>
 
             {canEditRole && (
-              <CustomSelect
-                label="สิทธิ์ระบบ"
-                value={formData.role}
-                onChange={(event) => setFormData({ ...formData, role: event.target.value })}
-                options={[
-                  { value: 'user', label: 'User' },
-                  { value: 'manager', label: 'Manager' }
-                ]}
-              />
+              <div className="relative">
+                <CustomSelect
+                  label="สิทธิ์ระบบ"
+                  value={formData.role}
+                  disabled={!!formData.tierId && formData.role !== 'admin'}
+                  onChange={(event) => setFormData({ ...formData, role: event.target.value })}
+                  options={[
+                    { value: 'user', label: 'User' },
+                    { value: 'manager', label: 'Manager' },
+                    ...(formData.role === 'admin' ? [{ value: 'admin', label: 'Admin (Superadmin)' }] : [])
+                  ]}
+                />
+                {formData.tierId && formData.role !== 'admin' && (
+                  <p className="mt-1 ml-1 text-[11px] font-medium text-slate-400 italic">
+                    * สิทธิ์ระบบจะถูกกำหนดโดยอัตโนมัติตาม "ระดับ" ที่คุณเลือก
+                  </p>
+                )}
+              </div>
             )}
 
             <div className="grid gap-5 md:grid-cols-2">

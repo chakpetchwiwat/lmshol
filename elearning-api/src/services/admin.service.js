@@ -726,8 +726,23 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
 
     const tierId = normalizeNullableId(baseData.tierId);
     if (tierId !== undefined) {
-        const tier = await ensureReferenceName(tx, 'tier', tierId);
-        data.tierId = tier?.id || null;
+        if (tierId) {
+            const tier = await tx.tier.findUnique({
+                where: { id: tierId },
+                select: { id: true, managerAccess: true }
+            });
+            if (!tier) throw new Error('Tier not found');
+            data.tierId = tier.id;
+
+            // Auto-sync role based on tier's managerAccess
+            // Only sync if current role is not ADMIN to prevent downgrading superadmins
+            const targetRole = tier.managerAccess ? USER_ROLES.MANAGER : USER_ROLES.USER;
+            if (data.role !== USER_ROLES.ADMIN) {
+                data.role = targetRole;
+            }
+        } else {
+            data.tierId = null;
+        }
     }
 
     if (baseData.employmentDate !== undefined) {
