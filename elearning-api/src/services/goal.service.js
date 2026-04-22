@@ -9,7 +9,7 @@ const GOAL_REPORT_CACHE_TTL_MS = Math.max(
     10000,
     Number.parseInt(process.env.GOAL_REPORT_CACHE_TTL_MS || '30000', 10) || 30000
 );
-const GOAL_REMINDER_DAY_OPTIONS = new Set([3, 7]);
+const GOAL_REMINDER_DAY_OPTIONS = new Set([0, 3, 7]);
 
 const goalReportCache = new Map();
 
@@ -21,7 +21,7 @@ const normalizeReminderDays = (value, fieldLabel) => {
     const parsedValue = Number.parseInt(value, 10);
 
     if (!GOAL_REMINDER_DAY_OPTIONS.has(parsedValue)) {
-        throw new ErrorResponse(`${fieldLabel} must be 3 or 7 days`, 400);
+        throw new ErrorResponse(`${fieldLabel} must be 0, 3 or 7 days`, 400);
     }
 
     return parsedValue;
@@ -55,7 +55,7 @@ const createGoalReminderNotifications = async (tx, goal, assignmentBaseDate = ne
     const notifications = [];
     const now = new Date();
 
-    if (goal.postAssignmentReminderDays) {
+    if (goal.postAssignmentReminderDays !== null) {
         const { date: scheduledFor } = addThailandDays(
             assignmentBaseDate,
             goal.postAssignmentReminderDays,

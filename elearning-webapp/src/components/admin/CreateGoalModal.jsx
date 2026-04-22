@@ -128,6 +128,7 @@ const CreateGoalModal = ({
                   })}
                   options={[
                     { value: '', label: 'ไม่ส่งแจ้งเตือน' },
+                    { value: '0', label: 'ทันที' },
                     { value: '3', label: '3 วัน' },
                     { value: '7', label: '7 วัน' }
                   ]}
