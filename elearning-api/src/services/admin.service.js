@@ -1106,7 +1106,16 @@ const getDashboardStats = async (authUser, filters = {}) => {
         const learnerWhere = buildLearnerWhere(scopeFilters.departmentId);
         const visibleCourseWhere = buildVisibleCourseWhereForDashboard(scopeFilters.departmentId);
 
-        const [totalUsers, activeCourses, categories, enrollments, selectedDepartment, dashboardGoals] = await Promise.all([
+        const [
+            totalUsers, 
+            activeCourses, 
+            categories, 
+            enrollmentCount, 
+            completedEnrollmentCount, 
+            enrollments, 
+            selectedDepartment, 
+            dashboardGoals
+        ] = await Promise.all([
             prisma.user.count({ where: learnerWhere }),
             prisma.course.count({ where: visibleCourseWhere }),
             prisma.category.findMany({
@@ -1116,12 +1125,28 @@ const getDashboardStats = async (authUser, filters = {}) => {
                     }
                 }
             }),
+            prisma.userCourse.count({
+                where: {
+                    user: learnerWhere,
+                    course: visibleCourseWhere,
+                    ...buildDateOverlapWhere(period.start, period.end)
+                }
+            }),
+            prisma.userCourse.count({
+                where: {
+                    user: learnerWhere,
+                    course: visibleCourseWhere,
+                    status: ENROLLMENT_STATUS.COMPLETED,
+                    ...buildDateOverlapWhere(period.start, period.end)
+                }
+            }),
             prisma.userCourse.findMany({
                 where: {
                     user: learnerWhere,
                     course: visibleCourseWhere,
                     ...buildDateOverlapWhere(period.start, period.end)
                 },
+                // Fetch all for now to keep charts accurate, but with optimized counts above
                 include: {
                     user: {
                         select: {
@@ -1183,6 +1208,9 @@ const getDashboardStats = async (authUser, filters = {}) => {
             })
         ]);
 
+        const totalEnrollments = enrollmentCount || 0;
+        const completedEnrollments = completedEnrollmentCount || 0;
+        const recentEnrollments = enrollments || [];
         const activeGoals = dashboardGoals || [];
 
         const enrollmentUserIds = [...new Set(enrollments.map((enrollment) => enrollment.userId))];
@@ -1242,8 +1270,6 @@ const getDashboardStats = async (authUser, filters = {}) => {
             };
         });
 
-        const totalEnrollments = learnerPerformance.length;
-        const completedEnrollments = learnerPerformance.filter((item) => item.status === ENROLLMENT_STATUS.COMPLETED).length;
         const scoredRecords = learnerPerformance.filter((item) => typeof item.score === 'number');
         const averageQuizScore = scoredRecords.length
             ? roundToOneDecimal(scoredRecords.reduce((sum, item) => sum + item.score, 0) / scoredRecords.length)
