@@ -1162,8 +1162,28 @@ const getDashboardStats = async (authUser, filters = {}) => {
                     where: { id: scopeFilters.departmentId },
                     select: { id: true, name: true }
                 })
-                : Promise.resolve(null)
+                : Promise.resolve(null),
+            prisma.learningGoal.findMany({
+                where: {
+                    status: GOAL_STATUS.ACTIVE,
+                    ...(scopeFilters.departmentId ? {
+                        OR: [
+                            { scope: GOAL_SCOPES.GLOBAL },
+                            { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId }
+                        ]
+                    } : {})
+                },
+                include: {
+                    courses: {
+                        select: {
+                            courseId: true
+                        }
+                    }
+                }
+            })
         ]);
+
+        const activeGoals = dashboardGoals || [];
 
         const enrollmentUserIds = [...new Set(enrollments.map((enrollment) => enrollment.userId))];
         const enrollmentCourseIds = [...new Set(enrollments.map((enrollment) => enrollment.courseId))];
@@ -1227,6 +1247,69 @@ const getDashboardStats = async (authUser, filters = {}) => {
         const scoredRecords = learnerPerformance.filter((item) => typeof item.score === 'number');
         const averageQuizScore = scoredRecords.length
             ? roundToOneDecimal(scoredRecords.reduce((sum, item) => sum + item.score, 0) / scoredRecords.length)
+            : 0;
+
+        // GOAL COMPLIANCE CALCULATION
+        let goalTotalAssignments = 0;
+        let goalSuccessfulAssignments = 0;
+
+        if (activeGoals.length > 0) {
+            const usersForCompliance = await prisma.user.findMany({
+                where: learnerWhere,
+                select: {
+                    id: true,
+                    departmentId: true
+                }
+            });
+
+            const usersByDept = usersForCompliance.reduce((acc, user) => {
+                const deptId = user.departmentId || '__NONE__';
+                if (!acc[deptId]) acc[deptId] = [];
+                acc[deptId].push(user.id);
+                return acc;
+            }, {});
+
+            const allComplianceUserIds = usersForCompliance.map(u => u.id);
+            const userCompletionCountMap = enrollments
+                .filter(e => e.status === ENROLLMENT_STATUS.COMPLETED)
+                .reduce((acc, e) => {
+                    if (!acc[e.userId]) acc[e.userId] = new Set();
+                    acc[e.userId].add(e.courseId);
+                    return acc;
+                }, {});
+
+            activeGoals.forEach(goal => {
+                const targetUserIds = goal.scope === GOAL_SCOPES.GLOBAL
+                    ? allComplianceUserIds
+                    : (usersByDept[goal.departmentId] || []);
+
+                if (targetUserIds.length === 0) return;
+
+                const goalCourseIds = goal.courses.map(c => c.courseId);
+                
+                targetUserIds.forEach(userId => {
+                    goalTotalAssignments++;
+                    const userCompletedCourseIds = userCompletionCountMap[userId] || new Set();
+                    
+                    let isGoalMet = false;
+                    if (goal.type === 'ANY') {
+                        // For ANY goals, we need to check completions within the goal's lifespan
+                        // Since dashboard enrollments are already period-filtered, we check count
+                        // (This is an approximation for the dashboard view)
+                        const count = [...userCompletedCourseIds].length; 
+                        isGoalMet = count >= goal.targetCount;
+                    } else {
+                        const completedSpecificCount = goalCourseIds.filter(id => userCompletedCourseIds.has(id)).length;
+                        isGoalMet = completedSpecificCount >= goal.targetCount;
+                    }
+
+                    if (isGoalMet) goalSuccessfulAssignments++;
+                });
+            });
+        }
+
+        const complianceRate = goalTotalAssignments > 0
+            ? roundToOneDecimal((goalSuccessfulAssignments / goalTotalAssignments) * 100)
             : 0;
 
         const bucketTemplate = buildTimeBuckets(period).map((bucket) => ({
@@ -1367,6 +1450,11 @@ const getDashboardStats = async (authUser, filters = {}) => {
             totalEnrollments,
             completedEnrollments,
             averageQuizScore,
+            complianceRate,
+            goalStats: {
+                totalAssignments: goalTotalAssignments,
+                successfulAssignments: goalSuccessfulAssignments
+            },
             learnerPerformance,
             popularCourses,
             weeklyActivity,
