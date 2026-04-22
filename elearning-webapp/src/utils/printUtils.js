@@ -3,13 +3,30 @@ import { formatThaiDateTime } from './dateUtils';
 const REPORT_STORAGE_PREFIX = 'print-report:';
 const REPORT_TTL_MS = 1000 * 60 * 60;
 
-const escapeHtml = (value) =>
-  String(value ?? '')
+const escapeHtml = (value) => {
+  let stringValue = value;
+  
+  if (value === null || value === undefined) {
+    return '';
+  }
+  
+  // Handle objects / React-like structures
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    // Check for common display properties
+    stringValue = value.name || value.title || value.label || 
+                 (value.props && value.props.children ? value.props.children : null) ||
+                 String(value);
+  } else {
+    stringValue = String(value);
+  }
+
+  return stringValue
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+};
 
 const renderMetaRow = (items = []) => {
   const visibleItems = items.filter(

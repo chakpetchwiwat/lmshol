@@ -31,6 +31,18 @@ import GoalReportModal from '../../components/admin/GoalReportModal';
 
 const safeValue = (value) => {
   if (value === null || value === undefined || value === '') return '-';
+  
+  // Handle objects and React elements
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    // If it's a React element (has props), try to get children
+    if (value.props && value.props.children) {
+      return safeValue(value.props.children);
+    }
+    
+    // Fallback to common display properties
+    return value.name || value.title || value.label || String(value);
+  }
+  
   return String(value);
 };
 
@@ -45,7 +57,14 @@ const buildPrintRowsFromInsight = (insight) => (
 
       // If the rendered value is a React component/object, fallback to the raw data key for printing
       if (renderedValue && typeof renderedValue === 'object' && !Array.isArray(renderedValue)) {
-        return safeValue(row[column.key]);
+        // Try to get a string value from the row data instead of the component
+        const rawValue = row[column.key];
+        if (rawValue && typeof rawValue !== 'object') {
+          return safeValue(rawValue);
+        }
+        
+        // If the raw value is also an object, let safeValue handle it
+        return safeValue(renderedValue);
       }
 
       return safeValue(renderedValue);

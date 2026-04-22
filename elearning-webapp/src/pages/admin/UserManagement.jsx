@@ -231,23 +231,36 @@ const UserManagement = () => {
     }
   };
 
-  const filteredUsers = useMemo(() => (
-    users.filter((user) => {
-      const keyword = searchTerm.trim().toLowerCase();
-      const matchesKeyword =
-        !keyword ||
-        user.name.toLowerCase().includes(keyword) ||
-        user.email.toLowerCase().includes(keyword);
+  const filteredUsers = useMemo(() => {
+    const tierOrderMap = Object.fromEntries(tiers.map((t) => [t.id, t.order]));
+    
+    return users
+      .filter((user) => {
+        const keyword = searchTerm.trim().toLowerCase();
+        const matchesKeyword =
+          !keyword ||
+          user.name.toLowerCase().includes(keyword) ||
+          user.email.toLowerCase().includes(keyword);
 
-      const matchesDepartment =
-        selectedDepartment === FILTER_VALUES.ALL || user.departmentId === selectedDepartment;
+        const matchesDepartment =
+          selectedDepartment === FILTER_VALUES.ALL || user.departmentId === selectedDepartment;
 
-      const matchesTier =
-        selectedTier === FILTER_VALUES.ALL || user.tierId === selectedTier;
+        const matchesTier =
+          selectedTier === FILTER_VALUES.ALL || user.tierId === selectedTier;
 
-      return matchesKeyword && matchesDepartment && matchesTier;
-    })
-  ), [searchTerm, selectedDepartment, selectedTier, users]);
+        return matchesKeyword && matchesDepartment && matchesTier;
+      })
+      .sort((a, b) => {
+        const orderA = tierOrderMap[a.tierId] ?? 999;
+        const orderB = tierOrderMap[b.tierId] ?? 999;
+        
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        
+        return a.name.localeCompare(b.name, 'th');
+      });
+  }, [searchTerm, selectedDepartment, selectedTier, users, tiers]);
 
   const columns = useMemo(() => [
     { label: 'ผู้ใช้งาน' },

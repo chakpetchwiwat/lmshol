@@ -109,7 +109,7 @@ const UserModal = ({
                   options={[
                     { value: 'user', label: 'User' },
                     { value: 'manager', label: 'Manager' },
-                    ...(formData.role === 'admin' ? [{ value: 'admin', label: 'Admin (Superadmin)' }] : [])
+                    ...(canEditRole || formData.role === 'admin' ? [{ value: 'admin', label: 'Admin (Superadmin)' }] : [])
                   ]}
                 />
                 {formData.tierId && formData.role !== 'admin' && (

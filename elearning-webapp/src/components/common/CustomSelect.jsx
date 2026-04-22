@@ -54,18 +54,18 @@ const CustomSelect = ({
               : 'border-slate-200 hover:border-slate-300'
           } ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-50' : 'cursor-pointer'} ${fullWidth ? 'w-full' : ''}`}
         >
-          <span className={`${selectedOption ? 'text-slate-900' : 'text-slate-400'} whitespace-nowrap`}>
+          <span className={`block flex-1 text-left ${selectedOption ? 'text-slate-900' : 'text-slate-400'} truncate mr-2`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           <ChevronDown 
             size={18} 
-            className={`text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} 
+            className={`shrink-0 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180 text-primary' : ''}`} 
           />
         </button>
 
         {isOpen && (
           <div 
-            className="absolute left-0 top-full z-[999] mt-2 min-w-full w-max max-w-[18rem] max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_10px_40px_-10px_rgba(15,23,42,0.15)] animate-in fade-in zoom-in-95 duration-200"
+            className="absolute left-0 top-full z-[999] mt-2 w-full max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_10px_40px_-10px_rgba(15,23,42,0.15)] animate-in fade-in zoom-in-95 duration-200"
           >
             {options.length === 0 ? (
               <div className="px-4 py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
