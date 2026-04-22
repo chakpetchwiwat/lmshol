@@ -2,6 +2,7 @@ import React, { useId, useMemo, useRef } from 'react';
 import { Filter, Sparkles, Tag, X } from 'lucide-react';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
+import ModalPortal from './ModalPortal';
 
 const DEFAULT_SORT = 'newest';
 const DEFAULT_STATUS = 'all';
@@ -120,21 +121,8 @@ const FilterSidebar = ({
     initialFocusRef: closeButtonRef,
   });
 
-  React.useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      document.body.style.touchAction = 'none';
-    } else {
-      document.body.style.overflow = '';
-      document.body.style.touchAction = '';
-    }
-
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.touchAction = '';
-    };
-  }, [isOpen]);
-
+  // Scroll lock is handled by ModalPortal, removing redundant logic
+  
   const categoryOptions = useMemo(() => {
     const allOption = { id: FILTER_VALUES.ALL, name: FILTER_VALUES.ALL_LABEL };
     const safeCategories = Array.isArray(categories) ? categories : [];
@@ -175,22 +163,22 @@ const FilterSidebar = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-900/45 backdrop-blur-md animate-fade-in">
-      <button
-        type="button"
-        className="absolute inset-0"
-        onClick={onClose}
-        aria-label="ปิดตัวกรองคอร์ส"
-      />
+    <ModalPortal isOpen={isOpen} onClose={onClose}>
+      <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-900/45 backdrop-blur-md animate-fade-in md:items-stretch md:justify-end">
+        <button
+          type="button"
+          className="absolute inset-0"
+          onClick={onClose}
+          aria-label="ปิดตัวกรองคอร์ส"
+        />
 
-      <div className="absolute inset-0 flex items-end justify-center md:items-stretch md:justify-end">
         <div
           ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
           tabIndex={-1}
-          className="relative flex h-[85dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-[2rem] rounded-b-none bg-white shadow-[0_30px_90px_-30px_rgba(15,23,42,0.55)] animate-slide-up md:h-[100dvh] md:w-[min(540px,calc(100vw-24px))] md:max-w-none md:animate-slide-in-right md:rounded-none md:rounded-l-[2rem] md:border-l md:border-white/70 md:shadow-[-24px_0_70px_-35px_rgba(15,23,42,0.45)]"
+          className="relative flex h-[85dvh] w-full max-w-xl flex-col rounded-t-[2rem] rounded-b-none bg-white shadow-[0_30px_90px_-30px_rgba(15,23,42,0.55)] animate-slide-up md:h-[100dvh] md:w-[min(540px,calc(100vw-24px))] md:max-w-none md:animate-slide-in-right md:rounded-none md:rounded-l-[2rem] md:border-l md:border-white/70 md:shadow-[-24px_0_70px_-35px_rgba(15,23,42,0.45)]"
         >
           <div className="flex shrink-0 justify-center pb-1 pt-3 md:hidden">
             <div className="h-1.5 w-14 rounded-full bg-slate-200" />
@@ -345,7 +333,7 @@ const FilterSidebar = ({
           </div>
         </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 };
 
