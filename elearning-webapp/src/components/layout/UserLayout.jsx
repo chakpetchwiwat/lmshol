@@ -87,8 +87,8 @@ const UserLayout = () => {
     navigate('/login');
   };
 
-  const renderNotificationPanel = () => (
-    <div className="absolute right-0 top-full z-50 mt-3 w-[min(24rem,88vw)] overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-2xl">
+  const renderNotificationPanel = (positionClasses = "right-0") => (
+    <div className={`absolute ${positionClasses} top-full z-50 mt-3 w-[min(24rem,88vw)] overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-2xl`}>
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Notifications</p>
@@ -154,7 +154,7 @@ const UserLayout = () => {
           <div className="flex items-center justify-between gap-3">
             <div className="points-pill w-full flex justify-center !py-2.5">
               <Gift size={16} strokeWidth={3} />
-              <span className="text-sm">{points.toLocaleString()} เนเธ•เนเธก</span>
+              <span className="text-sm">{points.toLocaleString()} แต้ม</span>
             </div>
             <div className="relative shrink-0" ref={desktopNotificationRef}>
               <button
@@ -166,42 +166,42 @@ const UserLayout = () => {
                 <Bell size={18} />
                 {unreadNotificationCount > 0 ? <span className="notification-dot" /> : null}
               </button>
-              {isNotificationOpen ? renderNotificationPanel() : null}
+              {isNotificationOpen ? renderNotificationPanel("left-0") : null}
             </div>
           </div>
           <div className="mt-3 text-center px-2">
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.08em] mb-0.5">เธเธนเนเนเธเนเธเธฒเธ</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.08em] mb-0.5">ผู้ใช้งาน</p>
             <p className="font-extrabold text-[15px] text-gray-900 tracking-tight truncate">{user?.name || 'Loading...'}</p>
           </div>
         </div>
 
         <nav className="flex-1 p-4 flex flex-col gap-2 overflow-y-auto no-scrollbar">
           <NavLink to="/user/home" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
-            <Home size={20} /> <span className="font-bold">เธซเธเนเธฒเนเธฃเธ</span>
+            <Home size={20} /> <span className="font-bold">หน้าแรก</span>
           </NavLink>
 
           <NavLink to="/user/courses" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
-            <BookOpen size={20} /> <span className="font-bold">เธเธญเธฃเนเธชเน€เธฃเธตเธขเธ</span>
+            <BookOpen size={20} /> <span className="font-bold">คอร์สเรียน</span>
           </NavLink>
 
           <NavLink to="/user/rewards" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
-            <Gift size={20} /> <span className="font-bold">เธเธญเธเธฃเธฒเธเธงเธฑเธฅ</span>
+            <Gift size={20} /> <span className="font-bold">ของรางวัล</span>
           </NavLink>
 
           <NavLink to="/user/profile" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
-            <User size={20} /> <span className="font-bold">เนเธเธฃเนเธเธฅเน</span>
+            <User size={20} /> <span className="font-bold">โปรไฟล์</span>
           </NavLink>
 
           {canAccessAdminPanel(user) && (
             <NavLink to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 text-rose-500 hover:bg-rose-50 hover:translate-x-1 mt-auto bg-rose-50/30">
-              <Settings size={20} /> <span className="font-bold">เธเธฑเธ”เธเธฒเธฃเธฃเธฐเธเธ</span>
+              <Settings size={20} /> <span className="font-bold">จัดการระบบ</span>
             </NavLink>
           )}
         </nav>
 
         <div className="p-4 border-t border-gray-100 shrink-0">
           <button onClick={handleLogout} className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-red-500 hover:bg-red-50 w-full transition-all border border-transparent hover:border-red-100 active:scale-95">
-            <LogOut size={18} /> <span>เธญเธญเธเธเธฒเธเธฃเธฐเธเธ</span>
+            <LogOut size={18} /> <span>ออกจากระบบ</span>
           </button>
         </div>
       </aside>
@@ -217,7 +217,7 @@ const UserLayout = () => {
                 <h1 className="text-lg font-bold tracking-tight text-gray-900 leading-none truncate">LMS Connect</h1>
                 {location.pathname !== '/user/home' && (
                   <span className="text-[10px] text-gray-500 font-medium truncate mt-0.5">
-                    เธชเธงเธฑเธชเธ”เธตเธเธธเธ“ {user?.name ? (user.name.split(' ')[0] === 'เธเธธเธ“' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'เธเธนเนเนเธเนเธเธฒเธ'}
+                    สวัสดีคุณ {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'}
                   </span>
                 )}
               </div>
@@ -233,11 +233,7 @@ const UserLayout = () => {
                   <Bell size={18} />
                   {unreadNotificationCount > 0 ? <span className="notification-dot" /> : null}
                 </button>
-                {isNotificationOpen ? renderNotificationPanel() : null}
-              </div>
-              <div className="points-pill shrink-0 shadow-sm border border-amber-100/30">
-                <Gift size={12} strokeWidth={2.5} />
-                <span className="font-bold">{points.toLocaleString()} เนเธ•เนเธก</span>
+                {isNotificationOpen ? renderNotificationPanel("right-0") : null}
               </div>
             </div>
           </div>
@@ -253,28 +249,28 @@ const UserLayout = () => {
           <div className="nav-items-container">
             <NavLink to="/user/home" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               <div className="nav-icon-wrapper"><Home size={22} /></div>
-              <span>เธซเธเนเธฒเนเธฃเธ</span>
+              <span>หน้าแรก</span>
             </NavLink>
 
             <NavLink to="/user/courses" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               <div className="nav-icon-wrapper"><BookOpen size={22} /></div>
-              <span>เธเธญเธฃเนเธชเน€เธฃเธตเธขเธ</span>
+              <span>คอร์สเรียน</span>
             </NavLink>
 
             <NavLink to="/user/rewards" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               <div className="nav-icon-wrapper"><Gift size={22} /></div>
-              <span>เธเธญเธเธฃเธฒเธเธงเธฑเธฅ</span>
+              <span>ของรางวัล</span>
             </NavLink>
 
             <NavLink to="/user/profile" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               <div className="nav-icon-wrapper"><User size={22} /></div>
-              <span>เนเธเธฃเนเธเธฅเน</span>
+              <span>โปรไฟล์</span>
             </NavLink>
 
             {canAccessAdminPanel(user) && (
               <NavLink to="/admin/dashboard" className={({ isActive }) => `nav-item text-rose-500 ${isActive ? 'active' : ''}`}>
                 <div className="nav-icon-wrapper"><Settings size={22} /></div>
-                <span>เธเธฑเธ”เธเธฒเธฃ</span>
+                <span>จัดการ</span>
               </NavLink>
             )}
           </div>
