@@ -616,7 +616,7 @@ const buildAtRiskLearners = async ({ learnerWhere, scopeFilters, now, warningWin
 
     return atRisk
         .sort((left, right) => (left.deadline || 0) - (right.deadline || 0))
-        .slice(0, 50);
+        .slice(0, 500);
 };
 
 const ensureReferenceName = async (tx, modelName, id) => {
