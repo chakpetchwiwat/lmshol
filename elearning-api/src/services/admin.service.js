@@ -444,7 +444,10 @@ const buildAtRiskLearners = async ({ learnerWhere, scopeFilters, now, warningWin
     const activeGoals = await prisma.learningGoal.findMany({
         where: {
             status: GOAL_STATUS.ACTIVE,
-            expiryDate: { lte: warningWindow },
+            expiryDate: {
+                gte: now,
+                lte: warningWindow
+            },
             ...(scopeFilters.departmentId ? {
                 OR: [
                     { scope: GOAL_SCOPES.GLOBAL },

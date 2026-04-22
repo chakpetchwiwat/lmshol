@@ -13,6 +13,7 @@ const CreateGoalModal = ({
   departments,
   courses,
   onSave,
+  isEditing,
   courseSearch,
   setCourseSearch,
   filteredCourses,
@@ -27,7 +28,7 @@ const CreateGoalModal = ({
           <div className="p-6 border-b border-border flex justify-between items-center">
             <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
               <Target className="text-primary" />
-              สร้างเป้าหมายการเรียนใหม่
+              {isEditing ? 'แก้ไขเป้าหมายการเรียน' : 'สร้างเป้าหมายการเรียนใหม่'}
             </h3>
             <button type="button" onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full">
               <X size={20} />
@@ -161,7 +162,7 @@ const CreateGoalModal = ({
 
             <div className="pt-4">
               <button type="submit" className="w-full btn btn-primary py-4 text-lg shadow-lg shadow-primary/20">
-                สร้างเป้าหมายเดี๋ยวนี้
+                {isEditing ? 'บันทึกการแก้ไข' : 'สร้างเป้าหมายเดี๋ยวนี้'}
               </button>
             </div>
           </form>

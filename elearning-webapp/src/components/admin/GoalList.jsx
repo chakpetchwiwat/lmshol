@@ -6,7 +6,7 @@ import AdminActionMenu from './AdminActionMenu';
 import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 
 
-const GoalList = ({ goals, columns, viewMode, onViewReport, onDeleteGoal, onArchiveGoal, onRepublishGoal }) => {
+const GoalList = ({ goals, columns, viewMode, onViewReport, onEditGoal, onDeleteGoal, onArchiveGoal, onRepublishGoal }) => {
 
   const [openDropdownId, setOpenDropdownId] = useState(null);
   return (
@@ -22,7 +22,7 @@ const GoalList = ({ goals, columns, viewMode, onViewReport, onDeleteGoal, onArch
               <div className="text-xs text-muted">สร้างเมื่อ {formatThaiDateTime(goal.createdAt)}</div>
             </td>
             <td className="p-4">
-              <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${goal.type === 'ANY' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
+              <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider whitespace-nowrap ${goal.type === 'ANY' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
                 {goal.type === 'ANY' ? 'คอร์สใดก็ได้' : 'เฉพาะคอร์ส'}
               </span>
             </td>
@@ -67,6 +67,14 @@ const GoalList = ({ goals, columns, viewMode, onViewReport, onDeleteGoal, onArch
                       className: 'text-slate-600 hover:bg-blue-50 hover:text-blue-600',
                       iconClassName: 'bg-blue-50 text-blue-500 group-hover:bg-blue-100',
                     },
+                    {
+                      icon: Archive,
+                      label: 'แก้ไขเป้าหมาย',
+                      onClick: () => onEditGoal(goal),
+                      className: 'text-slate-600 hover:bg-indigo-50 hover:text-indigo-600',
+                      iconClassName: 'bg-indigo-50 text-indigo-500 group-hover:bg-indigo-100',
+                    },
+
                     {
                       hidden: viewMode === ENTITY_VIEW_STATUS.ARCHIVED,
                       icon: Archive,

@@ -73,7 +73,7 @@ const CourseList = () => {
           <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">คอร์สเรียนทั้งหมด</h2>
           <button 
              onClick={() => setIsCatModalOpen(true)}
-             className="md:hidden inline-flex min-h-[44px] items-center gap-2 rounded-full bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-200"
+             className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-200"
           >
             หมวดหมู่ <Grid size={13} />
           </button>
