@@ -255,9 +255,11 @@ const Dashboard = () => {
         const reportResults = await Promise.allSettled(activeGoals.map(async (goal) => {
           const response = await adminAPI.getGoalReport(goal.id);
           const allRows = response.data?.report || [];
-          const visibleRows = isFullAdmin && filters.departmentId && selectedDepartmentName
+          const visibleRows = (isFullAdmin && filters.departmentId && selectedDepartmentName)
             ? allRows.filter((row) => row.department === selectedDepartmentName)
-            : allRows;
+            : (!isFullAdmin && currentUser?.department)
+              ? allRows.filter((row) => row.department === currentUser.department)
+              : allRows;
 
           return {
             ...goal,
@@ -450,9 +452,11 @@ const Dashboard = () => {
       setReportInitialFilterStatus(initialStatus);
       const response = await adminAPI.getGoalReport(goal.id);
       const allRows = response.data?.report || [];
-      const visibleRows = isFullAdmin && filters.departmentId && selectedDepartmentName
+      const visibleRows = (isFullAdmin && filters.departmentId && selectedDepartmentName)
         ? allRows.filter((row) => row.department === selectedDepartmentName)
-        : allRows;
+        : (!isFullAdmin && currentUser?.department)
+          ? allRows.filter((row) => row.department === currentUser.department)
+          : allRows;
 
       openGoalReportModal(goal, {
         ...response.data,
