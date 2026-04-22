@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Calendar as CalendarIcon, Clock } from 'lucide-react';
-import { formatThaiDateTime } from '../../utils/dateUtils';
+import { formatThaiDateTime, toUTCISOString, toThailandCalendarDate } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
 
 // Sub-components
@@ -22,9 +22,9 @@ const CustomDateTimePicker = ({
   const [view, setView] = useState('calendar'); // 'calendar', 'time', 'month', 'year'
   
   // Date logic
-  const initialDate = value ? new Date(value) : new Date();
+  const initialDate = value ? toThailandCalendarDate(value) : new Date();
   const [viewDate, setViewDate] = useState(new Date(initialDate));
-  const [selectedDate, setSelectedDate] = useState(value ? new Date(value) : null);
+  const [selectedDate, setSelectedDate] = useState(value ? toThailandCalendarDate(value) : null);
   
   // Time logic
   const [hours, setHours] = useState(selectedDate ? selectedDate.getHours() : 23);
@@ -88,7 +88,13 @@ const CustomDateTimePicker = ({
         finalDate.setHours(0, 0, 0, 0);
       }
     }
-    onChange({ target: { value: finalDate.toISOString() } });
+    const localDateTimeValue = [
+      finalDate.getFullYear(),
+      String(finalDate.getMonth() + 1).padStart(2, '0'),
+      String(finalDate.getDate()).padStart(2, '0')
+    ].join('-') + `T${String(finalDate.getHours()).padStart(2, '0')}:${String(finalDate.getMinutes()).padStart(2, '0')}`;
+
+    onChange({ target: { value: toUTCISOString(localDateTimeValue) } });
   };
 
   const handleDateClick = (day) => {

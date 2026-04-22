@@ -15,6 +15,29 @@ import { MONTH_OPTIONS } from '../../utils/constants/dashboard';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import { SlidersHorizontal } from 'lucide-react';
 import { isSuperAdmin } from '../../utils/roles';
+import { getThailandDateParts, toThaiDateInputValue } from '../../utils/dateUtils';
+
+const getDefaultGoalForm = (currentUser = null) => ({
+    title: '',
+    type: 'ANY',
+    targetCount: 1,
+    expiryDate: '',
+    scope: currentUser?.departmentId ? 'DEPARTMENT' : 'GLOBAL',
+    departmentId: currentUser?.departmentId || '',
+    courseIds: [],
+    postAssignmentReminderDays: '',
+    preDeadlineReminderDays: '',
+    postAssignmentReminderTime: '',
+    preDeadlineReminderTime: ''
+});
+
+const getCurrentThaiMonthYear = () => {
+    const thaiNow = getThailandDateParts(new Date());
+    return {
+        month: String(thaiNow?.month || 1),
+        year: String(thaiNow?.year || new Date().getFullYear())
+    };
+};
 
 const GoalManagement = () => {
     const toast = useToast();
@@ -34,29 +57,22 @@ const GoalManagement = () => {
     const [departments, setDepartments] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
-    const [formData, setFormData] = useState({
-        title: '',
-        type: 'ANY',
-        targetCount: 1,
-        expiryDate: '',
-        scope: 'DEPARTMENT',
-        departmentId: '',
-        courseIds: []
-    });
+    const [formData, setFormData] = useState(getDefaultGoalForm());
     const [courseSearch, setCourseSearch] = useState('');
+    const currentThaiMonthYear = useMemo(() => getCurrentThaiMonthYear(), []);
     const [filters, setFilters] = useState({
-        month: String(new Date().getMonth() + 1),
-        year: String(new Date().getFullYear()),
+        month: currentThaiMonthYear.month,
+        year: currentThaiMonthYear.year,
         departmentId: ''
     });
 
     const yearOptions = useMemo(() => {
-        const currentYear = new Date().getFullYear();
+        const currentYear = Number.parseInt(currentThaiMonthYear.year, 10);
         return Array.from({ length: 5 }, (_, index) => ({
             value: String(currentYear - 2 + index),
             label: String(currentYear - 2 + index)
         }));
-    }, []);
+    }, [currentThaiMonthYear.year]);
     const goalReportCacheRef = useRef(new Map());
     const goalReportRequestRef = useRef(null);
 
@@ -131,15 +147,7 @@ const GoalManagement = () => {
             setIsModalOpen(false);
             setIsEditing(false);
             setEditingId(null);
-            setFormData({
-                title: '',
-                type: 'ANY',
-                targetCount: 1,
-                expiryDate: '',
-                scope: currentUser?.departmentId ? 'DEPARTMENT' : 'GLOBAL',
-                departmentId: currentUser?.departmentId || '',
-                courseIds: []
-            });
+            setFormData(getDefaultGoalForm(currentUser));
             fetchData();
         } catch (err) {
             console.error('Failed to save goal', err);
@@ -152,10 +160,14 @@ const GoalManagement = () => {
             title: goal.title,
             type: goal.type,
             targetCount: goal.targetCount,
-            expiryDate: goal.expiryDate ? goal.expiryDate.split('T')[0] : '',
+            expiryDate: toThaiDateInputValue(goal.expiryDate),
             scope: goal.scope,
             departmentId: goal.departmentId || '',
-            courseIds: goal.courses.map(c => c.courseId)
+            courseIds: goal.courses.map(c => c.courseId),
+            postAssignmentReminderDays: goal.postAssignmentReminderDays ? String(goal.postAssignmentReminderDays) : '',
+            preDeadlineReminderDays: goal.preDeadlineReminderDays ? String(goal.preDeadlineReminderDays) : '',
+            postAssignmentReminderTime: goal.postAssignmentReminderTime || '',
+            preDeadlineReminderTime: goal.preDeadlineReminderTime || ''
         });
         setEditingId(goal.id);
         setIsEditing(true);
@@ -166,15 +178,7 @@ const GoalManagement = () => {
         setIsModalOpen(false);
         setIsEditing(false);
         setEditingId(null);
-        setFormData({
-            title: '',
-            type: 'ANY',
-            targetCount: 1,
-            expiryDate: '',
-            scope: currentUser?.departmentId ? 'DEPARTMENT' : 'GLOBAL',
-            departmentId: currentUser?.departmentId || '',
-            courseIds: []
-        });
+        setFormData(getDefaultGoalForm(currentUser));
     }, [currentUser]);
 
     const handleDeleteGoal = useCallback(async (id) => {
@@ -297,9 +301,9 @@ const GoalManagement = () => {
         let baseGoals = viewMode === ENTITY_VIEW_STATUS.ACTIVE ? activeGoals : archivedGoals;
         
         return baseGoals.filter((goal) => {
-            const date = new Date(goal.createdAt);
-            const matchesYear = !filters.year || String(date.getFullYear()) === filters.year;
-            const matchesMonth = filters.month === FILTER_VALUES.ALL || String(date.getMonth() + 1) === filters.month;
+            const goalDateParts = getThailandDateParts(goal.createdAt);
+            const matchesYear = !filters.year || String(goalDateParts?.year || '') === filters.year;
+            const matchesMonth = filters.month === FILTER_VALUES.ALL || String(goalDateParts?.month || '') === filters.month;
             
             let matchesScope = true;
             if (isSuperAdmin(currentUser) && filters.departmentId) {

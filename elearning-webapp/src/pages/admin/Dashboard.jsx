@@ -5,7 +5,7 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { canEditAdminUsers } from '../../utils/roles';
 import { USER_ROLES } from '../../utils/constants/roles';
 import { FILTER_VALUES } from '../../utils/constants/filters';
-import { formatThaiDateTime } from '../../utils/dateUtils';
+import { formatThaiDateTime, getThailandDateParts } from '../../utils/dateUtils';
 import { openPrintReport } from '../../utils/printUtils';
 import { MONTH_OPTIONS, SKILL_LABELS, ENROLLMENT_STATUS_LABELS } from '../../utils/constants/dashboard';
 
@@ -76,11 +76,11 @@ const Dashboard = () => {
   const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const isFullAdmin = canEditAdminUsers(currentUser);
   const isManagerView = !isFullAdmin || currentUser?.role === USER_ROLES.MANAGER;
-  const now = useMemo(() => new Date(), []);
+  const thaiNow = useMemo(() => getThailandDateParts(new Date()), []);
 
   const [filters, setFilters] = useState({
-    month: String(now.getMonth() + 1),
-    year: String(now.getFullYear()),
+    month: String(thaiNow?.month || 1),
+    year: String(thaiNow?.year || new Date().getFullYear()),
     departmentId: '',
   });
   const [stats, setStats] = useState(null);
@@ -96,7 +96,7 @@ const Dashboard = () => {
   const [reportData, setReportData] = useState(null);
   const [reportLoading, setReportLoading] = useState(false);
 
-  const yearOptions = useMemo(() => buildYearOptions(now.getFullYear()), [now]);
+  const yearOptions = useMemo(() => buildYearOptions(thaiNow?.year || new Date().getFullYear()), [thaiNow]);
 
   useEffect(() => {
     if (!isFullAdmin) return undefined;

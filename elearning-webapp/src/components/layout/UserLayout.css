@@ -41,6 +41,17 @@
   background-color: var(--color-primary);
 }
 
+.notification-dot {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
 .user-main {
   flex: 1;
   display: flex; /* Added flex to ensure children can participate in relative layout */

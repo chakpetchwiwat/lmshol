@@ -3,13 +3,99 @@ const authHelpers = require('../utils/auth.helpers');
 const ErrorResponse = require('../utils/errorResponse');
 const { GOAL_STATUS, ENROLLMENT_STATUS, USER_STATUS } = require('../utils/constants/statuses');
 const { GOAL_SCOPES } = require('../utils/constants/scopes');
+const { DEFAULT_REMINDER_TIME, normalizeReminderTime, addThailandDays, subtractThailandDays } = require('../utils/thailandTime');
 
 const GOAL_REPORT_CACHE_TTL_MS = Math.max(
     10000,
     Number.parseInt(process.env.GOAL_REPORT_CACHE_TTL_MS || '30000', 10) || 30000
 );
+const GOAL_REMINDER_DAY_OPTIONS = new Set([3, 7]);
 
 const goalReportCache = new Map();
+
+const normalizeReminderDays = (value, fieldLabel) => {
+    if (value === undefined || value === null || value === '') {
+        return null;
+    }
+
+    const parsedValue = Number.parseInt(value, 10);
+
+    if (!GOAL_REMINDER_DAY_OPTIONS.has(parsedValue)) {
+        throw new ErrorResponse(`${fieldLabel} must be 3 or 7 days`, 400);
+    }
+
+    return parsedValue;
+};
+
+const normalizeGoalReminderTime = (value, fieldLabel) => {
+    try {
+        return normalizeReminderTime(value);
+    } catch (error) {
+        throw new ErrorResponse(`${fieldLabel} must be in HH:mm format`, 400);
+    }
+};
+
+const buildGoalTargetUsersWhere = (goal) => ({
+    status: USER_STATUS.ACTIVE,
+    ...(goal.scope === GOAL_SCOPES.DEPARTMENT && goal.departmentId
+        ? { departmentId: goal.departmentId }
+        : {})
+});
+
+const createGoalReminderNotifications = async (tx, goal, assignmentBaseDate = new Date()) => {
+    const targetUsers = await tx.user.findMany({
+        where: buildGoalTargetUsersWhere(goal),
+        select: { id: true }
+    });
+
+    if (!targetUsers.length) {
+        return;
+    }
+
+    const notifications = [];
+    const now = new Date();
+
+    if (goal.postAssignmentReminderDays) {
+        const { date: scheduledFor } = addThailandDays(
+            assignmentBaseDate,
+            goal.postAssignmentReminderDays,
+            goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME
+        );
+
+        notifications.push(...targetUsers.map((user) => ({
+            userId: user.id,
+            goalId: goal.id,
+            type: 'GOAL_POST_ASSIGNMENT_REMINDER',
+            title: 'มีการแจ้งเตือนเป้าหมายการเรียน',
+            message: `เป้าหมาย "${goal.title}" ถูกมอบหมายให้คุณแล้ว กดเพื่อดูรายละเอียด`,
+            scheduledFor
+        })));
+    }
+
+    if (goal.preDeadlineReminderDays && goal.expiryDate) {
+        const { date: preDeadlineDate } = subtractThailandDays(
+            goal.expiryDate,
+            goal.preDeadlineReminderDays,
+            goal.preDeadlineReminderTime || DEFAULT_REMINDER_TIME
+        );
+        const scheduledFor = preDeadlineDate < now ? now : preDeadlineDate;
+
+        notifications.push(...targetUsers.map((user) => ({
+            userId: user.id,
+            goalId: goal.id,
+            type: 'GOAL_PRE_DEADLINE_REMINDER',
+            title: 'เป้าหมายการเรียนใกล้ครบกำหนด',
+            message: `เป้าหมาย "${goal.title}" จะครบกำหนดใน ${goal.preDeadlineReminderDays} วัน กดเพื่อดูเป้าหมายนี้`,
+            scheduledFor
+        })));
+    }
+
+    if (notifications.length > 0) {
+        await tx.userNotification.createMany({
+            data: notifications
+        });
+    }
+};
 
 const getGoalReportCacheKey = (goalId, actor, goal) => {
     const actorScope = actor.isAdmin ? 'admin' : (actor.departmentId || 'global');
@@ -62,11 +148,32 @@ const clearGoalReportCache = (goalId) => {
 };
 
 const createGoal = async (data, authUser) => {
-    const { title, type, targetCount, expiryDate, scope, departmentId, courseIds } = data;
+    const {
+        title,
+        type,
+        targetCount,
+        expiryDate,
+        scope,
+        departmentId,
+        courseIds,
+        postAssignmentReminderDays,
+        preDeadlineReminderDays,
+        postAssignmentReminderTime,
+        preDeadlineReminderTime
+    } = data;
     
     // Validate scope
     let finalScope = scope || GOAL_SCOPES.GLOBAL;
     let finalDeptId = departmentId || null;
+    const finalPostAssignmentReminderDays = normalizeReminderDays(postAssignmentReminderDays, 'Post-assignment reminder');
+    const normalizedPreDeadlineReminderDays = normalizeReminderDays(preDeadlineReminderDays, 'Pre-deadline reminder');
+    const finalPreDeadlineReminderDays = expiryDate ? normalizedPreDeadlineReminderDays : null;
+    const finalPostAssignmentReminderTime = finalPostAssignmentReminderDays
+        ? normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time')
+        : null;
+    const finalPreDeadlineReminderTime = finalPreDeadlineReminderDays
+        ? normalizeGoalReminderTime(preDeadlineReminderTime, 'Pre-deadline reminder time')
+        : null;
 
     const actor = await authHelpers.getActorContext(prisma, authUser);
 
@@ -91,6 +198,10 @@ const createGoal = async (data, authUser) => {
                 type,
                 targetCount: type === 'ANY' ? parseInt(targetCount) : (courseIds?.length || 1),
                 expiryDate: expiryDate ? new Date(expiryDate) : null,
+                postAssignmentReminderDays: finalPostAssignmentReminderDays,
+                preDeadlineReminderDays: finalPreDeadlineReminderDays,
+                postAssignmentReminderTime: finalPostAssignmentReminderTime,
+                preDeadlineReminderTime: finalPreDeadlineReminderTime,
                 scope: finalScope,
                 departmentId: finalDeptId,
                 status: GOAL_STATUS.ACTIVE
@@ -105,6 +216,8 @@ const createGoal = async (data, authUser) => {
                 }))
             });
         }
+
+        await createGoalReminderNotifications(tx, goal, goal.createdAt);
 
         return goal;
     });
@@ -182,6 +295,13 @@ const archiveGoal = async (id, authUser) => {
         data: { status: GOAL_STATUS.ARCHIVED }
     });
 
+    await prisma.userNotification.deleteMany({
+        where: {
+            goalId: id,
+            readAt: null
+        }
+    });
+
     clearGoalReportCache(id);
     return updatedGoal;
 };
@@ -203,12 +323,31 @@ const republishGoal = async (id, authUser) => {
         }
     });
 
+    await prisma.userNotification.deleteMany({
+        where: {
+            goalId: id,
+            readAt: null
+        }
+    });
+
     clearGoalReportCache(id);
     return updatedGoal;
 };
 
 const updateGoal = async (id, data, authUser) => {
-    const { title, type, targetCount, expiryDate, scope, departmentId, courseIds } = data;
+    const {
+        title,
+        type,
+        targetCount,
+        expiryDate,
+        scope,
+        departmentId,
+        courseIds,
+        postAssignmentReminderDays,
+        preDeadlineReminderDays,
+        postAssignmentReminderTime,
+        preDeadlineReminderTime
+    } = data;
     const actor = await authHelpers.getActorContext(prisma, authUser);
     
     const goal = await prisma.learningGoal.findUnique({ where: { id } });
@@ -220,6 +359,19 @@ const updateGoal = async (id, data, authUser) => {
 
     let finalScope = goal.scope;
     let finalDeptId = goal.departmentId;
+    const finalPostAssignmentReminderDays = postAssignmentReminderDays !== undefined
+        ? normalizeReminderDays(postAssignmentReminderDays, 'Post-assignment reminder')
+        : goal.postAssignmentReminderDays;
+    const nextExpiryDate = expiryDate !== undefined ? expiryDate : goal.expiryDate;
+    const finalPreDeadlineReminderDays = preDeadlineReminderDays !== undefined
+        ? (nextExpiryDate ? normalizeReminderDays(preDeadlineReminderDays, 'Pre-deadline reminder') : null)
+        : goal.preDeadlineReminderDays;
+    const finalPostAssignmentReminderTime = postAssignmentReminderTime !== undefined
+        ? (finalPostAssignmentReminderDays ? normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time') : null)
+        : goal.postAssignmentReminderTime;
+    const finalPreDeadlineReminderTime = preDeadlineReminderTime !== undefined
+        ? (finalPreDeadlineReminderDays ? normalizeGoalReminderTime(preDeadlineReminderTime, 'Pre-deadline reminder time') : null)
+        : (finalPreDeadlineReminderDays ? (goal.preDeadlineReminderTime || DEFAULT_REMINDER_TIME) : null);
 
     if (actor.isAdmin) {
         if (scope) {
@@ -236,6 +388,10 @@ const updateGoal = async (id, data, authUser) => {
                 type: type !== undefined ? type : goal.type,
                 targetCount: type === 'ANY' ? parseInt(targetCount) : (courseIds?.length || goal.targetCount),
                 expiryDate: expiryDate !== undefined ? (expiryDate ? new Date(expiryDate) : null) : goal.expiryDate,
+                postAssignmentReminderDays: finalPostAssignmentReminderDays,
+                preDeadlineReminderDays: finalPreDeadlineReminderDays,
+                postAssignmentReminderTime: finalPostAssignmentReminderTime,
+                preDeadlineReminderTime: finalPreDeadlineReminderTime,
                 scope: finalScope,
                 departmentId: finalDeptId
             }
@@ -250,6 +406,15 @@ const updateGoal = async (id, data, authUser) => {
                 }))
             });
         }
+
+        await tx.userNotification.deleteMany({
+            where: {
+                goalId: id,
+                readAt: null
+            }
+        });
+
+        await createGoalReminderNotifications(tx, updatedGoal, updatedGoal.updatedAt);
 
         clearGoalReportCache(id);
         return updatedGoal;

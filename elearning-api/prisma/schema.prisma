@@ -31,6 +31,7 @@ model User {
   pointsLedger  PointsLedger[]
   redeems       RedeemRequest[]
   QuizAttempt   QuizAttempt[]
+  notifications UserNotification[]
   createdAnnouncements Announcement[] @relation("AnnouncementCreator")
   announcementViews   AnnouncementView[] @relation("UserAnnouncementViews")
 
@@ -354,6 +355,10 @@ model LearningGoal {
   type         String   // "ANY" | "SPECIFIC"
   targetCount  Int      @default(1)
   expiryDate   DateTime?
+  postAssignmentReminderDays Int?
+  preDeadlineReminderDays    Int?
+  postAssignmentReminderTime String?
+  preDeadlineReminderTime    String?
   scope        String   @default("GLOBAL") // "GLOBAL" | "DEPARTMENT"
   departmentId String?
   status       String   @default("ACTIVE") // "ACTIVE" | "ARCHIVED"
@@ -362,6 +367,7 @@ model LearningGoal {
 
   department   Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   courses      GoalCourse[]
+  notifications UserNotification[]
 
   @@index([status, expiryDate, departmentId])
   @@index([scope, departmentId, status])
@@ -382,6 +388,25 @@ model SystemSetting {
   id    String @id @default(uuid())
   key   String @unique
   value String
+}
+
+model UserNotification {
+  id           String   @id @default(uuid())
+  userId       String
+  goalId       String?
+  type         String
+  title        String
+  message      String
+  scheduledFor DateTime
+  readAt       DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal LearningGoal? @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([userId, scheduledFor, readAt])
+  @@index([goalId, scheduledFor])
 }
 
 model AnnouncementView {

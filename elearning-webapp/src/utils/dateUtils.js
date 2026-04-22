@@ -1,115 +1,166 @@
-/**
- * Utilities for handling dates and timezones between Browser and Server (UTC)
- */
+export const THAI_TIMEZONE = 'Asia/Bangkok';
+export const THAI_OFFSET_HOURS = 7;
+export const DEFAULT_REMINDER_TIME = '09:00';
 
-/**
- * Converts a datetime-local input value (YYYY-MM-DDTHH:mm) to a UTC ISO string
- * @param {string} localValue - The value from <input type="datetime-local">
- * @returns {string|null} - UTC ISO string or null
- */
+const pad = (value) => String(value).padStart(2, '0');
+
+const getDateFromValue = (value) => {
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+export const getThailandDateParts = (value) => {
+  const date = getDateFromValue(value);
+  if (!date) return null;
+
+  const thaiDate = new Date(date.getTime() + (THAI_OFFSET_HOURS * 60 * 60 * 1000));
+
+  return {
+    year: thaiDate.getUTCFullYear(),
+    month: thaiDate.getUTCMonth() + 1,
+    day: thaiDate.getUTCDate(),
+    hour: thaiDate.getUTCHours(),
+    minute: thaiDate.getUTCMinutes(),
+    second: thaiDate.getUTCSeconds()
+  };
+};
+
+const buildUtcDateFromThailandParts = ({ year, month, day, hour = 0, minute = 0, second = 0 }) => (
+  new Date(Date.UTC(year, month - 1, day, hour - THAI_OFFSET_HOURS, minute, second, 0))
+);
+
+const formatPartsToInputValue = (parts, includeTime = true) => {
+  if (!parts) return '';
+
+  const datePart = `${pad(parts.year)}-${pad(parts.month)}-${pad(parts.day)}`;
+  if (!includeTime) return datePart;
+
+  return `${datePart}T${pad(parts.hour)}:${pad(parts.minute)}`;
+};
+
+const parseInputValue = (value) => {
+  if (!value) return null;
+
+  const match = String(value).trim().match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (!match) return null;
+
+  return {
+    year: Number.parseInt(match[1], 10),
+    month: Number.parseInt(match[2], 10),
+    day: Number.parseInt(match[3], 10),
+    hour: Number.parseInt(match[4] || '0', 10),
+    minute: Number.parseInt(match[5] || '0', 10),
+    second: Number.parseInt(match[6] || '0', 10)
+  };
+};
+
+export const normalizeReminderTime = (value) => {
+  if (value === undefined || value === null || value === '') {
+    return DEFAULT_REMINDER_TIME;
+  }
+
+  const match = String(value).trim().match(/^(\d{2}):(\d{2})$/);
+  if (!match) return DEFAULT_REMINDER_TIME;
+
+  const hour = Number.parseInt(match[1], 10);
+  const minute = Number.parseInt(match[2], 10);
+
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    return DEFAULT_REMINDER_TIME;
+  }
+
+  return `${pad(hour)}:${pad(minute)}`;
+};
+
 export const toUTCISOString = (localValue) => {
   if (!localValue) return null;
-  const date = new Date(localValue);
-  if (isNaN(date.getTime())) return null;
-  return date.toISOString();
+
+  const parsedValue = parseInputValue(localValue);
+  if (!parsedValue) return null;
+
+  return buildUtcDateFromThailandParts(parsedValue).toISOString();
 };
 
-/**
- * Converts a UTC ISO string to a datetime-local input value (YYYY-MM-DDTHH:mm)
- * Correctly handles timezone offset so the value matches the user's wall time.
- * @param {string|Date} utcValue - The UTC value from the server
- * @returns {string} - "YYYY-MM-DDTHH:mm"
- */
 export const toLocalInputValue = (utcValue) => {
-  if (!utcValue) return '';
-  const date = new Date(utcValue);
-  if (isNaN(date.getTime())) return '';
-  
-  // Shift the date by offset so toISOString returns the local wall-clock time
-  const offset = date.getTimezoneOffset() * 60000;
-  const localDate = new Date(date.getTime() - offset);
-  return localDate.toISOString().slice(0, 16);
+  const parts = getThailandDateParts(utcValue);
+  return formatPartsToInputValue(parts, true);
 };
 
-/**
- * Formats a date to Thai locale (BE) with specific precision
- * @param {string|Date} value - The date to format
- * @param {boolean} includeTime - Whether to include time (HH:mm)
- * @returns {string} - Formatted string (e.g., "30/04/2569" or "30/04/2569 23:59")
- */
-export const formatThaiDateTime = (value, includeTime = false) => {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (isNaN(date.getTime())) return '-';
+export const toThaiDateInputValue = (utcValue) => {
+  const parts = getThailandDateParts(utcValue);
+  return formatPartsToInputValue(parts, false);
+};
 
-  const datePart = date.toLocaleDateString('th-TH', {
+export const toThailandCalendarDate = (value) => {
+  const parts = getThailandDateParts(value);
+  if (!parts) return null;
+
+  return new Date(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second, 0);
+};
+
+const buildThaiFormatter = (options) => new Intl.DateTimeFormat('th-TH', {
+  timeZone: THAI_TIMEZONE,
+  ...options
+});
+
+export const formatThaiDateTime = (value, includeTime = false) => {
+  const date = getDateFromValue(value);
+  if (!date) return '-';
+
+  const datePart = buildThaiFormatter({
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric',
-  });
+    year: 'numeric'
+  }).format(date);
 
   if (!includeTime) return datePart;
 
-  const timePart = date.toLocaleTimeString('th-TH', {
+  const timePart = buildThaiFormatter({
     hour: '2-digit',
     minute: '2-digit',
     hour12: false
-  });
+  }).format(date);
 
   return `${datePart} ${timePart}`;
 };
 
-/**
- * Formats a date to full Thai words (BE)
- * @param {string|Date} value - The date to format
- * @returns {string} - Formatted string (e.g., "วันที่ 29 เมษายน 2569")
- */
-export const formatThaiFullDate = (value) => {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (isNaN(date.getTime())) return '-';
+export const formatThaiTime = (value) => {
+  const date = getDateFromValue(value);
+  if (!date) return '-';
 
-  const dateStr = date.toLocaleDateString('th-TH', {
+  return buildThaiFormatter({
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).format(date);
+};
+
+export const formatThaiFullDate = (value) => {
+  const date = getDateFromValue(value);
+  if (!date) return '-';
+
+  const dateStr = buildThaiFormatter({
     day: 'numeric',
     month: 'long',
-    year: 'numeric',
-  });
+    year: 'numeric'
+  }).format(date);
 
   return `วันที่ ${dateStr}`;
 };
 
-/**
- * Returns the Buddhist Era (BE) year for a date
- * @param {string|Date} value - The date
- * @returns {number|string} - Year + 543 or '-'
- */
 export const toThaiYear = (value) => {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (isNaN(date.getTime())) return '-';
-  return date.getFullYear() + 543;
+  const parts = getThailandDateParts(value);
+  if (!parts) return '-';
+  return parts.year + 543;
 };
 
-/**
- * Checks whether the given timestamp has already expired.
- * Useful as a UI safety net when the backend accidentally returns stale records.
- * @param {string|Date} value
- * @param {Date} referenceDate
- * @returns {boolean}
- */
 export const isExpiredAt = (value, referenceDate = new Date()) => {
-  if (!value) return false;
-  const date = new Date(value);
-  if (isNaN(date.getTime())) return false;
-  return date <= referenceDate;
+  const date = getDateFromValue(value);
+  const reference = getDateFromValue(referenceDate);
+  if (!date || !reference) return false;
+  return date <= reference;
 };
 
-/**
- * Filters temporary course/category-like items that should no longer be visible.
- * @param {Array} items
- * @param {Date} referenceDate
- * @returns {Array}
- */
 export const filterVisibleTimedItems = (items, referenceDate = new Date()) => {
   if (!Array.isArray(items)) return [];
 
@@ -121,14 +172,19 @@ export const filterVisibleTimedItems = (items, referenceDate = new Date()) => {
   });
 };
 
-/**
- * Filters visible learning goals based on expiryDate.
- * @param {Array} goals
- * @param {Date} referenceDate
- * @returns {Array}
- */
 export const filterVisibleGoals = (goals, referenceDate = new Date()) => {
   if (!Array.isArray(goals)) return [];
 
   return goals.filter((goal) => !isExpiredAt(goal?.expiryDate, referenceDate));
 };
+
+export const REMINDER_TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
+  const hour = Math.floor(index / 2);
+  const minute = index % 2 === 0 ? 0 : 30;
+  const value = `${pad(hour)}:${pad(minute)}`;
+
+  return {
+    value,
+    label: `${value} น.`
+  };
+});

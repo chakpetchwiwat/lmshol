@@ -1,17 +1,10 @@
 import React from 'react';
-import { AlertCircle, Calendar, Clock } from 'lucide-react';
+import { AlertCircle, Calendar } from 'lucide-react';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 
 const formatShortThaiDate = (value) => {
-  if (!value) return 'N/A';
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'N/A';
-
-  return new Intl.DateTimeFormat('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    year: '2-digit',
-  }).format(date);
+  const formattedValue = formatThaiDateTime(value);
+  return formattedValue === '-' ? 'N/A' : formattedValue;
 };
 
 const RiskIdentificationWidget = ({ data, onSelectRisk, onViewAll }) => {

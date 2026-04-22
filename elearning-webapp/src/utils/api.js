@@ -113,6 +113,8 @@ export const userAPI = {
   getAnnouncementDocumentAccess: (announcementId) => api.get(`/user/announcements/${announcementId}/document-access`),
   updateProfile: (data) => api.put('/user/profile', data),
   getPointsHistory: () => api.get('/user/points'), // Alias for clarity
+  getNotifications: () => api.get('/user/notifications'),
+  markNotificationRead: (notificationId) => api.put(`/user/notifications/${notificationId}/read`),
   uploadFile: (file) => {
     const formData = new FormData();
     formData.append('file', file);

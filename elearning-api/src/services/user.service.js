@@ -1296,6 +1296,72 @@ const submitAnnouncementQuiz = async (userId, announcementId, answers) => {
     };
 };
 
+const getNotifications = async (userId) => {
+    const now = new Date();
+    const [notifications, unreadCount] = await Promise.all([
+        prisma.userNotification.findMany({
+            where: {
+                userId,
+                scheduledFor: {
+                    lte: now
+                }
+            },
+            include: {
+                goal: {
+                    select: {
+                        id: true,
+                        title: true,
+                        status: true
+                    }
+                }
+            },
+            orderBy: [
+                { readAt: 'asc' },
+                { scheduledFor: 'desc' }
+            ],
+            take: 20
+        }),
+        prisma.userNotification.count({
+            where: {
+                userId,
+                readAt: null,
+                scheduledFor: {
+                    lte: now
+                }
+            }
+        })
+    ]);
+
+    return {
+        unreadCount,
+        items: notifications.map((notification) => ({
+            id: notification.id,
+            type: notification.type,
+            title: notification.title,
+            message: notification.message,
+            scheduledFor: notification.scheduledFor,
+            readAt: notification.readAt,
+            goalId: notification.goalId,
+            actionUrl: notification.goalId ? `/user/goals/${notification.goalId}` : null,
+            goal: notification.goal
+        }))
+    };
+};
+
+const markNotificationAsRead = async (userId, notificationId) => {
+    await prisma.userNotification.updateMany({
+        where: {
+            id: notificationId,
+            userId
+        },
+        data: {
+            readAt: new Date()
+        }
+    });
+
+    return getNotifications(userId);
+};
+
 module.exports = {
     getCourses,
     getAnnouncements,
@@ -1315,5 +1381,7 @@ module.exports = {
     getLessonDocumentAccess,
     getLessonDocumentStream,
     getAnnouncementDocumentAccess,
-    getAnnouncementDocumentStream
+    getAnnouncementDocumentStream,
+    getNotifications,
+    markNotificationAsRead
 };
