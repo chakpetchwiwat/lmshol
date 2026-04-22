@@ -1838,8 +1838,9 @@ const getUsers = async (authUser) => {
         where: buildAdminManagedUsersWhere(actor),
         include: userInclude,
         orderBy: [
+            { tier: { order: 'asc' } },
             { role: 'asc' },
-            { pointsBalance: 'desc' }
+            { name: 'asc' }
         ]
     });
 

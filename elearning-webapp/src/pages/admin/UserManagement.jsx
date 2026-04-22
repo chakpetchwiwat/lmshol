@@ -210,7 +210,7 @@ const UserManagement = () => {
 
     try {
       await adminAPI.deleteTier(id);
-      toast.success('ลบระดับผู้เรียนเรียบร้อย');
+      toast.success('ลบระดับเรียบร้อย');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete tier error:', error);
@@ -223,7 +223,7 @@ const UserManagement = () => {
       const tierIds = reorderedItems.map(item => item.id);
       setTiers(reorderedItems); // Optimistic update
       await adminAPI.reorderTiers(tierIds);
-      toast.success('บันทึกลำดับระดับผู้เรียนเรียบร้อย');
+      toast.success('บันทึกลำดับระดับเรียบร้อย');
     } catch (error) {
       console.error('Reorder tiers error:', error);
       toast.error('ไม่สามารถบันทึกลำดับได้');
@@ -253,7 +253,7 @@ const UserManagement = () => {
     { label: 'ผู้ใช้งาน' },
     { label: 'Role ระบบ' },
     { label: 'แผนก' },
-    { label: 'ระดับผู้เรียน' },
+    { label: 'ระดับ' },
     { label: 'เริ่มงาน' },
     { label: 'คอร์สที่จบ', className: 'text-center' },
     { label: 'แต้มสะสม', className: 'text-right' },
@@ -277,7 +277,7 @@ const UserManagement = () => {
                 </button>
                 <button type="button" onClick={() => setShowTierModal(true)} className="btn btn-outline">
                   <Sparkles size={18} />
-                  จัดการระดับผู้เรียน
+                  จัดการระดับ
                 </button>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
@@ -326,20 +326,20 @@ const UserManagement = () => {
 
           <ReferenceDataModal
             isOpen={showTierModal}
-            title="จัดการระดับผู้เรียน"
-            description="ระดับผู้เรียนจะถูกใช้แบบลำดับขั้น เช่น ตั้งแต่ Supervisor จะครอบคลุม Manager และ Director ที่สูงกว่า"
+            title="จัดการระดับ"
+            description="ระดับจะถูกใช้แบบลำดับขั้น เช่น ตั้งแต่ Supervisor จะครอบคลุม Manager และ Director ที่สูงกว่า"
             itemLabel="ระดับ"
             items={tiers}
             loading={referenceLoading}
             onClose={() => setShowTierModal(false)}
             onCreate={async (payload) => {
               await adminAPI.createTier(payload);
-              toast.success('สร้างระดับผู้เรียนเรียบร้อย');
+              toast.success('สร้างระดับเรียบร้อย');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
             onUpdate={async (id, payload) => {
               await adminAPI.updateTier(id, payload);
-              toast.success('อัปเดตระดับผู้เรียนเรียบร้อย');
+              toast.success('อัปเดตระดับเรียบร้อย');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
             onDelete={handleTierDelete}

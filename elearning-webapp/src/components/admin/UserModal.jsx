@@ -29,7 +29,7 @@ const UserModal = ({
               {editingUser ? 'แก้ไขข้อมูลผู้ใช้งาน' : 'เพิ่มผู้ใช้งานใหม่'}
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              กำหนดแผนก ระดับผู้เรียน และสิทธิ์การใช้งานของบัญชีนี้
+              กำหนดแผนก ระดับ และสิทธิ์การใช้งานของบัญชีนี้
             </p>
           </div>
           <button
@@ -107,7 +107,7 @@ const UserModal = ({
               />
 
               <CustomSelect
-                label="ระดับผู้เรียน"
+                label="ระดับ"
                 value={formData.tierId}
                 onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
                 options={[
@@ -118,7 +118,7 @@ const UserModal = ({
             </div>
 
             <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-700">
-              การมองเห็นคอร์สแบบลำดับขั้นจะอิงจาก "ระดับผู้เรียน" เช่น ถ้าเปิดให้เริ่มจาก Supervisor ผู้ที่อยู่ระดับสูงกว่าอย่าง Manager และ Director จะเห็นด้วย
+              การมองเห็นคอร์สแบบลำดับขั้นจะอิงจาก "ระดับ" เช่น ถ้าเปิดให้เริ่มจาก Supervisor ผู้ที่อยู่ระดับสูงกว่าอย่าง Manager และ Director จะเห็นด้วย
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
