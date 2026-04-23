@@ -9,6 +9,38 @@ This checklist turns the reviewed refactoring plan into small, actionable pull r
 - Do not mix large API refactors and large UI refactors in the same PR.
 - Each PR should include verification notes in the description.
 - Avoid introducing new shared god files such as broad `utils/mappers.js`.
+- Treat any shared extraction file such as `admin.queries.js` or `admin.serializers.js` as a temporary seam, not a permanent dumping ground.
+- If a PR starts moving more than one workflow family, split it before merge.
+- If a PR changes exported service method names, controller call sites, and payload shape together, stop and reduce scope.
+
+## Pre-PR 1: Freeze Public Surface Area
+
+### Goal
+
+Document the current callable surface before refactoring so facade compatibility is measurable instead of assumed.
+
+### Scope
+
+- exported methods only
+- controller-facing service contracts
+- high-risk frontend-consumed payloads
+
+### Tasks
+
+- [x] Inventory current exports from `elearning-api/src/services/user.service.js`
+- [x] Inventory current exports from `elearning-api/src/services/admin.service.js`
+- [x] Map which controllers call which service methods
+- [x] Identify payloads consumed directly by the webapp without adapter layers
+- [x] Record methods and payloads that must remain stable during PR 2-9
+- [x] Add a short note in the checklist/PR description template listing protected interfaces for the current PR
+
+### Suggested Artifact
+
+- [x] Create a small inventory doc such as `.planning/refactor/service-surface-inventory.md`
+
+### Exit Criteria
+
+- We know exactly which service exports and payload contracts are frozen before extraction begins.
 
 ---
 
@@ -22,29 +54,51 @@ Create a safety net before moving logic out of large files.
 
 - API smoke coverage for critical user/admin flows
 - frontend verification checklist and, if practical, small interaction coverage
+- payload-contract fixtures that can be rerun during later PRs
 
 ### Tasks
 
-- [ ] Identify the highest-risk API flows touched by upcoming refactors
-- [ ] Add smoke tests or executable checks for:
-  - [ ] course listing visibility
-  - [ ] course details response shape
-  - [ ] lesson progress completion behavior
-  - [ ] quiz submission side effects
-  - [ ] reward redemption constraints
-  - [ ] dashboard stats response shape
-  - [ ] category archive/republish/reorder behavior
-- [ ] Capture example payload fixtures for fragile API responses
-- [ ] Add a manual verification checklist for:
-  - [ ] category CRUD/reorder/archive
-  - [ ] dashboard filters
-  - [ ] goal report modal
+- [x] Identify the highest-risk API flows touched by upcoming refactors
+- [x] Create a dedicated folder for contract fixtures/checks
+- [x] Decide and document one repeatable command for running guardrails locally
+- [x] Add smoke tests or executable checks for:
+  - [x] course listing visibility
+  - [x] course details response shape
+  - [x] lesson progress completion behavior
+  - [x] quiz submission side effects
+  - [x] reward redemption constraints
+  - [x] dashboard stats response shape
+  - [x] category archive/republish/reorder behavior
+- [x] Capture example payload fixtures for fragile API responses
+- [x] Record fixture source conditions:
+  - [x] seed data or target environment
+  - [x] request params used
+  - [x] fields intentionally frozen
+- [x] Add a manual verification checklist for:
+  - [x] category CRUD/reorder/archive
+  - [x] dashboard filters
+  - [x] goal report modal
+
+### Suggested Artifacts
+
+- [x] `.planning/refactor/contracts/course-list.json`
+- [x] `.planning/refactor/contracts/course-detail.json`
+- [x] `.planning/refactor/contracts/announcement-list.json`
+- [x] `.planning/refactor/contracts/dashboard-stats.json`
+- [x] `.planning/refactor/manual-qa-checklist.md`
+
+### Suggested Commands
+
+- [x] `elearning-api`: `npm test`
+- [x] `elearning-webapp`: `npm run lint`
+- [x] one documented fixture/script command for comparing frozen payloads
 
 ### Verification
 
-- [ ] `elearning-api`: `npm test`
-- [ ] `elearning-webapp`: `npm run lint`
-- [ ] Confirm fixtures/examples reflect current production behavior
+- [x] `elearning-api`: `npm test`
+- [x] `elearning-webapp`: `npm run lint`
+- [x] Confirm fixtures/examples reflect current production behavior
+- [x] Confirm the fixture/script command is runnable by another developer without extra hidden setup
 
 ### Exit Criteria
 
@@ -53,6 +107,14 @@ Create a safety net before moving logic out of large files.
 ### Risk Notes
 
 - If adding automated tests is too heavy in one PR, land payload fixtures plus manual checklists first, but document the gap clearly.
+
+### Current Status Snapshot
+
+- `2026-04-23`: captured local seeded baselines for all 11 initial contract fixtures
+- `2026-04-23`: `elearning-api` test suite passed
+- `2026-04-23`: `elearning-webapp` lint passed cleanly
+- `2026-04-23`: API-driven smoke checks completed for category workflow, goal report, enroll, lesson progress, quiz submission, rewards, announcements, and notifications
+- `2026-04-23`: `test:refactor-contracts` passed with `invalidCount = 0`
 
 ---
 
@@ -74,6 +136,12 @@ Reduce file size and duplication without changing business behavior.
 - `user.documents.js`
 - `user.helpers.js`
 - keep `user.service.js` as facade
+
+### Protected Surface
+
+- [ ] Keep the exported interface of `user.service.js` unchanged
+- [ ] Do not change controller imports in this PR unless required for a bug fix
+- [ ] Do not change response payloads in this PR
 
 ### Tasks
 
@@ -128,6 +196,11 @@ Separate response shaping from query and mutation logic.
 
 - `elearning-api/src/services/user/user.serializers.js`
 
+### Protected Surface
+
+- [ ] Keep serializer outputs backward compatible with current frontend consumers
+- [ ] Do not rename payload fields unless a dedicated contract-update PR exists
+
 ### Tasks
 
 - [ ] Extract course summary serializer
@@ -175,6 +248,11 @@ Move high-risk business workflows into focused modules after helpers/serializers
 - `elearning-api/src/services/user/user.progress.js`
 - `elearning-api/src/services/user/user.rewards.js`
 - `elearning-api/src/services/user/user.profile.js`
+
+### Protected Surface
+
+- [ ] Keep transaction boundaries identical unless explicitly documented
+- [ ] Keep side effects identical in order and meaning where possible
 
 ### Tasks
 
@@ -228,6 +306,11 @@ Break the modal into clear UI subcomponents while keeping mutation logic central
 - `CategoryList.jsx`
 - `CategoryListItem.jsx`
 - `categoryForm.utils.js`
+
+### Protected Surface
+
+- [ ] Preserve current props used by the parent caller
+- [ ] Preserve visible UI behavior before introducing any UX improvements
 
 ### Tasks
 
@@ -283,6 +366,13 @@ Prepare `admin.service.js` for safe decomposition without moving full workflows 
 - `elearning-api/src/services/admin/admin.queries.js`
 - `elearning-api/src/services/admin/admin.serializers.js`
 
+### Temporary Seam Rules
+
+- [ ] Only extract helpers with demonstrated reuse
+- [ ] If a helper is used once, leave it inline unless it unlocks an immediate next PR
+- [ ] Do not let `admin.queries.js` become a second `admin.service.js`
+- [ ] Do not let `admin.serializers.js` mix unrelated dashboard/category/user/reward payload shaping without clear grouping
+
 ### Tasks
 
 - [ ] Identify repeated Prisma include/select/order shapes in `admin.service.js`
@@ -329,6 +419,12 @@ Start breaking up `admin.service.js` using the seams created in PR 6.
 - `elearning-api/src/services/admin/admin.rewards.js`
 - `elearning-api/src/services/admin/admin.courses.js`
 
+### Protected Surface
+
+- [ ] Keep `admin.service.js` facade exports stable
+- [ ] Do not move analytics code into this PR
+- [ ] Do not mix category and reward changes with unrelated user-admin fixes
+
 ### Tasks
 
 - [ ] Extract category CRUD/reorder/archive/republish flows
@@ -370,6 +466,12 @@ Move user administration logic out of `admin.service.js` after lower-risk extrac
 ### Suggested Files
 
 - `elearning-api/src/services/admin/admin.users.js`
+
+### Protected Surface
+
+- [ ] Preserve manager/admin authorization assumptions
+- [ ] Preserve filter and sorting semantics unless explicitly documented
+- [ ] Do not mix dashboard analytics changes into this PR
 
 ### Tasks
 
@@ -413,6 +515,11 @@ Move the most complex and performance-sensitive admin logic only after the extra
 ### Suggested Files
 
 - `elearning-api/src/services/admin/admin.analytics.js`
+
+### Protected Surface
+
+- [ ] Preserve response shape exactly unless a dedicated consumer update is included
+- [ ] Preserve cache behavior and invalidation semantics unless explicitly tested
 
 ### Tasks
 
@@ -514,6 +621,16 @@ Do a final readability and maintainability pass on screens that are already part
 - `needs-manual-qa`
 - `payload-contract`
 - `performance-sensitive`
+
+---
+
+## Stop Conditions
+
+- [ ] Stop and split the PR if diff size stops being reviewable in one sitting
+- [ ] Stop and split the PR if more than one domain owner would need to reason about the same file move
+- [ ] Stop and split the PR if facade compatibility can no longer be explained in a short PR summary
+- [ ] Stop and split the PR if manual QA scope exceeds what can realistically be completed the same day
+- [ ] Stop and split the PR if fixture updates and code changes become hard to review together
 
 ---
 

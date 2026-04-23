@@ -1,0 +1,39 @@
+{
+  "name": "dashboard-stats",
+  "route": {
+    "method": "GET",
+    "path": "/api/admin/dashboard"
+  },
+  "auth": {
+    "role": "admin-or-manager",
+    "notes": "Capture one admin fixture and, ideally, a separate manager-scoped variant later."
+  },
+  "capture": {
+    "source_environment": "local-dev-db",
+    "captured_at": "2026-04-23",
+    "captured_by": "codex",
+    "query": {
+      "month": "4",
+      "year": "2026",
+      "departmentId": "b46b89e3-87cb-4965-a3de-646dcc528f2d"
+    }
+  },
+  "freeze_fields": [
+    "data.totalUsers",
+    "data.totalEnrollments",
+    "data.completedEnrollments",
+    "data.completionRate",
+    "data.userTrackingSummary",
+    "data.goalOverview",
+    "data.weeklyActivity",
+    "data.atRisk"
+  ],
+  "notes": [
+    "Protect top-level section names and array/object presence even if exact counts differ by environment.",
+    "Manager-scoped filtering semantics should be separately verified."
+  ],
+  "sample": {
+    "success": true,
+    "data": {}
+  }
+}

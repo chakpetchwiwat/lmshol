@@ -1,0 +1,38 @@
+{
+  "name": "notifications",
+  "route": {
+    "method": "GET",
+    "path": "/api/user/notifications"
+  },
+  "auth": {
+    "role": "user",
+    "notes": "Use a user with at least one unread and one read notification if possible."
+  },
+  "capture": {
+    "source_environment": "local-dev-db",
+    "captured_at": "2026-04-23",
+    "captured_by": "codex",
+    "query": {}
+  },
+  "freeze_fields": [
+    "data.unreadCount",
+    "data.items[].id",
+    "data.items[].type",
+    "data.items[].title",
+    "data.items[].message",
+    "data.items[].scheduledFor",
+    "data.items[].readAt",
+    "data.items[].goalId",
+    "data.items[].actionUrl"
+  ],
+  "notes": [
+    "List size and sort order may be important to protect if the UI assumes newest-first among visible notifications."
+  ],
+  "sample": {
+    "success": true,
+    "data": {
+      "unreadCount": 0,
+      "items": []
+    }
+  }
+}

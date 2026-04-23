@@ -1,0 +1,46 @@
+{
+  "fixtures": {
+    "course-detail": {
+      "route_params": {
+        "id": "replace-with-real-course-id"
+      }
+    },
+    "announcement-detail": {
+      "route_params": {
+        "id": "replace-with-real-announcement-id"
+      }
+    },
+    "admin-user-detail": {
+      "route_params": {
+        "id": "replace-with-real-user-id"
+      }
+    },
+    "course-history": {
+      "route_params": {
+        "id": "replace-with-real-course-id"
+      },
+      "query": {
+        "dateField": "startedAt"
+      }
+    },
+    "announcement-history": {
+      "route_params": {
+        "id": "replace-with-real-announcement-id"
+      }
+    },
+    "dashboard-stats": {
+      "query": {
+        "month": "4",
+        "year": "2026",
+        "departmentId": ""
+      }
+    },
+    "advanced-analytics": {
+      "query": {
+        "month": "4",
+        "year": "2026",
+        "departmentId": ""
+      }
+    }
+  }
+}

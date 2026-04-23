@@ -1,0 +1,36 @@
+{
+  "name": "announcement-history",
+  "route": {
+    "method": "GET",
+    "path": "/api/admin/announcements/:id/history"
+  },
+  "auth": {
+    "role": "admin-or-manager",
+    "notes": "Use an announcement with attendance records and quiz participation if available."
+  },
+  "capture": {
+    "source_environment": "local-dev-db",
+    "captured_at": "2026-04-23",
+    "captured_by": "codex",
+    "route_params": {
+      "id": "42a48af6-3d03-4fd6-b2cb-deb9578dd9cf"
+    }
+  },
+  "freeze_fields": [
+    "data[].id",
+    "data[].user.id",
+    "data[].user.name",
+    "data[].user.email",
+    "data[].user.department",
+    "data[].viewedAt",
+    "data[].score",
+    "data[].passed"
+  ],
+  "notes": [
+    "This payload is cache-backed; keep shape stable even if implementation moves."
+  ],
+  "sample": {
+    "success": true,
+    "data": []
+  }
+}

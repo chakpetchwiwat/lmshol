@@ -111,6 +111,7 @@ const countGoalStatuses = (rows = []) => rows.reduce((accumulator, row) => {
 
 const Dashboard = () => {
   const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
+  const currentUserDepartment = currentUser?.department || '';
   const isFullAdmin = canEditAdminUsers(currentUser);
   const isManagerView = !isFullAdmin || currentUser?.role === USER_ROLES.MANAGER;
   const thaiNow = useMemo(() => getThailandDateParts(new Date()), []);
@@ -257,8 +258,8 @@ const Dashboard = () => {
           const allRows = response.data?.report || [];
           const visibleRows = (isFullAdmin && filters.departmentId && selectedDepartmentName)
             ? allRows.filter((row) => row.department === selectedDepartmentName)
-            : (!isFullAdmin && currentUser?.department)
-              ? allRows.filter((row) => row.department === currentUser.department)
+            : (!isFullAdmin && currentUserDepartment)
+              ? allRows.filter((row) => row.department === currentUserDepartment)
               : allRows;
 
           return {
@@ -309,7 +310,7 @@ const Dashboard = () => {
     return () => {
       isMounted = false;
     };
-  }, [filters.departmentId, isFullAdmin, selectedDepartmentName]);
+  }, [currentUserDepartment, filters.departmentId, isFullAdmin, selectedDepartmentName]);
 
   const performanceRows = useMemo(() => {
     const rows = [...(stats?.learnerPerformance || [])];
@@ -454,8 +455,8 @@ const Dashboard = () => {
       const allRows = response.data?.report || [];
       const visibleRows = (isFullAdmin && filters.departmentId && selectedDepartmentName)
         ? allRows.filter((row) => row.department === selectedDepartmentName)
-        : (!isFullAdmin && currentUser?.department)
-          ? allRows.filter((row) => row.department === currentUser.department)
+        : (!isFullAdmin && currentUserDepartment)
+          ? allRows.filter((row) => row.department === currentUserDepartment)
           : allRows;
 
       openGoalReportModal(goal, {

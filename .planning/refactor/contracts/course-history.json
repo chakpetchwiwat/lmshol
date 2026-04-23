@@ -1,0 +1,40 @@
+{
+  "name": "course-history",
+  "route": {
+    "method": "GET",
+    "path": "/api/admin/courses/:id/history"
+  },
+  "auth": {
+    "role": "superadmin",
+    "notes": "Capture at least one example with `dateField=startedAt`; add a second variant for `completedAt` later."
+  },
+  "capture": {
+    "source_environment": "local-dev-db",
+    "captured_at": "2026-04-23",
+    "captured_by": "codex",
+    "route_params": {
+      "id": "demo-course-1776772867292-24"
+    },
+    "query": {
+      "dateField": "startedAt"
+    }
+  },
+  "freeze_fields": [
+    "data[].id",
+    "data[].user.id",
+    "data[].user.name",
+    "data[].status",
+    "data[].progressPercent",
+    "data[].startedAt",
+    "data[].completedAt",
+    "data[].quizScore",
+    "data[].quizPassed"
+  ],
+  "notes": [
+    "Not-started rows are part of current behavior for some filter combinations and should be preserved deliberately."
+  ],
+  "sample": {
+    "success": true,
+    "data": []
+  }
+}
