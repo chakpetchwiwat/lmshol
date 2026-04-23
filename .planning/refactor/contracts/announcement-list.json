@@ -1,0 +1,32 @@
+{
+  "name": "announcement-list",
+  "route": {
+    "method": "GET",
+    "path": "/api/user/announcements"
+  },
+  "auth": {
+    "role": "user",
+    "notes": "Use a user with both global and department-scoped announcements visible if possible."
+  },
+  "capture": {
+    "source_environment": "local-dev-db",
+    "captured_at": "2026-04-23",
+    "captured_by": "codex",
+    "query": {}
+  },
+  "freeze_fields": [
+    "data[].id",
+    "data[].title",
+    "data[].scope",
+    "data[].departmentId",
+    "data[].questionCount",
+    "data[].isAnnouncement"
+  ],
+  "notes": [
+    "Visibility semantics matter more than cosmetic text fields here."
+  ],
+  "sample": {
+    "success": true,
+    "data": []
+  }
+}

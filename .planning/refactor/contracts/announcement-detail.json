@@ -1,0 +1,34 @@
+{
+  "name": "announcement-detail",
+  "route": {
+    "method": "GET",
+    "path": "/api/user/announcements/:id"
+  },
+  "auth": {
+    "role": "user",
+    "notes": "Use a seeded announcement that records attendance and, ideally, exercises document/quiz behavior."
+  },
+  "capture": {
+    "source_environment": "local-dev-db",
+    "captured_at": "2026-04-23",
+    "captured_by": "codex",
+    "route_params": {
+      "id": "42a48af6-3d03-4fd6-b2cb-deb9578dd9cf"
+    }
+  },
+  "freeze_fields": [
+    "data.id",
+    "data.title",
+    "data.scope",
+    "data.departmentId",
+    "data.hasDocument",
+    "data.questionCount"
+  ],
+  "notes": [
+    "This endpoint has a side effect: attendance/view recording. Verify behavior separately in manual QA."
+  ],
+  "sample": {
+    "success": true,
+    "data": {}
+  }
+}

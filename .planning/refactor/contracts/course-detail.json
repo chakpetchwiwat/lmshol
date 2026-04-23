@@ -1,0 +1,44 @@
+{
+  "name": "course-detail",
+  "route": {
+    "method": "GET",
+    "path": "/api/user/courses/:id"
+  },
+  "auth": {
+    "role": "user",
+    "notes": "Use a seeded enrolled course with at least one quiz lesson and one protected document lesson."
+  },
+  "capture": {
+    "source_environment": "local-dev-db",
+    "captured_at": "2026-04-23",
+    "captured_by": "codex",
+    "route_params": {
+      "id": "demo-course-1776772867292-24"
+    }
+  },
+  "freeze_fields": [
+    "data.id",
+    "data.title",
+    "data.isEnrolled",
+    "data.enrollmentStatus",
+    "data.progressPercent",
+    "data.completedAt",
+    "data.completionPoints",
+    "data.quizPoints",
+    "data.totalPoints",
+    "data.lessons[].id",
+    "data.lessons[].type",
+    "data.lessons[].hasDocument",
+    "data.lessons[].isCompleted",
+    "data.lessons[].bestScore",
+    "data.lessons[].questionCount"
+  ],
+  "notes": [
+    "Lesson ordering is part of the user experience and should be treated as protected.",
+    "Protected document lessons should keep `contentUrl` redaction behavior unchanged."
+  ],
+  "sample": {
+    "success": true,
+    "data": {}
+  }
+}
