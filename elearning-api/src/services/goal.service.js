@@ -284,10 +284,10 @@ const getGoalDetails = async (id, authUser) => {
 const archiveGoal = async (id, authUser) => {
     const actor = await authHelpers.getActorContext(prisma, authUser);
     const goal = await prisma.learningGoal.findUnique({ where: { id } });
-    if (!goal) throw new Error('Goal not found');
+    if (!goal) throw new ErrorResponse('Goal not found', 404);
 
-    if (goal.departmentId !== null && goal.departmentId !== actor.departmentId) {
-        throw new Error('Not authorized to archive this goal');
+    if (!actor.isAdmin && goal.departmentId !== actor.departmentId) {
+        throw new ErrorResponse('Not authorized to archive this goal', 403);
     }
 
     const updatedGoal = await prisma.learningGoal.update({
@@ -309,10 +309,10 @@ const archiveGoal = async (id, authUser) => {
 const republishGoal = async (id, authUser) => {
     const actor = await authHelpers.getActorContext(prisma, authUser);
     const goal = await prisma.learningGoal.findUnique({ where: { id } });
-    if (!goal) throw new Error('Goal not found');
+    if (!goal) throw new ErrorResponse('Goal not found', 404);
 
-    if (goal.departmentId !== null && goal.departmentId !== actor.departmentId) {
-        throw new Error('Not authorized to recover this goal');
+    if (!actor.isAdmin && goal.departmentId !== actor.departmentId) {
+        throw new ErrorResponse('Not authorized to recover this goal', 403);
     }
 
     const updatedGoal = await prisma.learningGoal.update({
@@ -351,10 +351,10 @@ const updateGoal = async (id, data, authUser) => {
     const actor = await authHelpers.getActorContext(prisma, authUser);
 
     const goal = await prisma.learningGoal.findUnique({ where: { id } });
-    if (!goal) throw new Error('Goal not found');
+    if (!goal) throw new ErrorResponse('Goal not found', 404);
 
     if (!actor.isAdmin && goal.departmentId !== actor.departmentId) {
-        throw new Error('Not authorized to update this goal');
+        throw new ErrorResponse('Not authorized to update this goal', 403);
     }
 
     let finalScope = goal.scope;
@@ -425,10 +425,10 @@ const updateGoal = async (id, data, authUser) => {
 const deleteGoal = async (id, authUser) => {
     const actor = await authHelpers.getActorContext(prisma, authUser);
     const goal = await prisma.learningGoal.findUnique({ where: { id } });
-    if (!goal) throw new Error('Goal not found');
+    if (!goal) throw new ErrorResponse('Goal not found', 404);
 
-    if (goal.departmentId !== null && goal.departmentId !== actor.departmentId) {
-        throw new Error('Not authorized to delete this goal');
+    if (!actor.isAdmin && goal.departmentId !== actor.departmentId) {
+        throw new ErrorResponse('Not authorized to delete this goal', 403);
     }
 
     const deletedGoal = await prisma.learningGoal.delete({
