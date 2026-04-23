@@ -4,9 +4,39 @@ export const DEFAULT_REMINDER_TIME = '09:00';
 
 const pad = (value) => String(value).padStart(2, '0');
 
+const hasNoDateValue = (value) => (
+  value === null ||
+  value === undefined ||
+  value === '' ||
+  value === 0 ||
+  value === '0'
+);
+
+const isSentinelDateValue = (value, date) => {
+  if (!date) return true;
+
+  const normalizedValue = typeof value === 'string' ? value.trim() : value;
+  if (
+    normalizedValue === '0000-00-00' ||
+    normalizedValue === '0000-00-00T00:00:00.000Z' ||
+    normalizedValue === '1970-01-01' ||
+    normalizedValue === '1970-01-01T00:00:00.000Z'
+  ) {
+    return true;
+  }
+
+  return date.getTime() === 0;
+};
+
 const getDateFromValue = (value) => {
+  if (hasNoDateValue(value)) return null;
+
   const date = value instanceof Date ? value : new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  if (Number.isNaN(date.getTime()) || isSentinelDateValue(value, date)) {
+    return null;
+  }
+
+  return date;
 };
 
 export const getThailandDateParts = (value) => {

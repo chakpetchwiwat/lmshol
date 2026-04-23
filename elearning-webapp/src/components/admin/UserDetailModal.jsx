@@ -50,6 +50,12 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
     return monthMatch && yearMatch;
   });
 
+  const getEnrollmentCompletedAtLabel = (enrollment) => (
+    enrollment?.status === ENROLLMENT_STATUS.COMPLETED && enrollment?.completedAt
+      ? formatThaiDateTime(enrollment.completedAt)
+      : '-'
+  );
+
   const handleExport = () => {
     const data = activeTab === 'learning' ? filteredEnrollments : filteredPointsHistory;
     if (data.length === 0) {
@@ -70,7 +76,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
       csvContent += 'คอร์ส,หมวดหมู่,เริ่มเรียน,สำเร็จเมื่อ,ความคืบหน้า,สถานะ\n';
       data.forEach((item) => {
         const started = item.startedAt ? formatThaiDateTime(item.startedAt) : '-';
-        const completed = item.completedAt ? formatThaiDateTime(item.completedAt) : '-';
+        const completed = getEnrollmentCompletedAtLabel(item);
         const status = item.status === ENROLLMENT_STATUS.COMPLETED ? 'เรียนจบแล้ว' : 'กำลังเรียน';
         csvContent += `"${item.course.title}","${item.course.categoryName || '-'}","${started}","${completed}","${Math.round(item.progressPercent || 0)}%","${status}"\n`;
       });
@@ -124,7 +130,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
             item.course?.title || '-',
             item.course?.categoryName || '-',
             item.startedAt ? formatThaiDateTime(item.startedAt) : '-',
-            item.completedAt ? formatThaiDateTime(item.completedAt) : '-',
+            getEnrollmentCompletedAtLabel(item),
             `${Math.round(item.progressPercent || 0)}%`,
             item.status === ENROLLMENT_STATUS.COMPLETED ? 'เรียนจบแล้ว' : 'กำลังเรียน',
           ]))
@@ -304,7 +310,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                                 </td>
                                 <td className="px-5 py-4 text-sm text-slate-600">{enrollment.course.categoryName || '-'}</td>
                                 <td className="px-5 py-4 text-sm text-slate-600">{formatThaiDateTime(enrollment.startedAt)}</td>
-                                <td className="px-5 py-4 text-sm text-slate-600">{formatThaiDateTime(enrollment.completedAt)}</td>
+                                <td className="px-5 py-4 text-sm text-slate-600">{getEnrollmentCompletedAtLabel(enrollment)}</td>
                                 <td className="px-5 py-4 text-sm font-semibold text-slate-700">{Math.round(enrollment.progressPercent || 0)}%</td>
                                 <td className="px-5 py-4">
                                   <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
