@@ -124,13 +124,10 @@ const CreateGoalModal = ({
                   onChange={(e) => setFormData({
                     ...formData,
                     postAssignmentReminderDays: e.target.value,
-                    postAssignmentReminderTime: e.target.value === '0'
-                      ? ''
-                      : (e.target.value ? (formData.postAssignmentReminderTime || '09:00') : '')
+                    postAssignmentReminderTime: e.target.value ? (formData.postAssignmentReminderTime || '09:00') : ''
                   })}
                   options={[
                     { value: '', label: 'ไม่ส่งแจ้งเตือน' },
-                    { value: '0', label: 'ทันที' },
                     { value: '3', label: '3 วัน' },
                     { value: '7', label: '7 วัน' }
                   ]}
@@ -159,7 +156,7 @@ const CreateGoalModal = ({
                   value={formData.postAssignmentReminderTime}
                   onChange={(e) => setFormData({ ...formData, postAssignmentReminderTime: e.target.value })}
                   options={REMINDER_TIME_OPTIONS}
-                  disabled={!formData.postAssignmentReminderDays || formData.postAssignmentReminderDays === '0'}
+                  disabled={!formData.postAssignmentReminderDays}
                   placeholder="เลือกเวลา"
                 />
 

@@ -9,7 +9,7 @@ const GOAL_REPORT_CACHE_TTL_MS = Math.max(
     10000,
     Number.parseInt(process.env.GOAL_REPORT_CACHE_TTL_MS || '30000', 10) || 30000
 );
-const GOAL_REMINDER_DAY_OPTIONS = new Set([0, 3, 7]);
+const GOAL_REMINDER_DAY_OPTIONS = new Set([3, 7]);
 
 const goalReportCache = new Map();
 
@@ -21,7 +21,7 @@ const normalizeReminderDays = (value, fieldLabel) => {
     const parsedValue = Number.parseInt(value, 10);
 
     if (!GOAL_REMINDER_DAY_OPTIONS.has(parsedValue)) {
-        throw new ErrorResponse(`${fieldLabel} must be 0, 3 or 7 days`, 400);
+        throw new ErrorResponse(`${fieldLabel} must be 3 or 7 days`, 400);
     }
 
     return parsedValue;
@@ -55,14 +55,12 @@ const createGoalReminderNotifications = async (tx, goal, assignmentBaseDate = ne
     const notifications = [];
     const now = new Date();
 
-    if (goal.postAssignmentReminderDays !== null) {
-        const scheduledFor = goal.postAssignmentReminderDays === 0
-            ? new Date(Math.max(new Date(assignmentBaseDate).getTime(), now.getTime()))
-            : addThailandDays(
-                assignmentBaseDate,
-                goal.postAssignmentReminderDays,
-                goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME
-            ).date;
+    if (goal.postAssignmentReminderDays) {
+        const { date: scheduledFor } = addThailandDays(
+            assignmentBaseDate,
+            goal.postAssignmentReminderDays,
+            goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME
+        );
 
         notifications.push(...targetUsers.map((user) => ({
             userId: user.id,
@@ -163,16 +161,16 @@ const createGoal = async (data, authUser) => {
         postAssignmentReminderTime,
         preDeadlineReminderTime
     } = data;
-    
+
     // Validate scope
     let finalScope = scope || GOAL_SCOPES.GLOBAL;
     let finalDeptId = departmentId || null;
     const finalPostAssignmentReminderDays = normalizeReminderDays(postAssignmentReminderDays, 'Post-assignment reminder');
     const normalizedPreDeadlineReminderDays = normalizeReminderDays(preDeadlineReminderDays, 'Pre-deadline reminder');
     const finalPreDeadlineReminderDays = expiryDate ? normalizedPreDeadlineReminderDays : null;
-    const finalPostAssignmentReminderTime = finalPostAssignmentReminderDays === null || finalPostAssignmentReminderDays === 0
-        ? null
-        : normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time');
+    const finalPostAssignmentReminderTime = finalPostAssignmentReminderDays
+        ? normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time')
+        : null;
     const finalPreDeadlineReminderTime = finalPreDeadlineReminderDays
         ? normalizeGoalReminderTime(preDeadlineReminderTime, 'Pre-deadline reminder time')
         : null;
@@ -319,7 +317,7 @@ const republishGoal = async (id, authUser) => {
 
     const updatedGoal = await prisma.learningGoal.update({
         where: { id },
-        data: { 
+        data: {
             status: GOAL_STATUS.ACTIVE,
             expiryDate: null // Bringing it back to active usually means clearing the past expiry
         }
@@ -351,7 +349,7 @@ const updateGoal = async (id, data, authUser) => {
         preDeadlineReminderTime
     } = data;
     const actor = await authHelpers.getActorContext(prisma, authUser);
-    
+
     const goal = await prisma.learningGoal.findUnique({ where: { id } });
     if (!goal) throw new Error('Goal not found');
 
@@ -369,12 +367,8 @@ const updateGoal = async (id, data, authUser) => {
         ? (nextExpiryDate ? normalizeReminderDays(preDeadlineReminderDays, 'Pre-deadline reminder') : null)
         : goal.preDeadlineReminderDays;
     const finalPostAssignmentReminderTime = postAssignmentReminderTime !== undefined
-        ? ((finalPostAssignmentReminderDays === null || finalPostAssignmentReminderDays === 0)
-            ? null
-            : normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time'))
-        : ((finalPostAssignmentReminderDays === null || finalPostAssignmentReminderDays === 0)
-            ? null
-            : (goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME));
+        ? (finalPostAssignmentReminderDays ? normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time') : null)
+        : goal.postAssignmentReminderTime;
     const finalPreDeadlineReminderTime = preDeadlineReminderTime !== undefined
         ? (finalPreDeadlineReminderDays ? normalizeGoalReminderTime(preDeadlineReminderTime, 'Pre-deadline reminder time') : null)
         : (finalPreDeadlineReminderDays ? (goal.preDeadlineReminderTime || DEFAULT_REMINDER_TIME) : null);
@@ -473,7 +467,7 @@ const getGoalReport = async (goalId, authUser) => {
 
     return resolveGoalReportCache(cacheKey, async () => {
         let userWhere = { status: USER_STATUS.ACTIVE };
-        
+
         // 1. If it's a departmental goal, filter by that department
         if (goal.scope === GOAL_SCOPES.DEPARTMENT) {
             userWhere.departmentId = goal.departmentId;
