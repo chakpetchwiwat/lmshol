@@ -241,7 +241,11 @@ const buildGoalVisibilityWhere = (
     actor,
     { referenceDate = new Date(), includeExpired = false, includeAllScopes = false } = {}
 ) => {
-    const filters = [{ status: GOAL_STATUS.ACTIVE }];
+    const filters = [];
+
+    if (!includeExpired) {
+        filters.push({ status: GOAL_STATUS.ACTIVE });
+    }
 
     if (!includeExpired) {
         filters.push(buildTimedVisibilityWhere({
@@ -274,7 +278,11 @@ const canAccessGoal = (
     goal,
     { referenceDate = new Date(), includeExpired = false, includeAllScopes = false } = {}
 ) => {
-    if (!goal || goal.status !== GOAL_STATUS.ACTIVE) {
+    if (!goal) {
+        return false;
+    }
+
+    if (!includeExpired && goal.status !== GOAL_STATUS.ACTIVE) {
         return false;
     }
 

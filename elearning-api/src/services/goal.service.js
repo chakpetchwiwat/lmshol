@@ -274,7 +274,11 @@ const getGoalDetails = async (id, authUser) => {
         }
     });
 
-    if (!authHelpers.canAccessGoal(actor, goal, { referenceDate })) {
+    if (!authHelpers.canAccessGoal(actor, goal, { 
+        referenceDate, 
+        includeExpired: actor.canAccessAdminPanel,
+        includeAllScopes: actor.isAdmin
+    })) {
         throw new ErrorResponse('Goal not found', 404);
     }
 
