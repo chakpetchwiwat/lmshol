@@ -12,6 +12,7 @@ import {
   GraduationCap,
   ClipboardList,
   BellRing,
+  Settings,
 } from 'lucide-react';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
