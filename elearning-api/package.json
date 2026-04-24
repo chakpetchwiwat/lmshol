@@ -7,7 +7,7 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "npm run test:helpers && npm run test:security",
-    "test:helpers": "node tests/visibility.helpers.node.test.js && node tests/auth.helpers.test.js",
+    "test:helpers": "node tests/visibility.helpers.node.test.js && node tests/auth.helpers.test.js && node tests/user.helpers.test.js && node tests/user.serializers.test.js && node tests/user.flows.test.js",
     "test:security": "node tests/security.config.test.js && node tests/loginProtection.test.js",
     "test:refactor-contracts": "node scripts/compare_refactor_contracts.js",
     "seed": "tsx prisma/seed.ts",
