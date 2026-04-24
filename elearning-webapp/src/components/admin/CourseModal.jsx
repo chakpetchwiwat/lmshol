@@ -71,10 +71,10 @@ const CourseModal = ({
 
   return (
     <ModalPortal isOpen={isOpen}>
-      <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 lg:p-8 backdrop-blur-md animate-fade-in overflow-hidden">
-        <div className="card bg-white w-full max-w-6xl h-full shadow-xl flex flex-col m-auto border border-gray-100">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md lg:p-8">
+        <div className="card m-auto flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden bg-white shadow-xl" style={{ isolation: 'isolate' }}>
           {/* Header & Tabs */}
-          <div className="p-4 border-b border-border bg-gray-50 flex justify-between items-center">
+          <div className="flex items-center justify-between border-b border-border bg-gray-50 p-4 rounded-t-[inherit]">
             <h3 className="text-xl font-bold">{isEditing ? 'แก้ไขคอร์สเรียน' : 'สร้างคอร์สใหม่'}</h3>
             <button onClick={onClose} className="text-muted hover:text-gray-900"><X size={20} /></button>
           </div>
@@ -102,7 +102,7 @@ const CourseModal = ({
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-6 bg-white">
+          <div className="flex-1 overflow-y-auto p-6 bg-white rounded-b-[inherit]">
             {activeTab === 'reports' ? (
               <CourseQuizReports 
                 quizReports={quizReports} 
