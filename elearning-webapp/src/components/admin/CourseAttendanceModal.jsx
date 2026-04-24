@@ -237,8 +237,8 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
     <>
       <ModalPortal isOpen={isOpen}>
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
-          <div className="card flex max-h-[94vh] w-full max-w-7xl flex-col overflow-hidden border border-slate-100 bg-white p-0 shadow-2xl">
-          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-5">
+          <div className="card flex max-h-[94vh] w-full max-w-7xl flex-col overflow-hidden bg-white p-0 shadow-2xl" style={{ isolation: 'isolate' }}>
+          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-5 rounded-t-[inherit]">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
                 <Users size={20} />
@@ -353,7 +353,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto bg-slate-50/50">
+          <div className="flex-1 overflow-auto bg-slate-50/50 rounded-b-[inherit]">
             {loading ? (
               <div className="flex h-64 items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
