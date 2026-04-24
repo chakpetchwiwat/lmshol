@@ -6,6 +6,7 @@ import CategoryPills from '../../components/common/CategoryPills';
 import CourseCard from '../../components/common/CourseCard';
 import FilterSidebar from '../../components/common/FilterSidebar';
 import SearchInput from '../../components/common/SearchInput';
+import Skeleton from '../../components/common/Skeleton';
 import { userAPI } from '../../utils/api';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import { filterCourses, sortCourses } from '../../utils/courseFilters';
@@ -123,8 +124,10 @@ const CourseList = () => {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-10">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+        <div className="relative z-10 mb-10 mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <Skeleton.CourseCard key={i} />
+          ))}
         </div>
       ) : null}
 

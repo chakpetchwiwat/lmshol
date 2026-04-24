@@ -17,6 +17,7 @@ import CourseDocumentList from '../../components/user/CourseDocumentList';
 import CourseOutline from '../../components/user/CourseOutline';
 import CourseInstructor from '../../components/user/CourseInstructor';
 import CourseEnrollAside from '../../components/user/CourseEnrollAside';
+import Skeleton from '../../components/common/Skeleton';
 
 const tryParse = (value, fallback) => {
   try {
@@ -145,11 +146,7 @@ const CourseDetail = () => {
   };
 
   if (loading || !course) {
-    return (
-      <div className="flex min-h-[80vh] items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-primary"></div>
-      </div>
-    );
+    return <Skeleton.CourseDetail />;
   }
 
   return (

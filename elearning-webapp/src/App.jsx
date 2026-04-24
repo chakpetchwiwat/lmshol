@@ -36,15 +36,15 @@ const AdminGoals = lazy(() => import('./pages/admin/GoalManagement'));
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
+import Skeleton from './components/common/Skeleton';
+
 // Loading Component
 const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen bg-white">
-    <div className="flex flex-col items-center gap-4">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent shadow-xl shadow-primary/20"></div>
-      <p className="text-sm font-black text-slate-800 tracking-widest uppercase">กำลังบันทึกข้อมูล...</p>
-    </div>
+  <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <Skeleton.Page />
   </div>
 );
+
 
 import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';

@@ -34,6 +34,11 @@ All notable changes to this project will be documented in this file.
 - **Service Loading Integrity**: Verified all refactored services load correctly through automated runtime testing.
 
 ### Refactored (Frontend)
+- **Centralized Skeleton Loading**: 
+    - Created a unified `Skeleton` compound component to replace generic loading spinners.
+    - Implemented specific skeleton variations for `CourseCard`, `Home`, `CourseDetail`, and generic `List` views.
+    - Replaced full-page loading spinners with smooth skeleton transitions in `Home`, `CourseList`, `CourseDetail`, `OngoingCourses`, and `CompletedCourses`.
+    - Updated global `LoadingFallback` in `App.jsx` to use `Skeleton.Page` for better lazy-loading UX.
 - **Course Management Decomposition**: 
     - Extracted course publishing and draft saving logic into a dedicated `useCoursePublishing` hook.
     - Modularized Course Builder actions into `CourseBuilderFooter` for better code reuse and clarity.
