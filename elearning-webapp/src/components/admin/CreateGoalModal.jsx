@@ -128,6 +128,7 @@ const CreateGoalModal = ({
                   })}
                   options={[
                     { value: '', label: 'ไม่ส่งแจ้งเตือน' },
+                    { value: '0', label: 'แจ้งทันที (Immediately)' },
                     { value: '3', label: '3 วัน' },
                     { value: '7', label: '7 วัน' }
                   ]}
@@ -143,6 +144,7 @@ const CreateGoalModal = ({
                   })}
                   options={[
                     { value: '', label: formData.expiryDate ? 'ไม่ส่งแจ้งเตือน' : 'ตั้งวันหมดเขตก่อน' },
+                    { value: '0', label: 'วันครบกำหนดพอดี' },
                     { value: '3', label: '3 วัน' },
                     { value: '7', label: '7 วัน' }
                   ]}

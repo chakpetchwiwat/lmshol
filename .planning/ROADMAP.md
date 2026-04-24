@@ -10,7 +10,8 @@ Current focus: Hardening infrastructure, reducing technical debt, and ensuring p
 - [x] Phase 1: Instructor Management & Presets
 - [x] Phase 2: Action Menu Positioning & UI Refinement
 - [x] Phase 2.2: Notification System UX & Data Isolation
-- [/] Phase 2.1: Project Standardization & Debt Reduction (Refactor)
+- [x] Phase 2.3: Backend Service Modularization (Refactor)
+- [x] Phase 2.1: Project Standardization & Debt Reduction (Refactor)
 - [ ] Phase 3: Security Hardening & Edge Protection (Production Grade)
 
 ## Execution Tracks

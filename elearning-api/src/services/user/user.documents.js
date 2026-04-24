@@ -181,6 +181,115 @@ const getDocumentUpstreamResponse = async (documentAccessPayload) => {
     };
 };
 
+const getLessonDocumentAccess = async (userId, lessonId) => {
+    const prisma = require('../../utils/prisma');
+    const lesson = await prisma.lesson.findUnique({
+        where: { id: lessonId },
+        select: {
+            id: true,
+            courseId: true,
+            type: true,
+            contentUrl: true
+        }
+    });
+
+    if (!lesson) {
+        throw new ErrorResponse('Lesson not found', 404);
+    }
+
+    if (!isProtectedDocumentLesson(lesson)) {
+        throw new ErrorResponse('Document not found for this lesson', 404);
+    }
+
+    const enrollment = await prisma.userCourse.findUnique({
+        where: {
+            userId_courseId: {
+                userId,
+                courseId: lesson.courseId
+            }
+        }
+    });
+
+    if (!enrollment) {
+        throw new ErrorResponse('You must enroll before opening this document', 403);
+    }
+
+    const token = createDocumentAccessToken({
+        userId,
+        resourceType: 'lesson',
+        resourceId: lesson.id,
+        contentUrl: lesson.contentUrl
+    });
+    const previewMeta = getDocumentPreviewMeta(lesson.contentUrl);
+
+    return {
+        lessonId: lesson.id,
+        accessUrl: `/api/user/lessons/${lesson.id}/document-stream?token=${encodeURIComponent(token)}`,
+        expiresIn: DOCUMENT_ACCESS_TOKEN_TTL_SECONDS,
+        ...previewMeta
+    };
+};
+
+const getLessonDocumentStream = async (lessonId, token) => {
+    const documentAccessPayload = verifyDocumentAccessToken(token, {
+        resourceType: 'lesson',
+        resourceId: lessonId
+    });
+    return getDocumentUpstreamResponse(documentAccessPayload);
+};
+
+const getAnnouncementDocumentAccess = async (userId, announcementId) => {
+    const prisma = require('../../utils/prisma');
+    const { getVisibleCourseQuery, buildAnnouncementVisibilityWhere, canAccessAnnouncement } = require('./user.visibility');
+    const userContext = await getVisibleCourseQuery(userId);
+    const referenceDate = new Date();
+    const announcement = await prisma.announcement.findFirst({
+        where: {
+            id: announcementId,
+            ...buildAnnouncementVisibilityWhere(userContext, referenceDate)
+        },
+        select: {
+            id: true,
+            type: true,
+            contentUrl: true,
+            departmentId: true,
+            status: true,
+            expiredAt: true
+        }
+    });
+
+    if (!announcement || !canAccessAnnouncement(announcement, userContext, referenceDate)) {
+        throw new ErrorResponse('Announcement not found', 404);
+    }
+
+    if (!isProtectedAnnouncementDocument(announcement)) {
+        throw new ErrorResponse('Document not found for this announcement', 404);
+    }
+
+    const token = createDocumentAccessToken({
+        userId,
+        resourceType: 'announcement',
+        resourceId: announcement.id,
+        contentUrl: announcement.contentUrl
+    });
+    const previewMeta = getDocumentPreviewMeta(announcement.contentUrl);
+
+    return {
+        announcementId: announcement.id,
+        accessUrl: `/api/user/announcements/${announcement.id}/document-stream?token=${encodeURIComponent(token)}`,
+        expiresIn: DOCUMENT_ACCESS_TOKEN_TTL_SECONDS,
+        ...previewMeta
+    };
+};
+
+const getAnnouncementDocumentStream = async (announcementId, token) => {
+    const documentAccessPayload = verifyDocumentAccessToken(token, {
+        resourceType: 'announcement',
+        resourceId: announcementId
+    });
+    return getDocumentUpstreamResponse(documentAccessPayload);
+};
+
 module.exports = {
     DOCUMENT_ACCESS_TOKEN_TTL_SECONDS,
     getDocumentPreviewMeta,
@@ -189,5 +298,10 @@ module.exports = {
     isProtectedAnnouncementDocument,
     isProtectedDocumentLesson,
     createDocumentAccessToken,
-    verifyDocumentAccessToken
+    verifyDocumentAccessToken,
+    getLessonDocumentAccess,
+    getLessonDocumentStream,
+    getAnnouncementDocumentAccess,
+    getAnnouncementDocumentStream
 };
+

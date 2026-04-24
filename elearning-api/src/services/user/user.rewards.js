@@ -5,6 +5,36 @@ const {
 } = require('../../utils/constants/statuses');
 const { POINT_SOURCE_TYPES } = require('../../utils/constants/ledger');
 
+const getRewardsData = async (userId) => {
+    const rewards = await prisma.reward.findMany({
+        where: { status: REWARD_STATUS.ACTIVE },
+        orderBy: { pointsCost: 'asc' }
+    });
+
+    const userRequests = await prisma.redeemRequest.groupBy({
+        by: ['rewardId'],
+        where: {
+            userId,
+            status: {
+                not: REDEEM_STATUS.REJECTED
+            }
+        },
+        _count: {
+            id: true
+        }
+    });
+
+    const countMap = {};
+    userRequests.forEach((request) => {
+        countMap[request.rewardId] = request._count.id;
+    });
+
+    return rewards.map((reward) => ({
+        ...reward,
+        userRedeemedCount: countMap[reward.id] || 0
+    }));
+};
+
 const requestRedeem = async (userId, rewardId) => {
     const reward = await prisma.reward.findUnique({
         where: { id: rewardId }
@@ -25,7 +55,7 @@ const requestRedeem = async (userId, rewardId) => {
     });
 
     if (userRedeemed >= reward.maxPerUser) {
-        throw new Error('เธเธธเธ“เนเธฅเธเธฃเธฒเธเธงเธฑเธฅเธเธตเนเธเธฃเธเธ•เธฒเธกเธชเธดเธ—เธเธดเธ—เธตเนเธเธณเธซเธเธ”เนเธฅเนเธง');
+        throw new Error('คุณแลกรางวัลนี้ครบตามสิทธิที่กำหนดแล้ว');
     }
 
     const balanceResult = await prisma.pointsLedger.aggregate({
@@ -71,5 +101,6 @@ const requestRedeem = async (userId, rewardId) => {
 };
 
 module.exports = {
+    getRewardsData,
     requestRedeem
 };
