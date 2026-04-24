@@ -39,6 +39,8 @@ const CourseModal = ({
   onDeleteLesson,
   onAddLesson,
   onReorderLessons,
+  onSaveDraft,
+  onPublishCourse,
   fetchQuizReports,
   uploading
 }) => {
@@ -112,6 +114,8 @@ const CourseModal = ({
               <CourseBasicInfoForm 
                 courseForm={courseForm}
                 setCourseForm={setCourseForm}
+                isPersisted={isEditing}
+                lessonCount={lessons.length}
                 categories={categories}
                 instructorPresets={instructorPresets}
                 departments={departments}
@@ -128,6 +132,8 @@ const CourseModal = ({
                 onAddLesson={onAddLesson}
                 onEditLesson={onEditLesson}
                 onDeleteLesson={onDeleteLesson}
+                onSaveDraft={onSaveDraft}
+                onPublishCourse={onPublishCourse}
                 sensors={sensors}
                 handleDragEnd={handleDragEnd}
               />

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Sparkles } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
-import { toUTCISOString, toLocalInputValue } from '../../utils/dateUtils';
+import { toLocalInputValue } from '../../utils/dateUtils';
 import { compressImage } from '../../utils/imageUtils';
 import { useToast } from '../../context/useToast';
 import useConfirm from '../../hooks/useConfirm';
@@ -16,7 +16,8 @@ import CourseFilters from '../../components/admin/CourseFilters';
 import CourseTable from '../../components/admin/CourseTable';
 import CourseAttendanceModal from '../../components/admin/CourseAttendanceModal';
 import { FILTER_VALUES } from '../../utils/constants/filters';
-import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
+import { ENTITY_STATUS, ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
+import useCoursePublishing from './course-management/useCoursePublishing';
 
 const getDefaultCourseForm = () => ({
   title: '',
@@ -38,6 +39,7 @@ const getDefaultCourseForm = () => ({
   visibleTierIds: [],
   isTemporary: false,
   expiredAt: '',
+  status: ENTITY_STATUS.DRAFT,
 });
 
 const getDefaultLessonForm = (order = 0) => ({
@@ -159,6 +161,7 @@ const CourseManagement = () => {
       visibleTierIds: course.visibleTierIds || [],
       isTemporary: Boolean(course.isTemporary),
       expiredAt: toLocalInputValue(course.expiredAt),
+      status: course.status || ENTITY_STATUS.DRAFT,
     });
     setActiveTab('basic');
     setShowModal(true);
@@ -186,31 +189,25 @@ const CourseManagement = () => {
     }
   };
 
-  const handleSaveCourse = async (event) => {
-    event.preventDefault();
-
-    try {
-      const payload = {
-        ...courseForm,
-        expiredAt: courseForm.isTemporary ? toUTCISOString(courseForm.expiredAt) : null,
-      };
-
-      if (isEditing) {
-        await adminAPI.updateCourse(editingId, payload);
-        toast.success('อัปเดตคอร์สเรียบร้อย');
-      } else {
-        await adminAPI.createCourse({ ...payload, status: 'PUBLISHED' });
-        toast.success('สร้างคอร์สเรียบร้อย');
-      }
-
-      setShowModal(false);
-      resetCourseForm();
-      fetchData();
-    } catch (error) {
-      console.error('Save course error:', error);
-      toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกคอร์สได้');
-    }
-  };
+  const {
+    publishFromBuilder: handlePublishCourseFromBuilder,
+    saveDraftFromBuilder: handleSaveDraftFromBuilder,
+    saveFromFormSubmit: handleSaveCourse,
+  } = useCoursePublishing({
+    courseForm,
+    isEditing,
+    editingId,
+    lessons,
+    fetchData,
+    fetchLessons,
+    resetCourseForm,
+    setActiveTab,
+    setCourseForm,
+    setEditingId,
+    setIsEditing,
+    setShowModal,
+    toast,
+  });
 
   const handleRepublishCourse = async (id) => {
     try {
@@ -501,6 +498,8 @@ const CourseManagement = () => {
           setShowLessonModal(true);
         }}
         onReorderLessons={handleReorderLessons}
+        onSaveDraft={handleSaveDraftFromBuilder}
+        onPublishCourse={handlePublishCourseFromBuilder}
         fetchQuizReports={fetchQuizReports}
         uploading={uploading}
       />

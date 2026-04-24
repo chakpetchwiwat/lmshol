@@ -31,7 +31,7 @@ const createGoal = async (data, authUser) => {
     const finalPostAssignmentReminderDays = normalizeReminderDays(postAssignmentReminderDays, 'Post-assignment reminder');
     const normalizedPreDeadlineReminderDays = normalizeReminderDays(preDeadlineReminderDays, 'Pre-deadline reminder');
     const finalPreDeadlineReminderDays = expiryDate ? normalizedPreDeadlineReminderDays : null;
-    const finalPostAssignmentReminderTime = finalPostAssignmentReminderDays !== null
+    const finalPostAssignmentReminderTime = finalPostAssignmentReminderDays !== null && finalPostAssignmentReminderDays !== 0
         ? normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time')
         : null;
     const finalPreDeadlineReminderTime = finalPreDeadlineReminderDays !== null
@@ -232,9 +232,11 @@ const updateGoal = async (id, data, authUser) => {
     const finalPreDeadlineReminderDays = preDeadlineReminderDays !== undefined
         ? (nextExpiryDate ? normalizeReminderDays(preDeadlineReminderDays, 'Pre-deadline reminder') : null)
         : goal.preDeadlineReminderDays;
-    const finalPostAssignmentReminderTime = postAssignmentReminderTime !== undefined
-        ? (finalPostAssignmentReminderDays !== null ? normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time') : null)
-        : goal.postAssignmentReminderTime;
+    const finalPostAssignmentReminderTime = finalPostAssignmentReminderDays === null || finalPostAssignmentReminderDays === 0
+        ? null
+        : (postAssignmentReminderTime !== undefined
+            ? normalizeGoalReminderTime(postAssignmentReminderTime, 'Post-assignment reminder time')
+            : (goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME));
     const finalPreDeadlineReminderTime = preDeadlineReminderTime !== undefined
         ? (finalPreDeadlineReminderDays !== null ? normalizeGoalReminderTime(preDeadlineReminderTime, 'Pre-deadline reminder time') : null)
         : (finalPreDeadlineReminderDays !== null ? (goal.preDeadlineReminderTime || DEFAULT_REMINDER_TIME) : null);

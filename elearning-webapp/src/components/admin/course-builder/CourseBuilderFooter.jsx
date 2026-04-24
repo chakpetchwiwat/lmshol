@@ -1,0 +1,64 @@
+import React from 'react';
+import { CheckCircle2, FilePenLine, Send } from 'lucide-react';
+import { ENTITY_STATUS } from '../../../utils/constants/statuses';
+
+const CourseBuilderFooter = ({
+  courseStatus,
+  isPersisted,
+  lessonCount,
+  onClose
+}) => {
+  const isPublished = courseStatus === ENTITY_STATUS.PUBLISHED;
+  const canPublish = isPersisted && lessonCount > 0;
+  let helperText = 'บันทึกข้อมูลพื้นฐานเพื่อเริ่มเพิ่มบทเรียน';
+
+  if (isPersisted && canPublish) {
+    helperText = 'แก้ไขต่อได้ หรือเผยแพร่เมื่อพร้อม';
+  } else if (isPersisted) {
+    helperText = 'เพิ่มบทเรียนอย่างน้อย 1 บทก่อนเผยแพร่';
+  }
+
+  return (
+    <div className="mt-8 flex flex-col gap-4 border-t border-slate-100 pt-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+        {isPublished ? (
+          <CheckCircle2 size={18} className="text-emerald-600" />
+        ) : (
+          <FilePenLine size={18} className="text-amber-600" />
+        )}
+        <div>
+          <p className="text-sm font-black text-slate-900">
+            {isPublished ? 'Published' : 'Draft'}
+          </p>
+          <p className="text-xs font-medium text-slate-500">
+            {helperText}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <button type="button" onClick={onClose} className="btn border-2 border-slate-200 bg-white px-6 text-xs font-black uppercase tracking-[0.15em] text-slate-500 transition-all hover:bg-slate-50">
+          ยกเลิก
+        </button>
+        <button type="submit" name="courseAction" value="draft" className="btn btn-outline px-6 text-xs font-black uppercase tracking-[0.15em]">
+          <FilePenLine size={16} />
+          {isPersisted ? 'บันทึกแบบร่าง' : 'สร้างฉบับร่าง'}
+        </button>
+        {isPersisted && (
+          <button
+            type="submit"
+            name="courseAction"
+            value="publish"
+            disabled={!canPublish}
+            className="btn btn-primary px-6 text-xs font-black uppercase tracking-[0.15em] shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Send size={16} />
+            เผยแพร่คอร์ส
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default CourseBuilderFooter;

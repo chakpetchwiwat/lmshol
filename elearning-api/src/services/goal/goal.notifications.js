@@ -48,11 +48,13 @@ const createGoalReminderNotifications = async (tx, goal, assignmentBaseDate = ne
     const now = new Date();
 
     if (goal.postAssignmentReminderDays !== null && goal.postAssignmentReminderDays !== undefined) {
-        const { date: scheduledFor } = addThailandDays(
-            assignmentBaseDate,
-            goal.postAssignmentReminderDays,
-            goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME
-        );
+        const scheduledFor = goal.postAssignmentReminderDays === 0
+            ? assignmentBaseDate
+            : addThailandDays(
+                assignmentBaseDate,
+                goal.postAssignmentReminderDays,
+                goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME
+            ).date;
 
         notifications.push(...targetUsers.map((user) => ({
             userId: user.id,

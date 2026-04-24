@@ -22,6 +22,9 @@ const CreateGoalModal = ({
 }) => {
   if (!isOpen) return null;
 
+  const isPostAssignmentImmediate = formData.postAssignmentReminderDays === '0';
+  const hasTimedPostAssignmentReminder = Boolean(formData.postAssignmentReminderDays) && !isPostAssignmentImmediate;
+
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
@@ -124,7 +127,7 @@ const CreateGoalModal = ({
                   onChange={(e) => setFormData({
                     ...formData,
                     postAssignmentReminderDays: e.target.value,
-                    postAssignmentReminderTime: e.target.value ? (formData.postAssignmentReminderTime || '09:00') : ''
+                    postAssignmentReminderTime: e.target.value && e.target.value !== '0' ? (formData.postAssignmentReminderTime || '09:00') : ''
                   })}
                   options={[
                     { value: '', label: 'ไม่ส่งแจ้งเตือน' },
@@ -155,11 +158,11 @@ const CreateGoalModal = ({
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <CustomSelect
                   label="เวลาแจ้งเตือนหลังมอบหมาย"
-                  value={formData.postAssignmentReminderTime}
+                  value={isPostAssignmentImmediate ? '' : formData.postAssignmentReminderTime}
                   onChange={(e) => setFormData({ ...formData, postAssignmentReminderTime: e.target.value })}
                   options={REMINDER_TIME_OPTIONS}
-                  disabled={!formData.postAssignmentReminderDays}
-                  placeholder="เลือกเวลา"
+                  disabled={!hasTimedPostAssignmentReminder}
+                  placeholder={isPostAssignmentImmediate ? 'ส่งทันที' : 'เลือกเวลา'}
                 />
 
                 <CustomSelect

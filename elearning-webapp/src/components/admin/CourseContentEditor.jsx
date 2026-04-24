@@ -15,6 +15,8 @@ const CourseContentEditor = ({
   onAddLesson,
   onEditLesson,
   onDeleteLesson,
+  onSaveDraft,
+  onPublishCourse,
   sensors,
   handleDragEnd
 }) => {
@@ -59,6 +61,20 @@ const CourseContentEditor = ({
             <p className="text-sm">ยังไม่มีเนื้อหาในคอร์สนี้</p>
           </div>
         )}
+      </div>
+
+      <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+        <button type="button" onClick={onSaveDraft} className="btn btn-outline text-xs font-black uppercase tracking-[0.14em]">
+          บันทึกแบบร่าง
+        </button>
+        <button
+          type="button"
+          onClick={onPublishCourse}
+          disabled={lessons.length === 0}
+          className="btn btn-primary text-xs font-black uppercase tracking-[0.14em] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          เผยแพร่คอร์ส
+        </button>
       </div>
     </div>
   );
