@@ -3,6 +3,7 @@ const { ENROLLMENT_STATUS, ENTITY_STATUS, USER_STATUS, GOAL_STATUS } = require('
 const { GOAL_SCOPES } = require('../../utils/constants/scopes');
 const { getActorContext, parseInteger, normalizeNullableId, getMonthDateRange } = require('./admin.helpers');
 const { buildDepartmentVisibleCourseWhere, buildLearnerWhere, buildVisibleCourseWhereForDashboard, buildDateOverlapWhere } = require('./admin.queries');
+const { getDashboardUserSummary } = require('./admin.serializers');
 
 const DASHBOARD_CACHE_TTL_MS = (() => {
     const parsed = parseInt(process.env.DASHBOARD_CACHE_TTL_MS || '30000', 10);
