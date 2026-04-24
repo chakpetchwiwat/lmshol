@@ -20,7 +20,6 @@ const { getDashboardStats, getAdvancedAnalytics } = require('./admin/admin.analy
 const { getAdminAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, archiveAnnouncement, republishAnnouncement, getAnnouncementHistory } = require('./admin/admin.announcements');
 const { getInstructorPresets, createInstructorPreset, updateInstructorPreset, deleteInstructorPreset } = require('./admin/admin.instructors');
 
-
 const {
     courseInclude,
     announcementInclude,
@@ -41,114 +40,6 @@ const {
     mapAnnouncementRecord,
     getDashboardUserSummary
 } = require('./admin/admin.serializers');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// USERS
-
-
-
-
-
-// DEPARTMENTS
-
-
-
-
-// TIERS
-
-
-
-
-);
-
-// INSTRUCTORS
-
-
-
-
-
-// COURSES
-
-
-
-
-
-
-
-// ANNOUNCEMENTS
-
-
-
-
-// CATEGORIES
-
-
-
-
-
-
-);
-
-// REWARDS
-
-
-
-
-// REDEMPTIONS
-
-
-// LESSONS
-
-
-
-
-);
-
-
-
-
 
 module.exports = {
     getDashboardStats,
@@ -205,6 +96,3 @@ module.exports = {
     reorderLessons,
     getCourseQuizAttempts
 };
-
-
-

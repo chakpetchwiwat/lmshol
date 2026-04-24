@@ -137,6 +137,7 @@ const reorderCategories = async (categoryIds) => prisma.$transaction(
         where: { id },
         data: { order: index }
     }))
+);
 
 module.exports = {
     buildCategoryMutationPayload,

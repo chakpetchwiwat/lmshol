@@ -38,6 +38,7 @@ const reorderTiers = async (tierIds) => prisma.$transaction(
         where: { id },
         data: { order: index }
     }))
+);
 
 module.exports = {
     getTiers,

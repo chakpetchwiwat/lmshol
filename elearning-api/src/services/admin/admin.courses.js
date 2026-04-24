@@ -509,6 +509,7 @@ const reorderLessons = async (lessonIds) => prisma.$transaction(
         where: { id },
         data: { order: index }
     }))
+);
 
 const getCourseQuizAttempts = async (courseId) => {
     const attempts = await prisma.quizAttempt.findMany({

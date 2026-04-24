@@ -12,7 +12,6 @@ const DASHBOARD_CACHE_TTL_MS = (() => {
 })();
 
 const dashboardQueryCache = new Map();
-const announcementHistoryCache = new Map();
 
 const pruneDashboardCache = () => {
     if (dashboardQueryCache.size <= 100) {
@@ -27,18 +26,6 @@ const pruneDashboardCache = () => {
     }
 };
 
-const pruneDashboardCache = () => {
-    if (dashboardQueryCache.size <= 100) {
-        return;
-    }
-
-    const now = Date.now();
-    for (const [key, entry] of dashboardQueryCache.entries()) {
-        if (!entry?.promise && (!entry?.expiresAt || entry.expiresAt <= now)) {
-            dashboardQueryCache.delete(key);
-        }
-    }
-};
 
 const getDashboardCacheKey = (namespace, actor, scopeFilters) => JSON.stringify({
     namespace,
@@ -113,22 +100,6 @@ const parseDashboardFilters = (filters = {}) => {
     };
 };
 
-const parseDashboardFilters = (filters = {}) => {
-    const now = new Date();
-    const rawYear = parseInteger(filters.year, now.getFullYear());
-    const rawMonth = filters.month === undefined || filters.month === null || filters.month === ''
-        ? null
-        : parseInteger(filters.month, now.getMonth() + 1);
-
-    const year = rawYear >= 2000 ? rawYear : now.getFullYear();
-    const month = rawMonth && rawMonth >= 1 && rawMonth <= 12 ? rawMonth : null;
-
-    return {
-        month,
-        year,
-        departmentId: normalizeNullableId(filters.departmentId)
-    };
-};
 
 const buildDashboardPeriod = ({ month, year }) => {
     const start = month
@@ -221,23 +192,6 @@ const getMonthDateRange = (month, year) => {
     };
 };
 
-const getMonthDateRange = (month, year) => {
-    if (!month || !year) {
-        return null;
-    }
-
-    const parsedMonth = parseInt(month, 10);
-    const parsedYear = parseInt(year, 10);
-
-    if (Number.isNaN(parsedMonth) || Number.isNaN(parsedYear)) {
-        return null;
-    }
-
-    return {
-        start: new Date(parsedYear, parsedMonth - 1, 1, 0, 0, 0, 0),
-        end: new Date(parsedYear, parsedMonth, 0, 23, 59, 59, 999)
-    };
-};
 
 const buildLatestCourseScoreMap = (attempts = []) => {
     const scoreMap = {};
