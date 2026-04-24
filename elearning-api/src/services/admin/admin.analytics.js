@@ -13,15 +13,29 @@ const DASHBOARD_CACHE_TTL_MS = (() => {
 const dashboardQueryCache = new Map();
 
 const pruneDashboardCache = () => {
-    if (dashboardQueryCache.size <= 100) {
-        return;
+    const now = Date.now();
+    let prunedCount = 0;
+
+    for (const [key, entry] of dashboardQueryCache.entries()) {
+        const isExpired = !entry?.promise && entry?.expiresAt && entry.expiresAt <= now;
+        const isStale = !entry?.promise && !entry?.expiresAt;
+
+        if (isExpired || isStale) {
+            dashboardQueryCache.delete(key);
+            prunedCount++;
+        }
     }
 
-    const now = Date.now();
-    for (const [key, entry] of dashboardQueryCache.entries()) {
-        if (!entry?.promise && (!entry?.expiresAt || entry.expiresAt <= now)) {
-            dashboardQueryCache.delete(key);
-        }
+    if (prunedCount > 0) {
+        console.debug(`[admin-cache] Pruned ${prunedCount} stale entries. Current size: ${dashboardQueryCache.size}`);
+    }
+
+    // Safety valve: if cache is still too large, clear the oldest half
+    if (dashboardQueryCache.size > 200) {
+        const keys = Array.from(dashboardQueryCache.keys());
+        const toRemove = keys.slice(0, Math.floor(keys.length / 2));
+        toRemove.forEach(k => dashboardQueryCache.delete(k));
+        console.warn(`[admin-cache] Emergency purge: size exceeded 200. Reduced to ${dashboardQueryCache.size}`);
     }
 };
 

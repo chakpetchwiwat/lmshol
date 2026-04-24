@@ -321,7 +321,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
               <button
                 type="button"
                 onClick={handlePrint}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary/8 px-4 py-2.5 text-sm font-bold text-primary transition-colors hover:bg-primary/12"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 px-4 py-2.5 text-sm font-black text-primary transition-all hover:from-primary/15 hover:to-primary/10 active:scale-95 shadow-sm shadow-primary/5"
               >
                 <Printer size={16} />
                 <span>Print to PDF</span>
@@ -335,7 +335,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
                 return (
                   <div
                     key={card.key}
-                    className={`rounded-2xl border p-4 ${style.borderClassName} ${style.bgClassName}`}
+                    className={`rounded-3xl border p-4 ${style.borderClassName} ${style.bgClassName}`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>

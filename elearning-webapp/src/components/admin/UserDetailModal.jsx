@@ -150,8 +150,8 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
   return (
     <ModalPortal isOpen>
       <div className="fixed inset-0 z-[95] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
-        <div className="card flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
-          <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+        <div className="card flex max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl" style={{ isolation: 'isolate' }}>
+          <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 rounded-t-[inherit]">
             <div>
               <h3 className="text-xl font-black text-slate-900">ประวัติผู้ใช้งานรายบุคคล</h3>
               <p className="mt-1 text-sm text-slate-500">ดูทั้งประวัติการเรียนและประวัติการได้ใช้แต้มในหน้าต่างเดียว</p>
@@ -276,7 +276,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                         <button
                           type="button"
                           onClick={handlePrint}
-                          className="flex items-center gap-2 rounded-2xl bg-primary/8 px-4 py-2 text-sm font-bold text-primary transition-all hover:bg-primary/12 active:scale-95"
+                          className="flex items-center gap-2 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 px-4 py-2 text-sm font-black text-primary transition-all hover:from-primary/15 hover:to-primary/10 active:scale-95 shadow-sm shadow-primary/5"
                         >
                           <Printer size={18} />
                           <span>Print to PDF</span>
