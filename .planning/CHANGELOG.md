@@ -35,10 +35,9 @@ All notable changes to this project will be documented in this file.
 
 ### Refactored (Frontend)
 - **Centralized Skeleton Loading**: 
-    - Created a unified `Skeleton` compound component to replace generic loading spinners.
-    - Implemented specific skeleton variations for `CourseCard`, `Home`, `CourseDetail`, and generic `List` views.
-    - Replaced full-page loading spinners with smooth skeleton transitions in `Home`, `CourseList`, `CourseDetail`, `OngoingCourses`, and `CompletedCourses`.
-    - Updated global `LoadingFallback` in `App.jsx` to use `Skeleton.Page` for better lazy-loading UX.
+    - Created a unified `Skeleton` compound component architecture with semantic variants: `Dashboard`, `LessonPlayer`, `CourseCard`, `Home`, `CourseDetail`, `List`, and `Page`.
+    - Replaced legacy loading spinners across 15+ pages including: `Home`, `Dashboard`, `LessonPlayer`, `AnnouncementPlayer`, `CourseList`, `CourseDetail`, `Rewards`, `Profile`, `PointsHistory`, `GoalManagement`, `RewardsManagement`, and `SystemSettings`.
+    - Integrated `Skeleton.Page` into the global `App.jsx` Suspense fallback for smooth route transitions.
 - **Course Management Decomposition**: 
     - Extracted course publishing and draft saving logic into a dedicated `useCoursePublishing` hook.
     - Modularized Course Builder actions into `CourseBuilderFooter` for better code reuse and clarity.

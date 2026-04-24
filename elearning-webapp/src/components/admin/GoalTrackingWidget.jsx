@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Skeleton from '../common/Skeleton';
 import { CheckCircle2, Clock3, Printer, Target, Users, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 
@@ -60,9 +61,7 @@ const GoalTrackingWidget = ({
       </div>
 
       {loading ? (
-        <div className="flex min-h-[220px] items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <Skeleton.List count={3} />
       ) : goals.length === 0 ? (
         <div className="mt-6 rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50 px-6 py-10 text-center">
           <h3 className="text-lg font-black text-slate-700">ยังไม่มี Active Goal</h3>

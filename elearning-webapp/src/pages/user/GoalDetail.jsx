@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Target, ArrowLeft, Calendar, BookOpen, CheckCircle2, Clock } from 'lucide-react';
 import { userAPI } from '../../utils/api';
+import Skeleton from '../../components/common/Skeleton';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import CourseCard from '../../components/common/CourseCard';
 import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
@@ -66,11 +67,7 @@ const GoalDetail = () => {
     }, [goal, courses]);
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-[50vh]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            </div>
-        );
+        return <Skeleton.List count={4} />;
     }
 
     if (error || !goal) {

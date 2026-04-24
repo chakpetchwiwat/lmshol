@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Play, CheckCircle, Clock, FileText, BookOpen } from 'lucide-react';
 import { userAPI, getFullUrl } from '../../utils/api';
+import Skeleton from '../../components/common/Skeleton';
 import { useToast } from '../../context/useToast';
 import DocViewer from '../../components/common/DocViewer';
 import { hasRenderableLessonContent, sanitizeLessonContent } from '../../utils/richText';
@@ -241,11 +242,7 @@ const LessonPlayer = () => {
   };
 
   if (!lesson && loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="h-10 w-10 animate-spin rounded-full border-t-2 border-r-2 border-primary border-r-transparent" />
-      </div>
-    );
+    return <Skeleton.LessonPlayer />;
   }
 
   const currentLessonIndex = course?.lessons?.findIndex((item) => item.id === lessonId) ?? -1;

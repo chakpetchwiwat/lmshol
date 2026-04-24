@@ -1,4 +1,5 @@
 import React from 'react';
+import Skeleton from '../common/Skeleton';
 
 const AdminTable = ({
   columns,
@@ -22,13 +23,13 @@ const AdminTable = ({
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={columns.length} className="p-12 text-center">
-                  <div className="flex justify-center">
-                    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-                  </div>
-                </td>
-              </tr>
+              [...Array(5)].map((_, i) => (
+                <tr key={i}>
+                  <td colSpan={columns.length} className="p-4">
+                    <Skeleton.Base className="h-6 w-full" />
+                  </td>
+                </tr>
+              ))
             ) : (!Array.isArray(data) || data.length === 0) ? (
               <tr>
                 <td colSpan={columns.length} className="p-12 text-center text-muted">

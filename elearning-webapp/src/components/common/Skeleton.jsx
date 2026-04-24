@@ -194,6 +194,39 @@ const CourseDetail = () => (
   </div>
 );
 
+// 5. Admin Dashboard Skeleton
+const Dashboard = () => (
+  <div className="flex flex-col gap-6 pb-10 animate-fade-in">
+    {/* Header */}
+    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="space-y-3">
+        <Base className="h-10 w-64" />
+        <Base className="h-4 w-96" />
+      </div>
+      <div className="flex gap-3">
+        <Base className="h-12 w-48 rounded-2xl" />
+        <Base className="h-12 w-32 rounded-2xl" />
+      </div>
+    </div>
+
+    {/* Stat Cards */}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[...Array(4)].map((_, i) => (
+        <Base key={i} className="h-32 w-full rounded-[1.5rem]" />
+      ))}
+    </div>
+
+    {/* Large Widget */}
+    <Base className="h-[400px] w-full rounded-[2.5rem]" />
+
+    {/* Charts Grid */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Base className="h-[450px] w-full rounded-[2.5rem]" />
+      <Base className="h-[450px] w-full rounded-[2.5rem]" />
+    </div>
+  </div>
+);
+
 // 5. List Skeleton (Generic for Rewards, History, etc.)
 const List = ({ count = 5 }) => (
   <div className="space-y-4">
@@ -226,10 +259,59 @@ const Page = () => (
 );
 
 // Compound Component Export
+// 6. Lesson Player Skeleton
+const LessonPlayer = () => (
+  <div className="flex flex-col lg:flex-row h-screen bg-slate-950 overflow-hidden animate-fade-in">
+    {/* Sidebar Skeleton */}
+    <div className="w-full lg:w-96 border-r border-white/10 flex flex-col shrink-0">
+      <div className="p-6 border-b border-white/10 space-y-3">
+        <Base className="h-6 w-32 bg-slate-800" />
+        <Base className="h-4 w-48 bg-slate-800" />
+      </div>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+            <Base className="h-10 w-10 rounded-xl bg-slate-800 shrink-0" />
+            <div className="space-y-2 w-full">
+              <Base className="h-4 w-3/4 bg-slate-800" />
+              <Base className="h-3 w-1/2 bg-slate-800" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Video Content Skeleton */}
+    <div className="flex-1 flex flex-col relative overflow-hidden">
+      <div className="aspect-video w-full bg-slate-900 flex items-center justify-center">
+        <Base className="h-20 w-20 rounded-full bg-slate-800 opacity-20" />
+      </div>
+      <div className="flex-1 p-8 bg-slate-50 overflow-y-auto">
+        <div className="max-w-4xl mx-auto space-y-8">
+          <div className="space-y-4">
+            <Base className="h-10 w-3/4" />
+            <div className="flex gap-4">
+              <Base className="h-4 w-24" />
+              <Base className="h-4 w-24" />
+            </div>
+          </div>
+          <div className="space-y-4">
+            {[...Array(10)].map((_, i) => (
+              <Base key={i} className={`h-4 ${i % 3 === 0 ? 'w-full' : i % 3 === 1 ? 'w-5/6' : 'w-4/6'}`} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const Skeleton = Object.assign(Base, {
   CourseCard,
   Home,
   CourseDetail,
+  Dashboard,
+  LessonPlayer,
   List,
   Page,
 });

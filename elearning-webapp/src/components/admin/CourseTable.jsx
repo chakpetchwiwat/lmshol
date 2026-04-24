@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Skeleton from '../common/Skeleton';
 import { RotateCcw, Edit, Trash2, History, Archive } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminActionMenu from './AdminActionMenu';
@@ -27,11 +28,7 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
   if (loading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-      </div>
-    );
+    return <Skeleton.List count={5} />;
   }
 
   if (courses.length === 0) {

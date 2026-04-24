@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, ImageIcon } from 'lucide-react';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
+import Skeleton from '../../components/common/Skeleton';
 import RewardModal from '../../components/admin/RewardModal';
 import { isSuperAdmin } from '../../utils/roles';
 import { useToast } from '../../context/useToast';
@@ -166,9 +167,7 @@ const RewardsManagement = () => {
 
       <div className="mb-2 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {loading ? (
-          <div className="col-span-full flex items-center justify-center p-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-          </div>
+          <Skeleton.List count={4} />
         ) : rewards.length === 0 ? (
           <div className="col-span-full rounded-2xl border-2 border-dashed border-border bg-gray-50/50 p-12 text-center text-muted">
             ยังไม่มีของรางวัลในระบบ

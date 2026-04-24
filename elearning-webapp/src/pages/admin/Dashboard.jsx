@@ -26,6 +26,7 @@ import UserLink from '../../components/admin/UserLink';
 import CustomSelect from '../../components/common/CustomSelect';
 import * as InsightConfigs from './InsightConfigs';
 import GoalReportModal from '../../components/admin/GoalReportModal';
+import Skeleton from '../../components/common/Skeleton';
 
 
 
@@ -343,11 +344,7 @@ const Dashboard = () => {
   const adminSubtitle = 'ดูทั้งภาพรวมองค์กรและ drill-down ลงไปถึงรายชื่อผู้เรียนของแต่ละกราฟได้ทันที';
 
   if (loading && !stats) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-      </div>
-    );
+    return <Skeleton.Dashboard />;
   }
 
   return (

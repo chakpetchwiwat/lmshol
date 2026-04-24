@@ -3,6 +3,7 @@ import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
+import Skeleton from '../../components/common/Skeleton';
 
 // Sub-components
 import ProfileHeader from '../../components/user/ProfileHeader';
@@ -91,11 +92,7 @@ const Profile = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
+    return <Skeleton.List count={5} />;
   }
 
   return (
