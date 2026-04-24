@@ -34,6 +34,7 @@ const DashboardPrintContent = ({ report }) => {
     roiTrend = [],
     skillGap = [],
     performanceRows = [],
+    goals = [],
   } = dashboardData;
 
   return (
@@ -56,6 +57,44 @@ const DashboardPrintContent = ({ report }) => {
           ))}
         </div>
       </section>
+
+      {goals.length > 0 && (
+        <section className="section">
+          <h2 className="section-title">Active Goal Overview</h2>
+          <div className="goal-print-grid">
+            {goals.map((goal, index) => (
+              <div key={index} className="goal-print-card">
+                <div className="goal-print-header">
+                  <div className="goal-print-title">{goal.title}</div>
+                  <div className="goal-print-meta">
+                    <span>Target: {goal.targetLabel}</span>
+                    <span className="separator">•</span>
+                    <span>Scope: {goal.scopeLabel}</span>
+                  </div>
+                </div>
+                <div className="goal-print-stats">
+                  <div className="goal-print-stat-item">
+                    <div className="label">สำเร็จแล้ว</div>
+                    <div className="value success">{goal.counts?.COMPLETED || 0}</div>
+                  </div>
+                  <div className="goal-print-stat-item">
+                    <div className="label">กำลังเรียน</div>
+                    <div className="value warning">{goal.counts?.IN_PROGRESS || 0}</div>
+                  </div>
+                  <div className="goal-print-stat-item">
+                    <div className="label">ยังไม่เริ่ม</div>
+                    <div className="value danger">{goal.counts?.NOT_STARTED || 0}</div>
+                  </div>
+                  <div className="goal-print-stat-item">
+                    <div className="label">ทั้งหมด</div>
+                    <div className="value muted">{goal.counts?.ALL || 0}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {(report.filters || []).length ? (
         <section className="section">
@@ -384,6 +423,69 @@ const PrintReportPage = () => {
           font-weight: 800;
           color: #0f172a;
         }
+
+        .goal-print-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 16px;
+        }
+
+        .goal-print-card {
+          border: 1px solid #dbe4f0;
+          border-radius: 20px;
+          background: #fff;
+          padding: 16px;
+          break-inside: avoid;
+        }
+
+        .goal-print-header {
+          margin-bottom: 12px;
+          border-bottom: 1px solid #f1f5f9;
+          padding-bottom: 10px;
+        }
+
+        .goal-print-title {
+          font-size: 14px;
+          font-weight: 800;
+          color: #0f172a;
+          margin-bottom: 4px;
+        }
+
+        .goal-print-meta {
+          font-size: 11px;
+          color: #64748b;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .goal-print-meta .separator {
+          color: #cbd5e1;
+        }
+
+        .goal-print-stats {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
+
+        .goal-print-stat-item .label {
+          font-size: 10px;
+          font-weight: 700;
+          color: #94a3b8;
+          text-transform: uppercase;
+          margin-bottom: 4px;
+        }
+
+        .goal-print-stat-item .value {
+          font-size: 16px;
+          font-weight: 800;
+        }
+
+        .goal-print-stat-item .value.success { color: #10b981; }
+        .goal-print-stat-item .value.warning { color: #f59e0b; }
+        .goal-print-stat-item .value.danger { color: #ef4444; }
+        .goal-print-stat-item .value.muted { color: #64748b; }
 
         .dashboard-table-section {
           padding-bottom: 32px;
