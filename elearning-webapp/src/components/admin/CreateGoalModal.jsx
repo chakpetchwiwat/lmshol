@@ -24,8 +24,8 @@ const CreateGoalModal = ({
 
   return (
     <ModalPortal>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md animate-fade-in">
-        <div className="w-full max-w-2xl rounded-3xl bg-white shadow-2xl animate-slide-up">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
+        <div className="card w-full max-w-2xl overflow-hidden rounded-3xl bg-white shadow-2xl">
           <div className="flex items-center justify-between border-b border-border p-6">
             <h3 className="flex items-center gap-2 text-xl font-black text-slate-800">
               <Target className="text-primary" />
