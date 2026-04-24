@@ -1,8 +1,5 @@
 const prisma = require('../../utils/prisma');
-const authHelpers = require('../../utils/auth.helpers');
-const { sanitizeName } = require('./admin.helpers');
-
-const getActorContext = (authUser) => authHelpers.getActorContext(prisma, authUser);
+const { getActorContext, sanitizeName, parseInteger } = require('./admin.helpers');
 
 const getTiers = async (authUser) => {
     await getActorContext(authUser);

@@ -1,12 +1,17 @@
 const prisma = require('../../utils/prisma');
-const authHelpers = require('../../utils/auth.helpers');
 const { ENTITY_STATUS } = require('../../utils/constants/statuses');
 const { ANNOUNCEMENT_SCOPES } = require('../../utils/constants/scopes');
+const { TRANSACTION_TIMEOUTS } = require('../../utils/constants/config');
 const { announcementInclude, buildAnnouncementWhereForActor } = require('./admin.queries');
 const { mapAnnouncementRecord } = require('./admin.serializers');
-const { parseInteger, parseOptionalDate, normalizeNullableId, sanitizeName } = require('./admin.helpers');
+const { getActorContext, parseInteger, parseOptionalDate, normalizeNullableId, sanitizeName, ensureReferenceName } = require('./admin.helpers');
 
-const getActorContext = (authUser) => authHelpers.getActorContext(prisma, authUser);
+const DASHBOARD_CACHE_TTL_MS = (() => {
+    const parsed = parseInt(process.env.DASHBOARD_CACHE_TTL_MS || '30000', 10);
+    return Number.isNaN(parsed) ? 30000 : Math.max(parsed, 0);
+})();
+
+const announcementHistoryCache = new Map();
 
 const getAnnouncementHistoryCacheKey = (announcementId, actor) => JSON.stringify({
     namespace: 'announcement-history',

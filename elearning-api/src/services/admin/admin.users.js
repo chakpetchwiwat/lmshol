@@ -4,11 +4,80 @@ const authHelpers = require('../../utils/auth.helpers');
 const { USER_ROLES, MANAGED_USER_ROLES } = require('../../utils/constants/roles');
 const { USER_STATUS } = require('../../utils/constants/statuses');
 const { POINT_SOURCE_TYPES } = require('../../utils/constants/ledger');
+const { TRANSACTION_TIMEOUTS } = require('../../utils/constants/config');
 const { mapUserRecord } = require('./admin.serializers');
-const { userInclude } = require('./admin.queries');
-const { sanitizeName, normalizeNullableId } = require('./admin.helpers');
+const { userInclude, buildScopedUserWhere } = require('./admin.queries');
+const { getActorContext, sanitizeName, normalizeNullableId, parseInteger, ensureReferenceName } = require('./admin.helpers');
 
-const getActorContext = (authUser) => authHelpers.getActorContext(prisma, authUser);
+const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) => {
+    const data = {};
+    const { password, pointsBalance, ...baseData } = inputData;
+
+    if (baseData.name !== undefined) {
+        data.name = baseData.name;
+    }
+
+    if (baseData.email !== undefined) {
+        data.email = baseData.email;
+    }
+
+    if (baseData.role !== undefined) {
+        if (![USER_ROLES.USER, USER_ROLES.MANAGER, USER_ROLES.ADMIN].includes(baseData.role)) {
+            throw new Error('Invalid role');
+        }
+        data.role = baseData.role;
+    }
+
+    if (password) {
+        data.password = await bcrypt.hash(password, 10);
+    } else if (isCreate) {
+        data.password = await bcrypt.hash('password123', 10);
+    }
+
+    if (pointsBalance !== undefined) {
+        data.pointsBalance = parseInteger(pointsBalance, 0);
+    } else if (isCreate) {
+        data.pointsBalance = 0;
+    }
+
+    const departmentId = normalizeNullableId(baseData.departmentId);
+    if (departmentId !== undefined) {
+        const department = await ensureReferenceName(tx, 'department', departmentId);
+        data.departmentId = department?.id || null;
+        data.department = department?.name || null;
+    } else if (baseData.department !== undefined && !isCreate) {
+        data.department = baseData.department || null;
+    }
+
+    const tierId = normalizeNullableId(baseData.tierId);
+    if (tierId !== undefined) {
+        if (tierId) {
+            const tier = await tx.tier.findUnique({
+                where: { id: tierId },
+                select: { id: true, accessAdmin: true }
+            });
+            if (!tier) throw new Error('Tier not found');
+            data.tierId = tier.id;
+
+            // Auto-sync role based on tier's accessAdmin
+            const targetRole = tier.accessAdmin ? USER_ROLES.MANAGER : USER_ROLES.USER;
+            if (data.role !== USER_ROLES.ADMIN) {
+                data.role = targetRole;
+            }
+        } else {
+            data.tierId = null;
+        }
+    }
+
+    if (baseData.employmentDate !== undefined) {
+        data.employmentDate = baseData.employmentDate ? new Date(baseData.employmentDate) : null;
+    } else if (isCreate) {
+        data.employmentDate = new Date();
+    }
+
+    return data;
+};
+
 const buildAdminManagedUsersWhere = (actor, extraWhere = {}) => authHelpers.buildUserManagementWhere(actor, extraWhere);
 
 const buildPointsHistory = async (userId) => {

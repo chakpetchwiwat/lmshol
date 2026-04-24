@@ -1,4 +1,7 @@
 const prisma = require('../../utils/prisma');
+const authHelpers = require('../../utils/auth.helpers');
+
+const getActorContext = (authUser) => authHelpers.getActorContext(prisma, authUser);
 
 const parseInteger = (value, fallback = 0) => {
     if (value === undefined || value === null || value === '') {
@@ -6,6 +9,15 @@ const parseInteger = (value, fallback = 0) => {
     }
 
     const parsed = parseInt(value, 10);
+    return Number.isNaN(parsed) ? fallback : parsed;
+};
+
+const parseFloatValue = (value, fallback = 0) => {
+    if (value === undefined || value === null || value === '') {
+        return fallback;
+    }
+
+    const parsed = parseFloat(value);
     return Number.isNaN(parsed) ? fallback : parsed;
 };
 
@@ -25,6 +37,24 @@ const parseOptionalDate = (value, fieldLabel = 'Expiration date') => {
     }
 
     return parsed;
+};
+
+const getMonthDateRange = (month, year) => {
+    if (!month || !year) {
+        return null;
+    }
+
+    const parsedMonth = parseInt(month, 10);
+    const parsedYear = parseInt(year, 10);
+
+    if (Number.isNaN(parsedMonth) || Number.isNaN(parsedYear)) {
+        return null;
+    }
+
+    return {
+        start: new Date(parsedYear, parsedMonth - 1, 1, 0, 0, 0, 0),
+        end: new Date(parsedYear, parsedMonth, 0, 23, 59, 59, 999)
+    };
 };
 
 const normalizeNullableId = (value) => {
@@ -127,8 +157,11 @@ const buildTemporaryStateData = (input) => {
 };
 
 module.exports = {
+    getActorContext,
     parseInteger,
+    parseFloatValue,
     parseOptionalDate,
+    getMonthDateRange,
     normalizeNullableId,
     normalizeIdArray,
     sanitizeName,

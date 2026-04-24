@@ -1,5 +1,6 @@
 const prisma = require('../../utils/prisma');
 const authHelpers = require('../../utils/auth.helpers');
+const { USER_ROLES } = require('../../utils/constants/roles');
 const { sanitizeName } = require('./admin.helpers');
 
 const getActorContext = (authUser) => authHelpers.getActorContext(prisma, authUser);

@@ -1,10 +1,8 @@
 const prisma = require('../../utils/prisma');
-const authHelpers = require('../../utils/auth.helpers');
 const { ENROLLMENT_STATUS, ENTITY_STATUS, USER_STATUS, GOAL_STATUS } = require('../../utils/constants/statuses');
 const { GOAL_SCOPES } = require('../../utils/constants/scopes');
+const { getActorContext, parseInteger, normalizeNullableId, getMonthDateRange } = require('./admin.helpers');
 const { buildDepartmentVisibleCourseWhere, buildLearnerWhere, buildVisibleCourseWhereForDashboard, buildDateOverlapWhere } = require('./admin.queries');
-
-const getActorContext = (authUser) => authHelpers.getActorContext(prisma, authUser);
 
 const DASHBOARD_CACHE_TTL_MS = (() => {
     const parsed = parseInt(process.env.DASHBOARD_CACHE_TTL_MS || '30000', 10);
@@ -172,25 +170,6 @@ const buildTimeBuckets = ({ start, end, mode }) => {
 };
 
 const roundToOneDecimal = (value) => Number((value || 0).toFixed(1));
-
-
-const getMonthDateRange = (month, year) => {
-    if (!month || !year) {
-        return null;
-    }
-
-    const parsedMonth = parseInt(month, 10);
-    const parsedYear = parseInt(year, 10);
-
-    if (Number.isNaN(parsedMonth) || Number.isNaN(parsedYear)) {
-        return null;
-    }
-
-    return {
-        start: new Date(parsedYear, parsedMonth - 1, 1, 0, 0, 0, 0),
-        end: new Date(parsedYear, parsedMonth, 0, 23, 59, 59, 999)
-    };
-};
 
 
 const buildLatestCourseScoreMap = (attempts = []) => {
