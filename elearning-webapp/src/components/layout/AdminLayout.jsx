@@ -12,7 +12,6 @@ import {
   GraduationCap,
   ClipboardList,
   BellRing,
-  Settings,
 } from 'lucide-react';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
@@ -72,7 +71,6 @@ const AdminLayout = () => {
       : []),
     { path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายการ Redeem' },
     { path: '/admin/users', icon: <Users size={20} />, label: 'ผู้ใช้งาน' },
-    { path: '/admin/settings', icon: <Settings size={20} />, label: 'ตั้งค่าระบบ' },
   ];
 
   return (
