@@ -1,7 +1,7 @@
-const { USER_STATUS } = require('../../../utils/constants/statuses');
-const { GOAL_SCOPES } = require('../../../utils/constants/scopes');
-const { DEFAULT_REMINDER_TIME, normalizeReminderTime, addThailandDays, subtractThailandDays } = require('../../../utils/thailandTime');
-const ErrorResponse = require('../../../utils/errorResponse');
+const { USER_STATUS } = require('../../utils/constants/statuses');
+const { GOAL_SCOPES } = require('../../utils/constants/scopes');
+const { DEFAULT_REMINDER_TIME, normalizeReminderTime, addThailandDays, subtractThailandDays } = require('../../utils/thailandTime');
+const ErrorResponse = require('../../utils/errorResponse');
 
 const GOAL_REMINDER_DAY_OPTIONS = new Set([0, 3, 7]); // Added 0 based on recent objective
 

@@ -1,4 +1,4 @@
-const prisma = require('../../../utils/prisma');
+const prisma = require('../../utils/prisma');
 
 const getPointsHistory = async (userId) => {
     const [ledger, aggregation] = await Promise.all([

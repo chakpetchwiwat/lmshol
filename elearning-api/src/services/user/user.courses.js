@@ -1,5 +1,5 @@
-const prisma = require('../../../utils/prisma');
-const authHelpers = require('../../../utils/auth.helpers');
+const prisma = require('../../utils/prisma');
+const authHelpers = require('../../utils/auth.helpers');
 const {
     buildCategoryVisibilityWhere,
     buildCourseVisibilityWhere,

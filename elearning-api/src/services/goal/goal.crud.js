@@ -1,9 +1,9 @@
-const prisma = require('../../../utils/prisma');
-const authHelpers = require('../../../utils/auth.helpers');
-const ErrorResponse = require('../../../utils/errorResponse');
-const { GOAL_STATUS } = require('../../../utils/constants/statuses');
-const { GOAL_SCOPES } = require('../../../utils/constants/scopes');
-const { DEFAULT_REMINDER_TIME } = require('../../../utils/thailandTime');
+const prisma = require('../../utils/prisma');
+const authHelpers = require('../../utils/auth.helpers');
+const ErrorResponse = require('../../utils/errorResponse');
+const { GOAL_STATUS } = require('../../utils/constants/statuses');
+const { GOAL_SCOPES } = require('../../utils/constants/scopes');
+const { DEFAULT_REMINDER_TIME } = require('../../utils/thailandTime');
 const { 
     normalizeReminderDays, 
     normalizeGoalReminderTime, 

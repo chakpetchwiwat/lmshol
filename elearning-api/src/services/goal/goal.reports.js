@@ -1,8 +1,8 @@
-const prisma = require('../../../utils/prisma');
-const ErrorResponse = require('../../../utils/errorResponse');
-const { GOAL_SCOPES } = require('../../../utils/constants/scopes');
-const { USER_STATUS, ENROLLMENT_STATUS } = require('../../../utils/constants/statuses');
-const authHelpers = require('../../../utils/auth.helpers');
+const prisma = require('../../utils/prisma');
+const ErrorResponse = require('../../utils/errorResponse');
+const { GOAL_SCOPES } = require('../../utils/constants/scopes');
+const { USER_STATUS, ENROLLMENT_STATUS } = require('../../utils/constants/statuses');
+const authHelpers = require('../../utils/auth.helpers');
 
 const GOAL_REPORT_CACHE_TTL_MS = Math.max(
     10000,
