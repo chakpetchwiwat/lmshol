@@ -32,6 +32,7 @@ const AdminRewards = lazy(() => import('./pages/admin/RewardsManagement'));
 const AdminRedeems = lazy(() => import('./pages/admin/RedeemRequests'));
 const AdminReports = lazy(() => import('./pages/admin/Reports'));
 const AdminGoals = lazy(() => import('./pages/admin/GoalManagement'));
+const AdminSettings = lazy(() => import('./pages/admin/SystemSettings'));
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -112,6 +113,7 @@ function App() {
             <Route path="redeems" element={<AdminRedeems />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="goals" element={<AdminGoals />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
         </Route>
 
@@ -119,7 +121,7 @@ function App() {
         <Route path="*" element={<div className="p-12 text-center font-black text-slate-400">404 - ไม่พบหน้าที่คุณต้องการ</div>} />
       </Routes>
     </Suspense>
-    </ToastProvider>
+      </ToastProvider>
     </LanguageProvider>
   );
 }

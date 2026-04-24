@@ -26,7 +26,7 @@ const AdminTable = ({
               [...Array(5)].map((_, i) => (
                 <tr key={i}>
                   <td colSpan={columns.length} className="p-4">
-                    <Skeleton.Base className="h-6 w-full" />
+                    <Skeleton className="h-6 w-full" />
                   </td>
                 </tr>
               ))

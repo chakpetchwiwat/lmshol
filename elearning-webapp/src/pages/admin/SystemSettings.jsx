@@ -29,12 +29,8 @@ const SystemSettings = () => {
       }
     };
     
-    if (isFullAdmin) {
-      fetchSettings();
-    } else {
-      setLoading(false);
-    }
-  }, [isFullAdmin]);
+    fetchSettings();
+  }, []);
 
   const handleSave = async (key, value) => {
     setSaving(true);
@@ -56,15 +52,6 @@ const SystemSettings = () => {
       setTimeout(() => setMessage(null), 3000);
     }
   };
-
-  if (!isFullAdmin) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
-        <h2 className="text-2xl font-black mb-2">เข้าถึงไม่ได้</h2>
-        <p className="text-muted">คุณไม่มีสิทธิ์ในการตั้งค่าระบบ</p>
-      </div>
-    );
-  }
 
 
   if (loading) {
