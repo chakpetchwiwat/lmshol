@@ -24,6 +24,10 @@ const getGoalTrackingSummary = async (authUser, queryParams = {}) => {
             let visibleRows = reportData.report || [];
             if (filterDepartment) {
                 visibleRows = visibleRows.filter(row => row.department === filterDepartment);
+                
+                if (visibleRows.length === 0) {
+                    return null;
+                }
             }
 
             const counts = { ALL: 0, COMPLETED: 0, IN_PROGRESS: 0, NOT_STARTED: 0 };
@@ -53,7 +57,7 @@ const getGoalTrackingSummary = async (authUser, queryParams = {}) => {
 
     // 4. Return successful summaries
     const summaries = summaryResults
-        .filter(result => result.status === 'fulfilled')
+        .filter(result => result.status === 'fulfilled' && result.value !== null)
         .map(result => result.value);
 
     // Sort by expiry date, ascending
