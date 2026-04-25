@@ -42,6 +42,12 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
                             id: true,
                             name: true
                         }
+                    },
+                    tier: true,
+                    tierRef: {
+                        select: {
+                            name: true
+                        }
                     }
                 }
             });
@@ -231,6 +237,7 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
                         userId: enrollment.userId,
                         userName: user?.name || '-',
                         email: user?.email || null,
+                        tier: user?.tier || '-',
                         completedCourses: 0,
                         totalCourses: 0,
                         scores: []
@@ -254,6 +261,7 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
                     userId: record.userId,
                     userName: record.userName,
                     email: record.email,
+                    tier: record.tier,
                     completedCourses: record.completedCourses,
                     totalCourses: record.totalCourses,
                     avgScore: record.scores.length
