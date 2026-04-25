@@ -282,6 +282,7 @@ module.exports = {
     createDynamicLimiter,
     createRedisStore,
     getAllowedOrigins,
+    getRedisClient,
     getSecurityConfig,
     isOriginAllowed,
     parseTrustProxy
