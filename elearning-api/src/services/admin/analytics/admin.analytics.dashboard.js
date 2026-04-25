@@ -51,7 +51,7 @@ const getDashboardStats = async (authUser, filters = {}) => {
         const visibleCourseWhere = buildVisibleCourseWhereForDashboard(scopeFilters.departmentId);
 
         const [
-            totalUsers, 
+            learnerCount,
             activeCourses, 
             categories, 
             enrollmentCount, 

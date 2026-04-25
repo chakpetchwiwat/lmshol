@@ -14,13 +14,8 @@ if (process.env.NODE_ENV !== 'production') {
   global.prisma = prismaInstance;
 }
 
-/**
- * Extended Prisma Client for Row Level Security (RLS)
- * Automatically injects the current user ID and role into the DB session.
- * Note: SET LOCAL is only effective within a transaction. 
- * For non-transactional queries, this provides a baseline but RLS is most 
- * reliable when used with prisma.$transaction().
- */
+// Temporarily disabled RLS extension for debugging 500 errors
+/*
 const prisma = prismaInstance.$extends({
   query: {
     $allModels: {
@@ -38,5 +33,8 @@ const prisma = prismaInstance.$extends({
     },
   },
 });
+*/
+
+const prisma = prismaInstance;
 
 module.exports = prisma;
