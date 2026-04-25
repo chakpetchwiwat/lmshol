@@ -11,6 +11,7 @@ import CategoryPills from '../../components/common/CategoryPills';
 
 // Sub-components
 import HomeHero from '../../components/user/HomeHero';
+import Skeleton from '../../components/common/Skeleton';
 import MobileContinueCTA from '../../components/user/MobileContinueCTA';
 import HomeActivities from '../../components/user/HomeActivities';
 import HomeRewards from '../../components/user/HomeRewards';
@@ -118,11 +119,7 @@ const Home = () => {
   }, [activeGoals, courses]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <Skeleton.Home />;
   }
 
   return (

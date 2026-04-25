@@ -236,9 +236,9 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
   return (
     <>
       <ModalPortal isOpen={isOpen}>
-        <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md">
-          <div className="card flex h-full w-full max-w-7xl flex-col border border-slate-100 bg-white p-0 shadow-2xl">
-          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-5">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
+          <div className="card flex max-h-[94vh] w-full max-w-7xl flex-col overflow-hidden bg-white p-0 shadow-2xl" style={{ isolation: 'isolate' }}>
+          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 p-5 rounded-t-[inherit]">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
                 <Users size={20} />
@@ -321,7 +321,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
               <button
                 type="button"
                 onClick={handlePrint}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary/8 px-4 py-2.5 text-sm font-bold text-primary transition-colors hover:bg-primary/12"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 px-4 py-2.5 text-sm font-black text-primary transition-all hover:from-primary/15 hover:to-primary/10 active:scale-95 shadow-sm shadow-primary/5"
               >
                 <Printer size={16} />
                 <span>Print to PDF</span>
@@ -335,7 +335,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
                 return (
                   <div
                     key={card.key}
-                    className={`rounded-2xl border p-4 ${style.borderClassName} ${style.bgClassName}`}
+                    className={`rounded-3xl border p-4 ${style.borderClassName} ${style.bgClassName}`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -353,7 +353,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
             </div>
           </div>
 
-          <div className="flex-1 overflow-auto bg-slate-50/50">
+          <div className="flex-1 overflow-auto bg-slate-50/50 rounded-b-[inherit]">
             {loading ? (
               <div className="flex h-64 items-center justify-center">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />

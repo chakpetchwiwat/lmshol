@@ -35,8 +35,8 @@ const AnnouncementHistoryModal = ({
 
   return (
     <ModalPortal isOpen={isOpen}>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md">
-        <div className="card flex h-full w-full max-w-5xl flex-col shadow-2xl">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
+        <div className="card flex max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden bg-white shadow-2xl">
           <div className="flex items-center justify-between border-b border-gray-100 p-4">
             <div>
               <h4 className="text-lg font-bold">ประวัติการเข้าอ่าน</h4>

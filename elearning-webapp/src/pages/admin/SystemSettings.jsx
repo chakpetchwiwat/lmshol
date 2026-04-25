@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { adminAPI } from '../../utils/api';
+import Skeleton from '../../components/common/Skeleton';
 import { Save, Settings, Target, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { isSuperAdmin } from '../../utils/roles';
 
@@ -28,12 +29,8 @@ const SystemSettings = () => {
       }
     };
     
-    if (isFullAdmin) {
-      fetchSettings();
-    } else {
-      setLoading(false);
-    }
-  }, [isFullAdmin]);
+    fetchSettings();
+  }, []);
 
   const handleSave = async (key, value) => {
     setSaving(true);
@@ -56,22 +53,9 @@ const SystemSettings = () => {
     }
   };
 
-  if (!isFullAdmin) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-center h-[60vh]">
-        <h2 className="text-2xl font-black mb-2">เข้าถึงไม่ได้</h2>
-        <p className="text-muted">คุณไม่มีสิทธิ์ในการตั้งค่าระบบ</p>
-      </div>
-    );
-  }
-
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <Skeleton.List count={6} />;
   }
 
   return (

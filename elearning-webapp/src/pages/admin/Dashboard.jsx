@@ -1,13 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Building2, FileDown, SlidersHorizontal } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { canEditAdminUsers } from '../../utils/roles';
 import { USER_ROLES } from '../../utils/constants/roles';
-import { FILTER_VALUES } from '../../utils/constants/filters';
+import { MONTH_OPTIONS, SKILL_LABELS, ENROLLMENT_STATUS_LABELS } from '../../utils/constants/dashboard';
 import { formatThaiDateTime, getThailandDateParts } from '../../utils/dateUtils';
 import { openPrintReport } from '../../utils/printUtils';
-import { MONTH_OPTIONS, SKILL_LABELS, ENROLLMENT_STATUS_LABELS } from '../../utils/constants/dashboard';
+import { FILTER_VALUES } from '../../utils/constants/filters';
+import useDashboardData from '../../hooks/useDashboardData';
 
 import StatCards from '../../components/admin/StatCards';
 import WeeklyActivityChart from '../../components/admin/WeeklyActivityChart';
@@ -25,6 +26,7 @@ import UserLink from '../../components/admin/UserLink';
 import CustomSelect from '../../components/common/CustomSelect';
 import * as InsightConfigs from './InsightConfigs';
 import GoalReportModal from '../../components/admin/GoalReportModal';
+import Skeleton from '../../components/common/Skeleton';
 
 
 
@@ -32,18 +34,12 @@ import GoalReportModal from '../../components/admin/GoalReportModal';
 
 const safeValue = (value) => {
   if (value === null || value === undefined || value === '') return '-';
-  
-  // Handle objects and React elements
   if (typeof value === 'object' && !Array.isArray(value)) {
-    // If it's a React element (has props), try to get children
     if (value.props && value.props.children) {
       return safeValue(value.props.children);
     }
-    
-    // Fallback to common display properties
     return value.name || value.title || value.label || String(value);
   }
-  
   return String(value);
 };
 
@@ -55,59 +51,17 @@ const buildPrintRowsFromInsight = (insight) => (
   (insight?.rows || []).map((row) => (
     (insight.columns || []).map((column) => {
       const renderedValue = typeof column.render === 'function' ? column.render(row) : row[column.key];
-
-      // If the rendered value is a React component/object, fallback to the raw data key for printing
       if (renderedValue && typeof renderedValue === 'object' && !Array.isArray(renderedValue)) {
-        // Try to get a string value from the row data instead of the component
         const rawValue = row[column.key];
         if (rawValue && typeof rawValue !== 'object') {
           return safeValue(rawValue);
         }
-        
-        // If the raw value is also an object, let safeValue handle it
         return safeValue(renderedValue);
       }
-
       return safeValue(renderedValue);
     })
   ))
 );
-
-const isGoalCurrentlyActive = (goal) => {
-  if (!goal || goal.status !== 'ACTIVE') return false;
-  if (!goal.expiryDate) return true;
-  return new Date(goal.expiryDate).getTime() >= Date.now();
-};
-
-const getGoalScopeLabel = (goal) => {
-  if (goal?.scope === 'DEPARTMENT') {
-    return goal?.department?.name || 'Department';
-  }
-
-  return 'ทั้งองค์กร';
-};
-
-const buildGoalTargetLabel = (goal) => {
-  if (!goal) return '-';
-  if (goal.type === 'ANY') {
-    return `${goal.targetCount || 0} คอร์ส`;
-  }
-
-  const totalCourses = goal.courses?.length || goal.targetCount || 0;
-  return `${totalCourses} คอร์สที่กำหนด`;
-};
-
-const countGoalStatuses = (rows = []) => rows.reduce((accumulator, row) => {
-  const status = row.userStatus || 'NOT_STARTED';
-  accumulator.ALL += 1;
-  accumulator[status] = (accumulator[status] || 0) + 1;
-  return accumulator;
-}, {
-  ALL: 0,
-  COMPLETED: 0,
-  IN_PROGRESS: 0,
-  NOT_STARTED: 0,
-});
 
 const Dashboard = () => {
   const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
@@ -124,14 +78,10 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [advancedStats, setAdvancedStats] = useState(null);
   const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
   const [insight, setInsight] = useState(null);
   const [showUserDetailModal, setShowUserDetailModal] = useState(false);
   const [userDetailLoading, setUserDetailLoading] = useState(false);
   const [selectedUserDetail, setSelectedUserDetail] = useState(null);
-  const [goalTrackingItems, setGoalTrackingItems] = useState([]);
-  const [goalTrackingLoading, setGoalTrackingLoading] = useState(false);
   const [reportGoal, setReportGoal] = useState(null);
   const [reportData, setReportData] = useState(null);
   const [reportLoading, setReportLoading] = useState(false);
@@ -139,99 +89,13 @@ const Dashboard = () => {
 
   const yearOptions = useMemo(() => buildYearOptions(thaiNow?.year || new Date().getFullYear()), [thaiNow]);
 
-  useEffect(() => {
-    if (!isFullAdmin) return undefined;
-
-    let isMounted = true;
-
-    const fetchDepartments = async () => {
-      try {
-        const response = await adminAPI.getDepartments();
-        if (isMounted) {
-          setDepartments(response.data || []);
-        }
-      } catch (error) {
-        console.error('Fetch departments error:', error);
-      }
-    };
-
-    fetchDepartments();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isFullAdmin]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchAllStats = async () => {
-      setLoading(true);
-      setErrorMessage('');
-
-      const params = {
-        year: filters.year,
-        ...(filters.month && filters.month !== FILTER_VALUES.ALL ? { month: filters.month } : {}),
-        ...(isFullAdmin && filters.departmentId ? { departmentId: filters.departmentId } : {}),
-      };
-
-      try {
-        const dashboardResponse = await adminAPI.getDashboardStats(params);
-
-        if (!isMounted) return;
-
-        setStats(dashboardResponse.data);
-
-        try {
-          const analyticsResponse = await adminAPI.getAdvancedAnalytics(params);
-
-          if (!isMounted) return;
-          setAdvancedStats(analyticsResponse.data);
-        } catch (analyticsError) {
-          console.error('Fetch advanced analytics error:', analyticsError);
-          if (isMounted) {
-            setAdvancedStats({
-              skillGap: [],
-              benchmarking: [],
-              roiTrend: [],
-              atRisk: [],
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Fetch dashboard stats error:', error);
-        if (isMounted) {
-          setErrorMessage('ไม่สามารถโหลดข้อมูล dashboard ได้ในขณะนี้');
-          setAdvancedStats({
-            skillGap: [],
-            benchmarking: [],
-            roiTrend: [],
-            atRisk: [],
-          });
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchAllStats();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [filters, isFullAdmin]);
-
   const selectedDepartmentName = useMemo(() => {
     if (!isFullAdmin) {
       return stats?.department || currentUser?.department || 'แผนกของคุณ';
     }
-
     if (!filters.departmentId) {
       return 'ทุกแผนก';
     }
-
     return departments.find((department) => department.id === filters.departmentId)?.name || stats?.department || 'แผนกที่เลือก';
   }, [currentUser, departments, filters.departmentId, isFullAdmin, stats?.department]);
 
@@ -243,74 +107,21 @@ const Dashboard = () => {
     return `${monthLabel} ${filters.year}`;
   }, [filters.month, filters.year]);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchGoalTracking = async () => {
-      setGoalTrackingLoading(true);
-
-      try {
-        const goalsResponse = await adminAPI.getGoals();
-        const activeGoals = (goalsResponse.data || []).filter(isGoalCurrentlyActive);
-
-        const reportResults = await Promise.allSettled(activeGoals.map(async (goal) => {
-          const response = await adminAPI.getGoalReport(goal.id);
-          const allRows = response.data?.report || [];
-          const visibleRows = (isFullAdmin && filters.departmentId && selectedDepartmentName)
-            ? allRows.filter((row) => row.department === selectedDepartmentName)
-            : (!isFullAdmin && currentUserDepartment)
-              ? allRows.filter((row) => row.department === currentUserDepartment)
-              : allRows;
-
-          return {
-            ...goal,
-            scopeLabel: getGoalScopeLabel(goal),
-            targetLabel: buildGoalTargetLabel(goal),
-            counts: countGoalStatuses(visibleRows),
-            reportData: {
-              ...response.data,
-              report: visibleRows,
-            },
-          };
-        }));
-
-        const reports = reportResults
-          .filter((result) => result.status === 'fulfilled')
-          .map((result) => result.value);
-
-        reportResults
-          .filter((result) => result.status === 'rejected')
-          .forEach((result) => {
-            console.error('Fetch goal tracking item error:', result.reason);
-          });
-
-        reports.sort((left, right) => {
-          const leftDate = new Date(left.expiryDate || '9999-12-31').getTime();
-          const rightDate = new Date(right.expiryDate || '9999-12-31').getTime();
-          return leftDate - rightDate;
-        });
-
-        if (isMounted) {
-          setGoalTrackingItems(reports);
-        }
-      } catch (error) {
-        console.error('Fetch goal tracking error:', error);
-        if (isMounted) {
-          setGoalTrackingItems([]);
-        }
-      } finally {
-        if (isMounted) {
-          setGoalTrackingLoading(false);
-        }
-      }
-    };
-
-    fetchGoalTracking();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [currentUserDepartment, filters.departmentId, isFullAdmin, selectedDepartmentName]);
+  const {
+    loading,
+    errorMessage,
+    setErrorMessage,
+    goalTrackingItems,
+    goalTrackingLoading,
+  } = useDashboardData({
+    filters,
+    isFullAdmin,
+    currentUserDepartment,
+    selectedDepartmentName,
+    setStats,
+    setAdvancedStats,
+    setDepartments,
+  });
 
   const performanceRows = useMemo(() => {
     const rows = [...(stats?.learnerPerformance || [])];
@@ -326,12 +137,6 @@ const Dashboard = () => {
       return rightDate - leftDate;
     });
   }, [stats?.learnerPerformance]);
-
-  const completionRate = useMemo(() => {
-    const total = stats?.totalEnrollments || 0;
-    if (!total) return '0.0';
-    return (((stats?.completedEnrollments || 0) / total) * 100).toFixed(1);
-  }, [stats?.completedEnrollments, stats?.totalEnrollments]);
 
   const handleFilterChange = (key) => (event) => {
     const nextValue = event.target.value;
@@ -353,9 +158,9 @@ const Dashboard = () => {
         : 'สรุปภาพรวมผลการเรียนและรายละเอียดรายบุคคลตามตัวกรองที่เลือก',
       summary: [
         { label: 'ขอบเขต', value: selectedDepartmentName },
-        { label: 'ผู้เรียน', value: stats?.totalUsers || 0 },
-        { label: 'เรียนจบแล้ว', value: stats?.completedEnrollments || 0 },
-        { label: 'Completion Rate', value: `${completionRate}%` },
+        { label: 'ผู้เรียนทั้งหมด', value: stats?.totalUsers || 0 },
+        { label: 'เรียนสำเร็จแล้ว', value: `${stats?.completedEnrollments || 0} จาก ${stats?.totalEnrollments || 0} enrollment` },
+        { label: 'Compliance Rate', value: `${stats?.complianceRate || '0.0'}%` },
         { label: 'คะแนนเฉลี่ย', value: stats?.averageQuizScore || 0 },
       ],
       filters: [
@@ -386,6 +191,13 @@ const Dashboard = () => {
         performanceRows: performanceRows.map((row) => ({
           ...row,
           statusLabel: ENROLLMENT_STATUS_LABELS[row.status] || row.status,
+        })),
+        goals: goalTrackingItems.map(goal => ({
+          title: goal.title,
+          scopeLabel: goal.scopeLabel,
+          targetLabel: goal.targetLabel,
+          expiryDate: goal.expiryDate,
+          counts: goal.counts
         })),
       },
     });
@@ -532,11 +344,7 @@ const Dashboard = () => {
   const adminSubtitle = 'ดูทั้งภาพรวมองค์กรและ drill-down ลงไปถึงรายชื่อผู้เรียนของแต่ละกราฟได้ทันที';
 
   if (loading && !stats) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-      </div>
-    );
+    return <Skeleton.Dashboard />;
   }
 
   return (

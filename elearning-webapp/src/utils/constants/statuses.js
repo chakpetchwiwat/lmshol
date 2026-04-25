@@ -16,6 +16,12 @@ export const ENTITY_VIEW_STATUS = Object.freeze({
   ARCHIVED: 'ARCHIVED',
 });
 
+export const ENTITY_STATUS = Object.freeze({
+  DRAFT: 'DRAFT',
+  PUBLISHED: 'PUBLISHED',
+  ARCHIVED: 'ARCHIVED',
+});
+
 export const USER_STATUS = Object.freeze({
   ACTIVE: 'ACTIVE',
 });

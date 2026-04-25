@@ -106,8 +106,8 @@ const LessonModal = ({
 
   return (
     <ModalPortal isOpen={isOpen}>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-md animate-fade-in lg:p-8">
-        <div className="card flex h-full w-full max-w-6xl flex-col border border-gray-100 bg-white p-0 shadow-2xl">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
+        <div className="card flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden border border-gray-100 bg-white p-0 shadow-2xl">
           <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 p-4">
             <h4 className="text-lg font-bold">{isEditing ? 'แก้ไขบทเรียน' : 'เพิ่มบทเรียนใหม่'}</h4>
             <button type="button" onClick={onClose} className="text-muted hover:text-gray-900">

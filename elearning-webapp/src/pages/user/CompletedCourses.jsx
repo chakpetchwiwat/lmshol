@@ -3,6 +3,7 @@ import { Search, CheckCircle2, ArrowRight, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 import CourseCard from '../../components/common/CourseCard';
+import Skeleton from '../../components/common/Skeleton';
 import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const CompletedCourses = () => {
@@ -85,9 +86,7 @@ const CompletedCourses = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-14">
-            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-          </div>
+          <Skeleton.List count={4} />
         ) : courses.length === 0 ? (
           <div className="flex flex-col items-center rounded-[2rem] border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50">

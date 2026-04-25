@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Gift, CheckCircle, TrendingUp, TrendingDown, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
+import Skeleton from '../../components/common/Skeleton';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 
 const PointsHistory = () => {
@@ -107,9 +108,7 @@ const PointsHistory = () => {
         <h3 className="mt-2 px-1 text-lg font-extrabold text-slate-800">ประวัติล่าสุด</h3>
 
         {loading ? (
-          <div className="flex justify-center py-10">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-          </div>
+          <Skeleton.List count={6} />
         ) : currentList.length === 0 ? (
           <div className="flex flex-col items-center rounded-3xl border-dashed bg-white p-12 text-center shadow-sm ring-1 ring-slate-100">
             <Clock size={40} className="mb-4 text-slate-300" />

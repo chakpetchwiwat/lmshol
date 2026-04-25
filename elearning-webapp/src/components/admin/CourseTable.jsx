@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import Skeleton from '../common/Skeleton';
 import { RotateCcw, Edit, Trash2, History, Archive } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminActionMenu from './AdminActionMenu';
+import { ENTITY_STATUS } from '../../utils/constants/statuses';
 
 const MODULE_GROUP_LABELS = {
   STRAT_BUSINESS: 'Business / Corporate',
@@ -26,11 +28,7 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
   if (loading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-      </div>
-    );
+    return <Skeleton.List count={5} />;
   }
 
   if (courses.length === 0) {
@@ -58,6 +56,11 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
               <td className="p-4">
                 <div className="flex flex-col gap-1">
                   <span className="font-medium text-left">{course.title}</span>
+                  {course.status === ENTITY_STATUS.DRAFT && (
+                    <span className="inline-flex w-fit rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 ring-1 ring-amber-200">
+                      Draft
+                    </span>
+                  )}
                   {course.isTemporary && (
                     <span
                       className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[11px] font-bold ${

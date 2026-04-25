@@ -38,7 +38,7 @@ const UserModal = ({
   return (
     <ModalPortal isOpen={isOpen}>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
-      <div className="card flex max-h-[95vh] w-full max-w-2xl flex-col border border-slate-100 bg-white shadow-2xl">
+      <div className="card flex max-h-[95vh] w-full max-w-2xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
           <div>
             <h3 className="text-xl font-black text-slate-900">

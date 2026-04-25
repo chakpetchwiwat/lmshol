@@ -6,8 +6,11 @@ import InstructorPresetPicker from './InstructorPresetPicker';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
 import { getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
+import CourseBuilderFooter from './course-builder/CourseBuilderFooter';
 
 const CourseBasicInfoForm = ({
+  isPersisted,
+  lessonCount,
   courseForm,
   setCourseForm,
   categories,
@@ -418,14 +421,12 @@ const CourseBasicInfoForm = ({
         </div>
       </div>
 
-      <div className="mt-8 flex gap-4 border-t border-slate-100 pt-6">
-        <button type="button" onClick={onClose} className="btn flex-1 border-2 border-slate-200 bg-white px-8 text-xs font-black uppercase tracking-[0.15em] text-slate-500 transition-all hover:bg-slate-50">
-          ยกเลิก
-        </button>
-        <button type="submit" className="btn btn-primary flex-1 px-8 text-xs font-black uppercase tracking-[0.15em] shadow-xl">
-          บันทึกข้อมูลคอร์ส
-        </button>
-      </div>
+      <CourseBuilderFooter
+        courseStatus={courseForm.status}
+        isPersisted={isPersisted}
+        lessonCount={lessonCount}
+        onClose={onClose}
+      />
     </form>
   );
 };

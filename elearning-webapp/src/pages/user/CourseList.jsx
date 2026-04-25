@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Filter, Grid, Search } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
@@ -6,6 +6,7 @@ import CategoryPills from '../../components/common/CategoryPills';
 import CourseCard from '../../components/common/CourseCard';
 import FilterSidebar from '../../components/common/FilterSidebar';
 import SearchInput from '../../components/common/SearchInput';
+import Skeleton from '../../components/common/Skeleton';
 import { userAPI } from '../../utils/api';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import { filterCourses, sortCourses } from '../../utils/courseFilters';
@@ -29,12 +30,24 @@ const CourseList = () => {
   const [loading, setLoading] = useState(true);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
-
+  const scrollRef = useRef(null);
   useEffect(() => {
     if (urlCategory) {
       setActiveCat(urlCategory);
     }
   }, [urlCategory]);
+
+  useEffect(() => {
+    // Scroll to top of the main container when category changes
+    if (!loading) {
+      const scrollContainer = document.querySelector('.user-main');
+      if (scrollContainer) {
+        scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  }, [activeCat, loading]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,7 +91,7 @@ const CourseList = () => {
   };
 
   return (
-    <div className="relative flex flex-col gap-6 animate-fade-in pb-10 pt-2">
+    <div ref={scrollRef} className="relative flex flex-col gap-6 animate-fade-in pb-10 pt-2">
       <div className="sticky top-0 z-40 -mx-5 mb-2 space-y-3 border-b border-gray-100 bg-[#f8fafc]/95 px-5 pb-2 pt-5 shadow-sm backdrop-blur-md sm:space-y-4 sm:shadow-none md:top-[-1px] md:-mx-0 md:border-none md:px-0 md:pb-4 md:pt-3">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-black tracking-tight text-slate-900 md:text-2xl">คอร์สเรียนทั้งหมด</h2>
@@ -123,8 +136,10 @@ const CourseList = () => {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-10">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+        <div className="relative z-10 mb-10 mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <Skeleton.CourseCard key={i} />
+          ))}
         </div>
       ) : null}
 
