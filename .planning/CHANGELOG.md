@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-04-26] - Dashboard Optimization & CI Setup
+
+### Added
+- **E2E Testing & CI**: Integrated Playwright for automated UI testing and established a GitHub Actions workflow (`playwright.yml`) to run tests on push and pull requests.
+- **Goal Tracking Summary API**: Created a new aggregated endpoint (`/api/goals/tracking-summary`) and service (`goal.tracking.js`) to drastically reduce API payload size and network requests on the Admin Dashboard.
+
+### Fixed
+- **Dashboard Goal Tracking 429 Errors**: Refactored `useDashboardData` to fetch goal summaries from a single endpoint instead of looping through all individual goal reports.
+- **Express Route Ordering (404 Error)**: Fixed a routing conflict where `/:id` was intercepting `/tracking-summary` in `goal.routes.js`.
+- **Insight Widget Missing Data**: 
+    - Fixed missing Goal titles in the "Risk Identification Widget" (`goalTitle` vs `courseTitle` mismatch).
+    - Fixed missing Tier/Position data in the "Department Insight Widget" by updating the Prisma query in `admin.analytics.advanced.js` to correctly fetch `tier` and `tierRef` relationships.
+
 ## [2026-04-24] - Phase 2.3: Backend Service Modularization
 
 ### Added
