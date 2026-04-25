@@ -36,6 +36,9 @@ const upload = multer({
 
 const uploadToSupabase = async (req, res, { forceSubDir } = {}) => {
     try {
+        if (req.file) {
+            req.file.originalname = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+        }
         const fileValidation = validateUploadedFile(req.file);
         if (!fileValidation.valid) {
             logSecurityEvent('upload.rejected', req, {
