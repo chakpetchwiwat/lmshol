@@ -151,6 +151,7 @@ const getDashboardStats = async (authUser, filters = {}) => {
             })
         ]);
 
+        const totalUsers = learnerCount || 0;
         const totalEnrollments = enrollmentCount || 0;
         const completedEnrollments = completedEnrollmentCount || 0;
         const recentEnrollments = enrollments || [];
