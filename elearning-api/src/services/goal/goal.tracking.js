@@ -4,7 +4,7 @@ const { getGoalReport } = require('./goal.reports');
 
 const getGoalTrackingSummary = async (authUser, queryParams = {}) => {
     // 1. Get all goals for the user, but we don't need expired ones for the summary
-    const allGoals = await getGoals(authUser, { includeExpired: false });
+    const allGoals = await getGoals(authUser, { includeExpired: false, includeAllScopes: true });
 
     const filterDepartment = queryParams.department || null;
 

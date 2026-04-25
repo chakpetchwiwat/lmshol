@@ -89,7 +89,9 @@ const getGoals = async (authUser, options = {}) => {
     const actor = await authHelpers.getActorContext(prisma, authUser);
     const referenceDate = new Date();
     const includeExpired = Boolean(options.includeExpired && actor.canAccessAdminPanel);
-    const includeAllScopes = Boolean(options.includeExpired && actor.isAdmin);
+    const includeAllScopes = options.includeAllScopes !== undefined 
+        ? Boolean(options.includeAllScopes && actor.isAdmin)
+        : Boolean(options.includeExpired && actor.isAdmin);
     const where = authHelpers.buildGoalVisibilityWhere(actor, {
         referenceDate,
         includeExpired,
