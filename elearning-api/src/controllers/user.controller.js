@@ -20,6 +20,26 @@ const updateProfile = asyncHandler(async (req, res) => {
   res.json({ success: true, data: updatedUser });
 });
 
+const getCertificates = asyncHandler(async (req, res) => {
+  const certificates = await UserService.getCertificates(req.user.userId);
+  res.json({ success: true, data: certificates });
+});
+
+const createCertificate = asyncHandler(async (req, res) => {
+  const certificate = await UserService.createCertificate(req.user.userId, req.body);
+  res.status(201).json({ success: true, data: certificate });
+});
+
+const updateCertificate = asyncHandler(async (req, res) => {
+  const certificate = await UserService.updateCertificate(req.user.userId, req.params.id, req.body);
+  res.json({ success: true, data: certificate });
+});
+
+const deleteCertificate = asyncHandler(async (req, res) => {
+  const result = await UserService.deleteCertificate(req.user.userId, req.params.id);
+  res.json({ success: true, data: result });
+});
+
 // Get single course details
 const getCourseDetails = asyncHandler(async (req, res) => {
   const course = await UserService.getCourseDetails(req.params.id, req.user.userId);
@@ -175,6 +195,10 @@ module.exports = {
   submitQuiz,
   submitAnnouncementQuiz,
   updateProfile,
+  getCertificates,
+  createCertificate,
+  updateCertificate,
+  deleteCertificate,
   getLessonQuestions,
   getAnnouncementQuestions,
   getLessonDocumentAccess,

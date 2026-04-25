@@ -1,6 +1,47 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import ModalPortal from '../../components/common/ModalPortal';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
+
+const PasswordInput = ({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  inputRef
+}) => {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div className="mb-4 w-full">
+      <label htmlFor={id} className="mb-2 block text-sm font-bold text-slate-700">
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          ref={inputRef}
+          id={id}
+          type={visible ? 'text' : 'password'}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 font-medium focus:outline-none focus:ring-2 focus:ring-primary/50"
+          placeholder={placeholder}
+          autoComplete="new-password"
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((current) => !current)}
+          aria-label={visible ? `ซ่อน${label}` : `แสดง${label}`}
+          aria-pressed={visible}
+          className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+        >
+          {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const UpdatePasswordModal = ({
   isOpen,
@@ -9,11 +50,14 @@ const UpdatePasswordModal = ({
   setCurrentPassword,
   newPassword,
   setNewPassword,
+  confirmNewPassword,
+  setConfirmNewPassword,
   savingPassword,
   onSave,
   passwordDialogTitleId,
   currentPasswordId,
-  newPasswordId
+  newPasswordId,
+  confirmNewPasswordId
 }) => {
   const editDialogRef = useRef(null);
   const editInputRef = useRef(null);
@@ -48,32 +92,30 @@ const UpdatePasswordModal = ({
             เปลี่ยนรหัสผ่าน
           </h3>
 
-          <div className="mb-4 w-full">
-            <label htmlFor={currentPasswordId} className="mb-2 block text-sm font-bold text-slate-700">
-              รหัสผ่านปัจจุบัน
-            </label>
-            <input
-              ref={editInputRef}
-              id={currentPasswordId}
-              type="password"
-              value={currentPassword}
-              onChange={(event) => setCurrentPassword(event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-primary/50"
-              placeholder="กรอกรหัสผ่านปัจจุบัน"
-            />
-          </div>
+          <PasswordInput
+            id={currentPasswordId}
+            label="รหัสผ่านปัจจุบัน"
+            value={currentPassword}
+            onChange={setCurrentPassword}
+            placeholder="กรอกรหัสผ่านปัจจุบัน"
+            inputRef={editInputRef}
+          />
 
-          <div className="mb-6 w-full">
-            <label htmlFor={newPasswordId} className="mb-2 block text-sm font-bold text-slate-700">
-              รหัสผ่านใหม่
-            </label>
-            <input
-              id={newPasswordId}
-              type="password"
-              value={newPassword}
-              onChange={(event) => setNewPassword(event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-medium focus:outline-none focus:ring-2 focus:ring-primary/50"
-              placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
+          <PasswordInput
+            id={newPasswordId}
+            label="รหัสผ่านใหม่"
+            value={newPassword}
+            onChange={setNewPassword}
+            placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
+          />
+
+          <div className="mb-2 w-full">
+            <PasswordInput
+              id={confirmNewPasswordId}
+              label="ยืนยันรหัสผ่านใหม่"
+              value={confirmNewPassword}
+              onChange={setConfirmNewPassword}
+              placeholder="กรอกรหัสผ่านใหม่อีกครั้ง"
             />
           </div>
 

@@ -13,6 +13,7 @@ const points = require('./user/user.points');
 const announcements = require('./user/user.announcements');
 const notifications = require('./user/user.notifications');
 const documents = require('./user/user.documents');
+const certificates = require('./user/user.certificates');
 
 module.exports = {
     // Profile & Identity
@@ -35,5 +36,8 @@ module.exports = {
     ...notifications,
     
     // Documents & Streaming
-    ...documents
+    ...documents,
+
+    // User Certificates
+    ...certificates
 };

@@ -9,6 +9,7 @@ import Skeleton from '../../components/common/Skeleton';
 import ProfileHeader from '../../components/user/ProfileHeader';
 import ProfileStats from '../../components/user/ProfileStats';
 import ProfileActivities from '../../components/user/ProfileActivities';
+import ProfileCertificates from '../../components/user/ProfileCertificates';
 import ProfileSettings from '../../components/user/ProfileSettings';
 import UpdatePasswordModal from '../../components/user/UpdatePasswordModal';
 import PrivacyPolicyModal from '../../components/user/PrivacyPolicyModal';
@@ -23,27 +24,34 @@ const Profile = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [savingPassword, setSavingPassword] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [courses, setCourses] = useState([]);
+  const [certificates, setCertificates] = useState([]);
+  const [savingCertificate, setSavingCertificate] = useState(false);
+  const [uploadingCertificate, setUploadingCertificate] = useState(false);
 
   const passwordDialogTitleId = useId();
   const policyDialogTitleId = useId();
   const currentPasswordId = useId();
   const newPasswordId = useId();
+  const confirmNewPasswordId = useId();
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const [userRes, pointsRes, coursesRes] = await Promise.all([
+        const [userRes, pointsRes, coursesRes, certificatesRes] = await Promise.all([
           authAPI.getCurrentUser(),
           userAPI.getPoints(),
           userAPI.getCourses(),
+          userAPI.getCertificates(),
         ]);
         setUser(userRes?.data || userRes);
         setPoints(pointsRes?.data?.balance ?? pointsRes?.balance ?? 0);
         setCourses(Array.isArray(coursesRes?.data) ? coursesRes.data : Array.isArray(coursesRes) ? coursesRes : []);
+        setCertificates(Array.isArray(certificatesRes?.data) ? certificatesRes.data : Array.isArray(certificatesRes) ? certificatesRes : []);
       } catch (error) {
         console.error('Fetch profile error:', error);
       } finally {
@@ -61,7 +69,7 @@ const Profile = () => {
   };
 
   const handleUpdatePassword = async () => {
-    if (!currentPassword || !newPassword) {
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
       toast.warning('กรุณากรอกรหัสผ่านให้ครบถ้วน');
       return;
     }
@@ -71,12 +79,18 @@ const Profile = () => {
       return;
     }
 
+    if (newPassword !== confirmNewPassword) {
+      toast.warning('รหัสผ่านใหม่และการยืนยันรหัสผ่านไม่ตรงกัน');
+      return;
+    }
+
     try {
       setSavingPassword(true);
       await userAPI.updateProfile({ currentPassword, newPassword });
       setShowEditModal(false);
       setCurrentPassword('');
       setNewPassword('');
+      setConfirmNewPassword('');
       toast.success('เปลี่ยนรหัสผ่านสำเร็จ');
     } catch (error) {
       console.error('Update password error', error);
@@ -89,6 +103,69 @@ const Profile = () => {
   const toggleNotifications = () => {
     setNotificationsEnabled((current) => !current);
     toast.info(notificationsEnabled ? 'ปิดการแจ้งเตือนแล้ว' : 'เปิดการแจ้งเตือนแล้ว');
+  };
+
+  const handleCreateCertificate = async (payload) => {
+    try {
+      setSavingCertificate(true);
+      const response = await userAPI.createCertificate(payload);
+      const certificate = response?.data || response;
+      setCertificates((current) => [certificate, ...current]);
+      toast.success('เพิ่ม certificate สำเร็จ');
+      return certificate;
+    } catch (error) {
+      console.error('Create certificate error', error);
+      toast.error(error.response?.data?.message || 'เพิ่ม certificate ไม่สำเร็จ');
+      return null;
+    } finally {
+      setSavingCertificate(false);
+    }
+  };
+
+  const handleUpdateCertificate = async (certificateId, payload) => {
+    try {
+      setSavingCertificate(true);
+      const response = await userAPI.updateCertificate(certificateId, payload);
+      const certificate = response?.data || response;
+      setCertificates((current) => current.map((item) => (item.id === certificateId ? certificate : item)));
+      toast.success('อัปเดต certificate สำเร็จ');
+      return certificate;
+    } catch (error) {
+      console.error('Update certificate error', error);
+      toast.error(error.response?.data?.message || 'อัปเดต certificate ไม่สำเร็จ');
+      return null;
+    } finally {
+      setSavingCertificate(false);
+    }
+  };
+
+  const handleDeleteCertificate = async (certificateId) => {
+    const confirmed = window.confirm('ลบ certificate นี้ออกจากโปรไฟล์?');
+    if (!confirmed) return;
+
+    try {
+      await userAPI.deleteCertificate(certificateId);
+      setCertificates((current) => current.filter((item) => item.id !== certificateId));
+      toast.success('ลบ certificate แล้ว');
+    } catch (error) {
+      console.error('Delete certificate error', error);
+      toast.error(error.response?.data?.message || 'ลบ certificate ไม่สำเร็จ');
+    }
+  };
+
+  const handleUploadCertificateFile = async (file) => {
+    try {
+      setUploadingCertificate(true);
+      const response = await userAPI.uploadCertificateFile(file);
+      toast.success('อัปโหลดไฟล์สำเร็จ');
+      return response?.data || response;
+    } catch (error) {
+      console.error('Upload certificate file error', error);
+      toast.error(error.response?.data?.message || 'อัปโหลดไฟล์ไม่สำเร็จ');
+      return null;
+    } finally {
+      setUploadingCertificate(false);
+    }
   };
 
   if (loading) {
@@ -110,6 +187,16 @@ const Profile = () => {
       <ProfileActivities 
         courses={courses} 
         onNavigate={navigate} 
+      />
+
+      <ProfileCertificates
+        certificates={certificates}
+        saving={savingCertificate}
+        uploading={uploadingCertificate}
+        onCreate={handleCreateCertificate}
+        onUpdate={handleUpdateCertificate}
+        onDelete={handleDeleteCertificate}
+        onUpload={handleUploadCertificateFile}
       />
 
       <ProfileSettings 
@@ -136,16 +223,20 @@ const Profile = () => {
           setShowEditModal(false);
           setCurrentPassword('');
           setNewPassword('');
+          setConfirmNewPassword('');
         }}
         currentPassword={currentPassword}
         setCurrentPassword={setCurrentPassword}
         newPassword={newPassword}
         setNewPassword={setNewPassword}
+        confirmNewPassword={confirmNewPassword}
+        setConfirmNewPassword={setConfirmNewPassword}
         savingPassword={savingPassword}
         onSave={handleUpdatePassword}
         passwordDialogTitleId={passwordDialogTitleId}
         currentPasswordId={currentPasswordId}
         newPasswordId={newPasswordId}
+        confirmNewPasswordId={confirmNewPasswordId}
       />
 
       <PrivacyPolicyModal 

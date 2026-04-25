@@ -17,6 +17,7 @@ const {
 
 const { buildLatestCourseScoreMap } = require('./admin.analytics.dashboard');
 const { buildAtRiskLearners } = require('./admin.analytics.at-risk');
+const { aggregateRoiTrend } = require('./admin.analytics.aggregators');
 
 const getAdvancedAnalytics = async (authUser, filters = {}) => {
     const actor = await getActorContext(authUser);
@@ -271,58 +272,21 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
                 }))
                 .sort((left, right) => right.completion_rate - left.completion_rate);
 
-            const roiBuckets = buildTimeBuckets(period).map((bucket) => ({
-                ...bucket,
-                completions: 0,
-                points: 0,
-                details: []
-            }));
-            const roiBucketMap = Object.fromEntries(roiBuckets.map((bucket) => [bucket.key, bucket]));
-
-            enrollments
-                .filter((enrollment) => enrollment.status === ENROLLMENT_STATUS.COMPLETED && enrollment.completedAt)
-                .forEach((enrollment) => {
-                    const user = userDirectory[enrollment.userId];
-                    const departmentName = user?.department || null;
-                    const key = getTimeBucketKey(enrollment.completedAt, period.mode);
-                    if (!roiBucketMap[key]) return;
-                    roiBucketMap[key].completions += 1;
-                    roiBucketMap[key].details.push({
-                        kind: 'completion',
-                        userId: enrollment.userId,
-                        userName: user?.name || '-',
-                        department: departmentName,
-                        courseTitle: enrollment.course.title,
-                        completedAt: enrollment.completedAt,
-                        points: 0
-                    });
-                });
-
-            learningPoints.forEach((entry) => {
-                const user = userDirectory[entry.userId];
-                const departmentName = user?.department || null;
-                const key = getTimeBucketKey(entry.createdAt, period.mode);
-                if (!roiBucketMap[key]) return;
-                roiBucketMap[key].points += entry.points;
-                roiBucketMap[key].details.push({
-                    kind: 'points',
-                    userId: entry.userId,
-                    userName: user?.name || '-',
-                    department: departmentName,
-                    courseTitle: entry.note || 'Learning reward',
-                    completedAt: entry.createdAt,
-                    points: entry.points
-                });
-            });
-
-            const roiTrend = roiBuckets.map((bucket) => ({
-                month: bucket.label,
-                label: bucket.fullLabel,
-                bucketKey: bucket.key,
-                points: roiBucketMap[bucket.key]?.points || 0,
-                completions: roiBucketMap[bucket.key]?.completions || 0,
-                details: roiBucketMap[bucket.key]?.details || []
-            }));
+            const roiTrend = aggregateRoiTrend(
+                enrollments.map(e => ({
+                    ...e,
+                    userName: userDirectory[e.userId]?.name,
+                    department: userDirectory[e.userId]?.department,
+                    courseTitle: e.course.title
+                })),
+                learningPoints.map(p => ({
+                    ...p,
+                    userName: userDirectory[p.userId]?.name,
+                    department: userDirectory[p.userId]?.department
+                })),
+                buildTimeBuckets(period).map(b => ({ ...b, points: 0, completions: 0, details: [] })),
+                period.mode
+            );
 
             const now = new Date();
             const warningWindow = new Date();

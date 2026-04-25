@@ -34,8 +34,7 @@ const upload = multer({
     limits: { fileSize: securityConfig.uploadMaxFileSizeBytes }
 });
 
-// POST /api/upload - Upload to Supabase Storage
-router.post('/', verifyToken, verifyAdminPanelAccess, uploadRateLimiter, upload.single('file'), async (req, res) => {
+const uploadToSupabase = async (req, res, { forceSubDir } = {}) => {
     try {
         const fileValidation = validateUploadedFile(req.file);
         if (!fileValidation.valid) {
@@ -50,7 +49,7 @@ router.post('/', verifyToken, verifyAdminPanelAccess, uploadRateLimiter, upload.
 
         const isImage = req.file.mimetype.startsWith('image/');
         const bucketName = 'uploads';
-        const subDir = isImage ? 'images' : 'documents';
+        const subDir = forceSubDir || (isImage ? 'images' : 'documents');
         const ext = path.extname(req.file.originalname);
         const fileName = `${subDir}/${crypto.randomUUID()}${ext.toLowerCase()}`;
 
@@ -69,13 +68,14 @@ router.post('/', verifyToken, verifyAdminPanelAccess, uploadRateLimiter, upload.
             .from(bucketName)
             .getPublicUrl(fileName);
 
-        const fileUrl = isImage ? publicUrl : fileName;
+        const fileUrl = forceSubDir ? publicUrl : isImage ? publicUrl : fileName;
 
         res.json({
             message: 'Upload successful!',
             fileUrl,
             fileKey: fileName,
-            fileName
+            fileName: forceSubDir ? req.file.originalname : fileName,
+            fileMimeType: req.file.mimetype
         });
 
     } catch (err) {
@@ -85,6 +85,16 @@ router.post('/', verifyToken, verifyAdminPanelAccess, uploadRateLimiter, upload.
         console.error('Upload Error:', err);
         res.status(500).json({ message: 'Upload failed', error: err.message });
     }
+};
+
+// POST /api/upload/certificate - User-owned certificate attachments
+router.post('/certificate', verifyToken, uploadRateLimiter, upload.single('file'), async (req, res) => {
+    await uploadToSupabase(req, res, { forceSubDir: 'certificates' });
+});
+
+// POST /api/upload - Upload to Supabase Storage
+router.post('/', verifyToken, verifyAdminPanelAccess, uploadRateLimiter, upload.single('file'), async (req, res) => {
+    await uploadToSupabase(req, res);
 });
 
 module.exports = router;
