@@ -8,12 +8,13 @@ const { goalReportRateLimiter } = require('../middleware/rateLimiters');
 router.use(verifyToken);
 
 router.get('/', goalController.getGoals);
+router.get('/tracking-summary', verifyAdminPanelAccess, goalController.getGoalTrackingSummary);
 router.get('/:id', goalController.getGoalDetails);
 
 // Routes below require Admin/Manager access
 router.use(verifyAdminPanelAccess);
 router.post('/', goalController.createGoal);
-router.get('/tracking-summary', goalController.getGoalTrackingSummary);
+// Tracking summary moved up
 router.put('/:id', goalController.updateGoal);
 router.get('/:id/report', goalReportRateLimiter, goalController.getGoalReport);
 router.put('/:id/archive', goalController.archiveGoal);
