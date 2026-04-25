@@ -54,7 +54,7 @@ const getDashboardUserSummary = (user) => ({
     name: user.name,
     email: user.email,
     department: user.departmentRef?.name || user.department || null,
-    tier: user.tierRef?.name || user.tier || null
+    tier: user.tier?.name || null
 });
 
 module.exports = {

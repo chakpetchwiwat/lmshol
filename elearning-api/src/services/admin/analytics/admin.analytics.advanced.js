@@ -43,8 +43,8 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
                             name: true
                         }
                     },
-                    tier: true,
-                    tierRef: {
+                    tierId: true,
+                    tier: {
                         select: {
                             name: true
                         }
