@@ -69,8 +69,9 @@ const SystemHealth = () => {
     if (isManual) setRefreshing(true);
     try {
       const response = await api.get('/admin/system/health');
-      if (response.data.success) {
-        setHealthData(response.data.data);
+      // The API interceptor already unwraps response.data.data into response.data
+      if (response.data) {
+        setHealthData(response.data);
         setLastUpdated(new Date());
       }
     } catch (error) {
@@ -88,6 +89,7 @@ const SystemHealth = () => {
   }, []);
 
   const formatBytes = (bytes) => {
+    if (bytes === undefined || bytes === null || isNaN(bytes)) return '-';
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -96,6 +98,7 @@ const SystemHealth = () => {
   };
 
   const formatUptime = (seconds) => {
+    if (seconds === undefined || seconds === null || isNaN(seconds)) return '-';
     const d = Math.floor(seconds / (3600 * 24));
     const h = Math.floor((seconds % (3600 * 24)) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -107,7 +110,7 @@ const SystemHealth = () => {
     if (m > 0) parts.push(`${m}m`);
     parts.push(`${s}s`);
     
-    return parts.join(' ');
+    return parts.length > 0 ? parts.join(' ') : '0s';
   };
 
   return (
