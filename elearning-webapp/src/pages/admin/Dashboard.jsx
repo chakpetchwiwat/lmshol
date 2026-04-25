@@ -254,7 +254,7 @@ const Dashboard = () => {
 
   const handleOpenTrackedGoalReport = (goal, initialStatus = 'ALL') => {
     if (!goal) return;
-    openGoalReportModal(goal, goal.reportData, initialStatus);
+    handleViewGoalReport(goal, initialStatus);
   };
 
   const handleViewGoalReport = async (goal, initialStatus = 'ALL') => {

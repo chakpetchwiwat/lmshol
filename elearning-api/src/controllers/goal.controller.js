@@ -101,6 +101,17 @@ const getGoalReport = asyncHandler(async (req, res) => {
     });
 });
 
+const getGoalTrackingSummary = asyncHandler(async (req, res) => {
+    const startedAt = Date.now();
+    const summary = await goalService.getGoalTrackingSummary(req.user, req.query);
+    const durationMs = Date.now() - startedAt;
+    appendServerTiming(res, 'goal-summary', durationMs);
+    res.json({
+        success: true,
+        data: summary
+    });
+});
+
 module.exports = {
     createGoal,
     getGoals,
@@ -109,5 +120,6 @@ module.exports = {
     republishGoal,
     updateGoal,
     deleteGoal,
-    getGoalReport
+    getGoalReport,
+    getGoalTrackingSummary
 };

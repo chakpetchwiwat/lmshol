@@ -8,6 +8,7 @@
 const crud = require('./goal/goal.crud');
 const reports = require('./goal/goal.reports');
 const notifications = require('./goal/goal.notifications');
+const tracking = require('./goal/goal.tracking');
 
 module.exports = {
     // Lifecycle Operations (CRUD)
@@ -17,5 +18,8 @@ module.exports = {
     ...reports,
     
     // Notification Helpers (if needed externally)
-    ...notifications
+    ...notifications,
+
+    // Tracking
+    ...tracking
 };

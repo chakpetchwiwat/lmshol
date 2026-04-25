@@ -229,6 +229,7 @@ export const adminAPI = {
   republishGoal: (id) => api.put(`/goals/${id}/republish`),
   deleteGoal: (id) => api.delete(`/goals/${id}`),
   getGoalReport: (id, config = {}) => api.get(`/goals/${id}/report`, config),
+  getGoalTrackingSummary: () => api.get('/goals/tracking-summary'),
 
 };
 
