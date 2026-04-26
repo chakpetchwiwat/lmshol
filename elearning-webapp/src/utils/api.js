@@ -112,6 +112,10 @@ export const userAPI = {
   getLessonDocumentAccess: (lessonId) => api.get(`/user/lessons/${lessonId}/document-access`),
   getAnnouncementDocumentAccess: (announcementId) => api.get(`/user/announcements/${announcementId}/document-access`),
   updateProfile: (data) => api.put('/user/profile', data),
+  getCertificates: () => api.get('/user/certificates'),
+  createCertificate: (data) => api.post('/user/certificates', data),
+  updateCertificate: (id, data) => api.put(`/user/certificates/${id}`, data),
+  deleteCertificate: (id) => api.delete(`/user/certificates/${id}`),
   getPointsHistory: () => api.get('/user/points'), // Alias for clarity
   getNotifications: () => api.get('/user/notifications'),
   markNotificationRead: (notificationId) => api.put(`/user/notifications/${notificationId}/read`),
@@ -121,6 +125,13 @@ export const userAPI = {
     const formData = new FormData();
     formData.append('file', file);
     return api.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadCertificateFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/certificate', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
@@ -218,6 +229,7 @@ export const adminAPI = {
   republishGoal: (id) => api.put(`/goals/${id}/republish`),
   deleteGoal: (id) => api.delete(`/goals/${id}`),
   getGoalReport: (id, config = {}) => api.get(`/goals/${id}/report`, config),
+  getGoalTrackingSummary: (config = {}) => api.get('/goals/tracking-summary', config),
 
 };
 

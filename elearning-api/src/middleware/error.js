@@ -1,4 +1,5 @@
 const ErrorResponse = require('../utils/errorResponse');
+const { logSecurityEvent } = require('../utils/securityEvents');
 
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
@@ -27,7 +28,13 @@ const errorHandler = (err, req, res, next) => {
   }
 
   if (err.message && err.message.startsWith('CORS:')) {
+    logSecurityEvent('security.cors.denied', req, { origin: req.headers.origin, reason: err.message });
     error = new ErrorResponse(err.message, 403);
+  }
+
+  // Handle unauthorized/forbidden
+  if (err.statusCode === 401 || err.statusCode === 403) {
+    logSecurityEvent('auth.access_denied', req, { statusCode: err.statusCode, reason: err.message });
   }
 
   if (err.type === 'entity.too.large') {

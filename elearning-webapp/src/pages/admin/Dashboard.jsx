@@ -254,7 +254,7 @@ const Dashboard = () => {
 
   const handleOpenTrackedGoalReport = (goal, initialStatus = 'ALL') => {
     if (!goal) return;
-    openGoalReportModal(goal, goal.reportData, initialStatus);
+    handleViewGoalReport(goal, initialStatus);
   };
 
   const handleViewGoalReport = async (goal, initialStatus = 'ALL') => {
@@ -291,11 +291,11 @@ const Dashboard = () => {
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        handleViewGoalReport({ id: row.goalId || row.courseId, title: row.courseTitle });
+        handleViewGoalReport({ id: row.goalId || row.courseId, title: row.goalTitle || row.courseTitle });
       }}
       className="inline-block text-left font-bold text-primary hover:text-primary-dark hover:underline transition-all cursor-pointer relative z-[5]"
     >
-      {row.courseTitle}
+      {row.goalTitle || row.courseTitle}
     </button>
   );
 

@@ -34,9 +34,33 @@ model User {
   notifications UserNotification[]
   createdAnnouncements Announcement[] @relation("AnnouncementCreator")
   announcementViews   AnnouncementView[] @relation("UserAnnouncementViews")
+  certificates  UserCertificate[]
 
   @@index([status, departmentId, tierId])
   @@index([departmentId, status])
+}
+
+model UserCertificate {
+  id            String    @id @default(uuid())
+  userId        String
+  title         String
+  issuer        String
+  issueDate     DateTime?
+  expirationDate DateTime?
+  noExpiration  Boolean   @default(false)
+  credentialId  String?
+  credentialUrl String?
+  fileUrl       String?
+  fileKey       String?
+  fileName      String?
+  fileMimeType  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, issueDate])
+  @@index([userId, createdAt])
 }
 
 model Course {

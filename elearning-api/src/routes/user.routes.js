@@ -28,6 +28,10 @@ router.get('/notifications', userController.getNotifications);
 router.put('/notifications/read-all', userController.markAllNotificationsAsRead);
 router.put('/notifications/:id/read', userController.markNotificationAsRead);
 router.delete('/notifications', userController.clearAllNotifications);
+router.get('/certificates', userController.getCertificates);
+router.post('/certificates', userController.createCertificate);
+router.put('/certificates/:id', userController.updateCertificate);
+router.delete('/certificates/:id', userController.deleteCertificate);
 router.post('/redeem/:id', userController.requestRedeem);
 router.put('/profile', userController.updateProfile);
 

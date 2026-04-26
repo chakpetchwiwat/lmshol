@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.controller');
+const systemController = require('../controllers/system.controller');
 const { verifyToken, verifySuperAdmin, verifyAdminPanelAccess } = require('../middleware/auth');
 const { adminAnalyticsRateLimiter } = require('../middleware/rateLimiters');
 
@@ -8,6 +9,7 @@ router.use(verifyToken, verifyAdminPanelAccess); // Admin + manager can access t
 
 router.get('/dashboard', adminAnalyticsRateLimiter, adminController.getDashboardStats);
 router.get('/analytics', adminAnalyticsRateLimiter, adminController.getAdvancedAnalytics);
+router.get('/system/health', verifySuperAdmin, systemController.getSystemHealth);
 
 router.get('/users', adminController.getUsers);
 router.get('/users/:id/details', adminController.getUserDetails);

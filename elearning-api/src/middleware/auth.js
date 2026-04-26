@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { USER_ROLES, ADMIN_PANEL_ROLES } = require('../utils/constants/roles');
+const { runWithContext } = require('../utils/context');
 
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -13,7 +14,11 @@ const verifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    next();
+
+    // Set context for RLS
+    runWithContext({ userId: decoded.userId, role: decoded.role }, () => {
+      next();
+    });
   } catch (error) {
     return res.status(401).json({ message: 'Invalid or expired token' });
   }

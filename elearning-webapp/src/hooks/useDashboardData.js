@@ -154,39 +154,22 @@ const useDashboardData = ({
             setGoalTrackingLoading(true);
 
             try {
-                const goalsResponse = await adminAPI.getGoals();
-                const activeGoals = (goalsResponse.data || []).filter(isGoalCurrentlyActive);
+                // Determine the department filter to send to the backend
+                let deptFilter = '';
+                if (isFullAdmin && filters.departmentId && selectedDepartmentName) {
+                    deptFilter = selectedDepartmentName;
+                } else if (!isFullAdmin && currentUserDepartment) {
+                    deptFilter = currentUserDepartment;
+                }
 
-                const reportResults = await Promise.allSettled(activeGoals.map(async (goal) => {
-                    const response = await adminAPI.getGoalReport(goal.id);
-                    const allRows = response.data?.report || [];
-                    const visibleRows = (isFullAdmin && filters.departmentId && selectedDepartmentName)
-                        ? allRows.filter((row) => row.department === selectedDepartmentName)
-                        : (!isFullAdmin && currentUserDepartment)
-                            ? allRows.filter((row) => row.department === currentUserDepartment)
-                            : allRows;
-
-                    return {
-                        ...goal,
-                        scopeLabel: getGoalScopeLabel(goal),
-                        targetLabel: buildGoalTargetLabel(goal),
-                        counts: countGoalStatuses(visibleRows),
-                        reportData: {
-                            ...response.data,
-                            report: visibleRows,
-                        },
-                    };
-                }));
-
-                const reports = reportResults
-                    .filter((result) => result.status === 'fulfilled')
-                    .map((result) => result.value);
-
-                reportResults
-                    .filter((result) => result.status === 'rejected')
-                    .forEach((result) => {
-                        console.error('Fetch goal tracking item error:', result.reason);
-                    });
+                // Call the new summary endpoint
+                const summaryResponse = await adminAPI.getGoalTrackingSummary({
+                    params: {
+                        department: deptFilter
+                    }
+                });
+                
+                const reports = summaryResponse.data || [];
 
                 reports.sort((left, right) => {
                     const leftDate = new Date(left.expiryDate || '9999-12-31').getTime();
@@ -195,7 +178,11 @@ const useDashboardData = ({
                 });
 
                 if (isMounted) {
-                    setGoalTrackingItems(reports);
+                    setGoalTrackingItems(reports.map(report => ({
+                        ...report,
+                        scopeLabel: report.departmentName || 'ทั้งองค์กร',
+                        targetLabel: report.targetCountLabel || '-',
+                    })));
                 }
             } catch (error) {
                 console.error('Fetch goal tracking error:', error);

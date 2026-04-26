@@ -2,6 +2,7 @@ const AuthService = require('../services/auth.service');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
 const { recordLoginFailure, resetLoginFailures } = require('../middleware/loginProtection');
+const { logSecurityEvent } = require('../utils/securityEvents');
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
@@ -13,8 +14,10 @@ const login = asyncHandler(async (req, res) => {
   let result;
   try {
     result = await AuthService.login(email, password);
+    logSecurityEvent('auth.login.success', req, { email, userId: result.user.id });
   } catch (error) {
     if (error.statusCode === 401) {
+      logSecurityEvent('auth.login.failure', req, { email, reason: 'Invalid credentials' });
       recordLoginFailure(req, email);
     }
 

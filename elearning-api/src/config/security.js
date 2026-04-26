@@ -1,3 +1,5 @@
+const { RedisStore } = require('rate-limit-redis');
+const { createClient } = require('redis');
 const rateLimit = require('express-rate-limit');
 const { SECURITY_DEFAULTS } = require('../utils/constants/config');
 
@@ -172,8 +174,60 @@ const getSecurityConfig = (env = process.env) => ({
     uploadMaxFileSizeBytes: parsePositiveInteger(
         env.UPLOAD_MAX_FILE_SIZE_MB,
         SECURITY_DEFAULTS.UPLOAD_MAX_FILE_SIZE_MB
-    ) * 1024 * 1024
+    ) * 1024 * 1024,
+    redis: {
+        enabled: parseBoolean(env.REDIS_ENABLED, false),
+        url: env.REDIS_URL || 'redis://localhost:6379'
+    }
 });
+
+let redisClient = null;
+const getRedisClient = async (config = getSecurityConfig().redis) => {
+    if (!config.enabled) return null;
+    if (redisClient) return redisClient;
+
+    try {
+        redisClient = createClient({ url: config.url });
+        redisClient.on('error', (err) => console.error('Redis Client Error', err));
+        await redisClient.connect();
+        return redisClient;
+    } catch (err) {
+        console.error('Failed to connect to Redis', err);
+        return null;
+    }
+};
+
+const createRedisStore = async (prefix = 'rl:') => {
+    const client = await getRedisClient();
+    if (!client) return undefined; // Fallback to memory store
+
+    return new RedisStore({
+        sendCommand: (...args) => client.sendCommand(args),
+        prefix
+    });
+};
+
+/**
+ * Factory for limiters that can optionally use a Redis store if available.
+ * Since Redis initialization is async, this returns a wrapper middleware.
+ */
+const createDynamicLimiter = (options, prefix) => {
+    let limiter;
+    const storePromise = createRedisStore(prefix);
+
+    return async (req, res, next) => {
+        if (!limiter) {
+            try {
+                const store = await storePromise;
+                limiter = rateLimit({ ...options, store });
+            } catch (err) {
+                console.error(`Rate limiter initialization failed for ${prefix}, falling back to memory`, err);
+                limiter = rateLimit(options);
+            }
+        }
+        return limiter(req, res, next);
+    };
+};
 
 const buildCorsOptions = (securityConfig = getSecurityConfig()) => ({
     origin: (origin, callback) => {
@@ -190,9 +244,17 @@ const buildCorsOptions = (securityConfig = getSecurityConfig()) => ({
 });
 
 const buildHelmetOptions = () => ({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: false, // API only, no HTML to protect
     crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: false
+    crossOriginResourcePolicy: false,
+    hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true
+    },
+    frameguard: {
+        action: 'deny'
+    }
 });
 
 const createDefaultApiLimiter = (securityConfig = getSecurityConfig()) => {
@@ -200,7 +262,7 @@ const createDefaultApiLimiter = (securityConfig = getSecurityConfig()) => {
         return (req, res, next) => next();
     }
 
-    return rateLimit({
+    return createDynamicLimiter({
         windowMs: securityConfig.defaultRateLimit.windowMs,
         limit: securityConfig.defaultRateLimit.max,
         standardHeaders: true,
@@ -210,14 +272,17 @@ const createDefaultApiLimiter = (securityConfig = getSecurityConfig()) => {
             success: false,
             message: 'Too many requests. Please try again later.'
         }
-    });
+    }, 'rl:default:');
 };
 
 module.exports = {
     buildCorsOptions,
     buildHelmetOptions,
     createDefaultApiLimiter,
+    createDynamicLimiter,
+    createRedisStore,
     getAllowedOrigins,
+    getRedisClient,
     getSecurityConfig,
     isOriginAllowed,
     parseTrustProxy

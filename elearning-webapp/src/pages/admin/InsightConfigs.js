@@ -153,7 +153,7 @@ export const getRiskInsightConfig = (rows, selectedDepartmentName, renderUserLin
   columns: [
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
     { key: 'department', label: 'แผนก' },
-    { key: 'courseTitle', label: 'เป้าหมาย (Goal)', render: renderGoalLink },
+    { key: 'goalTitle', label: 'เป้าหมาย (Goal)', render: renderGoalLink },
     { key: 'gapCount', label: 'ขาดอีก (รายการ)', render: (row) => row.gapCount > 0 ? `${row.gapCount} คอร์ส` : '-' },
     { key: 'deadline', label: 'วันหมดอายุเป้าหมาย', render: (row) => formatThaiDateTime(row.deadline, true) },
     { key: 'isOverdue', label: 'สถานะ', render: (row) => row.isOverdue ? 'เลยกำหนด' : 'ใกล้หมดเวลา' },
