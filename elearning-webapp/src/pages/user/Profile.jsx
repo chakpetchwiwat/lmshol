@@ -18,21 +18,21 @@ const Profile = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [user, setUser] = useState(null);
-  const [points, setPoints] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [savingPassword, setSavingPassword] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [showPolicyModal, setShowPolicyModal] = useState(false);
-  const [courses, setCourses] = useState([]);
-  const [certificates, setCertificates] = useState([]);
-  const [lmsCertificates, setLmsCertificates] = useState([]);
-  const [savingCertificate, setSavingCertificate] = useState(false);
-  const [uploadingCertificate, setUploadingCertificate] = useState(false);
+  const [user, setUser] = React.useState(null);
+  const [points, setPoints] = React.useState(0);
+  const [loading, setLoading] = React.useState(true);
+  const [showEditModal, setShowEditModal] = React.useState(false);
+  const [currentPassword, setCurrentPassword] = React.useState('');
+  const [newPassword, setNewPassword] = React.useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = React.useState('');
+  const [savingPassword, setSavingPassword] = React.useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
+  const [showPolicyModal, setShowPolicyModal] = React.useState(false);
+  const [courses, setCourses] = React.useState([]);
+  const [certificates, setCertificates] = React.useState([]);
+  const [lmsCertificates, setLmsCertificates] = React.useState([]);
+  const [savingCertificate, setSavingCertificate] = React.useState(false);
+  const [uploadingCertificate, setUploadingCertificate] = React.useState(false);
 
   const passwordDialogTitleId = useId();
   const policyDialogTitleId = useId();
@@ -40,7 +40,7 @@ const Profile = () => {
   const newPasswordId = useId();
   const confirmNewPasswordId = useId();
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchProfile = async () => {
       try {
         const [userRes, pointsRes, coursesRes, certificatesRes, lmsCertificatesRes] = await Promise.all([
