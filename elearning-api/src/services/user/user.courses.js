@@ -113,6 +113,21 @@ const getCourseDetails = async (courseId, userId) => {
             },
             enrollments: {
                 where: { userId }
+            },
+            staff: {
+                orderBy: [
+                    { role: 'asc' },
+                    { isPrimary: 'desc' },
+                    { createdAt: 'asc' }
+                ],
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    }
+                }
             }
         }
     });

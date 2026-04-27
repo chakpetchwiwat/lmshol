@@ -65,6 +65,7 @@ const MODULE_GROUP_LABELS = {
 
 const CourseManagement = () => {
   const toast = useToast();
+  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
   const { confirm, ConfirmDialogProps } = useConfirm();
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -502,6 +503,7 @@ const CourseManagement = () => {
         onPublishCourse={handlePublishCourseFromBuilder}
         fetchQuizReports={fetchQuizReports}
         uploading={uploading}
+        currentUser={currentUser}
       />
 
       <CategoryManagementModal

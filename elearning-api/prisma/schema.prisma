@@ -35,9 +35,14 @@ model User {
   createdAnnouncements Announcement[] @relation("AnnouncementCreator")
   announcementViews   AnnouncementView[] @relation("UserAnnouncementViews")
   certificates  UserCertificate[]
+  courseStaff    CourseStaff[]
 
   @@index([status, departmentId, tierId])
   @@index([departmentId, status])
+
+  signatureImageUrl String?
+  signatureTitle    String?
+  issuedCertificates Certificate[]
 }
 
 model UserCertificate {
@@ -99,6 +104,29 @@ model Course {
   departmentAccess CourseDepartmentAccess[]
   tierAccess       CourseTierAccess[]
   learningGoals    GoalCourse[]
+  staff            CourseStaff[]
+
+  certificateSetting CourseCertificateSetting?
+  certificates       Certificate[]
+}
+
+model CourseStaff {
+  id        String   @id @default(uuid())
+  courseId  String
+  userId    String
+  role      String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, userId, role])
+  @@index([courseId])
+  @@index([userId])
+  @@index([courseId, role])
+  @@index([courseId, role, isPrimary])
 }
 
 model InstructorPreset {
@@ -446,4 +474,98 @@ model AnnouncementView {
   user         User         @relation("UserAnnouncementViews", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, announcementId])
+}
+
+// --- CERTIFICATE SYSTEM ---
+
+enum CertificateStatus {
+  PENDING
+  VALID
+  REVOKED
+  EXPIRED
+  FAILED
+}
+
+enum CertificateIssueMode {
+  AUTOMATIC
+  MANUAL
+}
+
+enum CertificateSignatureType {
+  INSTRUCTOR
+  CUSTOM
+  ORGANIZATION
+}
+
+enum CertificateOrientation {
+  PORTRAIT
+  LANDSCAPE
+}
+
+model CertificateTemplate {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  templateHtml String   @db.Text
+  templateCss  String   @db.Text
+  orientation  CertificateOrientation @default(LANDSCAPE)
+  pageSize     String   @default("A4")
+  isDefault    Boolean  @default(false)
+  createdById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  courseSettings CourseCertificateSetting[]
+  certificates   Certificate[]
+}
+
+model CourseCertificateSetting {
+  id                  String   @id @default(uuid())
+  courseId            String   @unique
+  templateId          String
+  enabled             Boolean  @default(false)
+  issueMode           CertificateIssueMode @default(AUTOMATIC)
+  signatureType       CertificateSignatureType @default(INSTRUCTOR)
+  
+  // Custom Signer Fields
+  signerNameOverride  String?
+  signerTitleOverride String?
+  signatureImageUrl   String?
+  
+  passingScore        Int?     
+  expiryMonths        Int?     
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  course   Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  template CertificateTemplate @relation(fields: [templateId], references: [id])
+}
+
+model Certificate {
+  id                String    @id @default(uuid())
+  certificateNo     String    @unique
+  verificationToken String    @unique
+  userId            String
+  courseId          String
+  templateId        String
+  status            CertificateStatus @default(PENDING)
+  pdfUrl            String?
+  
+  issuedById        String?
+  issuedAt          DateTime  @default(now())
+  expiresAt         DateTime?
+  
+  revokedById       String?
+  revokedAt         DateTime?
+  revokeReason      String?
+  
+  metadata          Json?     
+
+  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  template CertificateTemplate @relation(fields: [templateId], references: [id])
+
+  @@index([userId, courseId]) 
+  @@index([verificationToken])
+  @@index([certificateNo])
 }

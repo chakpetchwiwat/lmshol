@@ -30,6 +30,7 @@ const Profile = () => {
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [courses, setCourses] = useState([]);
   const [certificates, setCertificates] = useState([]);
+  const [lmsCertificates, setLmsCertificates] = useState([]);
   const [savingCertificate, setSavingCertificate] = useState(false);
   const [uploadingCertificate, setUploadingCertificate] = useState(false);
 
@@ -47,11 +48,13 @@ const Profile = () => {
           userAPI.getPoints(),
           userAPI.getCourses(),
           userAPI.getCertificates(),
+          userAPI.getLmsCertificates(),
         ]);
         setUser(userRes?.data || userRes);
         setPoints(pointsRes?.data?.balance ?? pointsRes?.balance ?? 0);
         setCourses(Array.isArray(coursesRes?.data) ? coursesRes.data : Array.isArray(coursesRes) ? coursesRes : []);
         setCertificates(Array.isArray(certificatesRes?.data) ? certificatesRes.data : Array.isArray(certificatesRes) ? certificatesRes : []);
+        setLmsCertificates(Array.isArray(lmsCertificatesRes?.data) ? lmsCertificatesRes.data : Array.isArray(lmsCertificatesRes) ? lmsCertificatesRes : []);
       } catch (error) {
         console.error('Fetch profile error:', error);
       } finally {
@@ -191,6 +194,7 @@ const Profile = () => {
 
       <ProfileCertificates
         certificates={certificates}
+        lmsCertificates={lmsCertificates}
         saving={savingCertificate}
         uploading={uploadingCertificate}
         onCreate={handleCreateCertificate}

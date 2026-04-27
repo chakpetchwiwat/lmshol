@@ -16,6 +16,9 @@ import {
 import CourseQuizReports from './CourseQuizReports';
 import CourseBasicInfoForm from './CourseBasicInfoForm';
 import CourseContentEditor from './CourseContentEditor';
+import CourseStaffEditor from './CourseStaffEditor';
+import CourseCertificatesTab from './CourseCertificatesTab';
+import { getCourseAccess } from '../../utils/coursePermissions';
 
 const CourseModal = ({
   isOpen,
@@ -42,8 +45,11 @@ const CourseModal = ({
   onSaveDraft,
   onPublishCourse,
   fetchQuizReports,
-  uploading
+  uploading,
+  currentUser,
+  onStaffChanged
 }) => {
+  const [canEdit, setCanEdit] = React.useState(true);
   const imageInputRef = useRef(null);
 
   const sensors = useSensors(
@@ -77,7 +83,14 @@ const CourseModal = ({
         <div className="card m-auto flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden bg-white shadow-xl" style={{ isolation: 'isolate' }}>
           {/* Header & Tabs */}
           <div className="flex items-center justify-between border-b border-border bg-gray-50 p-4 rounded-t-[inherit]">
-            <h3 className="text-xl font-bold">{isEditing ? 'แก้ไขคอร์สเรียน' : 'สร้างคอร์สใหม่'}</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-xl font-bold">{isEditing ? 'แก้ไขคอร์สเรียน' : 'สร้างคอร์สใหม่'}</h3>
+              {!canEdit && (
+                <span className="flex items-center gap-1 bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-full border border-slate-200">
+                  <X size={12} /> Read Only
+                </span>
+              )}
+            </div>
             <button onClick={onClose} className="text-muted hover:text-gray-900"><X size={20} /></button>
           </div>
 
@@ -100,6 +113,18 @@ const CourseModal = ({
                 className={`py-3 px-6 text-sm font-bold transition-colors border-b-2 ${activeTab === 'reports' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-gray-700'}`}
               >
                 รายงานผลสอบ
+              </button>
+              <button
+                onClick={() => setActiveTab('staff')}
+                className={`py-3 px-6 text-sm font-bold transition-colors border-b-2 ${activeTab === 'staff' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-gray-700'}`}
+              >
+                ทีมงาน
+              </button>
+              <button
+                onClick={() => setActiveTab('certificates')}
+                className={`py-3 px-6 text-sm font-bold transition-colors border-b-2 ${activeTab === 'certificates' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-gray-700'}`}
+              >
+                หนังสือรับรอง
               </button>
             </div>
           )}
@@ -125,8 +150,9 @@ const CourseModal = ({
                 uploading={uploading}
                 imageInputRef={imageInputRef}
                 onClose={onClose}
+                readOnly={!canEdit}
               />
-            ) : (
+            ) : activeTab === 'content' ? (
               <CourseContentEditor 
                 lessons={lessons}
                 onAddLesson={onAddLesson}
@@ -136,6 +162,27 @@ const CourseModal = ({
                 onPublishCourse={onPublishCourse}
                 sensors={sensors}
                 handleDragEnd={handleDragEnd}
+                readOnly={!canEdit}
+              />
+            ) : activeTab === 'certificates' ? (
+              <CourseCertificatesTab 
+                courseId={editingId} 
+                readOnly={!canEdit} 
+              />
+            ) : (
+              <CourseStaffEditor 
+                courseId={editingId}
+                currentUser={currentUser}
+                onStaffChanged={(staffList) => {
+                  if (onStaffChanged) onStaffChanged(staffList);
+                  
+                  // Recalculate local permission using shared utility
+                  const access = getCourseAccess({ 
+                    currentUser, 
+                    staff: staffList
+                  });
+                  setCanEdit(access === 'full');
+                }}
               />
             )}
           </div>

@@ -113,6 +113,9 @@ export const userAPI = {
   getAnnouncementDocumentAccess: (announcementId) => api.get(`/user/announcements/${announcementId}/document-access`),
   updateProfile: (data) => api.put('/user/profile', data),
   getCertificates: () => api.get('/user/certificates'),
+  getLmsCertificates: () => api.get('/certificates/me'),
+  getCertificateDownloadUrl: (id) => api.get(`/certificates/${id}/download-url`),
+  verifyLmsCertificate: (token) => api.get(`/certificates/verify/${token}`),
   createCertificate: (data) => api.post('/user/certificates', data),
   updateCertificate: (id, data) => api.put(`/user/certificates/${id}`, data),
   deleteCertificate: (id) => api.delete(`/user/certificates/${id}`),
@@ -207,6 +210,12 @@ export const adminAPI = {
   updateRedeemStatus: (id, status, adminNote = '') => api.put(`/admin/redeems/${id}/status`, { status, adminNote }),
 
   getCourseQuizReports: (courseId) => api.get(`/admin/courses/${courseId}/quiz-reports`),
+  getCourseCertificates: (courseId) => api.get(`/admin/courses/${courseId}/certificates`),
+  getCertificateDownloadUrl: (id) => api.get(`/certificates/${id}/download-url`),
+  issueManual: (courseId, userId) => api.post(`/courses/${courseId}/certificates/issue/${userId}`),
+  retryCertificate: (id) => api.post(`/certificates/${id}/retry`),
+  reissueCertificate: (id) => api.post(`/certificates/${id}/reissue`),
+  revokeCertificate: (id) => api.post(`/certificates/${id}/revoke`),
 
   // File Upload
   uploadFile: (file) => {
@@ -231,6 +240,13 @@ export const adminAPI = {
   getGoalReport: (id, config = {}) => api.get(`/goals/${id}/report`, config),
   getGoalTrackingSummary: (config = {}) => api.get('/goals/tracking-summary', config),
 
+};
+
+export const courseStaffAPI = {
+  getStaff: (courseId) => api.get(`/courses/${courseId}/staff`),
+  assignStaff: (courseId, data) => api.post(`/courses/${courseId}/staff`, data),
+  updateStaff: (courseId, staffId, data) => api.patch(`/courses/${courseId}/staff/${staffId}`, data),
+  deleteStaff: (courseId, staffId) => api.delete(`/courses/${courseId}/staff/${staffId}`)
 };
 
 export default api;

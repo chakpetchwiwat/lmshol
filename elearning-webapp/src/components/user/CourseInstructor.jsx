@@ -2,6 +2,11 @@ import React from 'react';
 import { getFullUrl } from '../../utils/api';
 
 const CourseInstructor = ({ course }) => {
+  const primaryInstructor = Array.isArray(course.staff)
+    ? course.staff.find((staff) => staff.role === 'instructor' && staff.isPrimary)
+    : null;
+  const instructorName = primaryInstructor?.name || course.instructorName;
+
   return (
     <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
       <h2 className="mb-5 text-xl font-black tracking-tight text-slate-900 md:text-2xl">ผู้สอน</h2>
@@ -11,7 +16,7 @@ const CourseInstructor = ({ course }) => {
             <img src={getFullUrl(course.instructorAvatar)} alt="ผู้สอน" className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-slate-200 text-2xl font-bold uppercase text-slate-400">
-              {course.instructorName?.charAt(0) || 'I'}
+              {instructorName?.charAt(0) || 'I'}
             </div>
           )}
         </div>

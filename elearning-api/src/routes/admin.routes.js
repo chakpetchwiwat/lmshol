@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.controller');
 const systemController = require('../controllers/system.controller');
+const certificateController = require('../controllers/certificate.controller');
 const { verifyToken, verifySuperAdmin, verifyAdminPanelAccess } = require('../middleware/auth');
 const { adminAnalyticsRateLimiter } = require('../middleware/rateLimiters');
 
@@ -74,5 +75,8 @@ router.delete('/lessons/:id', verifySuperAdmin, adminController.deleteLesson);
 
 // Quiz Reports
 router.get('/courses/:courseId/quiz-reports', verifySuperAdmin, adminController.getCourseQuizAttempts);
+
+// Certificates
+router.get('/courses/:courseId/certificates', certificateController.getCourseCertificates);
 
 module.exports = router;

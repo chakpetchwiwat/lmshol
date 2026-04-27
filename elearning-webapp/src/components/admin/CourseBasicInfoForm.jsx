@@ -21,10 +21,12 @@ const CourseBasicInfoForm = ({
   onImageUpload,
   uploading,
   imageInputRef,
-  onClose
+  onClose,
+  readOnly
 }) => {
   return (
     <form onSubmit={onSaveCourse} className="flex flex-col gap-4">
+      <fieldset disabled={readOnly} className="contents">
       <div className="space-y-1.5">
         <label className="ml-1 block text-sm font-black uppercase tracking-wider text-slate-700">ชื่อคอร์ส</label>
         <div className="relative group">
@@ -421,11 +423,13 @@ const CourseBasicInfoForm = ({
         </div>
       </div>
 
+      </fieldset>
       <CourseBuilderFooter
         courseStatus={courseForm.status}
         isPersisted={isPersisted}
         lessonCount={lessonCount}
         onClose={onClose}
+        readOnly={readOnly}
       />
     </form>
   );

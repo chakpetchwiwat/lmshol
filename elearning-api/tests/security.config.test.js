@@ -8,6 +8,7 @@ const {
     isOriginAllowed,
     parseTrustProxy
 } = require('../src/config/security');
+const { SECURITY_DEFAULTS } = require('../src/utils/constants/config');
 
 test('getAllowedOrigins appends localhost origins outside production and removes duplicates', () => {
     const allowedOrigins = getAllowedOrigins(
@@ -78,6 +79,6 @@ test('getSecurityConfig falls back to safe body limits and rate-limit defaults',
     assert.equal(config.bodyLimits.urlencoded, '1mb');
     assert.equal(config.defaultRateLimit.enabled, true);
     assert.equal(config.defaultRateLimit.windowMs, 900000);
-    assert.equal(config.defaultRateLimit.max, 300);
+    assert.equal(config.defaultRateLimit.max, SECURITY_DEFAULTS.DEFAULT_RATE_LIMIT_MAX);
     assert.deepEqual(config.allowedOrigins, ['https://app.example.com']);
 });

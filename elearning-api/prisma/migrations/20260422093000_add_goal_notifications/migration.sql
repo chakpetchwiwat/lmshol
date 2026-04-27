@@ -1,8 +1,3 @@
-ALTER TABLE "LearningGoal"
-ADD COLUMN "postAssignmentReminderDays" INTEGER,
-ADD COLUMN "preDeadlineReminderDays" INTEGER,
-ADD COLUMN "postAssignmentReminderTime" TEXT,
-ADD COLUMN "preDeadlineReminderTime" TEXT;
 
 CREATE TABLE "UserNotification" (
     "id" TEXT NOT NULL,

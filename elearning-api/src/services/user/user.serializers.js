@@ -46,6 +46,22 @@ const serializeCourseLesson = (lesson) => ({
     quizAttempts: undefined
 });
 
+const serializeCourseStaff = (staff) => ({
+    id: staff.id,
+    userId: staff.userId,
+    name: staff.user?.name || null,
+    role: staff.role,
+    isPrimary: staff.isPrimary
+});
+
+const getPrimaryInstructorName = (course) => {
+    const primaryInstructor = Array.isArray(course.staff)
+        ? course.staff.find((staff) => staff.role === 'instructor' && staff.isPrimary)
+        : null;
+
+    return primaryInstructor?.user?.name || course.instructorName;
+};
+
 const serializeCourseDetail = (course) => {
     const enrollment = course.enrollments[0];
     const rewardSummary = getCourseRewardSummary(course);
@@ -56,11 +72,13 @@ const serializeCourseDetail = (course) => {
         departmentAccess: undefined,
         tierAccess: undefined,
         category: serializeCourseCategory(course.category),
+        instructorName: getPrimaryInstructorName(course),
         isEnrolled: !!enrollment,
         enrollmentStatus: enrollment ? enrollment.status : null,
         progressPercent: enrollment ? enrollment.progressPercent : 0,
         completedAt: enrollment ? enrollment.completedAt : null,
         ...rewardSummary,
+        staff: Array.isArray(course.staff) ? course.staff.map(serializeCourseStaff) : [],
         lessonsCount: Array.isArray(course.lessons) ? course.lessons.length : 0,
         lessons: course.lessons.map(serializeCourseLesson)
     };

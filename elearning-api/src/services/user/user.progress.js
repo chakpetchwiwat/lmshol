@@ -9,6 +9,7 @@ const {
     canAccessCourse,
     getVisibleCourseQuery
 } = require('./user.visibility');
+const certificateService = require('../admin/certificate.service');
 
 const enrollCourse = async (userId, courseId) => {
     const userContext = await getVisibleCourseQuery(userId);
@@ -152,6 +153,11 @@ const updateLessonProgress = async (userId, lessonId, progress) => {
             where: { id: enrollment.id },
             data: updateData
         });
+
+        // Auto-issue certificate if 100%
+        if (newProgressPercent === 100) {
+            handleAutoCertificateIssuance(userId, lesson.courseId);
+        }
     }
 
     return lessonProgress;
@@ -318,6 +324,11 @@ const submitQuiz = async (userId, lessonId, answers) => {
                 where: { id: enrollment.id },
                 data: updateData
             });
+
+            // Auto-issue certificate if 100%
+            if (newProgressPercent === 100) {
+                handleAutoCertificateIssuance(userId, lesson.courseId);
+            }
         }
     }
 
@@ -334,6 +345,34 @@ const submitQuiz = async (userId, lessonId, answers) => {
         earnedPoints: earnedQuizPoints + earnedCoursePoints
     };
 };
+
+/**
+ * Background helper to issue certificate on completion
+ */
+async function handleAutoCertificateIssuance(userId, courseId) {
+    try {
+        const cert = await certificateService.issueCertificate({
+            courseId,
+            userId,
+            manual: false
+        });
+        
+        console.log(`[Auto-Certificate] Issued ${cert.certificateNo} for user ${userId}`);
+        
+        // Trigger PDF generation in background
+        certificateService.generateCertificatePdfAsync(cert.id).catch(err => {
+            console.error(`[Auto-Certificate] PDF Generation failed for ${cert.id}:`, err);
+        });
+    } catch (error) {
+        // Safe ignore for expected service blocks (manual mode, disabled, duplicate)
+        const expectedErrors = ['requires manual', 'disabled', 'already has'];
+        if (expectedErrors.some(msg => error.message.includes(msg))) {
+            return;
+        }
+        
+        console.error(`[Auto-Certificate] Failed for user ${userId} / course ${courseId}:`, error.message);
+    }
+}
 
 module.exports = {
     enrollCourse,
