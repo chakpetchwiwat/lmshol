@@ -1,4 +1,5 @@
-﻿import { useCallback, useRef, useState } from 'react';
+﻿import React from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 /**
  * useConfirm — Hook to replace window.confirm() with a premium dialog.

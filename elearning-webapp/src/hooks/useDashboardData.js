@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from 'react';
+﻿import React from 'react';
+import { useEffect, useState } from 'react';
 import { adminAPI } from '../utils/api';
 import { FILTER_VALUES } from '../utils/constants/filters';
 
