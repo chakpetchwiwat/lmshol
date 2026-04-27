@@ -43,7 +43,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const [userRes, pointsRes, coursesRes, certificatesRes] = await Promise.all([
+        const [userRes, pointsRes, coursesRes, certificatesRes, lmsCertificatesRes] = await Promise.all([
           authAPI.getCurrentUser(),
           userAPI.getPoints(),
           userAPI.getCourses(),

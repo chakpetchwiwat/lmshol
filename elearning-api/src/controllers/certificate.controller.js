@@ -220,7 +220,7 @@ exports.getCourseCertificates = async (req, res, next) => {
       orderBy: { issuedAt: 'desc' }
     });
 
-    // Calculate Summary
+    // Calculate Summary Safely
     const summary = {
       total: certificates.length,
       valid: 0,
@@ -231,8 +231,11 @@ exports.getCourseCertificates = async (req, res, next) => {
     };
 
     certificates.forEach(c => {
-      const s = c.status.toLowerCase();
-      if (summary[s] !== undefined) summary[s]++;
+      if (!c.status) return;
+      const s = String(c.status).toLowerCase();
+      if (summary[s] !== undefined) {
+        summary[s]++;
+      }
     });
 
     res.json({
@@ -241,6 +244,7 @@ exports.getCourseCertificates = async (req, res, next) => {
       data: certificates
     });
   } catch (error) {
+    console.error(`[Certificate] getCourseCertificates Error | courseId=${req.params.courseId}:`, error);
     next(error);
   }
 };
