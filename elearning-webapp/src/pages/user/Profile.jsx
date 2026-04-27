@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useState } from 'react';
+import React from 'react';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
@@ -34,11 +34,11 @@ const Profile = () => {
   const [savingCertificate, setSavingCertificate] = React.useState(false);
   const [uploadingCertificate, setUploadingCertificate] = React.useState(false);
 
-  const passwordDialogTitleId = useId();
-  const policyDialogTitleId = useId();
-  const currentPasswordId = useId();
-  const newPasswordId = useId();
-  const confirmNewPasswordId = useId();
+  const passwordDialogTitleId = React.useId();
+  const policyDialogTitleId = React.useId();
+  const currentPasswordId = React.useId();
+  const newPasswordId = React.useId();
+  const confirmNewPasswordId = React.useId();
 
   React.useEffect(() => {
     const fetchProfile = async () => {

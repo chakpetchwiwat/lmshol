@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import ModalPortal from '../../components/common/ModalPortal';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
@@ -11,7 +11,7 @@ const PasswordInput = ({
   placeholder,
   inputRef
 }) => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = React.useState(false);
 
   return (
     <div className="mb-4 w-full">
@@ -59,8 +59,8 @@ const UpdatePasswordModal = ({
   newPasswordId,
   confirmNewPasswordId
 }) => {
-  const editDialogRef = useRef(null);
-  const editInputRef = useRef(null);
+  const editDialogRef = React.useRef(null);
+  const editInputRef = React.useRef(null);
 
   useAccessibleOverlay({
     isOpen,

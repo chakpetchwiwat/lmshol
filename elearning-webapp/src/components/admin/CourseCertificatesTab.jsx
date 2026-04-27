@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React from 'react';
 import { Award, CheckCircle2, AlertCircle, RotateCcw, Ban, FileText, Loader2, Search, ExternalLink, RefreshCw, Plus } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
@@ -11,12 +11,14 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
   const [certificates, setCertificates] = React.useState([]);
   const [summary, setSummary] = React.useState({ total: 0, valid: 0, pending: 0, failed: 0, revoked: 0, expired: 0 });
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [hasCertificate, setHasCertificate] = React.useState(true);
 
   const fetchCertificates = async () => {
     try {
       setLoading(true);
       const response = await adminAPI.getCourseCertificates(courseId);
       setCertificates(response.data || []);
+      setHasCertificate(response.hasCertificate ?? true);
       if (response.summary) setSummary(response.summary);
     } catch (error) {
       console.error('Failed to fetch certificates:', error);
@@ -158,6 +160,25 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
 
   return (
     <div className="animate-fade-in space-y-6">
+      {!hasCertificate && (
+        <div className="bg-rose-50 border border-rose-100 rounded-2xl p-6 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="bg-rose-100 p-3 rounded-full text-rose-600">
+              <AlertCircle size={24} />
+            </div>
+            <div>
+              <h4 className="font-black text-rose-800 text-lg">ระบบเกียรติบัตรถูกปิดใช้งาน</h4>
+              <p className="text-rose-600 font-bold text-sm">คอร์สนี้ไม่ได้ตั้งค่าให้มีการออกเกียรติบัตร กรุณาไปที่ "ข้อมูลพื้นฐาน" เพื่อเปิดใช้งาน</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => window.location.hash = '#basic'} 
+            className="btn btn-primary px-6"
+          >
+            ตั้งค่าคอร์ส
+          </button>
+        </div>
+      )}
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[

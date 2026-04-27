@@ -3,7 +3,7 @@ import { Building2, Calendar, ExternalLink, FileText, Pencil, Trash2 } from 'luc
 import { formatCertificateDateRange } from './certificateForm.utils';
 
 const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = React.useState(false);
   const title = isLms ? (certificate.metadata?.snapshot?.course?.title || 'Course Certificate') : certificate.title;
   const issuer = isLms ? (certificate.metadata?.snapshot?.signer?.name || 'LMS System') : certificate.issuer;
   const displayId = isLms ? certificate.certificateNo : certificate.credentialId;

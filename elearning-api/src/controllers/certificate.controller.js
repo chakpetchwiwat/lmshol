@@ -24,6 +24,18 @@ exports.issueManual = async (req, res, next) => {
 
     await requireFullAccess(req.user, courseId);
 
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      select: { hasCertificate: true }
+    });
+
+    if (!course?.hasCertificate) {
+      return res.status(400).json({
+        success: false,
+        message: 'ระบบเกียรติบัตรถูกปิดใช้งานสำหรับคอร์สนี้ กรุณาเปิดใช้งานในส่วนข้อมูลพื้นฐานก่อน'
+      });
+    }
+
     const certificate = await certificateService.issueCertificate({
       courseId,
       userId,
@@ -205,19 +217,25 @@ exports.getCourseCertificates = async (req, res, next) => {
 
     await requireFullAccess(req.user, courseId);
 
-    const certificates = await prisma.certificate.findMany({
-      where: { courseId },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true
+    const [course, certificates] = await Promise.all([
+      prisma.course.findUnique({
+        where: { id: courseId },
+        select: { hasCertificate: true }
+      }),
+      prisma.certificate.findMany({
+        where: { courseId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
           }
-        }
-      },
-      orderBy: { issuedAt: 'desc' }
-    });
+        },
+        orderBy: { issuedAt: 'desc' }
+      })
+    ]);
 
     // Calculate Summary Safely
     const summary = {
@@ -240,7 +258,8 @@ exports.getCourseCertificates = async (req, res, next) => {
     res.json({
       success: true,
       summary,
-      data: certificates
+      data: certificates,
+      hasCertificate: course?.hasCertificate || false
     });
   } catch (error) {
     console.error(`[Certificate] getCourseCertificates Error | courseId=${req.params.courseId}:`, error);

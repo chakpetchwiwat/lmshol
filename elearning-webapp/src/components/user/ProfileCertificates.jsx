@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { Award, BadgeCheck, Plus } from 'lucide-react';
 import ProfileCertificateCard from './certificates/ProfileCertificateCard';
 import ProfileCertificateModal from './certificates/ProfileCertificateModal';
@@ -18,12 +18,12 @@ const ProfileCertificates = ({
   onDelete,
   onUpload
 }) => {
-  const [activeTab, setActiveTab] = useState('LMS'); // 'LMS' or 'EXTERNAL'
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCertificate, setEditingCertificate] = useState(null);
-  const [form, setForm] = useState(emptyCertificateForm);
+  const [activeTab, setActiveTab] = React.useState('LMS'); // 'LMS' or 'EXTERNAL'
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [editingCertificate, setEditingCertificate] = React.useState(null);
+  const [form, setForm] = React.useState(emptyCertificateForm);
 
-  const sortedExternal = useMemo(
+  const sortedExternal = React.useMemo(
     () => sortCertificatesByIssueDate(certificates),
     [certificates]
   );

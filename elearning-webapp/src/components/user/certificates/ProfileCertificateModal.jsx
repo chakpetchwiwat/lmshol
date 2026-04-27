@@ -1,4 +1,4 @@
-import React, { useId, useRef } from 'react';
+import React from 'react';
 import { Link as LinkIcon, Upload, X } from 'lucide-react';
 import ModalPortal from '../../common/ModalPortal';
 import useAccessibleOverlay from '../../../hooks/useAccessibleOverlay';
@@ -14,17 +14,17 @@ const ProfileCertificateModal = ({
   onFileChange,
   onSubmit
 }) => {
-  const dialogRef = useRef(null);
-  const titleInputRef = useRef(null);
-  const titleId = useId();
-  const titleInputId = useId();
-  const issuerInputId = useId();
-  const issueDateId = useId();
-  const expirationDateId = useId();
-  const noExpirationId = useId();
-  const credentialIdInputId = useId();
-  const credentialUrlInputId = useId();
-  const fileInputId = useId();
+  const dialogRef = React.useRef(null);
+  const titleInputRef = React.useRef(null);
+  const titleId = React.useId();
+  const titleInputId = React.useId();
+  const issuerInputId = React.useId();
+  const issueDateId = React.useId();
+  const expirationDateId = React.useId();
+  const noExpirationId = React.useId();
+  const credentialIdInputId = React.useId();
+  const credentialUrlInputId = React.useId();
+  const fileInputId = React.useId();
 
   useAccessibleOverlay({
     isOpen,
