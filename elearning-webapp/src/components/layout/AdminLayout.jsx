@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+﻿import React from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -19,8 +19,8 @@ import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
-  const [isDrawerOpen, setDrawerOpen] = useState(false);
-  const [user] = useState(() => {
+  const [isDrawerOpen, setDrawerOpen] = React.useState(false);
+  const [user] = React.useState(() => {
     if (typeof window === 'undefined') {
       return null;
     }
@@ -29,10 +29,10 @@ const AdminLayout = () => {
   });
   const navigate = useNavigate();
   const location = useLocation();
-  const drawerRef = useRef(null);
-  const mainRef = useRef(null);
-  const closeButtonRef = useRef(null);
-  const drawerTitleId = useId();
+  const drawerRef = React.useRef(null);
+  const mainRef = React.useRef(null);
+  const closeButtonRef = React.useRef(null);
+  const drawerTitleId = React.useId();
 
   const toggleDrawer = () => setDrawerOpen((current) => !current);
   const closeDrawer = () => setDrawerOpen(false);
@@ -44,7 +44,7 @@ const AdminLayout = () => {
     initialFocusRef: closeButtonRef,
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }

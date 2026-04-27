@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React from 'react';
 import { Building2, FileDown, SlidersHorizontal } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -64,32 +64,32 @@ const buildPrintRowsFromInsight = (insight) => (
 );
 
 const Dashboard = () => {
-  const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
+  const currentUser = React.useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const currentUserDepartment = currentUser?.department || '';
   const isFullAdmin = canEditAdminUsers(currentUser);
   const isManagerView = !isFullAdmin || currentUser?.role === USER_ROLES.MANAGER;
-  const thaiNow = useMemo(() => getThailandDateParts(new Date()), []);
+  const thaiNow = React.useMemo(() => getThailandDateParts(new Date()), []);
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = React.useState({
     month: String(thaiNow?.month || 1),
     year: String(thaiNow?.year || new Date().getFullYear()),
     departmentId: '',
   });
-  const [stats, setStats] = useState(null);
-  const [advancedStats, setAdvancedStats] = useState(null);
-  const [departments, setDepartments] = useState([]);
-  const [insight, setInsight] = useState(null);
-  const [showUserDetailModal, setShowUserDetailModal] = useState(false);
-  const [userDetailLoading, setUserDetailLoading] = useState(false);
-  const [selectedUserDetail, setSelectedUserDetail] = useState(null);
-  const [reportGoal, setReportGoal] = useState(null);
-  const [reportData, setReportData] = useState(null);
-  const [reportLoading, setReportLoading] = useState(false);
-  const [reportInitialFilterStatus, setReportInitialFilterStatus] = useState('ALL');
+  const [stats, setStats] = React.useState(null);
+  const [advancedStats, setAdvancedStats] = React.useState(null);
+  const [departments, setDepartments] = React.useState([]);
+  const [insight, setInsight] = React.useState(null);
+  const [showUserDetailModal, setShowUserDetailModal] = React.useState(false);
+  const [userDetailLoading, setUserDetailLoading] = React.useState(false);
+  const [selectedUserDetail, setSelectedUserDetail] = React.useState(null);
+  const [reportGoal, setReportGoal] = React.useState(null);
+  const [reportData, setReportData] = React.useState(null);
+  const [reportLoading, setReportLoading] = React.useState(false);
+  const [reportInitialFilterStatus, setReportInitialFilterStatus] = React.useState('ALL');
 
-  const yearOptions = useMemo(() => buildYearOptions(thaiNow?.year || new Date().getFullYear()), [thaiNow]);
+  const yearOptions = React.useMemo(() => buildYearOptions(thaiNow?.year || new Date().getFullYear()), [thaiNow]);
 
-  const selectedDepartmentName = useMemo(() => {
+  const selectedDepartmentName = React.useMemo(() => {
     if (!isFullAdmin) {
       return stats?.department || currentUser?.department || 'แผนกของคุณ';
     }
@@ -99,7 +99,7 @@ const Dashboard = () => {
     return departments.find((department) => department.id === filters.departmentId)?.name || stats?.department || 'แผนกที่เลือก';
   }, [currentUser, departments, filters.departmentId, isFullAdmin, stats?.department]);
 
-  const periodLabel = useMemo(() => {
+  const periodLabel = React.useMemo(() => {
     const monthLabel = getMonthLabel(filters.month);
     if (!filters.month) {
       return `ปี ${filters.year}`;
@@ -123,7 +123,7 @@ const Dashboard = () => {
     setDepartments,
   });
 
-  const performanceRows = useMemo(() => {
+  const performanceRows = React.useMemo(() => {
     const rows = [...(stats?.learnerPerformance || [])];
 
     return rows.sort((left, right) => {

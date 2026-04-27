@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+﻿import React from 'react';
 import { BookOpen, CheckCircle2, Printer, Search, X, XCircle } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import { openPrintReport } from '../../utils/printUtils';
@@ -12,13 +12,13 @@ const GoalReportModal = ({
 }) => {
   const [filterStatus, setFilterStatus] = React.useState(initialFilterStatus);
   const goalSource = reportData?.goal || reportGoal;
-  const targetCourses = useMemo(() => (
+  const targetCourses = React.useMemo(() => (
     (goalSource?.courses || [])
       .map((item) => item?.course?.title || item?.title || null)
       .filter(Boolean)
   ), [goalSource]);
 
-  const numberedTargetCourses = useMemo(() => (
+  const numberedTargetCourses = React.useMemo(() => (
     targetCourses.map((courseTitle, index) => `${index + 1}. ${courseTitle}`).join('\n')
   ), [targetCourses]);
 
@@ -28,7 +28,7 @@ const GoalReportModal = ({
     }
   }, [initialFilterStatus, reportGoal]);
 
-  const statusCounts = useMemo(() => {
+  const statusCounts = React.useMemo(() => {
     const counts = {
       COMPLETED: 0,
       IN_PROGRESS: 0,
@@ -41,7 +41,7 @@ const GoalReportModal = ({
     return counts;
   }, [reportData]);
 
-  const filteredRows = useMemo(() => (
+  const filteredRows = React.useMemo(() => (
     (reportData?.report || []).filter((record) => filterStatus === 'ALL' || record.userStatus === filterStatus)
   ), [filterStatus, reportData]);
 

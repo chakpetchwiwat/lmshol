@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+﻿import React from 'react';
 import { ArrowLeft, FileText, BookOpen } from 'lucide-react';
 
 const VideoPlayer = lazy(() => import('../common/VideoPlayer'));

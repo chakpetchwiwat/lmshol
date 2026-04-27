@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+﻿import React from 'react';
 import { X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import {
@@ -50,7 +50,7 @@ const CourseModal = ({
   onStaffChanged
 }) => {
   const [canEdit, setCanEdit] = React.useState(true);
-  const imageInputRef = useRef(null);
+  const imageInputRef = React.useRef(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

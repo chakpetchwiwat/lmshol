@@ -1,23 +1,23 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React from 'react';
 import { adminAPI } from '../../utils/api';
 import Skeleton from '../../components/common/Skeleton';
 import { Save, Settings, Target, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { isSuperAdmin } from '../../utils/roles';
 
 const SystemSettings = () => {
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = React.useState({
     weekly_goal: '1',
     weekly_goal_scope: 'global',
     weekly_goal_departmentId: null,
   });
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [saving, setSaving] = React.useState(false);
+  const [message, setMessage] = React.useState(null);
 
-  const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
+  const currentUser = React.useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const isFullAdmin = isSuperAdmin(currentUser);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchSettings = async () => {
       try {
         const res = await adminAPI.getSettings();

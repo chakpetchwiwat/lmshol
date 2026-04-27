@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+﻿import React from 'react';
 import { Check, Clock, FileDown, X } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -39,15 +39,15 @@ const buildYearOptions = (requests) => {
 };
 
 const RedeemRequests = () => {
-  const [requests, setRequests] = useState([]);
-  const [statusFilter, setStatusFilter] = useState(REDEEM_STATUS.PENDING);
-  const [monthFilter, setMonthFilter] = useState(FILTER_VALUES.ALL);
-  const [yearFilter, setYearFilter] = useState(FILTER_VALUES.ALL);
-  const [loading, setLoading] = useState(true);
+  const [requests, setRequests] = React.useState([]);
+  const [statusFilter, setStatusFilter] = React.useState(REDEEM_STATUS.PENDING);
+  const [monthFilter, setMonthFilter] = React.useState(FILTER_VALUES.ALL);
+  const [yearFilter, setYearFilter] = React.useState(FILTER_VALUES.ALL);
+  const [loading, setLoading] = React.useState(true);
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
 
-  const fetchRequests = useCallback(async () => {
+  const fetchRequests = React.useCallback(async () => {
     setLoading(true);
     try {
       const response = await adminAPI.getRedeems();
@@ -60,7 +60,7 @@ const RedeemRequests = () => {
     }
   }, [toast]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchRequests();
   }, [fetchRequests]);
 
@@ -84,8 +84,8 @@ const RedeemRequests = () => {
     }
   };
 
-  const yearValues = useMemo(() => buildYearOptions(requests), [requests]);
-  const yearOptions = useMemo(
+  const yearValues = React.useMemo(() => buildYearOptions(requests), [requests]);
+  const yearOptions = React.useMemo(
     () => yearValues.map((year) => ({
       value: year,
       label: year === FILTER_VALUES.ALL ? 'ทุกปี' : year,
@@ -93,7 +93,7 @@ const RedeemRequests = () => {
     [yearValues]
   );
 
-  const filteredRequests = useMemo(
+  const filteredRequests = React.useMemo(
     () => requests.filter((request) => {
       const matchesStatus = statusFilter === FILTER_VALUES.ALL || request.status === statusFilter;
       if (!matchesStatus) return false;
@@ -111,12 +111,12 @@ const RedeemRequests = () => {
     [monthFilter, requests, statusFilter, yearFilter]
   );
 
-  const pendingCount = useMemo(
+  const pendingCount = React.useMemo(
     () => requests.filter((request) => request.status === REDEEM_STATUS.PENDING).length,
     [requests]
   );
 
-  const summary = useMemo(
+  const summary = React.useMemo(
     () => ({
       total: filteredRequests.length,
       approved: filteredRequests.filter((request) => request.status === REDEEM_STATUS.APPROVED).length,

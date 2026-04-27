@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+﻿import React from 'react';
 import th from '../locales/th.json';
 import en from '../locales/en.json';
 import LanguageContext from './languageContextValue';
@@ -6,13 +6,13 @@ import LanguageContext from './languageContextValue';
 const locales = { th, en };
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState(() => localStorage.getItem('language') || 'th');
+  const [language, setLanguage] = React.useState(() => localStorage.getItem('language') || 'th');
 
-  useEffect(() => {
+  React.useEffect(() => {
     localStorage.setItem('language', language);
   }, [language]);
 
-  const t = useCallback((keyPath) => {
+  const t = React.useCallback((keyPath) => {
     const keys = keyPath.split('.');
     let value = locales[language];
     
@@ -27,7 +27,7 @@ export const LanguageProvider = ({ children }) => {
     return value;
   }, [language]);
 
-  const contextValue = useMemo(() => ({
+  const contextValue = React.useMemo(() => ({
     language,
     setLanguage,
     t,

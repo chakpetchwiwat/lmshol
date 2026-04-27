@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+﻿import React from 'react';
 import { ExternalLink, Printer } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import {
@@ -241,9 +241,9 @@ const DashboardPrintContent = ({ report }) => {
 
 const PrintReportPage = () => {
   const { reportId } = useParams();
-  const report = useMemo(() => getStoredPrintReport(reportId), [reportId]);
+  const report = React.useMemo(() => getStoredPrintReport(reportId), [reportId]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!report) {
       document.title = 'Print Report';
       return undefined;

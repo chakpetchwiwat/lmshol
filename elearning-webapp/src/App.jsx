@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+﻿import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { canAccessAdminPanel } from './utils/roles';
 

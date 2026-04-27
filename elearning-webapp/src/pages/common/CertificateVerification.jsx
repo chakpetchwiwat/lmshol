@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { BadgeCheck, ShieldAlert, ShieldCheck, FileText, Calendar, Building2, User, ExternalLink, Globe } from 'lucide-react';
 import { userAPI } from '../../utils/api';
@@ -7,11 +7,11 @@ import Skeleton from '../../components/common/Skeleton';
 
 const CertificateVerification = () => {
   const { token } = useParams();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [certificate, setCertificate] = useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  const [certificate, setCertificate] = React.useState(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const verify = async () => {
       try {
         setLoading(true);

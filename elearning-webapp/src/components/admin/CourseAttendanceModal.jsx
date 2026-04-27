@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React from 'react';
 import { CalendarClock, Printer, Search, Users, X } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -70,12 +70,12 @@ const getProgressTone = (status, progressPercent) => {
 
 const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) => {
   const toast = useToast();
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showUserDetailModal, setShowUserDetailModal] = useState(false);
-  const [userDetailLoading, setUserDetailLoading] = useState(false);
-  const [selectedUserDetail, setSelectedUserDetail] = useState(null);
-  const [filters, setFilters] = useState({
+  const [history, setHistory] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [showUserDetailModal, setShowUserDetailModal] = React.useState(false);
+  const [userDetailLoading, setUserDetailLoading] = React.useState(false);
+  const [selectedUserDetail, setSelectedUserDetail] = React.useState(null);
+  const [filters, setFilters] = React.useState({
     departmentId: '',
     tierId: '',
     month: '',
@@ -109,7 +109,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
     { value: (currentYear - 2).toString(), label: String(currentYear + 541) },
   ];
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isOpen || !course) {
       return;
     }
@@ -137,13 +137,13 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
     fetchHistory();
   }, [course, filters.dateField, filters.departmentId, filters.month, filters.status, filters.tierId, filters.year, isOpen]);
 
-  const statusSummary = useMemo(() => ({
+  const statusSummary = React.useMemo(() => ({
     completed: history.filter((record) => record.status === ENROLLMENT_STATUS.COMPLETED).length,
     inProgress: history.filter((record) => record.status === ENROLLMENT_STATUS.IN_PROGRESS).length,
     notStarted: history.filter((record) => record.status === ENROLLMENT_STATUS.NOT_STARTED).length,
   }), [history]);
 
-  const summaryCards = useMemo(() => ([
+  const summaryCards = React.useMemo(() => ([
     {
       key: 'completed',
       label: 'สำเร็จแล้ว',

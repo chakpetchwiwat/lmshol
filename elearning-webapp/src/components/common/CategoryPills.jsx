@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React from 'react';
 
 const SCROLL_EPSILON = 4;
 
@@ -8,11 +8,11 @@ const CategoryPills = ({
   onSelect,
   className = '',
 }) => {
-  const scrollRef = useRef(null);
-  const [showLeftFade, setShowLeftFade] = useState(false);
-  const [showRightFade, setShowRightFade] = useState(false);
+  const scrollRef = React.useRef(null);
+  const [showLeftFade, setShowLeftFade] = React.useState(false);
+  const [showRightFade, setShowRightFade] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const container = scrollRef.current;
     if (!container) return undefined;
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React from 'react';
 import {
   CalendarDays,
   CheckCircle2,
@@ -22,9 +22,9 @@ import { openPrintReport } from '../../utils/printUtils';
 
 const UserDetailModalContent = ({ loading, detail, onClose }) => {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState('learning');
-  const [filterMonth, setFilterMonth] = useState(FILTER_VALUES.ALL);
-  const [filterYear, setFilterYear] = useState(FILTER_VALUES.ALL);
+  const [activeTab, setActiveTab] = React.useState('learning');
+  const [filterMonth, setFilterMonth] = React.useState(FILTER_VALUES.ALL);
+  const [filterYear, setFilterYear] = React.useState(FILTER_VALUES.ALL);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, index) => currentYear - index);

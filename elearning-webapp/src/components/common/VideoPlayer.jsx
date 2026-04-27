@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React from 'react';
 import { Plyr } from 'plyr-react';
 import 'plyr-react/plyr.css';
 import plyrSprite from '../../assets/plyr.svg?url';
@@ -91,18 +91,18 @@ const isDirectMediaUrl = (url) => {
 };
 
 const VideoPlayer = ({ url, onEnded }) => {
-  const [hasStarted, setHasStarted] = useState(false);
-  const [playbackError, setPlaybackError] = useState('');
+  const [hasStarted, setHasStarted] = React.useState(false);
+  const [playbackError, setPlaybackError] = React.useState('');
 
-  const safeUrl = useMemo(() => ensureAbsoluteUrl(url), [url]);
-  const youtubeId = useMemo(() => getYouTubeId(safeUrl), [safeUrl]);
-  const vimeoId = useMemo(() => getVimeoId(safeUrl), [safeUrl]);
-  const isDirectMedia = useMemo(() => isDirectMediaUrl(safeUrl), [safeUrl]);
+  const safeUrl = React.useMemo(() => ensureAbsoluteUrl(url), [url]);
+  const youtubeId = React.useMemo(() => getYouTubeId(safeUrl), [safeUrl]);
+  const vimeoId = React.useMemo(() => getVimeoId(safeUrl), [safeUrl]);
+  const isDirectMedia = React.useMemo(() => isDirectMediaUrl(safeUrl), [safeUrl]);
   
-  const thumbnailUrl = useMemo(() => (isYouTube(safeUrl) ? getYouTubeThumbnail(safeUrl) : null), [safeUrl]);
+  const thumbnailUrl = React.useMemo(() => (isYouTube(safeUrl) ? getYouTubeThumbnail(safeUrl) : null), [safeUrl]);
   const platformLabel = vimeoId ? 'Vimeo' : youtubeId ? 'YouTube' : 'วิดีโอ';
 
-  const plyrSource = useMemo(() => {
+  const plyrSource = React.useMemo(() => {
     if (youtubeId) {
       return {
         type: 'video',

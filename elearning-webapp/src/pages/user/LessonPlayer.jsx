@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Play, CheckCircle, Clock, FileText, BookOpen } from 'lucide-react';
 import { userAPI, getFullUrl } from '../../utils/api';
@@ -25,23 +25,23 @@ const LessonPlayer = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [lesson, setLesson] = useState(null);
-  const [course, setCourse] = useState(null);
-  const [completed, setCompleted] = useState(false);
-  const [updating, setUpdating] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [showDocViewer, setShowDocViewer] = useState(false);
-  const [documentAccess, setDocumentAccess] = useState(null);
-  const [openingDocument, setOpeningDocument] = useState(false);
-  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
+  const [lesson, setLesson] = React.useState(null);
+  const [course, setCourse] = React.useState(null);
+  const [completed, setCompleted] = React.useState(false);
+  const [updating, setUpdating] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+  const [showDocViewer, setShowDocViewer] = React.useState(false);
+  const [documentAccess, setDocumentAccess] = React.useState(null);
+  const [openingDocument, setOpeningDocument] = React.useState(false);
+  const [isNavigatingAway, setIsNavigatingAway] = React.useState(false);
 
-  const [answers, setAnswers] = useState({});
-  const [quizResult, setQuizResult] = useState(null);
-  const [shouldScrollToQuizResult, setShouldScrollToQuizResult] = useState(false);
-  const quizResultRef = useRef(null);
-  const lessonContentRef = useRef(null);
+  const [answers, setAnswers] = React.useState({});
+  const [quizResult, setQuizResult] = React.useState(null);
+  const [shouldScrollToQuizResult, setShouldScrollToQuizResult] = React.useState(false);
+  const quizResultRef = React.useRef(null);
+  const lessonContentRef = React.useRef(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchLessonData = async () => {
       try {
         setLoading(true);
@@ -82,7 +82,7 @@ const LessonPlayer = () => {
     fetchLessonData();
   }, [courseId, lessonId, toast]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!shouldScrollToQuizResult || !quizResult || lesson?.type !== 'quiz') return;
 
     window.requestAnimationFrame(() => {

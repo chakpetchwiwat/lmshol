@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React from 'react';
 import { 
   Users, 
   UserPlus, 
@@ -52,13 +52,13 @@ const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged }) => {
   const [isPrimary, setIsPrimary] = React.useState(false);
 
   // Permission logic
-  const userAccess = useMemo(() => 
+  const userAccess = React.useMemo(() => 
     getCourseAccess({ currentUser, staff }), 
   [currentUser, staff]);
 
   const canEdit = userAccess === 'full';
 
-  const fetchStaff = useCallback(async () => {
+  const fetchStaff = React.useCallback(async () => {
     try {
       setLoading(true);
       const response = await courseStaffAPI.getStaff(courseId);
@@ -72,7 +72,7 @@ const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged }) => {
     }
   }, [courseId, toast, onStaffChanged]);
 
-  const fetchAllUsers = useCallback(async () => {
+  const fetchAllUsers = React.useCallback(async () => {
     try {
       const response = await adminAPI.getUsers();
       setAllUsers(response.data);
@@ -88,7 +88,7 @@ const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged }) => {
     }
   }, [courseId, fetchStaff, fetchAllUsers]);
 
-  const handleMutationError = useCallback((error, defaultMessage) => {
+  const handleMutationError = React.useCallback((error, defaultMessage) => {
     console.error('Mutation error:', error);
     
     // Explicit 403 Forbidden handling
@@ -159,7 +159,7 @@ const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged }) => {
     }
   };
 
-  const filteredUsers = useMemo(() => {
+  const filteredUsers = React.useMemo(() => {
     if (!searchTerm) return [];
     const lowerSearch = searchTerm.toLowerCase();
     const existingIds = new Set(staff.map(s => s.userId));

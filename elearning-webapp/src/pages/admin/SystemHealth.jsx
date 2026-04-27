@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React from 'react';
 import { 
   Activity, 
   Server, 
@@ -60,10 +60,10 @@ const StatCard = ({ title, status, icon, metrics, error, loading }) => {
 };
 
 const SystemHealth = () => {
-  const [healthData, setHealthData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const [healthData, setHealthData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
+  const [lastUpdated, setLastUpdated] = React.useState(null);
 
   const fetchHealth = async (isManual = false) => {
     if (isManual) setRefreshing(true);
@@ -82,7 +82,7 @@ const SystemHealth = () => {
     }
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchHealth();
     const interval = setInterval(() => fetchHealth(), 30000); // Auto refresh every 30s
     return () => clearInterval(interval);

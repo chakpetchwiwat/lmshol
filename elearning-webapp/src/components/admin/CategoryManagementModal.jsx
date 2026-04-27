@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+﻿import React from 'react';
 import {
   Archive,
   LayoutGrid,
@@ -24,13 +24,13 @@ const CategoryManagementModal = ({
 }) => {
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
-  const iconPickerRef = useRef(null);
-  const [showIconPicker, setShowIconPicker] = useState(false);
-  const [categoryForm, setCategoryForm] = useState(getDefaultCategoryForm());
-  const [editingCategoryId, setEditingCategoryId] = useState(null);
-  const [categoryView, setCategoryView] = useState(ENTITY_VIEW_STATUS.ACTIVE);
+  const iconPickerRef = React.useRef(null);
+  const [showIconPicker, setShowIconPicker] = React.useState(false);
+  const [categoryForm, setCategoryForm] = React.useState(getDefaultCategoryForm());
+  const [editingCategoryId, setEditingCategoryId] = React.useState(null);
+  const [categoryView, setCategoryView] = React.useState(ENTITY_VIEW_STATUS.ACTIVE);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (iconPickerRef.current && !iconPickerRef.current.contains(event.target)) {
         setShowIconPicker(false);
@@ -150,7 +150,7 @@ const CategoryManagementModal = ({
     }
   };
 
-  const filteredCategories = useMemo(() => {
+  const filteredCategories = React.useMemo(() => {
     const subset = categories.filter((category) => (
       categoryView === ENTITY_VIEW_STATUS.ARCHIVED ? Boolean(category.isArchived) : !category.isArchived
     ));

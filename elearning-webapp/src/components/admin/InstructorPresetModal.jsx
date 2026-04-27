@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+﻿import React from 'react';
 import { ImagePlus, Plus, Save, Search, Trash2, UserRound, X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import { adminAPI, getFullUrl } from '../../utils/api';
@@ -22,11 +22,11 @@ const InstructorPresetModal = ({
   onDelete,
 }) => {
   const toast = useToast();
-  const imageInputRef = useRef(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [editingPreset, setEditingPreset] = useState(null);
-  const [form, setForm] = useState(getDefaultForm());
-  const [uploading, setUploading] = useState(false);
+  const imageInputRef = React.useRef(null);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [editingPreset, setEditingPreset] = React.useState(null);
+  const [form, setForm] = React.useState(getDefaultForm());
+  const [uploading, setUploading] = React.useState(false);
 
   if (!isOpen) {
     return null;

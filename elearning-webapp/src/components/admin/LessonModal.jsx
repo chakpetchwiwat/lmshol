@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+﻿import React from 'react';
 import { X, Upload, FileText, Play } from 'lucide-react';
 import QuizBuilder from './QuizBuilder';
 import ModalPortal from '../common/ModalPortal';
@@ -17,7 +17,7 @@ const LessonModal = ({
   onEditorImageUpload,
   isEditing = false,
 }) => {
-  const docInputRef = useRef(null);
+  const docInputRef = React.useRef(null);
 
   if (!isOpen) return null;
 

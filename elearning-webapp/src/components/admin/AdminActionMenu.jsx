@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect, useState } from 'react';
+﻿import React from 'react';
 import ModalPortal from '../common/ModalPortal';
 
 /**
@@ -9,9 +9,9 @@ import ModalPortal from '../common/ModalPortal';
  * @param {Array} actions - Array of action objects: { icon: string, label: string, onClick: Function, className: string, iconClassName: string, hidden: boolean }
  */
 const AdminActionMenu = ({ isOpen, onToggle, actions = [] }) => {
-  const triggerRef = useRef(null);
-  const menuRef = useRef(null);
-  const [menuPosition, setMenuPosition] = useState(null);
+  const triggerRef = React.useRef(null);
+  const menuRef = React.useRef(null);
+  const [menuPosition, setMenuPosition] = React.useState(null);
 
   useLayoutEffect(() => {
     if (isOpen && triggerRef.current) {

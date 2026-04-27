@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+﻿import { useEffect, useRef } from 'react';
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -34,14 +34,14 @@ const useAccessibleOverlay = ({
   containerRef,
   initialFocusRef,
 }) => {
-  const previousActiveElementRef = useRef(null);
-  const onCloseRef = useRef(onClose);
+  const previousActiveElementRef = React.useRef(null);
+  const onCloseRef = React.useRef(onClose);
 
-  useEffect(() => {
+  React.useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isOpen) {
       return undefined;
     }
