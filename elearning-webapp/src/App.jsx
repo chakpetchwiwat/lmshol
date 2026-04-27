@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { canAccessAdminPanel } from './utils/roles';
 
@@ -69,7 +70,7 @@ function App() {
   return (
     <LanguageProvider>
       <ToastProvider>
-        <React.Suspense fallback={<LoadingFallback />}>
+        <Suspense fallback={<LoadingFallback />}>
       <Routes>
         {/* Root Redirect - Check for existing session */}
         <Route path="/" element={
@@ -122,7 +123,7 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<div className="p-12 text-center font-black text-slate-400">404 - ไม่พบหน้าที่คุณต้องการ</div>} />
       </Routes>
-    </React.Suspense>
+    </Suspense>
       </ToastProvider>
     </LanguageProvider>
   );

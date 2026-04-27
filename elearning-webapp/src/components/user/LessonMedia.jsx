@@ -56,7 +56,7 @@ const LessonMedia = ({
                 url={lessonMediaUrl || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'}
                 onEnded={handleComplete}
               />
-            </React.Suspense>
+            </Suspense>
           )
         ) : isQuiz ? (
           <div className="relative flex min-h-full flex-col items-center justify-center gap-6 px-6 py-20 text-center text-white md:py-32">
