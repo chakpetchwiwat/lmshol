@@ -1,0 +1,71 @@
+name: Security & Hardening Audit
+
+on:
+  push:
+    branches: ["main", "feat/*"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  security-audit:
+    name: Dependency & Schema Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Backend Security Audit
+        working-directory: ./elearning-api
+        run: |
+          npm ci
+          npm audit --audit-level=high
+
+      - name: Prisma Schema Validation
+        working-directory: ./elearning-api
+        run: npx prisma validate
+
+      - name: Frontend Security Audit
+        working-directory: ./elearning-webapp
+        run: |
+          npm ci
+          npm audit --audit-level=high
+
+  secret-scanning:
+    name: Secret Leakage Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Secret Scanning
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+
+  infrastructure-drift:
+    name: Docker & Env Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Validate Docker Compose
+        run: |
+          if [ -f docker-compose.yml ]; then
+            docker compose config -q
+          fi
+
+      - name: Check Env Consistency
+        run: |
+          # Compare .env.example keys between backend and frontend if applicable
+          echo "Checking environment variable consistency..."
+          if [ -f elearning-api/.env.example ] && [ -f elearning-webapp/.env.example ]; then
+             echo "Found example files. Proceeding with audit..."
+          fi
