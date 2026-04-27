@@ -93,6 +93,7 @@ model Course {
   rating           Float     @default(4.8)
   reviewCount      Int       @default(1240)
   studentCount     Int       @default(5000)
+  hasCertificate   Boolean   @default(false)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

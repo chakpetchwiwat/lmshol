@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Plus, Sparkles } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { toLocalInputValue } from '../../utils/dateUtils';
@@ -67,38 +67,38 @@ const CourseManagement = () => {
   const toast = useToast();
   const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
   const { confirm, ConfirmDialogProps } = useConfirm();
-  const [courses, setCourses] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [tiers, setTiers] = useState([]);
-  const [instructorPresets, setInstructorPresets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(FILTER_VALUES.ALL);
-  const [selectedModuleGroup, setSelectedModuleGroup] = useState(FILTER_VALUES.ALL);
-  const [courseView, setCourseView] = useState(ENTITY_VIEW_STATUS.ACTIVE);
+  const [courses, setCourses] = React.useState([]);
+  const [categories, setCategories] = React.useState([]);
+  const [departments, setDepartments] = React.useState([]);
+  const [tiers, setTiers] = React.useState([]);
+  const [instructorPresets, setInstructorPresets] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [selectedCategory, setSelectedCategory] = React.useState(FILTER_VALUES.ALL);
+  const [selectedModuleGroup, setSelectedModuleGroup] = React.useState(FILTER_VALUES.ALL);
+  const [courseView, setCourseView] = React.useState(ENTITY_VIEW_STATUS.ACTIVE);
 
-  const [showModal, setShowModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [activeTab, setActiveTab] = useState('basic');
-  const [courseForm, setCourseForm] = useState(getDefaultCourseForm());
-  const [lessons, setLessons] = useState([]);
-  const [quizReports, setQuizReports] = useState([]);
-  const [loadingReports, setLoadingReports] = useState(false);
+  const [showModal, setShowModal] = React.useState(false);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editingId, setEditingId] = React.useState(null);
+  const [activeTab, setActiveTab] = React.useState('basic');
+  const [courseForm, setCourseForm] = React.useState(getDefaultCourseForm());
+  const [lessons, setLessons] = React.useState([]);
+  const [quizReports, setQuizReports] = React.useState([]);
+  const [loadingReports, setLoadingReports] = React.useState(false);
 
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [selectedHistoryCourse, setSelectedHistoryCourse] = useState(null);
+  const [showHistoryModal, setShowHistoryModal] = React.useState(false);
+  const [selectedHistoryCourse, setSelectedHistoryCourse] = React.useState(null);
 
-  const [showLessonModal, setShowLessonModal] = useState(false);
-  const [editingLesson, setEditingLesson] = useState(null);
-  const [lessonForm, setLessonForm] = useState(getDefaultLessonForm());
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [editorImageUploading, setEditorImageUploading] = useState(false);
-  const [showInstructorPresetModal, setShowInstructorPresetModal] = useState(false);
+  const [showLessonModal, setShowLessonModal] = React.useState(false);
+  const [editingLesson, setEditingLesson] = React.useState(null);
+  const [lessonForm, setLessonForm] = React.useState(getDefaultLessonForm());
+  const [showCategoryModal, setShowCategoryModal] = React.useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [editorImageUploading, setEditorImageUploading] = React.useState(false);
+  const [showInstructorPresetModal, setShowInstructorPresetModal] = React.useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       const [courseResponse, categoryResponse, departmentResponse, tierResponse, instructorPresetResponse] = await Promise.all([
         adminAPI.getCourses(),
@@ -121,7 +121,7 @@ const CourseManagement = () => {
     }
   }, [toast]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchData();
   }, [fetchData]);
 
@@ -386,7 +386,7 @@ const CourseManagement = () => {
     }
   };
 
-  const filteredCourses = useMemo(() => (
+  const filteredCourses = React.useMemo(() => (
     courses.filter((course) => {
       const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === FILTER_VALUES.ALL || course.categoryId === selectedCategory;
@@ -396,7 +396,7 @@ const CourseManagement = () => {
     })
   ), [courseView, courses, searchTerm, selectedCategory, selectedModuleGroup]);
 
-  const moduleGroupOptions = useMemo(() => {
+  const moduleGroupOptions = React.useMemo(() => {
     const visibleTypes = Array.from(
       new Set(
         categories
@@ -414,7 +414,7 @@ const CourseManagement = () => {
     ];
   }, [categories]);
 
-  const selectableCategories = useMemo(() => (
+  const selectableCategories = React.useMemo(() => (
     categories.filter((category) => !category.isArchived || category.id === courseForm.categoryId)
   ), [categories, courseForm.categoryId]);
 

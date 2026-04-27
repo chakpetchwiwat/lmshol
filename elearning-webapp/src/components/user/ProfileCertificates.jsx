@@ -28,7 +28,7 @@ const ProfileCertificates = ({
     [certificates]
   );
 
-  const sortedLms = useMemo(
+  const sortedLms = React.useMemo(
     () => [...lmsCertificates].sort((a, b) => new Date(b.issuedAt) - new Date(a.issuedAt)),
     [lmsCertificates]
   );
