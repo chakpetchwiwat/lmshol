@@ -9,106 +9,96 @@ datasource db {
 }
 
 model User {
-  id            String  @id @default(uuid())
-  name          String
-  email         String  @unique
-  password      String
-  role          String  @default("user") // "user" | "admin"
-  department    String?
-  departmentId  String?
-  tierId        String?
-  pointsBalance Int     @default(0)
-  employmentDate DateTime?
-
-  status    String   @default("ACTIVE") // "ACTIVE" | "INACTIVE"
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  departmentRef Department? @relation("DepartmentUsers", fields: [departmentId], references: [id], onDelete: SetNull)
-  tier          Tier?       @relation(fields: [tierId], references: [id], onDelete: SetNull)
-  enrollments   UserCourse[]
-  progress      UserLessonProgress[]
-  pointsLedger  PointsLedger[]
-  redeems       RedeemRequest[]
-  QuizAttempt   QuizAttempt[]
-  notifications UserNotification[]
-  createdAnnouncements Announcement[] @relation("AnnouncementCreator")
-  announcementViews   AnnouncementView[] @relation("UserAnnouncementViews")
-  certificates  UserCertificate[]
-  courseStaff    CourseStaff[]
+  id                   String               @id @default(uuid())
+  name                 String
+  email                String               @unique
+  password             String
+  role                 String               @default("user")
+  department           String?
+  pointsBalance        Int                  @default(0)
+  status               String               @default("ACTIVE")
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  departmentId         String?
+  employmentDate       DateTime?
+  tierId               String?
+  signatureImageUrl    String?
+  signatureTitle       String?
+  createdAnnouncements Announcement[]       @relation("AnnouncementCreator")
+  announcementViews    AnnouncementView[]   @relation("UserAnnouncementViews")
+  issuedCertificates   Certificate[]
+  courseStaff          CourseStaff[]
+  pointsLedger         PointsLedger[]
+  QuizAttempt          QuizAttempt[]
+  redeems              RedeemRequest[]
+  departmentRef        Department?          @relation("DepartmentUsers", fields: [departmentId], references: [id])
+  tier                 Tier?                @relation(fields: [tierId], references: [id])
+  certificates         UserCertificate[]
+  enrollments          UserCourse[]
+  progress             UserLessonProgress[]
+  notifications        UserNotification[]
 
   @@index([status, departmentId, tierId])
   @@index([departmentId, status])
-
-  signatureImageUrl String?
-  signatureTitle    String?
-  issuedCertificates Certificate[]
 }
 
 model UserCertificate {
-  id            String    @id @default(uuid())
-  userId        String
-  title         String
-  issuer        String
-  issueDate     DateTime?
+  id             String    @id @default(uuid())
+  userId         String
+  title          String
+  issuer         String
+  issueDate      DateTime?
   expirationDate DateTime?
-  noExpiration  Boolean   @default(false)
-  credentialId  String?
-  credentialUrl String?
-  fileUrl       String?
-  fileKey       String?
-  fileName      String?
-  fileMimeType  String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  noExpiration   Boolean   @default(false)
+  credentialId   String?
+  credentialUrl  String?
+  fileUrl        String?
+  fileKey        String?
+  fileName       String?
+  fileMimeType   String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, issueDate])
   @@index([userId, createdAt])
 }
 
 model Course {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  categoryId  String?
+  id                 String                    @id @default(uuid())
+  title              String
+  description        String?
+  categoryId         String?
+  points             Int                       @default(0)
+  status             String                    @default("DRAFT")
+  image              String?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  instructorAvatar   String?
+  instructorBio      String?                   @default("ทีมงานผู้มีความเชี่ยวชาญเฉพาะด้านที่ผ่านประสบการณ์การทำงานในองค์กรชั้นนำ พร้อมถ่ายทอดทักษะระดับมืออาชีพให้คุณ")
+  instructorName     String?                   @default("ทีมงานวิทยากรผู้เชี่ยวชาญ")
+  instructorRole     String?                   @default("Enterprise Instructor")
+  previewVideoUrl    String?
+  rating             Float                     @default(4.8)
+  reviewCount        Int                       @default(1240)
+  studentCount       Int                       @default(5000)
+  totalDuration      String?
+  whatYouWillGet     String?
+  whatYouWillLearn   String?
+  visibleToAll       Boolean                   @default(true)
+  isTemporary        Boolean                   @default(false)
+  expiredAt          DateTime?
   instructorPresetId String?
-  points      Int      @default(0)
-  status      String   @default("DRAFT") // "DRAFT" | "PUBLISHED"
-  image       String?
-  visibleToAll Boolean @default(true)
-  isTemporary Boolean  @default(false)
-  expiredAt   DateTime?
-  
-  // Premium Fields
-  instructorName   String?   @default("ทีมงานวิทยากรผู้เชี่ยวชาญ")
-  instructorRole   String?   @default("Enterprise Instructor")
-  instructorAvatar String?
-  instructorBio    String?   @default("ทีมงานผู้มีความเชี่ยวชาญเฉพาะด้านที่ผ่านประสบการณ์การทำงานในองค์กรชั้นนำ พร้อมถ่ายทอดทักษะระดับมืออาชีพให้คุณ")
-  previewVideoUrl  String?   // YouTube embed or Vercel URL
-  totalDuration    String?   // override e.g. "120 ชม."
-  whatYouWillLearn String?   @db.Text // JSON string list
-  whatYouWillGet   String?   @db.Text // JSON string list
-  rating           Float     @default(4.8)
-  reviewCount      Int       @default(1240)
-  studentCount     Int       @default(5000)
-  hasCertificate   Boolean   @default(false)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  category    Category?    @relation(fields: [categoryId], references: [id])
-  instructorPreset InstructorPreset? @relation(fields: [instructorPresetId], references: [id], onDelete: SetNull)
-  lessons     Lesson[]
-  enrollments UserCourse[]
-  departmentAccess CourseDepartmentAccess[]
-  tierAccess       CourseTierAccess[]
-  learningGoals    GoalCourse[]
-  staff            CourseStaff[]
-
-  certificateSetting CourseCertificateSetting?
   certificates       Certificate[]
+  category           Category?                 @relation(fields: [categoryId], references: [id])
+  instructorPreset   InstructorPreset?         @relation(fields: [instructorPresetId], references: [id])
+  certificateSetting CourseCertificateSetting?
+  departmentAccess   CourseDepartmentAccess[]
+  staff              CourseStaff[]
+  tierAccess         CourseTierAccess[]
+  learningGoals      GoalCourse[]
+  lessons            Lesson[]
+  enrollments        UserCourse[]
 }
 
 model CourseStaff {
@@ -119,9 +109,8 @@ model CourseStaff {
   isPrimary Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([courseId, userId, role])
   @@index([courseId])
@@ -135,86 +124,80 @@ model InstructorPreset {
   name      String
   role      String?
   avatar    String?
-  bio       String?  @db.Text
+  bio       String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  courses Course[]
+  courses   Course[]
 }
 
 model Announcement {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  image       String?
-  type        String
-  contentUrl  String?
-  content     String?  @db.Text
-  duration    String?
-  passScore   Int?
-  scope       String   @default("DEPARTMENT") // "GLOBAL" | "DEPARTMENT"
+  id           String                 @id @default(uuid())
+  title        String
+  description  String?
+  image        String?
+  type         String
+  contentUrl   String?
+  content      String?
+  duration     String?
+  passScore    Int?
   departmentId String?
-  createdById String?
-  status      String   @default("PUBLISHED")
-  expiredAt   DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  department Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  creator    User?      @relation("AnnouncementCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  questions  AnnouncementQuestion[]
-  views      AnnouncementView[] @relation("AnnouncementViews")
+  createdById  String?
+  status       String                 @default("PUBLISHED")
+  expiredAt    DateTime?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  scope        String                 @default("DEPARTMENT")
+  creator      User?                  @relation("AnnouncementCreator", fields: [createdById], references: [id])
+  department   Department?            @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  questions    AnnouncementQuestion[]
+  views        AnnouncementView[]     @relation("AnnouncementViews")
 }
 
 model Category {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  icon      String?  @default("Grid")
-  type      String?  @default("FUNCTION") // LEADERSHIP | FUNCTION | INNOVATION
-  order     Int      @default(0)
-  visibleToAll Boolean @default(true)
-  isTemporary Boolean @default(false)
-  expiredAt   DateTime?
-  createdAt DateTime @default(now())
-
-  courses Course[]
+  id               String                     @id @default(uuid())
+  name             String                     @unique
+  order            Int                        @default(0)
+  createdAt        DateTime                   @default(now())
+  icon             String?                    @default("Grid")
+  visibleToAll     Boolean                    @default(true)
+  type             String?                    @default("FUNCTION")
+  isTemporary      Boolean                    @default(false)
+  expiredAt        DateTime?
   departmentAccess CategoryDepartmentAccess[]
   tierAccess       CategoryTierAccess[]
+  courses          Course[]
 }
 
 model Department {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  users        User[]                 @relation("DepartmentUsers")
-  courseAccess CourseDepartmentAccess[]
-  categoryAccess CategoryDepartmentAccess[]
-  learningGoals  LearningGoal[]
+  id             String                     @id @default(uuid())
+  name           String                     @unique
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
   announcements  Announcement[]
+  categoryAccess CategoryDepartmentAccess[]
+  courseAccess   CourseDepartmentAccess[]
+  learningGoals  LearningGoal[]
+  users          User[]                     @relation("DepartmentUsers")
 }
 
 model Tier {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  order     Int      @default(0)
-  accessAdmin Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  users        User[]
-  courseAccess CourseTierAccess[]
+  id             String               @id @default(uuid())
+  name           String               @unique
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  accessAdmin    Boolean              @default(false)
+  order          Int                  @default(0)
   categoryAccess CategoryTierAccess[]
+  courseAccess   CourseTierAccess[]
+  users          User[]
 }
 
 model CategoryDepartmentAccess {
   categoryId   String
   departmentId String
-  createdAt    DateTime @default(now())
-
-  category   Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
 
   @@id([categoryId, departmentId])
 }
@@ -223,9 +206,8 @@ model CategoryTierAccess {
   categoryId String
   tierId     String
   createdAt  DateTime @default(now())
-
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  tier     Tier     @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tier       Tier     @relation(fields: [tierId], references: [id], onDelete: Cascade)
 
   @@id([categoryId, tierId])
 }
@@ -233,10 +215,9 @@ model CategoryTierAccess {
 model CourseDepartmentAccess {
   courseId     String
   departmentId String
-  createdAt    DateTime @default(now())
-
-  course     Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
 
   @@id([courseId, departmentId])
 }
@@ -245,53 +226,49 @@ model CourseTierAccess {
   courseId  String
   tierId    String
   createdAt DateTime @default(now())
-
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  tier   Tier   @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tier      Tier     @relation(fields: [tierId], references: [id], onDelete: Cascade)
 
   @@id([courseId, tierId])
 }
 
 model Lesson {
-  id         String   @id @default(uuid())
-  courseId   String
-  title      String
-  type       String // "video" | "pdf" | "article"
-  contentUrl String?
-  content    String? // New field for rich text content
-  duration   String?
-  points     Int      @default(0)
-  order      Int      @default(0)
-  passScore  Int?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
+  id           String               @id @default(uuid())
+  courseId     String
+  title        String
+  type         String
+  contentUrl   String?
+  content      String?
+  duration     String?
+  points       Int                  @default(0)
+  order        Int                  @default(0)
+  passScore    Int?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
   course       Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  progress     UserLessonProgress[]
   questions    Question[]
   quizAttempts QuizAttempt[]
+  progress     UserLessonProgress[]
 
   @@index([courseId, order])
 }
 
 model Question {
-  id       String @id @default(uuid())
+  id       String   @id @default(uuid())
   lessonId String
   text     String
-  order    Int    @default(0)
-  points   Int    @default(1)
-
-  lesson  Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  choices Choice[]
+  order    Int      @default(0)
+  points   Int      @default(1)
+  choices  Choice[]
+  lesson   Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 }
 
 model Choice {
-  id         String  @id @default(uuid())
+  id         String   @id @default(uuid())
   questionId String
   text       String
-  isCorrect  Boolean @default(false)
-
-  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  isCorrect  Boolean  @default(false)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model QuizAttempt {
@@ -299,48 +276,44 @@ model QuizAttempt {
   lessonId  String
   userId    String
   score     Int      @default(0)
-  status    String   @default("PASSED") // "PASSED" | "FAILED"
+  status    String   @default("PASSED")
   createdAt DateTime @default(now())
-
-  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
   @@index([lessonId, createdAt])
 }
 
 model AnnouncementQuestion {
-  id             String @id @default(uuid())
+  id             String               @id @default(uuid())
   announcementId String
   text           String
-  order          Int    @default(0)
-  points         Int    @default(1)
-
-  announcement Announcement        @relation(fields: [announcementId], references: [id], onDelete: Cascade)
-  choices      AnnouncementChoice[]
+  order          Int                  @default(0)
+  points         Int                  @default(1)
+  choices        AnnouncementChoice[]
+  announcement   Announcement         @relation(fields: [announcementId], references: [id], onDelete: Cascade)
 }
 
 model AnnouncementChoice {
-  id         String  @id @default(uuid())
+  id         String               @id @default(uuid())
   questionId String
   text       String
-  isCorrect  Boolean @default(false)
-
-  question AnnouncementQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  isCorrect  Boolean              @default(false)
+  question   AnnouncementQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model UserCourse {
   id              String    @id @default(uuid())
   userId          String
   courseId        String
-  status          String    @default("IN_PROGRESS") // "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED"
+  status          String    @default("IN_PROGRESS")
   progressPercent Float     @default(0)
-  deadline        DateTime?
   startedAt       DateTime  @default(now())
   completedAt     DateTime?
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  deadline        DateTime?
+  course          Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
   @@index([courseId, status, completedAt])
@@ -352,12 +325,11 @@ model UserLessonProgress {
   id          String    @id @default(uuid())
   userId      String
   lessonId    String
-  progress    Float     @default(0) // 0-100
+  progress    Float     @default(0)
   lastSeenAt  DateTime  @default(now())
   completedAt DateTime?
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
 }
@@ -365,27 +337,25 @@ model UserLessonProgress {
 model PointsLedger {
   id         String   @id @default(uuid())
   userId     String
-  sourceType String // "course" | "reward_adjust" | "redeem"
-  sourceId   String? // ID of course or redeem request
-  points     Int // positive for earn, negative for spend
+  sourceType String
+  sourceId   String?
+  points     Int
   note       String?
   createdAt  DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Reward {
-  id         String   @id @default(uuid())
+  id         String          @id @default(uuid())
   name       String
   pointsCost Int
-  stock      Int      @default(0)
-  maxPerUser Int      @default(1)
-  status     String   @default("ACTIVE") // "ACTIVE" | "INACTIVE"
+  stock      Int             @default(0)
+  status     String          @default("ACTIVE")
   image      String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  redeems RedeemRequest[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  maxPerUser Int             @default(1)
+  redeems    RedeemRequest[]
 }
 
 model RedeemRequest {
@@ -393,34 +363,32 @@ model RedeemRequest {
   userId      String
   rewardId    String
   pointsCost  Int
-  status      String   @default("PENDING") // "PENDING" | "APPROVED" | "FULFILLED" | "REJECTED" | "CANCELLED"
+  status      String   @default("PENDING")
   adminNote   String?
   requestedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  reward      Reward   @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model LearningGoal {
-  id           String   @id @default(uuid())
-  title        String
-  type         String   // "ANY" | "SPECIFIC"
-  targetCount  Int      @default(1)
-  expiryDate   DateTime?
+  id                         String             @id @default(uuid())
+  title                      String
+  type                       String
+  targetCount                Int                @default(1)
+  expiryDate                 DateTime?
+  scope                      String             @default("GLOBAL")
+  departmentId               String?
+  status                     String             @default("ACTIVE")
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
   postAssignmentReminderDays Int?
   preDeadlineReminderDays    Int?
   postAssignmentReminderTime String?
   preDeadlineReminderTime    String?
-  scope        String   @default("GLOBAL") // "GLOBAL" | "DEPARTMENT"
-  departmentId String?
-  status       String   @default("ACTIVE") // "ACTIVE" | "ARCHIVED"
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  department   Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  courses      GoalCourse[]
-  notifications UserNotification[]
+  courses                    GoalCourse[]
+  department                 Department?        @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  notifications              UserNotification[]
 
   @@index([status, expiryDate, departmentId])
   @@index([scope, departmentId, status])
@@ -429,9 +397,8 @@ model LearningGoal {
 model GoalCourse {
   goalId   String
   courseId String
-
-  goal   LearningGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
-  course Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course   Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  goal     LearningGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
   @@id([goalId, courseId])
   @@index([courseId, goalId])
@@ -444,7 +411,7 @@ model SystemSetting {
 }
 
 model UserNotification {
-  id           String   @id @default(uuid())
+  id           String        @id @default(uuid())
   userId       String
   goalId       String?
   type         String
@@ -452,32 +419,87 @@ model UserNotification {
   message      String
   scheduledFor DateTime
   readAt       DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  goal LearningGoal? @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  goal         LearningGoal? @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, scheduledFor, readAt])
   @@index([goalId, scheduledFor])
 }
 
 model AnnouncementView {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   announcementId String
   userId         String
-  score          Int?     // For quiz type
-  passed         Boolean? // For quiz type
-  viewedAt       DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  announcement Announcement @relation("AnnouncementViews", fields: [announcementId], references: [id], onDelete: Cascade)
-  user         User         @relation("UserAnnouncementViews", fields: [userId], references: [id], onDelete: Cascade)
+  score          Int?
+  passed         Boolean?
+  viewedAt       DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  announcement   Announcement @relation("AnnouncementViews", fields: [announcementId], references: [id], onDelete: Cascade)
+  user           User         @relation("UserAnnouncementViews", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, announcementId])
 }
 
-// --- CERTIFICATE SYSTEM ---
+model CertificateTemplate {
+  id             String                     @id @default(uuid())
+  name           String
+  description    String?
+  templateHtml   String
+  templateCss    String
+  orientation    CertificateOrientation     @default(LANDSCAPE)
+  pageSize       String                     @default("A4")
+  isDefault      Boolean                    @default(false)
+  createdById    String?
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  certificates   Certificate[]
+  courseSettings CourseCertificateSetting[]
+}
+
+model CourseCertificateSetting {
+  id                  String                   @id @default(uuid())
+  courseId            String                   @unique
+  templateId          String
+  enabled             Boolean                  @default(false)
+  issueMode           CertificateIssueMode     @default(AUTOMATIC)
+  signatureType       CertificateSignatureType @default(INSTRUCTOR)
+  signerNameOverride  String?
+  signerTitleOverride String?
+  signatureImageUrl   String?
+  passingScore        Int?
+  expiryMonths        Int?
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+  course              Course                   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  template            CertificateTemplate      @relation(fields: [templateId], references: [id])
+}
+
+model Certificate {
+  id                String              @id @default(uuid())
+  certificateNo     String              @unique
+  verificationToken String              @unique
+  userId            String
+  courseId          String
+  templateId        String
+  status            CertificateStatus   @default(PENDING)
+  pdfUrl            String?
+  issuedById        String?
+  issuedAt          DateTime            @default(now())
+  expiresAt         DateTime?
+  revokedById       String?
+  revokedAt         DateTime?
+  revokeReason      String?
+  metadata          Json?
+  course            Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  template          CertificateTemplate @relation(fields: [templateId], references: [id])
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, courseId])
+  @@index([verificationToken])
+  @@index([certificateNo])
+}
 
 enum CertificateStatus {
   PENDING
@@ -501,72 +523,4 @@ enum CertificateSignatureType {
 enum CertificateOrientation {
   PORTRAIT
   LANDSCAPE
-}
-
-model CertificateTemplate {
-  id           String   @id @default(uuid())
-  name         String
-  description  String?
-  templateHtml String   @db.Text
-  templateCss  String   @db.Text
-  orientation  CertificateOrientation @default(LANDSCAPE)
-  pageSize     String   @default("A4")
-  isDefault    Boolean  @default(false)
-  createdById  String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  courseSettings CourseCertificateSetting[]
-  certificates   Certificate[]
-}
-
-model CourseCertificateSetting {
-  id                  String   @id @default(uuid())
-  courseId            String   @unique
-  templateId          String
-  enabled             Boolean  @default(false)
-  issueMode           CertificateIssueMode @default(AUTOMATIC)
-  signatureType       CertificateSignatureType @default(INSTRUCTOR)
-  
-  // Custom Signer Fields
-  signerNameOverride  String?
-  signerTitleOverride String?
-  signatureImageUrl   String?
-  
-  passingScore        Int?     
-  expiryMonths        Int?     
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-
-  course   Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  template CertificateTemplate @relation(fields: [templateId], references: [id])
-}
-
-model Certificate {
-  id                String    @id @default(uuid())
-  certificateNo     String    @unique
-  verificationToken String    @unique
-  userId            String
-  courseId          String
-  templateId        String
-  status            CertificateStatus @default(PENDING)
-  pdfUrl            String?
-  
-  issuedById        String?
-  issuedAt          DateTime  @default(now())
-  expiresAt         DateTime?
-  
-  revokedById       String?
-  revokedAt         DateTime?
-  revokeReason      String?
-  
-  metadata          Json?     
-
-  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course   Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  template CertificateTemplate @relation(fields: [templateId], references: [id])
-
-  @@index([userId, courseId]) 
-  @@index([verificationToken])
-  @@index([certificateNo])
 }

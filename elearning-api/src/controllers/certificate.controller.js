@@ -26,10 +26,10 @@ exports.issueManual = async (req, res, next) => {
 
     const course = await prisma.course.findUnique({
       where: { id: courseId },
-      select: { hasCertificate: true }
+      include: { certificateSetting: { select: { enabled: true } } }
     });
 
-    if (!course?.hasCertificate) {
+    if (!course?.certificateSetting?.enabled) {
       return res.status(400).json({
         success: false,
         message: 'ระบบเกียรติบัตรถูกปิดใช้งานสำหรับคอร์สนี้ กรุณาเปิดใช้งานในส่วนข้อมูลพื้นฐานก่อน'
@@ -220,7 +220,7 @@ exports.getCourseCertificates = async (req, res, next) => {
     const [course, certificates] = await Promise.all([
       prisma.course.findUnique({
         where: { id: courseId },
-        select: { hasCertificate: true }
+        include: { certificateSetting: { select: { enabled: true } } }
       }),
       prisma.certificate.findMany({
         where: { courseId },
@@ -259,7 +259,7 @@ exports.getCourseCertificates = async (req, res, next) => {
       success: true,
       summary,
       data: certificates,
-      hasCertificate: course?.hasCertificate || false
+      hasCertificate: course?.certificateSetting?.enabled || false
     });
   } catch (error) {
     console.error(`[Certificate] getCourseCertificates Error | courseId=${req.params.courseId}:`, error);
