@@ -13,7 +13,7 @@ const AdminActionMenu = ({ isOpen, onToggle, actions = [] }) => {
   const menuRef = React.useRef(null);
   const [menuPosition, setMenuPosition] = React.useState(null);
 
-  useLayoutEffect(() => {
+  React.useLayoutEffect(() => {
     if (isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;

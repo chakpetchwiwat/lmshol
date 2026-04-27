@@ -280,16 +280,19 @@ async function verifyCertificate(token) {
  * Compatibility helper to extract storage path from old public Supabase URLs
  */
 function extractStoragePath(pdfUrl) {
-  if (!pdfUrl) return null;
-  if (!pdfUrl.startsWith('http')) return pdfUrl; // Already a path
+  if (!pdfUrl) return { bucket: 'secure-documents', path: null };
+  if (!pdfUrl.startsWith('http')) return { bucket: 'secure-documents', path: pdfUrl };
 
   try {
     const url = new URL(pdfUrl);
-    // Standard Supabase public URL: .../storage/v1/object/public/uploads/certificates/...
-    const parts = url.pathname.split('/public/uploads/');
-    return parts.length > 1 ? parts[1] : pdfUrl;
+    // Standard Supabase public URL: .../storage/v1/object/public/{bucket}/certificates/...
+    const match = url.pathname.match(/\/public\/(uploads|secure-documents)\/(.+)$/);
+    if (match) {
+      return { bucket: match[1], path: match[2] };
+    }
+    return { bucket: 'secure-documents', path: pdfUrl };
   } catch {
-    return pdfUrl;
+    return { bucket: 'secure-documents', path: pdfUrl };
   }
 }
 
@@ -321,11 +324,11 @@ async function createCertificateSignedUrl({ certificateId, requester }) {
   if (!hasAccess) throw new Error('Forbidden: You do not have permission to access this certificate');
 
   const supabase = require('../../utils/supabase');
-  const storagePath = extractStoragePath(cert.pdfUrl);
+  const { bucket, path: storagePath } = extractStoragePath(cert.pdfUrl);
   const expiresIn = parseInt(process.env.CERTIFICATE_SIGNED_URL_EXPIRES_SECONDS || '300', 10);
 
   const { data, error } = await supabase.storage
-    .from('uploads')
+    .from(bucket)
     .createSignedUrl(storagePath, expiresIn);
 
   if (error) {

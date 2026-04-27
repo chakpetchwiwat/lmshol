@@ -51,7 +51,9 @@ const uploadToSupabase = async (req, res, { forceSubDir } = {}) => {
         }
 
         const isImage = req.file.mimetype.startsWith('image/');
-        const bucketName = 'uploads';
+        // Use 'secure-documents' bucket for sensitive files, 'uploads' for public images
+        const isSensitive = forceSubDir === 'certificates' || !isImage;
+        const bucketName = isSensitive ? 'secure-documents' : 'uploads';
         const subDir = forceSubDir || (isImage ? 'images' : 'documents');
         const ext = path.extname(req.file.originalname);
         const fileName = `${subDir}/${crypto.randomUUID()}${ext.toLowerCase()}`;
