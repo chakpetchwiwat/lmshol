@@ -15,6 +15,7 @@ import {
 import { adminAPI, courseStaffAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 import Skeleton from '../common/Skeleton';
+import UserLink from '../admin/UserLink';
 import { getCourseAccess } from '../../utils/coursePermissions';
 
 const ROLE_CONFIG = {
@@ -40,15 +41,15 @@ const ROLE_CONFIG = {
 
 const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged }) => {
   const toast = useToast();
-  const [staff, setStaff] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isAdding, setIsAdding] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [newRole, setNewRole] = useState('trainer');
-  const [isPrimary, setIsPrimary] = useState(false);
+  const [staff, setStaff] = React.useState([]);
+  const [allUsers, setAllUsers] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [processing, setProcessing] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [isAdding, setIsAdding] = React.useState(false);
+  const [selectedUser, setSelectedUser] = React.useState(null);
+  const [newRole, setNewRole] = React.useState('trainer');
+  const [isPrimary, setIsPrimary] = React.useState(false);
 
   // Permission logic
   const userAccess = useMemo(() => 
@@ -80,7 +81,7 @@ const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged }) => {
     }
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (courseId) {
       fetchStaff();
       fetchAllUsers();

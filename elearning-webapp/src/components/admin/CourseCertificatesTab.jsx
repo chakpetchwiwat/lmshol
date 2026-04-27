@@ -6,11 +6,11 @@ import { formatThaiDateTime } from '../../utils/dateUtils';
 
 const CourseCertificatesTab = ({ courseId, readOnly }) => {
   const toast = useToast();
-  const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(null); // id of record being processed
-  const [certificates, setCertificates] = useState([]);
-  const [summary, setSummary] = useState({ total: 0, valid: 0, pending: 0, failed: 0, revoked: 0, expired: 0 });
-  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = React.useState(true);
+  const [processing, setProcessing] = React.useState(null); // id of record being processed
+  const [certificates, setCertificates] = React.useState([]);
+  const [summary, setSummary] = React.useState({ total: 0, valid: 0, pending: 0, failed: 0, revoked: 0, expired: 0 });
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   const fetchCertificates = async () => {
     try {
@@ -26,11 +26,11 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
     }
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (courseId) fetchCertificates();
   }, [courseId]);
 
-  const filteredCertificates = useMemo(() => {
+  const filteredCertificates = React.useMemo(() => {
     if (!searchQuery) return certificates;
     const query = searchQuery.toLowerCase();
     return certificates.filter(c => 
