@@ -3,37 +3,37 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { canAccessAdminPanel } from './utils/roles';
 
 // Layouts
-const UserLayout = lazy(() => import('./components/layout/UserLayout'));
-const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
+const UserLayout = React.lazy(() => import('./components/layout/UserLayout'));
+const AdminLayout = React.lazy(() => import('./components/layout/AdminLayout'));
 
 // Auth Pages
-const Login = lazy(() => import('./pages/auth/Login'));
+const Login = React.lazy(() => import('./pages/auth/Login'));
 
 // User Pages
-const Home = lazy(() => import('./pages/user/Home'));
-const CourseList = lazy(() => import('./pages/user/CourseList'));
-const CompletedCourses = lazy(() => import('./pages/user/CompletedCourses'));
-const CourseDetail = lazy(() => import('./pages/user/CourseDetail'));
-const LessonPlayer = lazy(() => import('./pages/user/LessonPlayer'));
-const AnnouncementPlayer = lazy(() => import('./pages/user/AnnouncementPlayer'));
-const Rewards = lazy(() => import('./pages/user/Rewards'));
-const PointsHistory = lazy(() => import('./pages/user/PointsHistory'));
-const Profile = lazy(() => import('./pages/user/Profile'));
-const OngoingCourses = lazy(() => import('./pages/user/OngoingCourses'));
-const GoalDetail = lazy(() => import('./pages/user/GoalDetail'));
-const PrintReportPage = lazy(() => import('./pages/common/PrintReportPage'));
-const CertificateVerification = lazy(() => import('./pages/common/CertificateVerification'));
+const Home = React.lazy(() => import('./pages/user/Home'));
+const CourseList = React.lazy(() => import('./pages/user/CourseList'));
+const CompletedCourses = React.lazy(() => import('./pages/user/CompletedCourses'));
+const CourseDetail = React.lazy(() => import('./pages/user/CourseDetail'));
+const LessonPlayer = React.lazy(() => import('./pages/user/LessonPlayer'));
+const AnnouncementPlayer = React.lazy(() => import('./pages/user/AnnouncementPlayer'));
+const Rewards = React.lazy(() => import('./pages/user/Rewards'));
+const PointsHistory = React.lazy(() => import('./pages/user/PointsHistory'));
+const Profile = React.lazy(() => import('./pages/user/Profile'));
+const OngoingCourses = React.lazy(() => import('./pages/user/OngoingCourses'));
+const GoalDetail = React.lazy(() => import('./pages/user/GoalDetail'));
+const PrintReportPage = React.lazy(() => import('./pages/common/PrintReportPage'));
+const CertificateVerification = React.lazy(() => import('./pages/common/CertificateVerification'));
 
 // Admin Pages
-const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
-const AdminCourses = lazy(() => import('./pages/admin/CourseManagement'));
-const AdminAnnouncements = lazy(() => import('./pages/admin/AnnouncementManagement'));
-const AdminUsers = lazy(() => import('./pages/admin/UserManagement'));
-const AdminRewards = lazy(() => import('./pages/admin/RewardsManagement'));
-const AdminRedeems = lazy(() => import('./pages/admin/RedeemRequests'));
-const AdminReports = lazy(() => import('./pages/admin/Reports'));
-const AdminGoals = lazy(() => import('./pages/admin/GoalManagement'));
-const AdminHealth = lazy(() => import('./pages/admin/SystemHealth'));
+const AdminDashboard = React.lazy(() => import('./pages/admin/Dashboard'));
+const AdminCourses = React.lazy(() => import('./pages/admin/CourseManagement'));
+const AdminAnnouncements = React.lazy(() => import('./pages/admin/AnnouncementManagement'));
+const AdminUsers = React.lazy(() => import('./pages/admin/UserManagement'));
+const AdminRewards = React.lazy(() => import('./pages/admin/RewardsManagement'));
+const AdminRedeems = React.lazy(() => import('./pages/admin/RedeemRequests'));
+const AdminReports = React.lazy(() => import('./pages/admin/Reports'));
+const AdminGoals = React.lazy(() => import('./pages/admin/GoalManagement'));
+const AdminHealth = React.lazy(() => import('./pages/admin/SystemHealth'));
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -69,7 +69,7 @@ function App() {
   return (
     <LanguageProvider>
       <ToastProvider>
-        <Suspense fallback={<LoadingFallback />}>
+        <React.Suspense fallback={<LoadingFallback />}>
       <Routes>
         {/* Root Redirect - Check for existing session */}
         <Route path="/" element={
@@ -122,7 +122,7 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<div className="p-12 text-center font-black text-slate-400">404 - ไม่พบหน้าที่คุณต้องการ</div>} />
       </Routes>
-    </Suspense>
+    </React.Suspense>
       </ToastProvider>
     </LanguageProvider>
   );
