@@ -212,8 +212,7 @@ exports.getCourseCertificates = async (req, res, next) => {
           select: {
             id: true,
             name: true,
-            email: true,
-            avatar: true
+            email: true
           }
         }
       },
