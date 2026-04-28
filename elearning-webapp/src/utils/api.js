@@ -78,7 +78,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error("API Error Interceptor:", error.response?.data || error.message);
+        console.error("API Error Interceptor:", error.response ? { status: error.response.status, data: error.response.data } : error.message);
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
