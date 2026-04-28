@@ -11,21 +11,45 @@ const supabase = require('../../utils/supabase');
  */
 async function generatePdfBuffer(html, options = {}) {
   // 1. Resolve executable path and browser options
-  const isLocal = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
+  // Detect if we are in a cloud environment (Vercel, Render, Railway, etc.)
+  const isCloud = !!process.env.VERCEL || !!process.env.RENDER || !!process.env.RAILWAY_STATIC_URL || process.env.NODE_ENV === 'production';
   
+  let executablePath;
+  try {
+    executablePath = await chromium.executablePath();
+  } catch (e) {
+    console.warn('[CertificatePdf] Chromium executable path resolution failed, falling back to local detection');
+  }
+
   const launchOptions = {
-    args: isLocal ? ['--no-sandbox', '--disable-setuid-sandbox'] : chromium.args,
+    args: executablePath ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
     defaultViewport: chromium.defaultViewport,
-    executablePath: isLocal 
-      ? (process.platform === 'win32' 
-          ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' 
-          : '/usr/bin/google-chrome')
-      : await chromium.executablePath(),
-    headless: isLocal ? 'new' : chromium.headless,
+    executablePath: executablePath || (process.platform === 'win32' 
+      ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' 
+      : '/usr/bin/google-chrome'),
+    headless: executablePath ? chromium.headless : 'new',
     ignoreHTTPSErrors: true,
   };
 
-  const browser = await puppeteer.launch(launchOptions);
+  // 2. Launch with retry to handle ETXTBSY (Text file busy) race conditions in serverless
+  let browser;
+  let lastError;
+  for (let i = 0; i < 3; i++) {
+    try {
+      browser = await puppeteer.launch(launchOptions);
+      break;
+    } catch (error) {
+      lastError = error;
+      if (error.message.includes('ETXTBSY') || error.code === 'ETXTBSY') {
+        console.warn(`[CertificatePdf] Browser launch busy (attempt ${i + 1}/3), retrying...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  if (!browser) throw lastError;
 
   try {
     const page = await browser.newPage();
