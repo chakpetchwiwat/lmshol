@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   UserX
 } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { useToast } from '../../context/useToast';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import api from '../../utils/api';
 import './SystemHealth.css';
@@ -65,6 +65,7 @@ const StatCard = ({ title, status, icon, metrics, error, loading }) => {
 };
 
 const SystemHealth = () => {
+  const toast = useToast();
   const [healthData, setHealthData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [refreshing, setRefreshing] = React.useState(false);
