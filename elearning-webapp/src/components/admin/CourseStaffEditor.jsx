@@ -60,7 +60,7 @@ const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged, initialStaff
 
   const fetchStaff = React.useCallback(async () => {
     try {
-      setLoading(true);
+      if (staff.length === 0) setLoading(true);
       const response = await courseStaffAPI.getStaff(courseId);
       setStaff(response.data);
       if (onStaffChanged) onStaffChanged(response.data);
