@@ -427,7 +427,7 @@ async function generateCertificatePdfAsync(certificateId) {
     });
 
     // 5. Update status to VALID
-    await prisma.certificate.update({
+    const updatedCert = await prisma.certificate.update({
       where: { id: certificateId },
       data: {
         status: 'VALID',
@@ -441,13 +441,14 @@ async function generateCertificatePdfAsync(certificateId) {
 
     const duration = Date.now() - startTime;
     console.log(`[Certificate] pdf.success | id=${certificateId} | no=${certNo} | duration=${duration}ms`);
+    return updatedCert;
   } catch (error) {
     const duration = Date.now() - startTime;
     console.error(`[Certificate] pdf.failed | id=${certificateId} | no=${certNo} | duration=${duration}ms | error=${error.message}`);
 
     // Update status to FAILED
     const current = await prisma.certificate.findUnique({ where: { id: certificateId } });
-    await prisma.certificate.update({
+    return await prisma.certificate.update({
       where: { id: certificateId },
       data: {
         status: 'FAILED',

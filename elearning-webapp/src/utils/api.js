@@ -223,7 +223,7 @@ export const adminAPI = {
   issueManual: (courseId, userId) => api.post(`/courses/${courseId}/certificates/issue/${userId}`),
   retryCertificate: (id) => api.post(`/certificates/${id}/retry`),
   reissueCertificate: (id) => api.post(`/certificates/${id}/reissue`),
-  revokeCertificate: (id) => api.post(`/certificates/${id}/revoke`),
+  revokeCertificate: (id, data = {}) => api.post(`/certificates/${id}/revoke`, data),
 
   // File Upload
   uploadFile: (file) => {

@@ -33,10 +33,18 @@ const CertificateApprovals = () => {
   const handleApprove = async (id) => {
     try {
       setApproving(id);
-      await adminAPI.reissueCertificate(id); // Reissue acts as "Start Generation" for Pending
-      toast.success('กำลังดำเนินการสร้างไฟล์เกียรติบัตร...');
-      // Remove from list or refresh
-      setCertificates(prev => prev.filter(c => c.id !== id));
+      const response = await adminAPI.reissueCertificate(id);
+      
+      // status will be PENDING because generation is async
+      if (response.data?.status === 'VALID' || response.data?.status === 'PENDING') {
+        toast.success('อนุมัติและกำลังเริ่มสร้างไฟล์เกียรติบัตร...');
+        // Remove from current view immediately for better UX
+        setCertificates(prev => prev.filter(c => c.id !== id));
+        // Then refresh in background to get updated metadata
+        fetchPending();
+      } else {
+        toast.error('การออกเกียรติบัตรขัดข้อง กรุณาลองใหม่อีกครั้ง');
+      }
     } catch (error) {
       toast.error('ไม่สามารถอนุมัติได้: ' + (error.response?.data?.message || error.message));
     } finally {

@@ -86,18 +86,17 @@ exports.reissue = async (req, res, next) => {
       requestedById: req.user.id
     });
 
-    // Trigger async generation
-    certificateService.generateCertificatePdfAsync(updatedCert.id).catch(err => {
-      console.error(`[Certificate] Reissue generation trigger failed | id=${updatedCert.id}:`, err);
-    });
+    const finalCert = await certificateService.generateCertificatePdfAsync(updatedCert.id);
 
-    res.status(202).json({
+    res.json({
       success: true,
       data: {
         certificateId: updatedCert.id,
-        status: updatedCert.status
+        status: finalCert?.status || updatedCert.status
       },
-      message: 'Certificate reissue started'
+      message: finalCert?.status === 'VALID'
+        ? 'Certificate has been approved and generated'
+        : 'Certificate generation failed'
     });
   } catch (error) {
     next(error);
