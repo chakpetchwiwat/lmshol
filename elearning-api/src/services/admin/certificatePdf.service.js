@@ -198,7 +198,7 @@ async function generatePdfBuffer(html, options = {}) {
  * @returns {String} Public URL or storage path
  */
 async function uploadCertificatePdf({ buffer, userId, certificateId }) {
-  const bucketName = 'secure-documents';
+  const bucketName = 'uploads';
   const filePath = `certificates/${userId}/${certificateId}.pdf`;
 
   const { error } = await supabase.storage

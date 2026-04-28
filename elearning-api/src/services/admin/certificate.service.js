@@ -281,8 +281,8 @@ async function verifyCertificate(token) {
  * Compatibility helper to extract storage path from old public Supabase URLs
  */
 function extractStoragePath(pdfUrl) {
-  if (!pdfUrl) return { bucket: 'secure-documents', path: null };
-  if (!pdfUrl.startsWith('http')) return { bucket: 'secure-documents', path: pdfUrl };
+  if (!pdfUrl) return { bucket: 'uploads', path: null };
+  if (!pdfUrl.startsWith('http')) return { bucket: 'uploads', path: pdfUrl };
 
   try {
     const url = new URL(pdfUrl);
@@ -291,9 +291,9 @@ function extractStoragePath(pdfUrl) {
     if (match) {
       return { bucket: match[1], path: match[2] };
     }
-    return { bucket: 'secure-documents', path: pdfUrl };
+    return { bucket: 'uploads', path: pdfUrl };
   } catch {
-    return { bucket: 'secure-documents', path: pdfUrl };
+    return { bucket: 'uploads', path: pdfUrl };
   }
 }
 
@@ -310,20 +310,24 @@ async function createCertificateSignedUrl({ certificateId, requester }) {
   if (!cert.pdfUrl) throw new Error('Certificate file is missing');
 
   // Validate Access
+  if (!requester) throw new ErrorResponse('Authentication required', 401);
+  
+  const requesterId = requester.userId || requester.id;
   let hasAccess = false;
   
   // 1. Owner
-  const requesterId = requester.id || requester.userId;
   if (requesterId === cert.userId) hasAccess = true;
 
   // 2. Admin/Manager with full access to course
   if (!hasAccess) {
-    const { canManageCourse } = require('../../utils/coursePermissions');
+    const { canManageCourse, COURSE_MANAGEMENT_ACCESS } = require('../../utils/coursePermissions');
     const { access } = await canManageCourse(requester, cert.courseId);
-    if (access === 'FULL') hasAccess = true;
+    if (access === COURSE_MANAGEMENT_ACCESS.FULL || access === COURSE_MANAGEMENT_ACCESS.LIMITED) {
+      hasAccess = true;
+    }
   }
 
-  if (!hasAccess) throw new Error('Forbidden: You do not have permission to access this certificate');
+  if (!hasAccess) throw new ErrorResponse('Forbidden: You do not have permission to access this certificate', 403);
 
   const supabase = require('../../utils/supabase');
   const { bucket, path: storagePath } = extractStoragePath(cert.pdfUrl);
@@ -334,11 +338,15 @@ async function createCertificateSignedUrl({ certificateId, requester }) {
     .createSignedUrl(storagePath, expiresIn);
 
   if (error) {
-    console.error(`[Certificate] Signed URL failed for ${certificateId}:`, error);
-    throw new Error('Failed to generate download link');
+    console.error(`[Certificate] Signed URL failed | id=${certificateId} | bucket=${bucket} | path=${storagePath}:`, error);
+    throw new Error(`Storage Error: ${error.message} (Bucket: ${bucket})`);
   }
 
-  console.log(`[Certificate] download_url.created | id=${certificateId} | user=${requesterId}`);
+  if (!data?.signedUrl) {
+    throw new Error('Storage Error: Failed to retrieve signed URL from Supabase');
+  }
+
+  console.log(`[Certificate] download_url.created | id=${certificateId} | user=${requesterId} | bucket=${bucket}`);
 
   return {
     url: data.signedUrl,
