@@ -110,6 +110,11 @@ const CourseModal = ({
     });
   }, [currentUser, staff]);
 
+  const handleStaffChange = React.useCallback((staffList) => {
+    setStaff(staffList);
+    if (onStaffChanged) onStaffChanged(staffList);
+  }, [onStaffChanged]);
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
 
@@ -224,10 +229,7 @@ const CourseModal = ({
                 courseId={editingId}
                 currentUser={currentUser}
                 initialStaff={staff}
-                onStaffChanged={(staffList) => {
-                  setStaff(staffList);
-                  if (onStaffChanged) onStaffChanged(staffList);
-                }}
+                onStaffChanged={handleStaffChange}
               />
             )}
           </div>
