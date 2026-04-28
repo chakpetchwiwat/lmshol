@@ -335,11 +335,11 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
                             <>
                               <button
                                 onClick={() => handleReissue(cert.id)}
-                                disabled={processing === cert.id}
+                                disabled={processing === cert.id || cert.status === 'PENDING'}
                                 className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white hover:text-amber-600 disabled:opacity-50"
-                                title={cert.status === 'PENDING' ? "เร่งการออกไฟล์ (Reissue)" : "ออกใหม่ (Reissue)"}
+                                title={cert.status === 'PENDING' ? "กำลังประมวลผล..." : "ออกใหม่ (Reissue)"}
                               >
-                                <RotateCcw size={16} className={processing === cert.id ? 'animate-spin' : ''} />
+                                <RotateCcw size={16} className={processing === cert.id || cert.status === 'PENDING' ? 'animate-spin' : ''} />
                               </button>
                               
                               {cert.status !== 'PENDING' && (
