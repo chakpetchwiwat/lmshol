@@ -413,11 +413,14 @@ async function generateCertificatePdfAsync(certificateId) {
     console.log(`[Certificate] pdf.started | id=${certificateId} | no=${certNo}`);
 
     // 1. Prepare verification URL
-    // Priority: 1. FRONTEND_URL env 2. Base site URL (if we have it) 3. No fallback (must be configured)
-    const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:5173');
+    // Priority: 1. FRONTEND_URL env 2. Base site URL (if we have it) 3. Hardcoded fallback (safety net)
+    let frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:5173');
+    
     if (!frontendUrl && process.env.NODE_ENV === 'production') {
-      console.error('[Certificate] CRITICAL: FRONTEND_URL is not set in production. Verification links will be broken.');
+      frontendUrl = 'https://lms-scaleup.vercel.app';
+      console.warn('[Certificate] WARNING: FRONTEND_URL is not set in production. Falling back to hardcoded production URL.');
     }
+    
     const verificationUrl = `${frontendUrl || ''}/certificates/verify/${cert.verificationToken}`;
 
     // 2. Render HTML
