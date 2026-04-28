@@ -19,8 +19,11 @@ function buildLaunchDiagnostics(executablePath) {
 }
 
 function escapePdfText(value) {
+  // Simple PDF strings () don't support Thai/Unicode. 
+  // We'll replace non-ASCII with ? to avoid mojibake in the fallback,
+  // but the GOAL is to make the primary Puppeteer flow work.
   return String(value || '')
-    .replace(/[^\x20-\x7E\u0E00-\u0E7F]/g, '?')
+    .replace(/[^\x20-\x7E]/g, '?') 
     .replace(/\\/g, '\\\\')
     .replace(/\(/g, '\\(')
     .replace(/\)/g, '\\)');
@@ -151,10 +154,14 @@ async function generatePdfBuffer(html, options = {}) {
       
       // Set viewport size if needed, but A4 format usually takes care of it
       // Set content with a reasonable timeout for Vercel
+      // Use 'domcontentloaded' for faster response when fonts are already linked
       await page.setContent(html, { 
-        waitUntil: 'load',
-        timeout: 30000 
+        waitUntil: 'domcontentloaded',
+        timeout: 45000 
       });
+
+      // Give a tiny bit of extra time for fonts if needed, without waiting for full 'load'
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       const pdfBuffer = await page.pdf({
         format: 'A4',

@@ -50,8 +50,14 @@ function renderCertificateHtml({ template, certificate, metadata, verificationUr
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Certificate - ${variables.certificate_no}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
       <style>
-        body { margin: 0; padding: 0; -webkit-print-color-adjust: exact; }
+        body { 
+          margin: 0; 
+          padding: 0; 
+          -webkit-print-color-adjust: exact; 
+          font-family: 'Sarabun', sans-serif;
+        }
         ${templateCss}
       </style>
     </head>
