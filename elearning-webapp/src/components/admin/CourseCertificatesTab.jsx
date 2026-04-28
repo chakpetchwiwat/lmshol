@@ -221,7 +221,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
                 <p className={`mt-1 text-2xl font-black text-${item.color}-700`}>{item.value}</p>
               </div>
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-${item.color}-100 text-${item.color}-600`}>
-                <item.icon size={20} className={item.label.includes('Pending') ? 'animate-spin' : ''} />
+                <item.icon size={20} className={item.label.includes('Pending') && item.value > 0 ? 'animate-spin' : ''} />
               </div>
             </div>
           </div>

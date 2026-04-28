@@ -266,6 +266,7 @@ exports.getCourseCertificates = async (req, res, next) => {
     certificates.forEach(c => {
       if (!c.status) return;
       const s = String(c.status).toLowerCase();
+      // Map both uppercase and lowercase to ensure counting
       if (summary[s] !== undefined) {
         summary[s]++;
       }
