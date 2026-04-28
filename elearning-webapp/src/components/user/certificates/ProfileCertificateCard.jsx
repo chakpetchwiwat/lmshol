@@ -1,5 +1,6 @@
 import React from 'react';
 import { Building2, Calendar, ExternalLink, FileText, Pencil, Trash2 } from 'lucide-react';
+import { userAPI } from '../../../utils/api';
 import { formatCertificateDateRange } from './certificateForm.utils';
 
 const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
@@ -11,11 +12,14 @@ const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
   const dateLabel = formatCertificateDateRange(certificate, isLms);
 
   const handleDownload = async () => {
-    if (!isLms || !certificate.id) return;
+    if (!certificate.id) return;
     
     try {
       setDownloading(true);
-      const response = await userAPI.getCertificateDownloadUrl(certificate.id);
+      const response = isLms 
+        ? await userAPI.getCertificateDownloadUrl(certificate.id)
+        : await userAPI.getUploadedCertificateDownloadUrl(certificate.id);
+
       if (response.data?.url) {
         window.open(response.data.url, '_blank');
       } else {
@@ -23,7 +27,7 @@ const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
       }
     } catch (error) {
       console.error('Download error:', error);
-      alert('ไม่สามารถดาวน์โหลดเกียรติบัตรได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง');
+      alert('ไม่สามารถเปิดไฟล์เกียรติบัตรได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setDownloading(false);
     }
@@ -125,16 +129,20 @@ const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
                   </button>
                 )
               ) : (
-                fileUrl && (
-                  <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100"
+                (fileUrl || certificate.fileKey) && (
+                  <button
+                    onClick={handleDownload}
+                    disabled={downloading}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:opacity-50"
                   >
+                    {downloading ? (
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
+                    ) : (
+                      <FileText size={13} />
+                    )}
                     {certificate.fileName || 'ไฟล์แนบ'}
                     <ExternalLink size={13} />
-                  </a>
+                  </button>
                 )
               )}
             </div>

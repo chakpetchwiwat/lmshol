@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const crypto = require('crypto');
-const { createClient } = require('@supabase/supabase-js');
+const supabase = require('../config/supabase');
 const path = require('path');
 const { getSecurityConfig } = require('../config/security');
 const { verifyToken, verifyAdminPanelAccess } = require('../middleware/auth');
@@ -12,10 +12,7 @@ const { validateUploadedFile, ALLOWED_UPLOAD_TYPES } = require('../utils/uploadV
 const router = express.Router();
 const securityConfig = getSecurityConfig();
 
-// Initialize Supabase Client
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Supabase client is now managed centrally in ../config/supabase
 
 // Use Memory Storage for Serverless (Vercel)
 const storage = multer.memoryStorage();
@@ -73,7 +70,9 @@ const uploadToSupabase = async (req, res, { forceSubDir } = {}) => {
             .from(bucketName)
             .getPublicUrl(fileName);
 
-        const fileUrl = forceSubDir ? publicUrl : isImage ? publicUrl : fileName;
+        // For sensitive files, we don't return a public URL as it's private.
+        // Frontend must use the signed URL endpoint.
+        const fileUrl = isSensitive ? null : publicUrl;
 
         res.json({
             message: 'Upload successful!',

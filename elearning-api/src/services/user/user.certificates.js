@@ -103,9 +103,34 @@ const deleteCertificate = async (userId, certificateId) => {
     return { id: certificateId };
 };
 
+const getCertificateSignedUrl = async (userId, certificateId) => {
+    const cert = await prisma.userCertificate.findFirst({
+        where: { id: certificateId, userId }
+    });
+
+    if (!cert) {
+        throw new Error('ไม่พบ certificate');
+    }
+
+    if (!cert.fileKey) {
+        throw new Error('ไม่มีไฟล์แนบสำหรับ certificate นี้');
+    }
+
+    const { data, error } = await require('../../config/supabase').storage
+        .from('secure-documents')
+        .createSignedUrl(cert.fileKey, 3600); // 1 hour
+
+    if (error) {
+        throw new Error(`ไม่สามารถสร้างลิงก์ดาวน์โหลดได้: ${error.message}`);
+    }
+
+    return { url: data.signedUrl };
+};
+
 module.exports = {
     getCertificates,
     createCertificate,
     updateCertificate,
-    deleteCertificate
+    deleteCertificate,
+    getCertificateSignedUrl
 };

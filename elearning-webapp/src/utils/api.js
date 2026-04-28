@@ -113,6 +113,7 @@ export const userAPI = {
   getAnnouncementDocumentAccess: (announcementId) => api.get(`/user/announcements/${announcementId}/document-access`),
   updateProfile: (data) => api.put('/user/profile', data),
   getCertificates: () => api.get('/user/certificates'),
+  getUploadedCertificateDownloadUrl: (id) => api.get(`/user/certificates/${id}/download-url`),
   getLmsCertificates: () => api.get('/certificates/me'),
   getCertificateDownloadUrl: (id) => api.get(`/certificates/${id}/download-url`),
   verifyLmsCertificate: (token) => api.get(`/certificates/verify/${token}`),

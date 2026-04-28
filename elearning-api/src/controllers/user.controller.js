@@ -125,6 +125,11 @@ const getAnnouncementDocumentAccess = asyncHandler(async (req, res) => {
   res.json({ success: true, data: documentAccess });
 });
 
+const getCertificateDownloadUrl = asyncHandler(async (req, res) => {
+  const result = await UserService.getCertificateSignedUrl(req.user.userId, req.params.id);
+  res.json({ success: true, data: result });
+});
+
 const getLessonDocumentStream = asyncHandler(async (req, res) => {
   const { upstreamResponse, fileName } = await UserService.getLessonDocumentStream(req.params.id, req.query.token);
   const contentType = upstreamResponse.headers.get('content-type') || 'application/octet-stream';
@@ -196,6 +201,7 @@ module.exports = {
   submitAnnouncementQuiz,
   updateProfile,
   getCertificates,
+  getCertificateDownloadUrl,
   createCertificate,
   updateCertificate,
   deleteCertificate,

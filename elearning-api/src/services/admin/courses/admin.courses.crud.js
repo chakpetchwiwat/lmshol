@@ -48,10 +48,15 @@ const buildCourseMutationPayload = async (tx, input) => {
         studentCount: parseInteger(input.studentCount, 5000)
     };
 
+    const certificateEnabled = input.certificateEnabled !== undefined ? Boolean(input.certificateEnabled) : undefined;
+    const certificatePassingScore = input.certificatePassingScore !== undefined ? parseInteger(input.certificatePassingScore, 80) : undefined;
+
     return {
         data,
         visibleDepartmentIds,
-        visibleTierIds
+        visibleTierIds,
+        certificateEnabled,
+        certificatePassingScore
     };
 };
 
@@ -95,9 +100,28 @@ const getAdminCourses = async () => {
 };
 
 const createCourse = async (input) => prisma.$transaction(async (tx) => {
-    const { data, visibleDepartmentIds, visibleTierIds } = await buildCourseMutationPayload(tx, input);
+    const { data, visibleDepartmentIds, visibleTierIds, certificateEnabled, certificatePassingScore } = await buildCourseMutationPayload(tx, input);
     const course = await tx.course.create({ data });
     await saveCourseVisibility(tx, course.id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+
+    if (certificateEnabled !== undefined) {
+        const defaultTemplate = await tx.certificateTemplate.findFirst({ where: { isDefault: true } });
+        if (defaultTemplate) {
+            await tx.courseCertificateSetting.upsert({
+                where: { courseId: course.id },
+                create: {
+                    courseId: course.id,
+                    templateId: defaultTemplate.id,
+                    enabled: certificateEnabled,
+                    passingScore: certificatePassingScore || 80
+                },
+                update: {
+                    enabled: certificateEnabled,
+                    passingScore: certificatePassingScore || 80
+                }
+            });
+        }
+    }
     const createdCourse = await tx.course.findUnique({
         where: { id: course.id },
         include: courseInclude
@@ -109,9 +133,28 @@ const createCourse = async (input) => prisma.$transaction(async (tx) => {
 });
 
 const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
-    const { data, visibleDepartmentIds, visibleTierIds } = await buildCourseMutationPayload(tx, input);
+    const { data, visibleDepartmentIds, visibleTierIds, certificateEnabled, certificatePassingScore } = await buildCourseMutationPayload(tx, input);
     await tx.course.update({ where: { id }, data });
     await saveCourseVisibility(tx, id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+
+    if (certificateEnabled !== undefined) {
+        const defaultTemplate = await tx.certificateTemplate.findFirst({ where: { isDefault: true } });
+        if (defaultTemplate) {
+            await tx.courseCertificateSetting.upsert({
+                where: { courseId: id },
+                create: {
+                    courseId: id,
+                    templateId: defaultTemplate.id,
+                    enabled: certificateEnabled,
+                    passingScore: certificatePassingScore || 80
+                },
+                update: {
+                    enabled: certificateEnabled,
+                    passingScore: certificatePassingScore || 80
+                }
+            });
+        }
+    }
     const updatedCourse = await tx.course.findUnique({
         where: { id },
         include: courseInclude

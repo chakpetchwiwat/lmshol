@@ -1,5 +1,5 @@
 import React from 'react';
-import { Book, Trophy, Clock, Plus, ImageIcon, Upload, Trash2, FileText, Layers, Users, GraduationCap, Video } from 'lucide-react';
+import { Book, Trophy, Clock, Plus, ImageIcon, Upload, Trash2, FileText, Layers, Users, GraduationCap, Video, Award, CheckCircle2 } from 'lucide-react';
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import InstructorPresetPicker from './InstructorPresetPicker';
@@ -418,6 +418,86 @@ const CourseBasicInfoForm = ({
                 value={courseForm.whatYouWillGet}
                 onChange={(val) => setCourseForm({ ...courseForm, whatYouWillGet: val })}
               />
+            </div>
+          </div>
+
+          {/* Certificate Configuration Section */}
+          <div className="mt-8 overflow-hidden rounded-[2rem] border border-indigo-100 bg-white shadow-sm transition-all hover:shadow-md md:col-span-2">
+            <div className="bg-gradient-to-r from-indigo-50/50 to-white px-8 py-6 border-b border-indigo-50">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600 shadow-sm">
+                  <Award size={24} />
+                </div>
+                <div>
+                  <h4 className="text-lg font-black text-slate-900 uppercase tracking-tight">การตั้งค่าเกียรติบัตร</h4>
+                  <p className="text-sm font-medium text-slate-500">กำหนดเงื่อนไขการรับใบรับรองเมื่อจบหลักสูตร</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 space-y-8">
+              <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                <div className="max-w-md">
+                  <h5 className="font-black text-slate-900">เปิดใช้งานเกียรติบัตร</h5>
+                  <p className="mt-1 text-xs font-medium leading-relaxed text-slate-500">
+                    หากเปิดใช้งาน ผู้เรียนจะได้รับเกียรติบัตรโดยอัตโนมัติเมื่อผ่านเกณฑ์ที่กำหนด
+                  </p>
+                </div>
+                <label className="relative inline-flex cursor-pointer items-center">
+                  <input
+                    type="checkbox"
+                    className="peer sr-only"
+                    checked={Boolean(courseForm.certificateEnabled)}
+                    onChange={(e) => setCourseForm({ ...courseForm, certificateEnabled: e.target.checked })}
+                  />
+                  <div className="h-7 w-12 rounded-full bg-slate-200 transition-all after:absolute after:top-[4px] after:left-[4px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-5"></div>
+                </label>
+              </div>
+
+              {courseForm.certificateEnabled && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="rounded-2xl bg-indigo-50/50 p-6 border border-indigo-100/50">
+                    <div className="flex flex-col gap-6 md:flex-row md:items-center">
+                      <div className="flex-1">
+                        <label className="mb-2 block text-sm font-black text-indigo-900">เกณฑ์คะแนนสอบที่ผ่าน (%)</label>
+                        <p className="mb-4 text-xs font-medium text-indigo-700/70 leading-relaxed">
+                          ผู้เรียนต้องทำคะแนนสอบรวมให้ได้อย่างน้อยตามที่กำหนดเพื่อรับเกียรติบัตร
+                        </p>
+                        <div className="relative max-w-[200px]">
+                          <Trophy size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" />
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            className="form-input w-full pl-10 border-indigo-200 bg-white focus:border-primary"
+                            value={courseForm.certificatePassingScore}
+                            onChange={(e) => setCourseForm({ ...courseForm, certificatePassingScore: parseInt(e.target.value || 0, 10) })}
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">%</span>
+                        </div>
+                      </div>
+                      <div className="hidden h-20 w-px bg-indigo-100 md:block"></div>
+                      <div className="flex-1">
+                        <p className="text-xs font-black uppercase tracking-wider text-indigo-900/60 mb-2">ข้อมูลเพิ่มเติม</p>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                            <CheckCircle2 size={14} className="text-emerald-500" /> 
+                            <span>รูปแบบ: แนวนอน (Landscape)</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                            <CheckCircle2 size={14} className="text-emerald-500" /> 
+                            <span>ขนาด: A4</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
+                            <CheckCircle2 size={14} className="text-emerald-500" /> 
+                            <span>ออกให้โดย: ระบบอัตโนมัติ</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

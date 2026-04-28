@@ -29,6 +29,7 @@ router.put('/notifications/read-all', userController.markAllNotificationsAsRead)
 router.put('/notifications/:id/read', userController.markNotificationAsRead);
 router.delete('/notifications', userController.clearAllNotifications);
 router.get('/certificates', userController.getCertificates);
+router.get('/certificates/:id/download-url', userController.getCertificateDownloadUrl);
 router.post('/certificates', userController.createCertificate);
 router.put('/certificates/:id', userController.updateCertificate);
 router.delete('/certificates/:id', userController.deleteCertificate);

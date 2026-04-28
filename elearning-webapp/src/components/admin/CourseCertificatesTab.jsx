@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, CheckCircle2, AlertCircle, RotateCcw, Ban, FileText, Loader2, Search, ExternalLink, RefreshCw, Plus } from 'lucide-react';
+import { Award, CheckCircle2, AlertCircle, RotateCcw, Ban, FileText, Loader2, Search, ExternalLink, RefreshCw, Plus, X, User, ArrowRight } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -12,6 +12,10 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
   const [summary, setSummary] = React.useState({ total: 0, valid: 0, pending: 0, failed: 0, revoked: 0, expired: 0 });
   const [searchQuery, setSearchQuery] = React.useState('');
   const [hasCertificate, setHasCertificate] = React.useState(true);
+  const [showIssueModal, setShowIssueModal] = React.useState(false);
+  const [enrolledStudents, setEnrolledStudents] = React.useState([]);
+  const [loadingStudents, setLoadingStudents] = React.useState(false);
+  const [studentSearch, setStudentSearch] = React.useState('');
 
   const fetchCertificates = async () => {
     try {
@@ -85,20 +89,36 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
     }
   };
 
-  const handleIssueManual = async () => {
+  const handleIssueManual = async (userId) => {
     if (readOnly) return;
-    const userId = window.prompt('กรุณาระบุ User ID ของผู้เรียนที่ต้องการออกเกียรติบัตร:');
     if (!userId) return;
 
     try {
-      setProcessing('manual-issue');
+      setProcessing('manual-issue-' + userId);
       await adminAPI.issueManual(courseId, userId);
       toast.success('กำลังดำเนินการออกเกียรติบัตรให้ผู้เรียน...');
       fetchCertificates();
+      setShowIssueModal(false);
     } catch (error) {
       toast.error(error.response?.data?.message || 'ไม่สามารถออกเกียรติบัตรได้');
     } finally {
       setProcessing(null);
+    }
+  };
+
+  const handleOpenIssueModal = async () => {
+    if (readOnly) return;
+    setShowIssueModal(true);
+    setLoadingStudents(true);
+    try {
+      const response = await adminAPI.getCourseHistory(courseId);
+      // Filter out users who already have a valid/pending certificate in the current course
+      const existingUserIds = new Set(certificates.filter(c => c.status !== 'REVOKED').map(c => c.user?.id));
+      setEnrolledStudents((response.data || []).filter(student => !existingUserIds.has(student.user?.id)));
+    } catch (error) {
+      toast.error('ไม่สามารถดึงรายชื่อผู้เรียนได้');
+    } finally {
+      setLoadingStudents(false);
     }
   };
 
@@ -224,11 +244,11 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
           </button>
           {!readOnly && (
             <button 
-              onClick={handleIssueManual}
-              disabled={processing === 'manual-issue'}
+              onClick={handleOpenIssueModal}
+              disabled={!hasCertificate}
               className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-slate-800 active:scale-95 disabled:opacity-50"
             >
-              {processing === 'manual-issue' ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />} 
+              <Plus size={16} /> 
               ออกเกียรติบัตรเพิ่ม
             </button>
           )}
@@ -349,6 +369,114 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
           </table>
         </div>
       </div>
+      {/* Learner Selection Modal */}
+      {showIssueModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setShowIssueModal(false)}></div>
+          
+          <div className="relative w-full max-w-2xl animate-in zoom-in-95 fade-in duration-200 overflow-hidden rounded-[2.5rem] bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-50 bg-slate-50/50 px-8 py-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+                  <Award size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">ออกเกียรติบัตรด้วยตนเอง</h3>
+                  <p className="text-xs font-bold text-slate-500">เลือกผู้เรียนที่ต้องการมอบเกียรติบัตรให้</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowIssueModal(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-8">
+              <div className="relative mb-6">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="ค้นหาชื่อผู้เรียน หรือแผนก..."
+                  value={studentSearch}
+                  onChange={(e) => setStudentSearch(e.target.value)}
+                  className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-bold text-slate-900 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-50 transition-all outline-none"
+                />
+              </div>
+
+              <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                {loadingStudents ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <Loader2 size={32} className="animate-spin text-indigo-300 mb-4" />
+                    <p className="text-sm font-bold text-slate-400">กำลังโหลดรายชื่อผู้เรียน...</p>
+                  </div>
+                ) : enrolledStudents.length > 0 ? (
+                  <div className="space-y-2">
+                    {enrolledStudents
+                      .filter(s => 
+                        s.user?.name?.toLowerCase().includes(studentSearch.toLowerCase()) || 
+                        s.user?.department?.toLowerCase().includes(studentSearch.toLowerCase())
+                      )
+                      .map((student) => (
+                        <div 
+                          key={student.user?.id}
+                          className="group flex items-center justify-between rounded-2xl border border-slate-50 bg-white p-4 transition-all hover:border-indigo-100 hover:bg-indigo-50/30 hover:shadow-sm"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 font-black text-sm group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+                              <User size={20} />
+                            </div>
+                            <div>
+                              <p className="font-black text-slate-900">{student.user?.name}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{student.user?.department}</span>
+                                <span className="h-1 w-1 rounded-full bg-slate-300"></span>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider ${student.status === 'COMPLETED' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                                  {student.status} ({student.progressPercent}%)
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleIssueManual(student.user?.id)}
+                            disabled={processing === 'manual-issue-' + student.user?.id}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition-all hover:bg-indigo-600 active:scale-90 disabled:opacity-50"
+                          >
+                            {processing === 'manual-issue-' + student.user?.id ? (
+                              <Loader2 size={18} className="animate-spin" />
+                            ) : (
+                              <ArrowRight size={18} />
+                            )}
+                          </button>
+                        </div>
+                      ))}
+                    {enrolledStudents.filter(s => 
+                        s.user?.name?.toLowerCase().includes(studentSearch.toLowerCase()) || 
+                        s.user?.department?.toLowerCase().includes(studentSearch.toLowerCase())
+                      ).length === 0 && (
+                        <div className="py-12 text-center">
+                          <p className="text-sm font-bold text-slate-400">ไม่พบรายชื่อผู้เรียนที่ตรงกับการค้นหา</p>
+                        </div>
+                      )}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center">
+                    <AlertCircle size={32} className="mx-auto text-slate-200 mb-4" />
+                    <p className="text-sm font-bold text-slate-400">ไม่มีรายชื่อผู้เรียนที่ยังไม่ได้รับเกียรติบัตร</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-slate-50/50 px-8 py-4 text-center">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                เฉพาะผู้เรียนที่ยังไม่ได้รับเกียรติบัตรเท่านั้นที่จะแสดงในรายการนี้
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
