@@ -20,7 +20,7 @@ function buildLaunchDiagnostics(executablePath) {
 
 function escapePdfText(value) {
   return String(value || '')
-    .replace(/[^\x20-\x7E]/g, '?')
+    .replace(/[^\x20-\x7E\u0E00-\u0E7F]/g, '?')
     .replace(/\\/g, '\\\\')
     .replace(/\(/g, '\\(')
     .replace(/\)/g, '\\)');

@@ -177,7 +177,7 @@ const getSecurityConfig = (env = process.env) => ({
     ) * 1024 * 1024,
     redis: {
         enabled: parseBoolean(env.REDIS_ENABLED, false),
-        url: env.REDIS_URL || 'redis://localhost:6379'
+        url: env.REDIS_URL || (env.NODE_ENV === 'production' ? undefined : 'redis://localhost:6379')
     }
 });
 

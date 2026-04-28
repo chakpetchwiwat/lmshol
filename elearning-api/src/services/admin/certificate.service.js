@@ -405,8 +405,12 @@ async function generateCertificatePdfAsync(certificateId) {
     console.log(`[Certificate] pdf.started | id=${certificateId} | no=${certNo}`);
 
     // 1. Prepare verification URL
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const verificationUrl = `${frontendUrl}/certificates/verify/${cert.verificationToken}`;
+    // Priority: 1. FRONTEND_URL env 2. Base site URL (if we have it) 3. No fallback (must be configured)
+    const frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:5173');
+    if (!frontendUrl && process.env.NODE_ENV === 'production') {
+      console.error('[Certificate] CRITICAL: FRONTEND_URL is not set in production. Verification links will be broken.');
+    }
+    const verificationUrl = `${frontendUrl || ''}/certificates/verify/${cert.verificationToken}`;
 
     // 2. Render HTML
     const html = templateRenderer.renderCertificateHtml({

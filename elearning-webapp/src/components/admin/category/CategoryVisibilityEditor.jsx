@@ -12,7 +12,7 @@ const CategoryVisibilityEditor = ({
 }) => (
   <>
     <div>
-      <p className="mb-2 text-xs font-bold uppercase text-muted">เธชเธดเธ—เธเธดเนเธเธฒเธฃเธกเธญเธเน€เธซเนเธ</p>
+      <p className="mb-2 text-xs font-bold uppercase text-muted">สิทธิ์การมองเห็น</p>
       <div className="flex gap-2">
         <button
           type="button"
@@ -23,7 +23,7 @@ const CategoryVisibilityEditor = ({
               : 'border border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
           }`}
         >
-          เธ—เธธเธเธเธ (ALL)
+          ทุกคน (ALL)
         </button>
         <button
           type="button"
@@ -34,7 +34,7 @@ const CategoryVisibilityEditor = ({
               : 'border border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
           }`}
         >
-          เน€เธฅเธทเธญเธเน€เธเธเธฒเธฐเธเธฅเธธเนเธก
+          เลือกเฉพาะกลุ่ม
         </button>
       </div>
     </div>
@@ -42,7 +42,7 @@ const CategoryVisibilityEditor = ({
     {!categoryForm.visibleToAll && (
       <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-3">
         <div>
-          <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">เนเธเธเธ (Department)</p>
+          <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">แผนก (Department)</p>
           <div className="flex flex-wrap gap-1.5">
             {departments.map((department) => {
               const isSelected = (categoryForm.visibleDepartmentIds || []).includes(department.id);
@@ -69,7 +69,7 @@ const CategoryVisibilityEditor = ({
         </div>
 
         <div>
-          <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">เธฃเธฐเธ”เธฑเธเธเธนเนเนเธเนเธเธฒเธ (Tier)</p>
+          <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">ระดับผู้ใช้งาน (Tier)</p>
           <div className="flex flex-wrap gap-1.5">
             {tiers.map((tier) => {
               const isSelected = (categoryForm.visibleTierIds || []).includes(tier.id);

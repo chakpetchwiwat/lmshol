@@ -9,7 +9,7 @@ const getApiUrl = () => {
   if (typeof window !== 'undefined') {
     return new URL(API_DEFAULTS.API_PATH, window.location.origin).toString();
   }
-  return new URL(API_DEFAULTS.API_PATH, API_DEFAULTS.LOCAL_API_ORIGIN).toString();
+  return new URL(API_DEFAULTS.API_PATH, 'http://localhost:5000').toString();
 };
 
 const getBaseUrl = (apiUrl) => {
