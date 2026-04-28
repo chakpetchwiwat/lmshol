@@ -39,11 +39,11 @@ const ROLE_CONFIG = {
   }
 };
 
-const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged }) => {
+const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged, initialStaff }) => {
   const toast = useToast();
-  const [staff, setStaff] = React.useState([]);
+  const [staff, setStaff] = React.useState(initialStaff || []);
   const [allUsers, setAllUsers] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+  const [loading, setLoading] = React.useState(!initialStaff);
   const [processing, setProcessing] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isAdding, setIsAdding] = React.useState(false);

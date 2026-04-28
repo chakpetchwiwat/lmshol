@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import {
@@ -18,7 +18,9 @@ import CourseBasicInfoForm from './CourseBasicInfoForm';
 import CourseContentEditor from './CourseContentEditor';
 import CourseStaffEditor from './CourseStaffEditor';
 import CourseCertificatesTab from './CourseCertificatesTab';
-import { getCourseAccess } from '../../utils/coursePermissions';
+import { getCourseAccess, canUserEditCourse, canUserManageContent } from '../../utils/coursePermissions';
+import { adminAPI, courseStaffAPI } from '../../utils/api';
+import { useToast } from '../../context/useToast';
 
 const CourseModal = ({
   isOpen,
@@ -49,7 +51,15 @@ const CourseModal = ({
   currentUser,
   onStaffChanged
 }) => {
-  const [canEdit, setCanEdit] = React.useState(true);
+  const toast = useToast();
+  const [staff, setStaff] = React.useState([]);
+  const [loadingPermissions, setLoadingPermissions] = React.useState(false);
+  const [permissions, setPermissions] = React.useState({
+    canEditSettings: true,
+    canEditContent: true,
+    canManageCertificates: true
+  });
+  
   const imageInputRef = React.useRef(null);
 
   const sensors = useSensors(
@@ -62,6 +72,43 @@ const CourseModal = ({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const fetchStaff = React.useCallback(async () => {
+    if (!editingId) return;
+    try {
+      setLoadingPermissions(true);
+      const response = await courseStaffAPI.getStaff(editingId);
+      setStaff(response.data);
+      if (onStaffChanged) onStaffChanged(response.data);
+    } catch (error) {
+      console.error('Fetch staff for permissions error:', error);
+    } finally {
+      setLoadingPermissions(false);
+    }
+  }, [editingId, onStaffChanged]);
+
+  React.useEffect(() => {
+    if (isOpen && editingId) {
+      fetchStaff();
+    } else if (!isEditing) {
+      // New course - full permissions
+      setPermissions({
+        canEditSettings: true,
+        canEditContent: true,
+        canManageCertificates: true
+      });
+      setStaff([]);
+    }
+  }, [isOpen, editingId, isEditing, fetchStaff]);
+
+  React.useEffect(() => {
+    const access = getCourseAccess({ currentUser, staff });
+    setPermissions({
+      canEditSettings: canUserEditCourse(access),
+      canEditContent: canUserManageContent(access),
+      canManageCertificates: canUserManageContent(access) // Allow instructors to manage certs
+    });
+  }, [currentUser, staff]);
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -85,10 +132,13 @@ const CourseModal = ({
           <div className="flex items-center justify-between border-b border-border bg-gray-50 p-4 rounded-t-[inherit]">
             <div className="flex items-center gap-3">
               <h3 className="text-xl font-bold">{isEditing ? 'แก้ไขคอร์สเรียน' : 'สร้างคอร์สใหม่'}</h3>
-              {!canEdit && (
+              {!permissions.canEditContent && !loadingPermissions && (
                 <span className="flex items-center gap-1 bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-full border border-slate-200">
                   <X size={12} /> Read Only
                 </span>
+              )}
+              {loadingPermissions && (
+                <span className="animate-pulse text-[10px] font-bold text-slate-400">กำลังตรวจสอบสิทธิ์...</span>
               )}
             </div>
             <button onClick={onClose} className="text-muted hover:text-gray-900"><X size={20} /></button>
@@ -150,7 +200,7 @@ const CourseModal = ({
                 uploading={uploading}
                 imageInputRef={imageInputRef}
                 onClose={onClose}
-                readOnly={!canEdit}
+                readOnly={!permissions.canEditSettings}
               />
             ) : activeTab === 'content' ? (
               <CourseContentEditor 
@@ -162,26 +212,21 @@ const CourseModal = ({
                 onPublishCourse={onPublishCourse}
                 sensors={sensors}
                 handleDragEnd={handleDragEnd}
-                readOnly={!canEdit}
+                readOnly={!permissions.canEditContent}
               />
             ) : activeTab === 'certificates' ? (
               <CourseCertificatesTab 
                 courseId={editingId} 
-                readOnly={!canEdit} 
+                readOnly={!permissions.canManageCertificates} 
               />
             ) : (
               <CourseStaffEditor 
                 courseId={editingId}
                 currentUser={currentUser}
+                initialStaff={staff}
                 onStaffChanged={(staffList) => {
+                  setStaff(staffList);
                   if (onStaffChanged) onStaffChanged(staffList);
-                  
-                  // Recalculate local permission using shared utility
-                  const access = getCourseAccess({ 
-                    currentUser, 
-                    staff: staffList
-                  });
-                  setCanEdit(access === 'full');
                 }}
               />
             )}

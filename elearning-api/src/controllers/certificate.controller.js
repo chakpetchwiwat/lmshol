@@ -7,10 +7,10 @@ const ErrorResponse = require('../utils/errorResponse');
 /**
  * Helper to check if user has FULL access to a course
  */
-async function requireFullAccess(user, courseId) {
+async function requireManagementAccess(user, courseId) {
   const { access } = await canManageCourse(user, courseId);
-  if (access !== COURSE_MANAGEMENT_ACCESS.FULL) {
-    throw new ErrorResponse('Forbidden: Full course access required', 403);
+  if (access !== COURSE_MANAGEMENT_ACCESS.FULL && access !== COURSE_MANAGEMENT_ACCESS.LIMITED) {
+    throw new ErrorResponse('Forbidden: Course management access required', 403);
   }
 }
 
@@ -22,7 +22,7 @@ exports.issueManual = async (req, res, next) => {
     const { courseId, userId } = req.params;
     const issuedById = req.user.id;
 
-    await requireFullAccess(req.user, courseId);
+    await requireManagementAccess(req.user, courseId);
 
     const course = await prisma.course.findUnique({
       where: { id: courseId },
@@ -74,7 +74,7 @@ exports.reissue = async (req, res, next) => {
     const cert = await prisma.certificate.findUnique({ where: { id: certificateId } });
     if (!cert) return next(new ErrorResponse('Certificate not found', 404));
 
-    await requireFullAccess(req.user, cert.courseId);
+    await requireManagementAccess(req.user, cert.courseId);
 
     const updatedCert = await certificateService.reissueCertificate({
       certificateId,
@@ -105,7 +105,7 @@ exports.revoke = async (req, res, next) => {
     const cert = await prisma.certificate.findUnique({ where: { id: certificateId } });
     if (!cert) return next(new ErrorResponse('Certificate not found', 404));
 
-    await requireFullAccess(req.user, cert.courseId);
+    await requireManagementAccess(req.user, cert.courseId);
 
     const revokedCert = await certificateService.revokeCertificate({
       certificateId,
@@ -167,7 +167,7 @@ exports.retry = async (req, res, next) => {
     const cert = await prisma.certificate.findUnique({ where: { id: certificateId } });
     if (!cert) return next(new ErrorResponse('Certificate not found', 404));
 
-    await requireFullAccess(req.user, cert.courseId);
+    await requireManagementAccess(req.user, cert.courseId);
 
     const updatedCert = await certificateService.retryCertificatePdfGeneration({
       certificateId,
@@ -215,7 +215,7 @@ exports.getCourseCertificates = async (req, res, next) => {
   try {
     const { courseId } = req.params;
 
-    await requireFullAccess(req.user, courseId);
+    await requireManagementAccess(req.user, courseId);
 
     const [course, certificates] = await Promise.all([
       prisma.course.findUnique({

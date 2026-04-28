@@ -249,7 +249,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
               className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-slate-800 active:scale-95 disabled:opacity-50"
             >
               <Plus size={16} /> 
-              ออกเกียรติบัตรเพิ่ม
+              มอบ / อนุมัติเกียรติบัตร
             </button>
           )}
         </div>
@@ -330,24 +330,28 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
                               <RefreshCw size={16} className={processing === cert.id ? 'animate-spin' : ''} />
                             </button>
                           )}
-                          {cert.status !== 'REVOKED' && cert.status !== 'PENDING' && (
+                          
+                          {cert.status !== 'REVOKED' && (
                             <>
                               <button
                                 onClick={() => handleReissue(cert.id)}
                                 disabled={processing === cert.id}
                                 className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white hover:text-amber-600 disabled:opacity-50"
-                                title="ออกใหม่ (Reissue)"
+                                title={cert.status === 'PENDING' ? "เร่งการออกไฟล์ (Reissue)" : "ออกใหม่ (Reissue)"}
                               >
                                 <RotateCcw size={16} className={processing === cert.id ? 'animate-spin' : ''} />
                               </button>
-                              <button
-                                onClick={() => handleRevoke(cert.id)}
-                                disabled={processing === cert.id}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white hover:text-rose-600 disabled:opacity-50"
-                                title="ยกเลิก (Revoke)"
-                              >
-                                <Ban size={16} />
-                              </button>
+                              
+                              {cert.status !== 'PENDING' && (
+                                <button
+                                  onClick={() => handleRevoke(cert.id)}
+                                  disabled={processing === cert.id}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white hover:text-rose-600 disabled:opacity-50"
+                                  title="ยกเลิก (Revoke)"
+                                >
+                                  <Ban size={16} />
+                                </button>
+                              )}
                             </>
                           )}
                         </>

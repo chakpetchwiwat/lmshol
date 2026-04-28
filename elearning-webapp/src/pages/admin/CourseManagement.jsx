@@ -163,6 +163,8 @@ const CourseManagement = () => {
       isTemporary: Boolean(course.isTemporary),
       expiredAt: toLocalInputValue(course.expiredAt),
       status: course.status || ENTITY_STATUS.DRAFT,
+      certificateEnabled: course.certificateEnabled ?? false,
+      certificatePassingScore: course.certificatePassingScore ?? 80,
     });
     setActiveTab('basic');
     setShowModal(true);
