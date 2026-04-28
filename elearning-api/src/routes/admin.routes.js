@@ -30,7 +30,7 @@ router.put('/tiers/reorder', verifySuperAdmin, adminController.reorderTiers);
 router.put('/tiers/:id', verifySuperAdmin, adminController.updateTier);
 router.delete('/tiers/:id', verifySuperAdmin, adminController.deleteTier);
 
-router.get('/instructor-presets', verifySuperAdmin, adminController.getInstructorPresets);
+router.get('/instructor-presets', adminController.getInstructorPresets);
 router.post('/instructor-presets', verifySuperAdmin, adminController.createInstructorPreset);
 router.put('/instructor-presets/:id', verifySuperAdmin, adminController.updateInstructorPreset);
 router.delete('/instructor-presets/:id', verifySuperAdmin, adminController.deleteInstructorPreset);
@@ -51,7 +51,7 @@ router.put('/announcements/:id/archive', adminController.archiveAnnouncement);
 router.put('/announcements/:id', adminController.updateAnnouncement);
 router.delete('/announcements/:id', adminController.deleteAnnouncement);
 
-router.get('/categories', verifySuperAdmin, adminController.getCategories);
+router.get('/categories', adminController.getCategories);
 router.post('/categories', verifySuperAdmin, adminController.createCategory);
 router.put('/categories/reorder', verifySuperAdmin, adminController.reorderCategories);
 router.put('/categories/:id/republish', verifySuperAdmin, adminController.republishCategory);
@@ -59,7 +59,7 @@ router.put('/categories/:id/archive', verifySuperAdmin, adminController.archiveC
 router.put('/categories/:id', verifySuperAdmin, adminController.updateCategory);
 router.delete('/categories/:id', verifySuperAdmin, adminController.deleteCategory);
 
-router.get('/rewards', verifySuperAdmin, adminController.getAdminRewards);
+router.get('/rewards', adminController.getAdminRewards);
 router.post('/rewards', verifySuperAdmin, adminController.createReward);
 router.put('/rewards/:id', verifySuperAdmin, adminController.updateReward);
 router.delete('/rewards/:id', verifySuperAdmin, adminController.deleteReward);
@@ -68,14 +68,14 @@ router.get('/redeems', adminController.getRedeemRequests);
 router.put('/redeems/:id/status', adminController.updateRedeemStatus);
 
 // Lesson Management
-router.get('/courses/:courseId/lessons', verifySuperAdmin, adminController.getCourseLessons);
+router.get('/courses/:courseId/lessons', adminController.getCourseLessons);
 router.put('/lessons/reorder', verifySuperAdmin, adminController.reorderLessons);
 router.post('/lessons', verifySuperAdmin, adminController.createLesson);
 router.put('/lessons/:id', verifySuperAdmin, adminController.updateLesson);
 router.delete('/lessons/:id', verifySuperAdmin, adminController.deleteLesson);
 
 // Quiz Reports
-router.get('/courses/:courseId/quiz-reports', verifySuperAdmin, adminController.getCourseQuizAttempts);
+router.get('/courses/:courseId/quiz-reports', adminController.getCourseQuizAttempts);
 
 // Certificates
 router.get('/courses/:courseId/certificates', certificateController.getCourseCertificates);
