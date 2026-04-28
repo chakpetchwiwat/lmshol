@@ -74,7 +74,8 @@ const mapUserRecord = (user) => {
             accessAdmin: tier.accessAdmin,
             order: tier.order
         } : null,
-        employmentDate: rest.employmentDate || rest.createdAt
+        employmentDate: rest.employmentDate || rest.createdAt,
+        isCourseStaff: (rest.courseStaff?.length || 0) > 0
     };
 };
 

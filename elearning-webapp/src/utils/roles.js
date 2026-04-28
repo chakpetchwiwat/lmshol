@@ -2,7 +2,7 @@ import { USER_ROLES, ADMIN_PANEL_ROLES } from './constants/roles';
 
 export const canAccessAdminPanel = (user) => {
   if (!user) return false;
-  return ADMIN_PANEL_ROLES.includes(user.role) || user.tier?.accessAdmin === true;
+  return ADMIN_PANEL_ROLES.includes(user.role) || user.tier?.accessAdmin === true || user.isCourseStaff === true;
 };
 
 export const isSuperAdmin = (user) => user?.role === USER_ROLES.ADMIN;

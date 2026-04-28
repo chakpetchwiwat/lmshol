@@ -44,13 +44,17 @@ const verifyAdminPanelAccess = async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
-      include: { tier: true }
+      include: { 
+        tier: true,
+        courseStaff: { take: 1 }
+      }
     });
 
-    if (user && (ADMIN_PANEL_ROLES.includes(user.role) || user.tier?.accessAdmin)) {
+    if (user && (ADMIN_PANEL_ROLES.includes(user.role) || user.tier?.accessAdmin || (user.courseStaff && user.courseStaff.length > 0))) {
       // Update req.user with latest data for downstream use
       req.user.role = user.role;
       req.user.tier = user.tier;
+      req.user.isCourseStaff = (user.courseStaff && user.courseStaff.length > 0);
       next();
     } else {
       res.status(403).json({ message: 'Admin panel access required' });

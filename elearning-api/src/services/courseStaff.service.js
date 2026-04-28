@@ -69,8 +69,8 @@ const ensureCourseAndUserExist = async (tx, courseId, userId) => {
   }
 };
 
-const ensureOwnerAvailable = async (tx, courseId, excludeStaffId) => {
-  const owner = await tx.courseStaff.findFirst({
+const demoteExistingOwner = async (tx, courseId, excludeStaffId) => {
+  const currentOwner = await tx.courseStaff.findFirst({
     where: {
       courseId,
       role: 'owner',
@@ -79,8 +79,12 @@ const ensureOwnerAvailable = async (tx, courseId, excludeStaffId) => {
     select: { id: true }
   });
 
-  if (owner) {
-    throw new ErrorResponse('Course already has an owner', 400);
+  if (currentOwner) {
+    // Automatically demote previous owner to instructor
+    await tx.courseStaff.update({
+      where: { id: currentOwner.id },
+      data: { role: 'instructor' }
+    });
   }
 };
 
@@ -196,7 +200,7 @@ const assignCourseStaff = async (courseId, payload) => {
       await ensureCourseAndUserExist(tx, courseId, userId);
 
       if (role === 'owner') {
-        await ensureOwnerAvailable(tx, courseId);
+        await demoteExistingOwner(tx, courseId);
       }
 
       if (isPrimary) {
@@ -271,7 +275,7 @@ const updateCourseStaff = async (courseId, staffId, payload) => {
         : false;
 
       if (nextRole === 'owner') {
-        await ensureOwnerAvailable(tx, courseId, staffId);
+        await demoteExistingOwner(tx, courseId, staffId);
       }
 
       if (nextIsPrimary) {

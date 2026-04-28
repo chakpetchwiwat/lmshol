@@ -93,11 +93,17 @@ const getAdminCourses = async (user) => {
     
     // If not superadmin, only show courses where user is staff
     if (user?.role !== USER_ROLES.ADMIN) {
-        where.staff = {
-            some: {
-                userId: user.userId
-            }
-        };
+        const userId = user.userId || user.id;
+        if (userId) {
+            where.staff = {
+                some: {
+                    userId: userId
+                }
+            };
+        } else {
+            // Security: If we can't identify the user, they see nothing
+            return [];
+        }
     }
 
     const courses = await prisma.course.findMany({
