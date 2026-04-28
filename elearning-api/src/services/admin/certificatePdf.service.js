@@ -150,7 +150,11 @@ async function generatePdfBuffer(html, options = {}) {
       const page = await browser.newPage();
       
       // Set viewport size if needed, but A4 format usually takes care of it
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      // Set content with a reasonable timeout for Vercel
+      await page.setContent(html, { 
+        waitUntil: 'load',
+        timeout: 30000 
+      });
 
       const pdfBuffer = await page.pdf({
         format: 'A4',

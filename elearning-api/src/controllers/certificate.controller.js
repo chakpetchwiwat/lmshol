@@ -45,19 +45,19 @@ exports.issueManual = async (req, res, next) => {
       manual: true
     });
 
-    // Trigger async generation
-    certificateService.generateCertificatePdfAsync(certificate.id).catch(err => {
-      console.error(`[Certificate] Manual generation trigger failed | id=${certificate.id}:`, err);
-    });
+    // Trigger generation (Awaiting to ensure completion on Vercel/Production)
+    const finalCert = await certificateService.generateCertificatePdfAsync(certificate.id);
 
-    res.status(202).json({
+    res.status(finalCert?.status === 'VALID' ? 201 : 202).json({
       success: true,
       data: {
         certificateId: certificate.id,
         certificateNo: certificate.certificateNo,
-        status: certificate.status
+        status: finalCert?.status || certificate.status
       },
-      message: 'Certificate generation started'
+      message: finalCert?.status === 'VALID' 
+        ? 'Certificate issued and generated successfully'
+        : 'Certificate issued, but generation is still processing'
     });
   } catch (error) {
     // Handle known service errors with appropriate status codes
@@ -185,13 +185,18 @@ exports.retry = async (req, res, next) => {
       requestedById: getRequestUserId(req)
     });
 
+    // Await generation for Vercel stability
+    const finalCert = await certificateService.generateCertificatePdfAsync(updatedCert.id);
+
     res.json({
       success: true,
       data: {
         certificateId: updatedCert.id,
-        status: updatedCert.status
+        status: finalCert?.status || updatedCert.status
       },
-      message: 'Certificate retry started'
+      message: finalCert?.status === 'VALID' 
+        ? 'Certificate regenerated successfully' 
+        : 'Certificate regeneration failed'
     });
   } catch (error) {
     next(error);
