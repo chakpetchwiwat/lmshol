@@ -82,7 +82,13 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      
+      // Only redirect to login if we're not already there.
+      // This prevents the page from refreshing on a failed login attempt,
+      // which would wipe out the error message shown to the user.
+      if (!window.location.pathname.endsWith('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
