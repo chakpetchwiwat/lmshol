@@ -43,6 +43,11 @@ exports.issueManual = async (req, res, next) => {
       manual: true
     });
 
+    // Trigger async generation
+    certificateService.generateCertificatePdfAsync(certificate.id).catch(err => {
+      console.error(`[Certificate] Manual generation trigger failed | id=${certificate.id}:`, err);
+    });
+
     res.status(202).json({
       success: true,
       data: {
@@ -79,6 +84,11 @@ exports.reissue = async (req, res, next) => {
     const updatedCert = await certificateService.reissueCertificate({
       certificateId,
       requestedById: req.user.id
+    });
+
+    // Trigger async generation
+    certificateService.generateCertificatePdfAsync(updatedCert.id).catch(err => {
+      console.error(`[Certificate] Reissue generation trigger failed | id=${updatedCert.id}:`, err);
     });
 
     res.status(202).json({

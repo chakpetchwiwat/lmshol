@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -63,9 +63,7 @@ const AdminLayout = () => {
   const menuItems = [
     { path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
     { path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' },
-    ...(isFullAdmin
-      ? [{ path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' }]
-      : []),
+    { path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' },
     { path: '/admin/announcements', icon: <BellRing size={20} />, label: 'จัดการประกาศแผนก' },
     ...(isFullAdmin
       ? [{ path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' }]

@@ -156,7 +156,7 @@ const deleteInstructorPreset = asyncHandler(async (req, res) => {
 
 // COURSES
 const getAdminCourses = asyncHandler(async (req, res) => {
-  const courses = await AdminService.getAdminCourses();
+  const courses = await AdminService.getAdminCourses(req.user);
   res.json({ success: true, data: courses });
 });
 

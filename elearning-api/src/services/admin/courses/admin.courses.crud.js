@@ -1,4 +1,5 @@
 const prisma = require('../../../utils/prisma');
+const { USER_ROLES } = require('../../../utils/constants/roles');
 const { TRANSACTION_TIMEOUTS } = require('../../../utils/constants/config');
 const { mapCourseRecord } = require('../admin.serializers');
 const { courseInclude } = require('../admin.queries');
@@ -87,8 +88,20 @@ const saveCourseVisibility = async (tx, courseId, visibleToAll, visibleDepartmen
     }
 };
 
-const getAdminCourses = async () => {
+const getAdminCourses = async (user) => {
+    const where = {};
+    
+    // If not superadmin, only show courses where user is staff
+    if (user?.role !== USER_ROLES.ADMIN) {
+        where.staff = {
+            some: {
+                userId: user.userId
+            }
+        };
+    }
+
     const courses = await prisma.course.findMany({
+        where,
         include: courseInclude,
         orderBy: [
             { isTemporary: 'desc' },
