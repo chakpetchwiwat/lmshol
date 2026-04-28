@@ -36,6 +36,8 @@ model User {
   certificates         UserCertificate[]
   enrollments          UserCourse[]
   progress             UserLessonProgress[]
+  assessmentSubmissions AssessmentSubmission[] @relation("AssessmentLearner")
+  gradedAssessments    AssessmentSubmission[] @relation("AssessmentGrader")
   notifications        UserNotification[]
 
   @@index([status, departmentId, tierId])
@@ -249,6 +251,7 @@ model Lesson {
   questions    Question[]
   quizAttempts QuizAttempt[]
   progress     UserLessonProgress[]
+  assessmentSubmissions AssessmentSubmission[]
 
   @@index([courseId, order])
 }
@@ -283,6 +286,33 @@ model QuizAttempt {
 
   @@index([userId, createdAt])
   @@index([lessonId, createdAt])
+}
+
+model AssessmentSubmission {
+  id           String    @id @default(uuid())
+  lessonId     String
+  userId       String
+  fileUrl      String?
+  fileKey      String?
+  fileName     String?
+  fileMimeType String?
+  note         String?
+  score        Int?
+  maxScore     Int       @default(10)
+  status       String    @default("SUBMITTED")
+  feedback     String?
+  gradedById   String?
+  submittedAt  DateTime  @default(now())
+  gradedAt     DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lesson       Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user         User      @relation("AssessmentLearner", fields: [userId], references: [id], onDelete: Cascade)
+  gradedBy     User?     @relation("AssessmentGrader", fields: [gradedById], references: [id])
+
+  @@index([lessonId, status, submittedAt])
+  @@index([userId, submittedAt])
+  @@index([gradedById])
 }
 
 model AnnouncementQuestion {

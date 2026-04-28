@@ -108,6 +108,19 @@ const getCourseDetails = async (courseId, userId) => {
                         where: { userId },
                         orderBy: { score: 'desc' },
                         take: 1
+                    },
+                    assessmentSubmissions: {
+                        where: { userId },
+                        orderBy: { submittedAt: 'desc' },
+                        take: 1,
+                        include: {
+                            gradedBy: {
+                                select: {
+                                    id: true,
+                                    name: true
+                                }
+                            }
+                        }
                     }
                 }
             },

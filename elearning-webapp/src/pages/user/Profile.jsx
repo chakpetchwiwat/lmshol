@@ -33,6 +33,8 @@ const Profile = () => {
   const [lmsCertificates, setLmsCertificates] = React.useState([]);
   const [savingCertificate, setSavingCertificate] = React.useState(false);
   const [uploadingCertificate, setUploadingCertificate] = React.useState(false);
+  const [savingSignature, setSavingSignature] = React.useState(false);
+  const [uploadingSignature, setUploadingSignature] = React.useState(false);
 
   const passwordDialogTitleId = React.useId();
   const policyDialogTitleId = React.useId();
@@ -171,6 +173,37 @@ const Profile = () => {
     }
   };
 
+  const handleUploadSignatureFile = async (file) => {
+    try {
+      setUploadingSignature(true);
+      const response = await userAPI.uploadSignatureFile(file);
+      toast.success('Signature uploaded');
+      return response?.data || response;
+    } catch (error) {
+      console.error('Upload signature error', error);
+      toast.error(error.response?.data?.message || 'Unable to upload signature');
+      return null;
+    } finally {
+      setUploadingSignature(false);
+    }
+  };
+
+  const handleSaveSignature = async ({ signatureTitle, signatureImageUrl }) => {
+    try {
+      setSavingSignature(true);
+      const response = await userAPI.updateProfile({ signatureTitle, signatureImageUrl });
+      const updatedUser = response?.data || response;
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      toast.success('Signature saved');
+    } catch (error) {
+      console.error('Save signature error', error);
+      toast.error(error.response?.data?.message || 'Unable to save signature');
+    } finally {
+      setSavingSignature(false);
+    }
+  };
+
   if (loading) {
     return <Skeleton.List count={5} />;
   }
@@ -204,10 +237,15 @@ const Profile = () => {
       />
 
       <ProfileSettings 
+        user={user}
         notificationsEnabled={notificationsEnabled}
         onToggleNotifications={toggleNotifications}
         onShowPasswordModal={() => setShowEditModal(true)}
         onShowPrivacyModal={() => setShowPolicyModal(true)}
+        onSaveSignature={handleSaveSignature}
+        onUploadSignature={handleUploadSignatureFile}
+        savingSignature={savingSignature}
+        uploadingSignature={uploadingSignature}
       />
 
       <div className="mb-8 mt-4">

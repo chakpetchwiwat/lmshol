@@ -41,9 +41,11 @@ const serializeCourseLesson = (lesson) => ({
     progress: lesson.progress[0] || null,
     isCompleted: lesson.progress[0]?.progress === 100,
     bestScore: lesson.quizAttempts[0]?.score || null,
+    assessmentSubmission: lesson.assessmentSubmissions?.[0] || null,
     questionCount: lesson._count?.questions || 0,
     _count: undefined,
-    quizAttempts: undefined
+    quizAttempts: undefined,
+    assessmentSubmissions: undefined
 });
 
 const serializeCourseStaff = (staff) => ({

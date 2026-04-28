@@ -114,10 +114,6 @@ async function issueCertificate({ courseId, userId, issuedById = null, manual = 
       throw new Error('Certificate issuing is disabled for this course');
     }
 
-    if (!manual && setting.issueMode === 'MANUAL') {
-      throw new Error('This course requires manual certificate issuance');
-    }
-
     // 5. Duplicate check
     const existing = await tx.certificate.findFirst({
       where: {
@@ -422,7 +418,16 @@ async function generateCertificatePdfAsync(certificateId) {
 
     // 3. Generate PDF Buffer
     const pdfBuffer = await certificatePdfService.generatePdfBuffer(html, {
-      orientation: cert.template.orientation
+      orientation: cert.template.orientation,
+      fallbackData: {
+        certificateNo: cert.certificateNo,
+        learnerName: cert.metadata?.learner?.name || cert.user?.name,
+        courseTitle: cert.metadata?.course?.title || cert.course?.title,
+        issuedAt: cert.metadata?.issuedAt
+          ? new Date(cert.metadata.issuedAt).toISOString().slice(0, 10)
+          : new Date(cert.issuedAt).toISOString().slice(0, 10),
+        verificationUrl
+      }
     });
 
     // 4. Upload to Storage

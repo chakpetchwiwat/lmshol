@@ -112,6 +112,9 @@ export const userAPI = {
   getCategories: () => api.get('/user/categories'),
   requestRedeem: (rewardId) => api.post(`/user/redeem/${rewardId}`),
   submitQuiz: (lessonId, data) => api.post(`/user/lessons/${lessonId}/quiz`, data),
+  getAssessmentSubmission: (lessonId) => api.get(`/user/lessons/${lessonId}/assessment`),
+  submitAssessment: (lessonId, data) => api.post(`/user/lessons/${lessonId}/assessment`, data),
+  getAssessmentSubmissionDownloadUrl: (submissionId) => api.get(`/user/assessment-submissions/${submissionId}/download-url`),
   submitAnnouncementQuiz: (announcementId, data) => api.post(`/user/announcements/${announcementId}/quiz`, data),
   getLessonQuestions: (lessonId) => api.get(`/user/lessons/${lessonId}/questions`),
   getAnnouncementQuestions: (announcementId) => api.get(`/user/announcements/${announcementId}/questions`),
@@ -142,6 +145,20 @@ export const userAPI = {
     const formData = new FormData();
     formData.append('file', file);
     return api.post('/upload/certificate', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadAssessmentFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/assessment', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadSignatureFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/signature', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
@@ -217,6 +234,9 @@ export const adminAPI = {
   updateRedeemStatus: (id, status, adminNote = '') => api.put(`/admin/redeems/${id}/status`, { status, adminNote }),
 
   getCourseQuizReports: (courseId) => api.get(`/admin/courses/${courseId}/quiz-reports`),
+  getCourseAssessmentSubmissions: (courseId) => api.get(`/courses/${courseId}/assessment-submissions`),
+  gradeAssessmentSubmission: (courseId, submissionId, data) => api.patch(`/courses/${courseId}/assessment-submissions/${submissionId}/grade`, data),
+  getAssessmentSubmissionDownloadUrl: (courseId, submissionId) => api.get(`/courses/${courseId}/assessment-submissions/${submissionId}/download-url`),
   getPendingCertificates: (params) => api.get('/admin/certificates/pending', { params }),
   getCourseCertificates: (courseId) => api.get(`/admin/courses/${courseId}/certificates`),
   getCertificateDownloadUrl: (id) => api.get(`/certificates/${id}/download-url`),

@@ -51,7 +51,7 @@ const createLesson = async (data) => {
 const updateLesson = async (id, data) => {
     const { questions, ...lessonData } = data;
 
-    if (lessonData.type === 'quiz') {
+    if (lessonData.type !== 'quiz') {
         await prisma.question.deleteMany({
             where: { lessonId: id }
         });

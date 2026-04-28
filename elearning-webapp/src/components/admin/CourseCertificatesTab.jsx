@@ -1,5 +1,5 @@
-import React from 'react';
-import { Award, CheckCircle2, AlertCircle, RotateCcw, Ban, FileText, Loader2, Search, ExternalLink, RefreshCw, Plus, X, User, ArrowRight } from 'lucide-react';
+﻿import React from 'react';
+import { Award, CheckCircle2, AlertCircle, RotateCcw, Ban, FileText, Loader2, Search, ExternalLink, RefreshCw } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -12,10 +12,6 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
   const [summary, setSummary] = React.useState({ total: 0, valid: 0, pending: 0, failed: 0, revoked: 0, expired: 0 });
   const [searchQuery, setSearchQuery] = React.useState('');
   const [hasCertificate, setHasCertificate] = React.useState(true);
-  const [showIssueModal, setShowIssueModal] = React.useState(false);
-  const [enrolledStudents, setEnrolledStudents] = React.useState([]);
-  const [loadingStudents, setLoadingStudents] = React.useState(false);
-  const [studentSearch, setStudentSearch] = React.useState('');
 
   const fetchCertificates = async () => {
     try {
@@ -26,7 +22,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
       if (response.summary) setSummary(response.summary);
     } catch (error) {
       console.error('Failed to fetch certificates:', error);
-      toast.error('ไม่สามารถดึงข้อมูลเกียรติบัตรได้');
+      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ”เธถเธเธเนเธญเธกเธนเธฅเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃเนเธ”เน');
     } finally {
       setLoading(false);
     }
@@ -53,7 +49,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
         window.open(response.data.url, '_blank');
       }
     } catch (error) {
-      toast.error('ไม่สามารถดึงลิงก์ดาวน์โหลดได้');
+      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ”เธถเธเธฅเธดเธเธเนเธ”เธฒเธงเธเนเนเธซเธฅเธ”เนเธ”เน');
     } finally {
       setProcessing(null);
     }
@@ -64,10 +60,10 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
     try {
       setProcessing(id);
       await adminAPI.retryCertificate(id);
-      toast.success('เริ่มสร้างไฟล์ใบรับรองใหม่แล้ว');
+      toast.success('เน€เธฃเธดเนเธกเธชเธฃเนเธฒเธเนเธเธฅเนเนเธเธฃเธฑเธเธฃเธญเธเนเธซเธกเนเนเธฅเนเธง');
       fetchCertificates();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'ไม่สามารถเริ่มกระบวนการใหม่ได้');
+      toast.error(error.response?.data?.message || 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เน€เธฃเธดเนเธกเธเธฃเธฐเธเธงเธเธเธฒเธฃเนเธซเธกเนเนเธ”เน');
     } finally {
       setProcessing(null);
     }
@@ -75,65 +71,32 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
 
   const handleReissue = async (id) => {
     if (readOnly) return;
-    if (!window.confirm('คุณต้องการออกเกียรติบัตรใหม่ (Reissue) ใช่หรือไม่? รายการเดิมจะถูกยกเลิก')) return;
+    if (!window.confirm('เธเธธเธ“เธ•เนเธญเธเธเธฒเธฃเธญเธญเธเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃเนเธซเธกเน (Reissue) เนเธเนเธซเธฃเธทเธญเนเธกเน? เธฃเธฒเธขเธเธฒเธฃเน€เธ”เธดเธกเธเธฐเธ–เธนเธเธขเธเน€เธฅเธดเธ')) return;
 
     try {
       setProcessing(id);
       await adminAPI.reissueCertificate(id);
-      toast.success('กำลังดำเนินการออกเกียรติบัตรใหม่...');
+      toast.success('เธเธณเธฅเธฑเธเธ”เธณเน€เธเธดเธเธเธฒเธฃเธญเธญเธเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃเนเธซเธกเน...');
       fetchCertificates();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'ไม่สามารถออกเกียรติบัตรใหม่ได้');
+      toast.error(error.response?.data?.message || 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธญเธญเธเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃเนเธซเธกเนเนเธ”เน');
     } finally {
       setProcessing(null);
-    }
-  };
-
-  const handleIssueManual = async (userId) => {
-    if (readOnly) return;
-    if (!userId) return;
-
-    try {
-      setProcessing('manual-issue-' + userId);
-      await adminAPI.issueManual(courseId, userId);
-      toast.success('กำลังดำเนินการออกเกียรติบัตรให้ผู้เรียน...');
-      fetchCertificates();
-      setShowIssueModal(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'ไม่สามารถออกเกียรติบัตรได้');
-    } finally {
-      setProcessing(null);
-    }
-  };
-
-  const handleOpenIssueModal = async () => {
-    if (readOnly) return;
-    setShowIssueModal(true);
-    setLoadingStudents(true);
-    try {
-      const response = await adminAPI.getCourseHistory(courseId);
-      // Filter out users who already have a valid/pending certificate in the current course
-      const existingUserIds = new Set(certificates.filter(c => c.status !== 'REVOKED').map(c => c.user?.id));
-      setEnrolledStudents((response.data || []).filter(student => !existingUserIds.has(student.user?.id)));
-    } catch (error) {
-      toast.error('ไม่สามารถดึงรายชื่อผู้เรียนได้');
-    } finally {
-      setLoadingStudents(false);
     }
   };
 
   const handleRevoke = async (id) => {
     if (readOnly) return;
-    const reason = window.prompt('ระบุเหตุผลในการยกเลิก (ถ้ามี):', 'ความขัดข้องทางเทคนิค');
+    const reason = window.prompt('เธฃเธฐเธเธธเน€เธซเธ•เธธเธเธฅเนเธเธเธฒเธฃเธขเธเน€เธฅเธดเธ (เธ–เนเธฒเธกเธต):', 'เธเธงเธฒเธกเธเธฑเธ”เธเนเธญเธเธ—เธฒเธเน€เธ—เธเธเธดเธ');
     if (reason === null) return; // Cancelled prompt
 
     try {
       setProcessing(id);
       await adminAPI.revokeCertificate(id, { reason });
-      toast.success('ยกเลิกเกียรติบัตรเรียบร้อยแล้ว');
+      toast.success('เธขเธเน€เธฅเธดเธเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃเน€เธฃเธตเธขเธเธฃเนเธญเธขเนเธฅเนเธง');
       fetchCertificates();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'ไม่สามารถยกเลิกเกียรติบัตรได้');
+      toast.error(error.response?.data?.message || 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธขเธเน€เธฅเธดเธเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃเนเธ”เน');
     } finally {
       setProcessing(null);
     }
@@ -187,25 +150,25 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
               <AlertCircle size={24} />
             </div>
             <div>
-              <h4 className="font-black text-rose-800 text-lg">ระบบเกียรติบัตรถูกปิดใช้งาน</h4>
-              <p className="text-rose-600 font-bold text-sm">คอร์สนี้ไม่ได้ตั้งค่าให้มีการออกเกียรติบัตร กรุณาไปที่ "ข้อมูลพื้นฐาน" เพื่อเปิดใช้งาน</p>
+              <h4 className="font-black text-rose-800 text-lg">เธฃเธฐเธเธเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃเธ–เธนเธเธเธดเธ”เนเธเนเธเธฒเธ</h4>
+              <p className="text-rose-600 font-bold text-sm">เธเธญเธฃเนเธชเธเธตเนเนเธกเนเนเธ”เนเธ•เธฑเนเธเธเนเธฒเนเธซเนเธกเธตเธเธฒเธฃเธญเธญเธเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃ เธเธฃเธธเธ“เธฒเนเธเธ—เธตเน "เธเนเธญเธกเธนเธฅเธเธทเนเธเธเธฒเธ" เน€เธเธทเนเธญเน€เธเธดเธ”เนเธเนเธเธฒเธ</p>
             </div>
           </div>
           <button 
             onClick={() => window.location.hash = '#basic'} 
             className="btn btn-primary px-6"
           >
-            ตั้งค่าคอร์ส
+            เธ•เธฑเนเธเธเนเธฒเธเธญเธฃเนเธช
           </button>
         </div>
       )}
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
-          { label: 'ออกแล้ว (Valid)', value: summary.valid, color: 'emerald', icon: CheckCircle2 },
-          { label: 'กำลังรอ (Pending)', value: summary.pending, color: 'amber', icon: Loader2 },
-          { label: 'ล้มเหลว (Failed)', value: summary.failed, color: 'rose', icon: AlertCircle },
-          { label: 'ถูกยกเลิก (Revoked)', value: summary.revoked, color: 'slate', icon: Ban },
+          { label: 'เธญเธญเธเนเธฅเนเธง (Valid)', value: summary.valid, color: 'emerald', icon: CheckCircle2 },
+          { label: 'เธเธณเธฅเธฑเธเธฃเธญ (Pending)', value: summary.pending, color: 'amber', icon: Loader2 },
+          { label: 'เธฅเนเธกเน€เธซเธฅเธง (Failed)', value: summary.failed, color: 'rose', icon: AlertCircle },
+          { label: 'เธ–เธนเธเธขเธเน€เธฅเธดเธ (Revoked)', value: summary.revoked, color: 'slate', icon: Ban },
         ].map((item) => (
           <div key={item.label} className={`rounded-2xl border border-${item.color}-100 bg-${item.color}-50/30 p-4 shadow-sm`}>
             <div className="flex items-center justify-between gap-3">
@@ -227,7 +190,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="ค้นหาชื่อผู้เรียน หรือเลขที่เกียรติบัตร..."
+            placeholder="เธเนเธเธซเธฒเธเธทเนเธญเธเธนเนเน€เธฃเธตเธขเธ เธซเธฃเธทเธญเน€เธฅเธเธ—เธตเนเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃ..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm font-bold text-slate-900 transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
@@ -242,16 +205,9 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
           >
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
           </button>
-          {!readOnly && (
-            <button 
-              onClick={handleOpenIssueModal}
-              disabled={!hasCertificate}
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-slate-800 active:scale-95 disabled:opacity-50"
-            >
-              <Plus size={16} /> 
-              มอบ / อนุมัติเกียรติบัตร
-            </button>
-          )}
+          <span className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-2.5 text-xs font-black text-emerald-700">
+            Automatic grants
+          </span>
         </div>
       </div>
 
@@ -313,7 +269,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
                           onClick={() => handleDownload(cert.id)}
                           disabled={processing === cert.id}
                           className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white hover:text-emerald-600 disabled:opacity-50"
-                          title="ดูไฟล์ PDF"
+                          title="เธ”เธนเนเธเธฅเน PDF"
                         >
                           {processing === cert.id ? <Loader2 size={14} className="animate-spin" /> : <FileText size={16} />}
                         </button>
@@ -325,7 +281,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
                               onClick={() => handleRetry(cert.id)}
                               disabled={processing === cert.id}
                               className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white hover:text-primary disabled:opacity-50"
-                              title="ลองใหม่ (Retry)"
+                              title="เธฅเธญเธเนเธซเธกเน (Retry)"
                             >
                               <RefreshCw size={16} className={processing === cert.id ? 'animate-spin' : ''} />
                             </button>
@@ -337,7 +293,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
                                 onClick={() => handleReissue(cert.id)}
                                 disabled={processing === cert.id}
                                 className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white hover:text-amber-600 disabled:opacity-50"
-                                title={cert.status === 'PENDING' ? "เร่งการออกไฟล์ (Reissue)" : "ออกใหม่ (Reissue)"}
+                                title={cert.status === 'PENDING' ? "เน€เธฃเนเธเธเธฒเธฃเธญเธญเธเนเธเธฅเน (Reissue)" : "เธญเธญเธเนเธซเธกเน (Reissue)"}
                               >
                                 <RotateCcw size={16} className={processing === cert.id || cert.status === 'PENDING' ? 'animate-spin' : ''} />
                               </button>
@@ -347,7 +303,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
                                   onClick={() => handleRevoke(cert.id)}
                                   disabled={processing === cert.id}
                                   className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white hover:text-rose-600 disabled:opacity-50"
-                                  title="ยกเลิก (Revoke)"
+                                  title="เธขเธเน€เธฅเธดเธ (Revoke)"
                                 >
                                   <Ban size={16} />
                                 </button>
@@ -365,7 +321,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
                     <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-300">
                       <Award size={24} />
                     </div>
-                    <p className="text-sm font-bold text-slate-500">ไม่พบข้อมูลเกียรติบัตร</p>
+                    <p className="text-sm font-bold text-slate-500">เนเธกเนเธเธเธเนเธญเธกเธนเธฅเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃ</p>
                   </td>
                 </tr>
               )}
@@ -373,116 +329,9 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
           </table>
         </div>
       </div>
-      {/* Learner Selection Modal */}
-      {showIssueModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={() => setShowIssueModal(false)}></div>
-          
-          <div className="relative w-full max-w-2xl animate-in zoom-in-95 fade-in duration-200 overflow-hidden rounded-[2.5rem] bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-50 bg-slate-50/50 px-8 py-6">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
-                  <Award size={20} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-900">ออกเกียรติบัตรด้วยตนเอง</h3>
-                  <p className="text-xs font-bold text-slate-500">เลือกผู้เรียนที่ต้องการมอบเกียรติบัตรให้</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setShowIssueModal(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="p-8">
-              <div className="relative mb-6">
-                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="ค้นหาชื่อผู้เรียน หรือแผนก..."
-                  value={studentSearch}
-                  onChange={(e) => setStudentSearch(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-100 bg-slate-50 py-3.5 pl-12 pr-4 text-sm font-bold text-slate-900 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-50 transition-all outline-none"
-                />
-              </div>
-
-              <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                {loadingStudents ? (
-                  <div className="flex flex-col items-center justify-center py-12">
-                    <Loader2 size={32} className="animate-spin text-indigo-300 mb-4" />
-                    <p className="text-sm font-bold text-slate-400">กำลังโหลดรายชื่อผู้เรียน...</p>
-                  </div>
-                ) : enrolledStudents.length > 0 ? (
-                  <div className="space-y-2">
-                    {enrolledStudents
-                      .filter(s => 
-                        s.user?.name?.toLowerCase().includes(studentSearch.toLowerCase()) || 
-                        s.user?.department?.toLowerCase().includes(studentSearch.toLowerCase())
-                      )
-                      .map((student) => (
-                        <div 
-                          key={student.user?.id}
-                          className="group flex items-center justify-between rounded-2xl border border-slate-50 bg-white p-4 transition-all hover:border-indigo-100 hover:bg-indigo-50/30 hover:shadow-sm"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 font-black text-sm group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
-                              <User size={20} />
-                            </div>
-                            <div>
-                              <p className="font-black text-slate-900">{student.user?.name}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{student.user?.department}</span>
-                                <span className="h-1 w-1 rounded-full bg-slate-300"></span>
-                                <span className={`text-[10px] font-bold uppercase tracking-wider ${student.status === 'COMPLETED' ? 'text-emerald-500' : 'text-amber-500'}`}>
-                                  {student.status} ({student.progressPercent}%)
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => handleIssueManual(student.user?.id)}
-                            disabled={processing === 'manual-issue-' + student.user?.id}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm transition-all hover:bg-indigo-600 active:scale-90 disabled:opacity-50"
-                          >
-                            {processing === 'manual-issue-' + student.user?.id ? (
-                              <Loader2 size={18} className="animate-spin" />
-                            ) : (
-                              <ArrowRight size={18} />
-                            )}
-                          </button>
-                        </div>
-                      ))}
-                    {enrolledStudents.filter(s => 
-                        s.user?.name?.toLowerCase().includes(studentSearch.toLowerCase()) || 
-                        s.user?.department?.toLowerCase().includes(studentSearch.toLowerCase())
-                      ).length === 0 && (
-                        <div className="py-12 text-center">
-                          <p className="text-sm font-bold text-slate-400">ไม่พบรายชื่อผู้เรียนที่ตรงกับการค้นหา</p>
-                        </div>
-                      )}
-                  </div>
-                ) : (
-                  <div className="py-12 text-center">
-                    <AlertCircle size={32} className="mx-auto text-slate-200 mb-4" />
-                    <p className="text-sm font-bold text-slate-400">ไม่มีรายชื่อผู้เรียนที่ยังไม่ได้รับเกียรติบัตร</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-slate-50/50 px-8 py-4 text-center">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                เฉพาะผู้เรียนที่ยังไม่ได้รับเกียรติบัตรเท่านั้นที่จะแสดงในรายการนี้
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 export default CourseCertificatesTab;
+

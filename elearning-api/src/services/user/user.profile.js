@@ -19,6 +19,16 @@ const updateProfile = async (userId, data) => {
         dataToUpdate.password = await bcrypt.hash(newPassword, 10);
     }
 
+    if (Object.prototype.hasOwnProperty.call(data, 'signatureImageUrl')) {
+        const signatureImageUrl = data.signatureImageUrl ? String(data.signatureImageUrl).trim() : null;
+        dataToUpdate.signatureImageUrl = signatureImageUrl || null;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'signatureTitle')) {
+        const signatureTitle = data.signatureTitle ? String(data.signatureTitle).trim() : null;
+        dataToUpdate.signatureTitle = signatureTitle || null;
+    }
+
     if (Object.keys(dataToUpdate).length > 0) {
         const updatedUser = await prisma.user.update({
             where: { id: userId },

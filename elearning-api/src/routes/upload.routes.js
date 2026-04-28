@@ -96,6 +96,19 @@ router.post('/certificate', verifyToken, uploadRateLimiter, upload.single('file'
     await uploadToSupabase(req, res, { forceSubDir: 'certificates' });
 });
 
+// POST /api/upload/assessment - Learner assessment submissions
+router.post('/assessment', verifyToken, uploadRateLimiter, upload.single('file'), async (req, res) => {
+    await uploadToSupabase(req, res, { forceSubDir: 'assessments' });
+});
+
+// POST /api/upload/signature - Instructor signature images for certificate signing
+router.post('/signature', verifyToken, uploadRateLimiter, upload.single('file'), async (req, res) => {
+    if (req.file && !req.file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ message: 'Signature must be an image file.' });
+    }
+    await uploadToSupabase(req, res, { forceSubDir: 'signatures' });
+});
+
 // POST /api/upload - Upload to Supabase Storage
 router.post('/', verifyToken, verifyAdminPanelAccess, uploadRateLimiter, upload.single('file'), async (req, res) => {
     await uploadToSupabase(req, res);

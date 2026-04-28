@@ -15,6 +15,7 @@ const LessonProgressActions = ({
 }) => {
   const getLessonTypeLabel = (type) => {
     if (type === 'quiz') return 'แบบทดสอบ';
+    if (type === 'assessment') return 'Assessment';
     if (type === 'video') return 'วิดีโอ';
     if (type === 'article') return 'บทความ';
     if (type === 'pdf' || type === 'document') return 'เอกสาร';
@@ -23,7 +24,7 @@ const LessonProgressActions = ({
 
   return (
     <div className="w-full">
-      {!completed && lesson.type !== 'quiz' && (
+      {!completed && !['quiz', 'assessment'].includes(lesson.type) && (
         <section className="mt-12 -mx-6 border-y border-slate-100 bg-slate-50/70 p-6 md:mx-0 md:rounded-[2.5rem] md:border md:bg-white md:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">

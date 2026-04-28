@@ -16,8 +16,11 @@ router.post('/courses/:id/enroll', userController.enrollCourse);
 
 router.put('/lessons/:id/progress', userController.updateLessonProgress);
 router.post('/lessons/:id/quiz', userController.submitQuiz);
+router.get('/lessons/:id/assessment', userController.getMyAssessmentSubmission);
+router.post('/lessons/:id/assessment', userController.submitAssessment);
 router.get('/lessons/:id/questions', userController.getLessonQuestions);
 router.get('/lessons/:id/document-access', userController.getLessonDocumentAccess);
+router.get('/assessment-submissions/:id/download-url', userController.getAssessmentSubmissionDownloadUrl);
 router.post('/announcements/:id/quiz', userController.submitAnnouncementQuiz);
 router.get('/announcements/:id/questions', userController.getAnnouncementQuestions);
 router.get('/announcements/:id/document-access', userController.getAnnouncementDocumentAccess);

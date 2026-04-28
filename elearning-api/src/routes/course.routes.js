@@ -38,6 +38,9 @@ router.get('/:courseId/staff', courseController.getCourseStaff);
 router.post('/:courseId/staff', requireFullCourseAccess, courseController.assignCourseStaff);
 router.patch('/:courseId/staff/:staffId', requireFullCourseAccess, courseController.updateCourseStaff);
 router.delete('/:courseId/staff/:staffId', requireFullCourseAccess, courseController.deleteCourseStaff);
+router.get('/:courseId/assessment-submissions', requireCourseStaffAccess, courseController.getAssessmentSubmissions);
+router.patch('/:courseId/assessment-submissions/:submissionId/grade', requireCourseStaffAccess, courseController.gradeAssessmentSubmission);
+router.get('/:courseId/assessment-submissions/:submissionId/download-url', requireCourseStaffAccess, courseController.getAssessmentSubmissionDownloadUrl);
 
 // Certificate Management
 router.post('/:courseId/certificates/issue/:userId', requireCourseStaffAccess, certificateController.issueManual);

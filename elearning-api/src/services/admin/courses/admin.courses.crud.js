@@ -132,10 +132,12 @@ const createCourse = async (input) => prisma.$transaction(async (tx) => {
                     courseId: course.id,
                     templateId: defaultTemplate.id,
                     enabled: certificateEnabled,
+                    issueMode: 'AUTOMATIC',
                     passingScore: certificatePassingScore || 80
                 },
                 update: {
                     enabled: certificateEnabled,
+                    issueMode: 'AUTOMATIC',
                     passingScore: certificatePassingScore || 80
                 }
             });
@@ -165,10 +167,12 @@ const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
                     courseId: id,
                     templateId: defaultTemplate.id,
                     enabled: certificateEnabled,
+                    issueMode: 'AUTOMATIC',
                     passingScore: certificatePassingScore || 80
                 },
                 update: {
                     enabled: certificateEnabled,
+                    issueMode: 'AUTOMATIC',
                     passingScore: certificatePassingScore || 80
                 }
             });

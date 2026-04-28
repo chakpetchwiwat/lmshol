@@ -1,12 +1,36 @@
 import React from 'react';
-import { Settings, ChevronRight, Bell, Shield } from 'lucide-react';
+import { Settings, ChevronRight, Bell, Shield, PenLine, Upload } from 'lucide-react';
 
 const ProfileSettings = ({ 
+  user,
   notificationsEnabled, 
   onToggleNotifications, 
   onShowPasswordModal, 
-  onShowPrivacyModal 
+  onShowPrivacyModal,
+  onSaveSignature,
+  onUploadSignature,
+  savingSignature,
+  uploadingSignature,
 }) => {
+  const [signatureTitle, setSignatureTitle] = React.useState(user?.signatureTitle || 'Instructor');
+  const [signatureImageUrl, setSignatureImageUrl] = React.useState(user?.signatureImageUrl || '');
+  const fileInputRef = React.useRef(null);
+
+  React.useEffect(() => {
+    setSignatureTitle(user?.signatureTitle || 'Instructor');
+    setSignatureImageUrl(user?.signatureImageUrl || '');
+  }, [user?.signatureImageUrl, user?.signatureTitle]);
+
+  const handleSignatureFile = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const uploaded = await onUploadSignature(file);
+    if (uploaded?.fileUrl) {
+      setSignatureImageUrl(uploaded.fileUrl);
+    }
+    event.target.value = '';
+  };
+
   return (
     <div className="mt-2 flex flex-col gap-1">
       <h4 className="mb-2 pl-2 text-xs font-bold tracking-[0.04em] text-gray-500">
@@ -34,6 +58,61 @@ const ProfileSettings = ({
           </div>
           <ChevronRight size={18} className="text-gray-300 transition-colors group-hover:text-gray-500" />
         </button>
+
+        <div className="p-4">
+          <div className="mb-4 flex items-center gap-4">
+            <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-600">
+              <PenLine size={20} />
+            </div>
+            <div>
+              <span className="mb-0.5 block text-sm font-bold text-gray-900">Instructor signature</span>
+              <span className="block text-xs font-medium text-gray-400">
+                Used when this instructor signs course certificates.
+              </span>
+            </div>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            accept="image/*"
+            onChange={handleSignatureFile}
+          />
+
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+            <input
+              type="text"
+              className="form-input w-full"
+              value={signatureTitle}
+              onChange={(event) => setSignatureTitle(event.target.value)}
+              placeholder="Instructor, Course Owner, Trainer"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingSignature}
+              className="btn btn-outline btn-sm inline-flex items-center justify-center gap-2"
+            >
+              <Upload size={14} /> {uploadingSignature ? 'Uploading...' : 'Upload'}
+            </button>
+          </div>
+
+          {signatureImageUrl && (
+            <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+              <img src={signatureImageUrl} alt="Instructor signature" className="h-16 max-w-full object-contain" />
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => onSaveSignature({ signatureTitle, signatureImageUrl })}
+            disabled={savingSignature}
+            className="btn btn-primary btn-sm mt-3"
+          >
+            {savingSignature ? 'Saving...' : 'Save signature'}
+          </button>
+        </div>
 
         <button
           type="button"

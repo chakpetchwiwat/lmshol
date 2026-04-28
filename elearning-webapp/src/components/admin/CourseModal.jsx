@@ -18,6 +18,7 @@ import CourseBasicInfoForm from './CourseBasicInfoForm';
 import CourseContentEditor from './CourseContentEditor';
 import CourseStaffEditor from './CourseStaffEditor';
 import CourseCertificatesTab from './CourseCertificatesTab';
+import CourseAssessmentsTab from './CourseAssessmentsTab';
 import { getCourseAccess, canUserEditCourse, canUserManageContent } from '../../utils/coursePermissions';
 import { adminAPI, courseStaffAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
@@ -170,6 +171,12 @@ const CourseModal = ({
                 รายงานผลสอบ
               </button>
               <button
+                onClick={() => setActiveTab('assessments')}
+                className={`py-3 px-6 text-sm font-bold transition-colors border-b-2 ${activeTab === 'assessments' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-gray-700'}`}
+              >
+                Assessment
+              </button>
+              <button
                 onClick={() => setActiveTab('staff')}
                 className={`py-3 px-6 text-sm font-bold transition-colors border-b-2 ${activeTab === 'staff' ? 'border-primary text-primary' : 'border-transparent text-muted hover:text-gray-700'}`}
               >
@@ -218,6 +225,11 @@ const CourseModal = ({
                 sensors={sensors}
                 handleDragEnd={handleDragEnd}
                 readOnly={!permissions.canEditContent}
+              />
+            ) : activeTab === 'assessments' ? (
+              <CourseAssessmentsTab
+                courseId={editingId}
+                readOnly={!permissions.canManageCertificates}
               />
             ) : activeTab === 'certificates' ? (
               <CourseCertificatesTab 

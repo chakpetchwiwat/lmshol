@@ -1,6 +1,7 @@
 const asyncHandler = require('../middleware/async');
 const CourseStaffService = require('../services/courseStaff.service');
 const UserService = require('../services/user.service');
+const AssessmentService = require('../services/assessment.service');
 const ErrorResponse = require('../utils/errorResponse');
 
 const getCourseDetails = asyncHandler(async (req, res) => {
@@ -31,10 +32,28 @@ const deleteCourseStaff = asyncHandler(async (req, res) => {
   res.json({ success: true, data: result });
 });
 
+const getAssessmentSubmissions = asyncHandler(async (req, res) => {
+  const submissions = await AssessmentService.listCourseAssessmentSubmissions(req.user, req.params.courseId);
+  res.json({ success: true, data: submissions });
+});
+
+const gradeAssessmentSubmission = asyncHandler(async (req, res) => {
+  const result = await AssessmentService.gradeAssessmentSubmission(req.user, req.params.submissionId, req.body);
+  res.json({ success: true, data: result });
+});
+
+const getAssessmentSubmissionDownloadUrl = asyncHandler(async (req, res) => {
+  const result = await AssessmentService.getSubmissionDownloadUrl(req.user, req.params.submissionId);
+  res.json({ success: true, data: result });
+});
+
 module.exports = {
   getCourseDetails,
   getCourseStaff,
   assignCourseStaff,
   updateCourseStaff,
-  deleteCourseStaff
+  deleteCourseStaff,
+  getAssessmentSubmissions,
+  gradeAssessmentSubmission,
+  getAssessmentSubmissionDownloadUrl
 };

@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Play, CheckCircle, Clock, FileText, BookOpen } from 'lucide-react';
+import { Play, CheckCircle, Clock, FileText, BookOpen, ClipboardCheck } from 'lucide-react';
 import { userAPI, getFullUrl } from '../../utils/api';
 import Skeleton from '../../components/common/Skeleton';
 import { useToast } from '../../context/useToast';
@@ -9,11 +9,13 @@ import { hasRenderableLessonContent, sanitizeLessonContent } from '../../utils/r
 
 import LessonMedia from '../../components/user/LessonMedia';
 import QuizSection from '../../components/user/QuizSection';
+import AssessmentSection from '../../components/user/AssessmentSection';
 import LessonProgressActions from '../../components/user/LessonProgressActions';
 import LessonSidebar from '../../components/user/LessonSidebar';
 
 const getLessonTypeLabel = (type) => {
   if (type === 'quiz') return 'แบบทดสอบ';
+  if (type === 'assessment') return 'Assessment';
   if (type === 'video') return 'วิดีโอ';
   if (type === 'article') return 'บทความ';
   if (type === 'pdf' || type === 'document') return 'เอกสาร';
@@ -37,6 +39,10 @@ const LessonPlayer = () => {
 
   const [answers, setAnswers] = React.useState({});
   const [quizResult, setQuizResult] = React.useState(null);
+  const [assessmentSubmission, setAssessmentSubmission] = React.useState(null);
+  const [assessmentFile, setAssessmentFile] = React.useState(null);
+  const [assessmentNote, setAssessmentNote] = React.useState('');
+  const [assessmentUploading, setAssessmentUploading] = React.useState(false);
   const [shouldScrollToQuizResult, setShouldScrollToQuizResult] = React.useState(false);
   const quizResultRef = React.useRef(null);
   const lessonContentRef = React.useRef(null);
@@ -50,6 +56,9 @@ const LessonPlayer = () => {
         setIsNavigatingAway(false);
         setAnswers({});
         setQuizResult(null);
+        setAssessmentSubmission(null);
+        setAssessmentFile(null);
+        setAssessmentNote('');
 
         const response = await userAPI.getCourseDetails(courseId);
         setCourse(response.data);
@@ -59,6 +68,10 @@ const LessonPlayer = () => {
         if (currentLesson?.type === 'quiz') {
           const questionResponse = await userAPI.getLessonQuestions(lessonId);
           currentLesson.questions = questionResponse.data;
+        }
+
+        if (currentLesson?.type === 'assessment') {
+          setAssessmentSubmission(currentLesson.assessmentSubmission || null);
         }
 
         setLesson(currentLesson);
@@ -168,6 +181,51 @@ const LessonPlayer = () => {
       toast.error('เกิดข้อผิดพลาดในการส่งคำตอบ');
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleAssessmentSubmit = async () => {
+    if (!assessmentFile) {
+      toast.warning('Please choose an assessment file first');
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setAssessmentUploading(true);
+      const uploadResponse = await userAPI.uploadAssessmentFile(assessmentFile);
+      const uploadData = uploadResponse.data;
+      const response = await userAPI.submitAssessment(lessonId, {
+        fileUrl: uploadData.fileUrl,
+        fileKey: uploadData.fileKey,
+        fileName: uploadData.fileName || assessmentFile.name,
+        fileMimeType: uploadData.fileMimeType || assessmentFile.type,
+        maxScore: lesson.points || 10,
+        note: assessmentNote,
+      });
+
+      setAssessmentSubmission(response.data);
+      setAssessmentFile(null);
+      setAssessmentNote('');
+      toast.success('Assessment submitted for review');
+    } catch (error) {
+      console.error('Submit assessment error:', error);
+      toast.error(error.response?.data?.message || 'Unable to submit assessment');
+    } finally {
+      setAssessmentUploading(false);
+      setUpdating(false);
+    }
+  };
+
+  const handleAssessmentDownload = async (submission) => {
+    try {
+      const response = await userAPI.getAssessmentSubmissionDownloadUrl(submission.id);
+      const url = response?.data?.url || response?.url;
+      if (!url) throw new Error('Download URL was not returned');
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Open assessment file error:', error);
+      toast.error('Unable to open assessment file');
     }
   };
 
@@ -306,6 +364,7 @@ const LessonPlayer = () => {
                 <span className="flex items-center gap-1.5 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2 text-xs font-black tracking-[0.04em] text-primary">
                   {lesson.type === 'video' ? <Play size={14} fill="currentColor" /> :
                     lesson.type === 'quiz' ? <CheckCircle size={14} /> :
+                    lesson.type === 'assessment' ? <ClipboardCheck size={14} /> :
                     lesson.type === 'article' ? <BookOpen size={14} /> :
                     <FileText size={14} />}
                   {getLessonTypeLabel(lesson.type)}
@@ -347,6 +406,19 @@ const LessonPlayer = () => {
                   updating={updating}
                   canEarnQuizPoints={canEarnQuizPoints}
                   quizRewardPoints={quizRewardPoints}
+                />
+              ) : lesson.type === 'assessment' ? (
+                <AssessmentSection
+                  lesson={lesson}
+                  submission={assessmentSubmission}
+                  selectedFile={assessmentFile}
+                  setSelectedFile={setAssessmentFile}
+                  note={assessmentNote}
+                  setNote={setAssessmentNote}
+                  uploading={assessmentUploading}
+                  updating={updating}
+                  onSubmit={handleAssessmentSubmit}
+                  onDownload={handleAssessmentDownload}
                 />
               ) : (
                 <div className="rich-text-content rounded-[2rem] border border-slate-100 bg-slate-50/70 px-6 py-7 text-[1.05rem] text-slate-700 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.2)] md:px-8 md:py-9 md:text-[1.1rem]">

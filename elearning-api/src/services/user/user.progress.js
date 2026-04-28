@@ -86,6 +86,10 @@ const updateLessonProgress = async (userId, lessonId, progress) => {
         throw new Error('Not enrolled in this course');
     }
 
+    if (progress === 100 && ['quiz', 'assessment'].includes(lesson.type)) {
+        throw new Error('This lesson type must be completed by passing its required activity');
+    }
+
     const isCompleted = progress === 100;
     const lessonProgress = await prisma.userLessonProgress.upsert({
         where: {
@@ -161,6 +165,114 @@ const updateLessonProgress = async (userId, lessonId, progress) => {
     }
 
     return lessonProgress;
+};
+
+const completeLessonAndRefreshCourse = async (userId, lesson) => {
+    const enrollment = await prisma.userCourse.findUnique({
+        where: {
+            userId_courseId: {
+                userId,
+                courseId: lesson.courseId
+            }
+        }
+    });
+
+    if (!enrollment) {
+        throw new Error('Not enrolled in this course');
+    }
+
+    const previousProgress = prisma.userLessonProgress.findUnique
+        ? await prisma.userLessonProgress.findUnique({
+            where: {
+                userId_lessonId: {
+                    userId,
+                    lessonId: lesson.id
+                }
+            }
+        })
+        : null;
+
+    const wasAlreadyCompleted = previousProgress?.progress === 100;
+
+    await prisma.userLessonProgress.upsert({
+        where: {
+            userId_lessonId: {
+                userId,
+                lessonId: lesson.id
+            }
+        },
+        update: {
+            progress: 100,
+            lastSeenAt: new Date(),
+            completedAt: previousProgress?.completedAt || new Date()
+        },
+        create: {
+            userId,
+            lessonId: lesson.id,
+            progress: 100,
+            completedAt: new Date()
+        }
+    });
+
+    let earnedCoursePoints = 0;
+
+    if (!wasAlreadyCompleted && enrollment.status !== ENROLLMENT_STATUS.COMPLETED) {
+        const allLessons = await prisma.lesson.findMany({
+            where: { courseId: lesson.courseId }
+        });
+        const completedLessons = await prisma.userLessonProgress.findMany({
+            where: {
+                userId,
+                lessonId: { in: allLessons.map((item) => item.id) },
+                progress: 100
+            }
+        });
+
+        const newProgressPercent = Math.round((completedLessons.length / allLessons.length) * 100);
+        const updateData = { progressPercent: newProgressPercent };
+
+        if (newProgressPercent === 100) {
+            updateData.status = ENROLLMENT_STATUS.COMPLETED;
+            updateData.completedAt = new Date();
+
+            if (lesson.course.points > 0) {
+                const existingPoints = await prisma.pointsLedger.findFirst({
+                    where: {
+                        userId,
+                        sourceType: POINT_SOURCE_TYPES.COURSE,
+                        sourceId: lesson.courseId
+                    }
+                });
+
+                if (!existingPoints) {
+                    await prisma.pointsLedger.create({
+                        data: {
+                            userId,
+                            sourceType: POINT_SOURCE_TYPES.COURSE,
+                            sourceId: lesson.courseId,
+                            points: lesson.course.points,
+                            note: `Completed course: ${lesson.course.title}`
+                        }
+                    });
+                    earnedCoursePoints = lesson.course.points;
+                }
+            }
+        }
+
+        await prisma.userCourse.update({
+            where: { id: enrollment.id },
+            data: updateData
+        });
+
+        if (newProgressPercent === 100) {
+            handleAutoCertificateIssuance(userId, lesson.courseId);
+        }
+    }
+
+    return {
+        isCompleted: !wasAlreadyCompleted,
+        earnedCoursePoints
+    };
 };
 
 const submitQuiz = async (userId, lessonId, answers) => {
@@ -248,88 +360,8 @@ const submitQuiz = async (userId, lessonId, answers) => {
     }
 
     if (isCompleted) {
-        await prisma.userLessonProgress.upsert({
-            where: {
-                userId_lessonId: {
-                    userId,
-                    lessonId
-                }
-            },
-            update: {
-                progress: 100,
-                lastSeenAt: new Date(),
-                completedAt: new Date()
-            },
-            create: {
-                userId,
-                lessonId,
-                progress: 100,
-                completedAt: new Date()
-            }
-        });
-
-        const enrollment = await prisma.userCourse.findUnique({
-            where: {
-                userId_courseId: {
-                    userId,
-                    courseId: lesson.courseId
-                }
-            }
-        });
-
-        if (enrollment && enrollment.status !== ENROLLMENT_STATUS.COMPLETED) {
-            const allLessons = await prisma.lesson.findMany({
-                where: { courseId: lesson.courseId }
-            });
-            const completedLessons = await prisma.userLessonProgress.findMany({
-                where: {
-                    userId,
-                    lessonId: { in: allLessons.map((item) => item.id) },
-                    progress: 100
-                }
-            });
-
-            const newProgressPercent = Math.round((completedLessons.length / allLessons.length) * 100);
-            const updateData = { progressPercent: newProgressPercent };
-
-            if (newProgressPercent === 100) {
-                updateData.status = ENROLLMENT_STATUS.COMPLETED;
-                updateData.completedAt = new Date();
-
-                if (lesson.course.points > 0) {
-                    const existingPoints = await prisma.pointsLedger.findFirst({
-                        where: {
-                            userId,
-                            sourceType: POINT_SOURCE_TYPES.COURSE,
-                            sourceId: lesson.courseId
-                        }
-                    });
-
-                    if (!existingPoints) {
-                        await prisma.pointsLedger.create({
-                            data: {
-                                userId,
-                                sourceType: POINT_SOURCE_TYPES.COURSE,
-                                sourceId: lesson.courseId,
-                                points: lesson.course.points,
-                                note: `Completed course: ${lesson.course.title}`
-                            }
-                        });
-                        earnedCoursePoints = lesson.course.points;
-                    }
-                }
-            }
-
-            await prisma.userCourse.update({
-                where: { id: enrollment.id },
-                data: updateData
-            });
-
-            // Auto-issue certificate if 100%
-            if (newProgressPercent === 100) {
-                handleAutoCertificateIssuance(userId, lesson.courseId);
-            }
-        }
+        const completion = await completeLessonAndRefreshCourse(userId, lesson);
+        earnedCoursePoints = completion.earnedCoursePoints;
     }
 
     return {
@@ -377,5 +409,6 @@ async function handleAutoCertificateIssuance(userId, courseId) {
 module.exports = {
     enrollCourse,
     updateLessonProgress,
-    submitQuiz
+    submitQuiz,
+    completeLessonAndRefreshCourse
 };

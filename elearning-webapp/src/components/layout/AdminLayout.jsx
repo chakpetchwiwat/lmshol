@@ -13,7 +13,6 @@ import {
   ClipboardList,
   BellRing,
   Activity,
-  Award,
 } from 'lucide-react';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
@@ -65,7 +64,6 @@ const AdminLayout = () => {
     { path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
     { path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' },
     { path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' },
-    { path: '/admin/certificates', icon: <Award size={20} />, label: 'การอนุมัติเกียรติบัตร' },
     { path: '/admin/announcements', icon: <BellRing size={20} />, label: 'จัดการประกาศแผนก' },
     ...(isFullAdmin
       ? [{ path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' }]
