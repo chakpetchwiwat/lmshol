@@ -12,6 +12,10 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
   const [summary, setSummary] = React.useState({ total: 0, valid: 0, pending: 0, failed: 0, revoked: 0, expired: 0 });
   const [searchQuery, setSearchQuery] = React.useState('');
   const [hasCertificate, setHasCertificate] = React.useState(true);
+  const [isManualModalOpen, setIsManualModalOpen] = React.useState(false);
+  const [eligibleUsers, setEligibleUsers] = React.useState([]);
+  const [eligibleLoading, setEligibleLoading] = React.useState(false);
+  const [manualIssueLoading, setManualIssueLoading] = React.useState(false);
 
   const fetchCertificates = async () => {
     try {
@@ -102,6 +106,46 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
     }
   };
 
+  const fetchEligibleUsers = async () => {
+    try {
+      setEligibleLoading(true);
+      const response = await adminAPI.getCourseHistory(courseId);
+      // Filter out those who already have certificates (any status except REVOKED)
+      const certificateUserIds = new Set(
+        certificates
+          .filter(c => c.status !== 'REVOKED')
+          .map(c => c.user?.id)
+      );
+      
+      const eligible = (response.data || []).filter(record => 
+        !certificateUserIds.has(record.user?.id)
+      );
+      
+      setEligibleUsers(eligible);
+    } catch (error) {
+      console.error('Failed to fetch eligible users:', error);
+      toast.error('ไม่สามารถดึงข้อมูลรายชื่อผู้เรียนได้');
+    } finally {
+      setEligibleLoading(false);
+    }
+  };
+
+  const handleManualIssue = async (userId) => {
+    if (readOnly || manualIssueLoading) return;
+    
+    try {
+      setManualIssueLoading(true);
+      await adminAPI.issueManual(courseId, userId);
+      toast.success('กำลังสร้างเกียรติบัตรสำหรับผู้เรียนคนนี้...');
+      setIsManualModalOpen(false);
+      fetchCertificates();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'ไม่สามารถออกเกียรติบัตรได้');
+    } finally {
+      setManualIssueLoading(false);
+    }
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'VALID':
@@ -151,7 +195,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
             </div>
             <div>
               <h4 className="font-black text-rose-800 text-lg">ระบบเกียรติบัตรถูกปิดใช้งาน</h4>
-              <p className="text-rose-600 font-bold text-sm">เธเธญเธฃเนเธชเธเธตเนเนเธกเนเนเธ”เนเธ•เธฑเนเธเธเนเธฒเนเธซเนเธกเธตเธเธฒเธฃเธญเธญเธเน€เธเธตเธขเธฃเธ•เธดเธเธฑเธ•เธฃ เธเธฃเธธเธ“เธฒเนเธเธ—เธตเน "ข้อมูลพื้นฐาน" เน€เธเธทเนเธญเน€เธเธดเธ”เนเธเนเธเธฒเธ</p>
+              <p className="text-rose-600 font-bold text-sm">คอร์สนี้ไม่ได้ตั้งค่าให้มีการออกเกียรติบัตร กรุณาไปที่ "ข้อมูลพื้นฐาน" เพื่อเปิดใช้งาน</p>
             </div>
           </div>
           <button 
@@ -198,6 +242,18 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
         </div>
         
         <div className="flex items-center gap-2">
+          {!readOnly && hasCertificate && (
+            <button
+              onClick={() => {
+                setIsManualModalOpen(true);
+                fetchEligibleUsers();
+              }}
+              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-black text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-95"
+            >
+              <Award size={16} />
+              ออกเกียรติบัตรด้วยมือ
+            </button>
+          )}
           <button 
             onClick={fetchCertificates}
             disabled={loading}
@@ -329,9 +385,93 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
           </table>
         </div>
       </div>
+
+      {/* Manual Issue Modal */}
+      {isManualModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg animate-in zoom-in-95 duration-200 rounded-3xl bg-white shadow-2xl">
+            <div className="border-b border-slate-100 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                    <Award size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900 text-lg">ออกเกียรติบัตรด้วยมือ</h3>
+                    <p className="text-xs font-bold text-slate-400">เลือกผู้เรียนที่ต้องการออกใบรับรองให้ทันที</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsManualModalOpen(false)}
+                  className="text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <RotateCcw size={20} className="rotate-45" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {eligibleLoading ? (
+                <div className="flex h-48 flex-col items-center justify-center gap-3">
+                  <Loader2 className="animate-spin text-indigo-500" size={32} />
+                  <p className="text-xs font-bold text-slate-400">กำลังโหลดรายชื่อผู้เรียน...</p>
+                </div>
+              ) : eligibleUsers.length === 0 ? (
+                <div className="flex h-48 flex-col items-center justify-center text-center">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-300">
+                    <Search size={24} />
+                  </div>
+                  <p className="text-sm font-bold text-slate-500">ไม่พบรายชื่อผู้เรียนที่ยังไม่มีเกียรติบัตร</p>
+                  <p className="mt-1 text-xs font-bold text-slate-400">ผู้เรียนทุกคนในคอร์สนี้ได้รับเกียรติบัตรหมดแล้ว</p>
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                  {eligibleUsers.map((record) => (
+                    <div 
+                      key={record.user?.id}
+                      className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 transition-all hover:border-indigo-200 hover:bg-white hover:shadow-md"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 font-black text-sm">
+                          {record.user?.name?.charAt(0) || '?'}
+                        </div>
+                        <div>
+                          <p className="font-black text-slate-900 text-sm">{record.user?.name}</p>
+                          <p className="text-[10px] font-bold text-slate-400">
+                            {record.status === 'COMPLETED' ? (
+                              <span className="text-emerald-500">สถานะ: สำเร็จการเรียน</span>
+                            ) : (
+                              <span className="text-amber-500">สถานะ: กำลังเรียน ({record.progressPercent}%)</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleManualIssue(record.user?.id)}
+                        disabled={manualIssueLoading}
+                        className="rounded-xl bg-white px-4 py-2 text-xs font-black text-indigo-600 border border-indigo-100 shadow-sm transition-all hover:bg-indigo-600 hover:text-white disabled:opacity-50"
+                      >
+                        {manualIssueLoading ? <Loader2 size={14} className="animate-spin" /> : 'ออกบัตร'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-slate-100 p-6 bg-slate-50/50 rounded-b-3xl">
+              <button 
+                onClick={() => setIsManualModalOpen(false)}
+                className="w-full rounded-xl bg-white border border-slate-200 py-3 text-sm font-black text-slate-600 shadow-sm transition-all hover:bg-slate-50"
+              >
+                ปิดหน้าต่าง
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default CourseCertificatesTab;
-
