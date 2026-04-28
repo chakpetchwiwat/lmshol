@@ -461,6 +461,39 @@ async function generateCertificatePdfAsync(certificateId) {
   }
 }
 
+/**
+ * Get pending certificates across all courses the user can manage
+ */
+async function getPendingApprovals({ user, status = 'PENDING' }) {
+  // 1. Get all courses the user is staff of
+  const userId = user.id || user.userId;
+  const staffAssignments = await prisma.courseStaff.findMany({
+    where: { userId },
+    select: { courseId: true }
+  });
+  
+  const assignedCourseIds = staffAssignments.map(s => s.courseId);
+  
+  // 2. Query certificates
+  const where = { status };
+  
+  const isAdmin = user.role === 'admin' || user.effectiveRole === 'admin' || user.isAdmin === true;
+  
+  if (!isAdmin) {
+    // If not admin, restrict to courses where they are staff
+    where.courseId = { in: assignedCourseIds };
+  }
+
+  return await prisma.certificate.findMany({
+    where,
+    include: {
+      user: { select: { id: true, name: true, email: true, department: true } },
+      course: { select: { id: true, title: true } }
+    },
+    orderBy: { issuedAt: 'desc' }
+  });
+}
+
 module.exports = {
   issueCertificate,
   reissueCertificate,
@@ -471,5 +504,6 @@ module.exports = {
   resolveCertificateSigner,
   generateCertificatePdfAsync,
   createCertificateSignedUrl,
-  retryCertificatePdfGeneration
+  retryCertificatePdfGeneration,
+  getPendingApprovals
 };

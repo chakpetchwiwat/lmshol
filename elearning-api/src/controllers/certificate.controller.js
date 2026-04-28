@@ -276,3 +276,25 @@ exports.getCourseCertificates = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Get all pending certificates across all courses the user can manage
+ */
+exports.getPendingApprovals = async (req, res, next) => {
+  try {
+    const { status = 'PENDING' } = req.query;
+    
+    // Admins see all, others filtered by course staff
+    const certificates = await certificateService.getPendingApprovals({
+      user: req.user,
+      status: status.toUpperCase()
+    });
+
+    res.json({
+      success: true,
+      data: certificates
+    });
+  } catch (error) {
+    next(error);
+  }
+};

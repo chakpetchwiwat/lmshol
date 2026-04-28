@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { canAccessAdminPanel } from './utils/roles';
@@ -35,6 +35,7 @@ const AdminRedeems = React.lazy(() => import('./pages/admin/RedeemRequests'));
 const AdminReports = React.lazy(() => import('./pages/admin/Reports'));
 const AdminGoals = React.lazy(() => import('./pages/admin/GoalManagement'));
 const AdminHealth = React.lazy(() => import('./pages/admin/SystemHealth'));
+const AdminCertificates = React.lazy(() => import('./pages/admin/CertificateApprovals'));
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -116,6 +117,7 @@ function App() {
             <Route path="redeems" element={<AdminRedeems />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="goals" element={<AdminGoals />} />
+            <Route path="certificates" element={<AdminCertificates />} />
             <Route path="health" element={<AdminHealth />} />
           </Route>
         </Route>

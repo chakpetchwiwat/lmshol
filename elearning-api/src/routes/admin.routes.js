@@ -78,6 +78,7 @@ router.delete('/lessons/:id', verifySuperAdmin, adminController.deleteLesson);
 router.get('/courses/:courseId/quiz-reports', adminController.getCourseQuizAttempts);
 
 // Certificates
+router.get('/certificates/pending', certificateController.getPendingApprovals);
 router.get('/courses/:courseId/certificates', certificateController.getCourseCertificates);
 
 module.exports = router;

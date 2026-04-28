@@ -217,6 +217,7 @@ export const adminAPI = {
   updateRedeemStatus: (id, status, adminNote = '') => api.put(`/admin/redeems/${id}/status`, { status, adminNote }),
 
   getCourseQuizReports: (courseId) => api.get(`/admin/courses/${courseId}/quiz-reports`),
+  getPendingCertificates: (params) => api.get('/admin/certificates/pending', { params }),
   getCourseCertificates: (courseId) => api.get(`/admin/courses/${courseId}/certificates`),
   getCertificateDownloadUrl: (id) => api.get(`/certificates/${id}/download-url`),
   issueManual: (courseId, userId) => api.post(`/courses/${courseId}/certificates/issue/${userId}`),

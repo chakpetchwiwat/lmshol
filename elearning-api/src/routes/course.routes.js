@@ -15,7 +15,17 @@ const requireFullCourseAccess = asyncHandler(async (req, res, next) => {
   const permission = await canManageCourse(req.user, req.params.courseId);
 
   if (permission.access !== COURSE_MANAGEMENT_ACCESS.FULL) {
-    throw new ErrorResponse('Forbidden', 403);
+    throw new ErrorResponse('Forbidden: Owner access required', 403);
+  }
+
+  next();
+});
+
+const requireCourseStaffAccess = asyncHandler(async (req, res, next) => {
+  const permission = await canManageCourse(req.user, req.params.courseId);
+
+  if (permission.access !== COURSE_MANAGEMENT_ACCESS.FULL && permission.access !== COURSE_MANAGEMENT_ACCESS.LIMITED) {
+    throw new ErrorResponse('Forbidden: Course staff access required', 403);
   }
 
   next();
@@ -30,6 +40,6 @@ router.patch('/:courseId/staff/:staffId', requireFullCourseAccess, courseControl
 router.delete('/:courseId/staff/:staffId', requireFullCourseAccess, courseController.deleteCourseStaff);
 
 // Certificate Management
-router.post('/:courseId/certificates/issue/:userId', requireFullCourseAccess, certificateController.issueManual);
+router.post('/:courseId/certificates/issue/:userId', requireCourseStaffAccess, certificateController.issueManual);
 
 module.exports = router;
