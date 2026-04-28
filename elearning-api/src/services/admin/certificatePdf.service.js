@@ -2,6 +2,25 @@ const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 const supabase = require('../../utils/supabase');
 
+// Singleton promise to ensure chromium.executablePath() is only called once per instance
+let executablePathPromise = null;
+
+async function getExecutablePath() {
+  if (executablePathPromise) return executablePathPromise;
+  
+  executablePathPromise = (async () => {
+    try {
+      return await chromium.executablePath();
+    } catch (error) {
+      console.error('[CertificatePdf] Failed to resolve chromium path:', error);
+      executablePathPromise = null; // Reset for retry on next call
+      return null;
+    }
+  })();
+  
+  return executablePathPromise;
+}
+
 /**
  * Generates a PDF buffer from HTML content using Puppeteer.
  * 
@@ -10,19 +29,11 @@ const supabase = require('../../utils/supabase');
  * @returns {Buffer} PDF buffer
  */
 async function generatePdfBuffer(html, options = {}) {
-  // 1. Resolve executable path and browser options
-  // Detect if we are in a cloud environment (Vercel, Render, Railway, etc.)
-  const isCloud = !!process.env.VERCEL || !!process.env.RENDER || !!process.env.RAILWAY_STATIC_URL || process.env.NODE_ENV === 'production';
-  
-  let executablePath;
-  try {
-    executablePath = await chromium.executablePath();
-  } catch (e) {
-    console.warn('[CertificatePdf] Chromium executable path resolution failed, falling back to local detection');
-  }
+  // 1. Resolve executable path
+  const executablePath = await getExecutablePath();
 
   const launchOptions = {
-    args: executablePath ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: executablePath ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     defaultViewport: chromium.defaultViewport,
     executablePath: executablePath || (process.platform === 'win32' 
       ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' 
@@ -31,18 +42,20 @@ async function generatePdfBuffer(html, options = {}) {
     ignoreHTTPSErrors: true,
   };
 
-  // 2. Launch with retry to handle ETXTBSY (Text file busy) race conditions in serverless
+  // 2. Launch with aggressive retry to handle ETXTBSY race conditions
   let browser;
   let lastError;
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 5; i++) {
     try {
       browser = await puppeteer.launch(launchOptions);
       break;
     } catch (error) {
       lastError = error;
-      if (error.message.includes('ETXTBSY') || error.code === 'ETXTBSY') {
-        console.warn(`[CertificatePdf] Browser launch busy (attempt ${i + 1}/3), retrying...`);
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      const isBusy = error.message.includes('ETXTBSY') || error.code === 'ETXTBSY';
+      if (isBusy && i < 4) {
+        const delay = 1000 + (Math.random() * 1000); // Random delay 1-2s
+        console.warn(`[CertificatePdf] Browser launch busy (attempt ${i + 1}/5), retrying in ${Math.round(delay)}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
       throw error;
