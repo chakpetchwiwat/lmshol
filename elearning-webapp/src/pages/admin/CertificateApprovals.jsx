@@ -157,7 +157,7 @@ const CertificateApprovals = () => {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3">
-                  {cert.metadata?.lastRetryAt || cert.metadata?.retryCount > 0 ? (
+                  {approving === cert.id ? (
                     <div className="flex h-12 items-center gap-2 rounded-2xl bg-amber-50 px-6 text-sm font-black text-amber-600 border border-amber-100">
                       <Loader2 size={18} className="animate-spin" />
                       กำลังออกไฟล์...
@@ -166,25 +166,19 @@ const CertificateApprovals = () => {
                     <>
                       <button
                         onClick={() => handleReject(cert.id)}
-                        disabled={approving === cert.id}
-                        className="flex h-12 items-center gap-2 rounded-2xl border border-slate-100 px-6 text-sm font-black text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 disabled:opacity-50"
+                        className="flex h-12 items-center gap-2 rounded-2xl border border-slate-100 px-6 text-sm font-black text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100"
                       >
                         <XCircle size={18} />
                         ปฏิเสธ
                       </button>
                       <button
                         onClick={() => handleApprove(cert.id)}
-                        disabled={approving === cert.id}
-                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-8 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:bg-primary hover:shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 lg:flex-none"
+                        className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-8 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:bg-primary hover:shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0 lg:flex-none"
                       >
-                        {approving === cert.id ? (
-                          <Loader2 size={18} className="animate-spin" />
-                        ) : (
-                          <>
-                            <CheckCircle2 size={18} />
-                            อนุมัติออกเกียรติบัตร
-                          </>
-                        )}
+                        <CheckCircle2 size={18} />
+                        {cert.status === 'PENDING' && (cert.metadata?.lastRetryAt || cert.metadata?.retryCount > 0) 
+                          ? 'ลองใหม่อีกครั้ง' 
+                          : 'อนุมัติออกเกียรติบัตร'}
                       </button>
                     </>
                   )}
