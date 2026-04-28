@@ -74,47 +74,87 @@ async function generatePdfBuffer(_html, options = {}) {
       color: rgb(0.96, 0.98, 1.0), // Light bluish
     });
 
-    // 5. Draw Content
-    const drawText = (text, size, x, y, color = rgb(0, 0, 0)) => {
+    // Helper to draw Thai text correctly (handling combining characters)
+    const drawThaiText = (text, size, x, y, color = rgb(0, 0, 0)) => {
       if (!text) return;
-      page.drawText(String(text), {
-        x,
-        y,
-        size,
-        font,
-        color,
-      });
+      
+      let currentX = x;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const charCode = char.charCodeAt(0);
+        
+        // Thai combining characters (Upper vowels, lower vowels, tone marks)
+        // Range: \u0E31, \u0E34-\u0E3A, \u0E47-\u0E4E
+        const isCombining = (charCode === 0x0E31) || 
+                            (charCode >= 0x0E34 && charCode <= 0x0E3A) || 
+                            (charCode >= 0x0E47 && charCode <= 0x0E4E);
+        
+        if (isCombining && i > 0) {
+          // Draw combining character at the SAME position as previous base character
+          // We might need a slight adjustment depending on the base char, but 0-width is a good start
+          page.drawText(char, {
+            x: currentX - font.widthOfTextAtSize(text[i-1], size), // Step back to previous char's start
+            y,
+            size,
+            font,
+            color,
+          });
+        } else {
+          page.drawText(char, {
+            x: currentX,
+            y,
+            size,
+            font,
+            color,
+          });
+          currentX += font.widthOfTextAtSize(char, size);
+        }
+      }
+      return currentX;
     };
 
-    // Helper to center text
-    const drawCenteredText = (text, size, y, color = rgb(0, 0, 0)) => {
-      if (!text) return;
-      const textWidth = font.widthOfTextAtSize(String(text), size);
-      drawText(text, size, (width - textWidth) / 2, y, color);
+    // Helper to calculate Thai text width correctly
+    const getThaiWidth = (text, size) => {
+      let totalWidth = 0;
+      for (let i = 0; i < text.length; i++) {
+        const charCode = text[i].charCodeAt(0);
+        const isCombining = (charCode === 0x0E31) || 
+                            (charCode >= 0x0E34 && charCode <= 0x0E3A) || 
+                            (charCode >= 0x0E47 && charCode <= 0x0E4E);
+        if (!isCombining) {
+          totalWidth += font.widthOfTextAtSize(text[i], size);
+        }
+      }
+      return totalWidth;
+    };
+
+    const drawCenteredThaiText = (text, size, y, color = rgb(0, 0, 0)) => {
+      const textWidth = getThaiWidth(text, size);
+      drawThaiText(text, size, (width - textWidth) / 2, y, color);
     };
 
     // Header
-    drawCenteredText('CERTIFICATE OF COMPLETION', 32, height - 120, rgb(0.1, 0.2, 0.4));
-    drawCenteredText('หนังสือรับรองฉบับนี้ให้ไว้เพื่อแสดงว่า', 16, height - 170);
+    drawCenteredThaiText('CERTIFICATE OF COMPLETION', 32, height - 120, rgb(0.1, 0.2, 0.4));
+    drawCenteredThaiText('หนังสือรับรองฉบับนี้ ให้ไว้เพื่อแสดงว่า', 16, height - 170);
 
     // Learner Name
-    drawCenteredText(data.learnerName || 'Learner Name', 36, height - 240, rgb(0.1, 0.1, 0.1));
+    drawCenteredThaiText(data.learnerName || 'Learner Name', 36, height - 240, rgb(0.1, 0.1, 0.1));
 
     // Course Info
-    drawCenteredText(`ได้ผ่านการเรียนหลักสูตรออนไลน์`, 18, height - 300);
-    drawCenteredText(data.courseTitle || 'Course Title', 24, height - 350, rgb(0.2, 0.3, 0.5));
+    drawCenteredThaiText(`ได้ผ่านการเรียนหลักสูตรออนไลน์`, 18, height - 300);
+    drawCenteredThaiText(data.courseTitle || 'Course Title', 24, height - 350, rgb(0.2, 0.3, 0.5));
 
     // Details Footer
     const footerY = 150;
-    drawText(`เลขที่เกียรติบัตร: ${data.certificateNo || '-'}`, 12, 80, footerY);
-    drawText(`วันที่ออก: ${data.issuedAt || '-'}`, 12, 80, footerY - 25);
+    drawThaiText(`เลขที่เกียรติบัตร: ${data.certificateNo || '-'}`, 12, 80, footerY);
+    drawThaiText(`วันที่ออก: ${data.issuedAt || '-'}`, 12, 80, footerY - 25);
     
     // Verification
-    drawText('ตรวจสอบความถูกต้องได้ที่:', 10, 80, footerY - 60);
-    drawText(data.verificationUrl || '-', 9, 80, footerY - 75, rgb(0.3, 0.3, 0.3));
+    drawThaiText('ตรวจสอบความถูกต้องได้ที่:', 10, 80, footerY - 60);
+    drawThaiText(data.verificationUrl || '-', 9, 80, footerY - 75, rgb(0.3, 0.3, 0.3));
 
     // Branding
-    drawText('ScaleUp Learning Management System', 10, width - 280, 60, rgb(0.5, 0.5, 0.5));
+    drawThaiText('ScaleUp Learning Management System', 10, width - 280, 60, rgb(0.5, 0.5, 0.5));
 
     // 6. Serialize the PDF document to bytes (Uint8Array)
     const pdfBytes = await pdfDoc.save();
