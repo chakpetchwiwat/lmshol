@@ -110,40 +110,27 @@ async function getExecutablePath() {
  * @returns {Buffer} PDF buffer
  */
 async function generatePdfBuffer(html, options = {}) {
-  // 1. Resolve executable path
-  const executablePath = await getExecutablePath();
-  const usesPackagedChromium = executablePath && executablePath.includes('/tmp/chromium');
   const fallbackData = options.fallbackData;
 
-  const launchOptions = {
-    args: executablePath && usesPackagedChromium ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    defaultViewport: chromium.defaultViewport,
-    executablePath: executablePath || (process.platform === 'win32' 
-      ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' 
-      : '/usr/bin/google-chrome'),
-    headless: usesPackagedChromium ? chromium.headless : 'new',
-    ignoreHTTPSErrors: true,
-  };
-
   try {
-    // 2. Launch with aggressive retry to handle ETXTBSY race conditions
+    const launchOptions = {
+      args: [...chromium.args, '--hide-scrollbars', '--disable-web-security', '--no-sandbox'],
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
+    };
+
     let browser;
     let lastError;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 3; i++) {
       try {
         browser = await puppeteer.launch(launchOptions);
         break;
       } catch (error) {
         lastError = error;
-        const errorText = stringifyError(error);
-        const isBusy = errorText.includes('ETXTBSY') || error.code === 'ETXTBSY';
-        if (isBusy && i < 4) {
-          const delay = 1000 + (Math.random() * 1000); // Random delay 1-2s
-          console.warn(`[CertificatePdf] Browser launch busy (attempt ${i + 1}/5), retrying in ${Math.round(delay)}ms...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          continue;
-        }
-        throw error;
+        console.error(`[CertificatePdf] Launch attempt ${i+1} failed:`, error);
+        await new Promise(r => setTimeout(r, 1000));
       }
     }
 
@@ -152,16 +139,14 @@ async function generatePdfBuffer(html, options = {}) {
     try {
       const page = await browser.newPage();
       
-      // Set viewport size if needed, but A4 format usually takes care of it
-      // Set content with a reasonable timeout for Vercel
-      // Use 'domcontentloaded' for faster response when fonts are already linked
+      // Use 'domcontentloaded' for faster response
       await page.setContent(html, { 
         waitUntil: 'domcontentloaded',
         timeout: 45000 
       });
 
-      // Give a tiny bit of extra time for fonts if needed, without waiting for full 'load'
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Extra time for fonts
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const pdfBuffer = await page.pdf({
         format: 'A4',
@@ -181,11 +166,7 @@ async function generatePdfBuffer(html, options = {}) {
     }
   } catch (error) {
     const errorText = stringifyError(error);
-    const diagnostics = buildLaunchDiagnostics(executablePath);
-    const missingLinuxLibrary = process.platform === 'linux' && /error while loading shared libraries|libnss3\.so/i.test(errorText);
-    const message = missingLinuxLibrary
-      ? `${errorText}\nCertificate PDF generation requires Chromium runtime libraries. Install libnss3 and standard Chromium dependencies, or set CHROME_EXECUTABLE_PATH to a working Chrome/Chromium binary. ${diagnostics}`
-      : `${errorText}\nChromium PDF rendering failed. ${diagnostics}`;
+    const message = `Chromium PDF rendering failed: ${errorText}`;
 
     if (fallbackData) {
       console.warn(`[CertificatePdf] Chromium render failed; using simple PDF fallback. ${message}`);
