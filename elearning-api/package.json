@@ -12,7 +12,7 @@
     "test:refactor-contracts": "node scripts/compare_refactor_contracts.js",
     "seed": "tsx prisma/seed.ts",
     "seed:demo": "tsx prisma/seed-demo.ts",
-    "postinstall": "prisma generate && npx puppeteer browsers install chrome"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.11.0",
@@ -27,7 +27,8 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.1.1",
-    "puppeteer": "^24.42.0",
+    "@sparticuz/chromium": "^123.0.0",
+    "puppeteer-core": "^22.6.0",
     "rate-limit-redis": "^4.3.1",
     "redis": "^5.12.1"
   },

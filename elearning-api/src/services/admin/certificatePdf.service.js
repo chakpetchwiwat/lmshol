@@ -1,4 +1,5 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 const supabase = require('../../utils/supabase');
 
 /**
@@ -9,15 +10,22 @@ const supabase = require('../../utils/supabase');
  * @returns {Buffer} PDF buffer
  */
 async function generatePdfBuffer(html, options = {}) {
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: [
-      '--no-sandbox', 
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu'
-    ]
-  });
+  // 1. Resolve executable path and browser options
+  const isLocal = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
+  
+  const launchOptions = {
+    args: isLocal ? ['--no-sandbox', '--disable-setuid-sandbox'] : chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: isLocal 
+      ? (process.platform === 'win32' 
+          ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' 
+          : '/usr/bin/google-chrome')
+      : await chromium.executablePath(),
+    headless: isLocal ? 'new' : chromium.headless,
+    ignoreHTTPSErrors: true,
+  };
+
+  const browser = await puppeteer.launch(launchOptions);
 
   try {
     const page = await browser.newPage();
