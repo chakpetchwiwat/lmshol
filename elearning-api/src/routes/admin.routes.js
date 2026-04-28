@@ -39,7 +39,7 @@ router.get('/courses', adminController.getAdminCourses);
 router.post('/courses', verifySuperAdmin, adminController.createCourse);
 router.put('/courses/:id/republish', verifySuperAdmin, adminController.republishCourse);
 router.put('/courses/:id/archive', verifySuperAdmin, adminController.archiveCourse);
-router.get('/courses/:id/history', verifySuperAdmin, adminController.getCourseHistory);
+router.get('/courses/:id/history', adminController.getCourseHistory);
 router.put('/courses/:id', verifySuperAdmin, adminController.updateCourse);
 router.delete('/courses/:id', verifySuperAdmin, adminController.deleteCourse);
 
