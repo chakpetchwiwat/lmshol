@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { BadgeCheck, ShieldAlert, ShieldCheck, FileText, Calendar, Building2, User, ExternalLink, Globe } from 'lucide-react';
+import { BadgeCheck, ShieldAlert, ShieldCheck, FileText, Calendar, Building2, User, Globe } from 'lucide-react';
 import { userAPI } from '../../utils/api';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import Skeleton from '../../components/common/Skeleton';
@@ -65,7 +65,7 @@ const CertificateVerification = () => {
     );
   }
 
-  const snapshot = certificate.metadata?.snapshot || {};
+  const snapshot = certificate.metadata?.snapshot || certificate.metadata || {};
   const learner = snapshot.learner || {};
   const course = snapshot.course || {};
   const signer = snapshot.signer || {};
@@ -106,7 +106,7 @@ const CertificateVerification = () => {
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400">
                   <User size={18} />
                 </div>
-                <p className="text-[17px] font-black text-slate-900">{learner.name || 'ไม่ระบุชื่อ'}</p>
+                <p className="text-[17px] font-black text-slate-900">{learner.name || certificate.learnerName || 'ไม่ระบุชื่อ'}</p>
               </div>
             </div>
 
@@ -117,7 +117,7 @@ const CertificateVerification = () => {
                   <BadgeCheck size={18} />
                 </div>
                 <div>
-                  <p className="text-[15px] font-black text-slate-900 leading-tight">{course.title || 'หลักสูตรทั่วไป'}</p>
+                  <p className="text-[15px] font-black text-slate-900 leading-tight">{course.title || certificate.courseTitle || 'หลักสูตรทั่วไป'}</p>
                   <p className="mt-1 text-xs font-bold text-slate-500">ScaleUp LMS Connect</p>
                 </div>
               </div>
@@ -158,17 +158,6 @@ const CertificateVerification = () => {
                 </div>
               </div>
 
-              {isValid && certificate.pdfUrl && (
-                <a 
-                  href={certificate.pdfUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-slate-800 active:scale-95"
-                >
-                  <ExternalLink size={16} />
-                  ดูไฟล์เกียรติบัตรต้นฉบับ
-                </a>
-              )}
             </div>
           </div>
         </div>

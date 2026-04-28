@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, CheckCircle2, XCircle, Search, Filter, Loader2, User, BookOpen, Clock, ArrowRight, ExternalLink } from 'lucide-react';
+import { Award, CheckCircle2, XCircle, Search, Loader2, User, BookOpen, Clock } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -35,16 +35,12 @@ const CertificateApprovals = () => {
       setApproving(id);
       const response = await adminAPI.reissueCertificate(id);
       
-      // status will be PENDING because generation is async
-      if (response.data?.status === 'VALID' || response.data?.status === 'PENDING') {
-        toast.success('อนุมัติและกำลังเริ่มสร้างไฟล์เกียรติบัตร...');
-        // Remove from current view immediately for better UX
-        setCertificates(prev => prev.filter(c => c.id !== id));
-        // Then refresh in background to get updated metadata
-        fetchPending();
+      if (response.data?.status === 'VALID') {
+        toast.success('อนุมัติและสร้างไฟล์เกียรติบัตรเรียบร้อยแล้ว');
       } else {
         toast.error('การออกเกียรติบัตรขัดข้อง กรุณาลองใหม่อีกครั้ง');
       }
+      await fetchPending();
     } catch (error) {
       toast.error('ไม่สามารถอนุมัติได้: ' + (error.response?.data?.message || error.message));
     } finally {

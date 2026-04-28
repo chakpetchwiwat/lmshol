@@ -9,6 +9,9 @@ async function getExecutablePath() {
   if (executablePathPromise) return executablePathPromise;
   
   executablePathPromise = (async () => {
+    const configuredPath = process.env.CHROME_EXECUTABLE_PATH || process.env.PUPPETEER_EXECUTABLE_PATH;
+    if (configuredPath) return configuredPath;
+
     try {
       return await chromium.executablePath();
     } catch (error) {
@@ -31,14 +34,15 @@ async function getExecutablePath() {
 async function generatePdfBuffer(html, options = {}) {
   // 1. Resolve executable path
   const executablePath = await getExecutablePath();
+  const usesPackagedChromium = executablePath && executablePath.includes('/tmp/chromium');
 
   const launchOptions = {
-    args: executablePath ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    args: executablePath && usesPackagedChromium ? chromium.args : ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     defaultViewport: chromium.defaultViewport,
     executablePath: executablePath || (process.platform === 'win32' 
       ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' 
       : '/usr/bin/google-chrome'),
-    headless: executablePath ? chromium.headless : 'new',
+    headless: usesPackagedChromium ? chromium.headless : 'new',
     ignoreHTTPSErrors: true,
   };
 
@@ -57,6 +61,13 @@ async function generatePdfBuffer(html, options = {}) {
         console.warn(`[CertificatePdf] Browser launch busy (attempt ${i + 1}/5), retrying in ${Math.round(delay)}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
+      }
+      const missingLinuxLibrary = process.platform === 'linux' && /error while loading shared libraries|libnss3\.so/i.test(error.message);
+      if (missingLinuxLibrary) {
+        throw new Error(
+          `${error.message}\nCertificate PDF generation requires Chromium runtime libraries. ` +
+          'Install libnss3 and the standard Chromium dependencies on the server, or set CHROME_EXECUTABLE_PATH to a working Chrome/Chromium binary.'
+        );
       }
       throw error;
     }

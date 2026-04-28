@@ -5,8 +5,9 @@ import { formatCertificateDateRange } from './certificateForm.utils';
 
 const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
   const [downloading, setDownloading] = React.useState(false);
-  const title = isLms ? (certificate.metadata?.snapshot?.course?.title || 'Course Certificate') : certificate.title;
-  const issuer = isLms ? (certificate.metadata?.snapshot?.signer?.name || 'LMS System') : certificate.issuer;
+  const lmsMetadata = certificate.metadata?.snapshot || certificate.metadata || {};
+  const title = isLms ? (lmsMetadata.course?.title || certificate.courseTitle || 'Course Certificate') : certificate.title;
+  const issuer = isLms ? (lmsMetadata.signer?.name || 'LMS System') : certificate.issuer;
   const displayId = isLms ? certificate.certificateNo : certificate.credentialId;
   const fileUrl = isLms ? certificate.pdfUrl : certificate.fileUrl;
   const dateLabel = formatCertificateDateRange(certificate, isLms);

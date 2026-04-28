@@ -226,10 +226,12 @@ async function getMyCertificates(userId) {
   return certs.map(c => ({
     id: c.id,
     certificateNo: c.certificateNo,
+    status: c.status,
     courseTitle: c.course.title,
     issuedAt: c.issuedAt,
     expiresAt: c.expiresAt,
-    pdfUrl: c.pdfUrl
+    pdfUrl: c.pdfUrl,
+    metadata: c.metadata
   }));
 }
 
@@ -267,11 +269,14 @@ async function verifyCertificate(token) {
     success: true,
     status: 'VALID',
     data: {
+      id: cert.id,
+      status: cert.status,
       certificateNo: cert.certificateNo,
       learnerName: cert.user.name,
       courseTitle: cert.course.title,
       issuedAt: cert.issuedAt,
-      expiresAt: cert.expiresAt
+      expiresAt: cert.expiresAt,
+      metadata: cert.metadata
     }
   };
 }
@@ -312,7 +317,8 @@ async function createCertificateSignedUrl({ certificateId, requester }) {
   let hasAccess = false;
   
   // 1. Owner
-  if (requester.id === cert.userId) hasAccess = true;
+  const requesterId = requester.id || requester.userId;
+  if (requesterId === cert.userId) hasAccess = true;
 
   // 2. Admin/Manager with full access to course
   if (!hasAccess) {
@@ -336,7 +342,7 @@ async function createCertificateSignedUrl({ certificateId, requester }) {
     throw new Error('Failed to generate download link');
   }
 
-  console.log(`[Certificate] download_url.created | id=${certificateId} | user=${requester.id}`);
+  console.log(`[Certificate] download_url.created | id=${certificateId} | user=${requesterId}`);
 
   return {
     url: data.signedUrl,
@@ -466,26 +472,10 @@ async function generateCertificatePdfAsync(certificateId) {
  * Get pending certificates across all courses the user can manage
  */
 async function getPendingApprovals({ user, status = 'PENDING' }) {
-  // 1. Get all courses the user is staff of
-  const userId = user.id || user.userId;
-  const staffAssignments = await prisma.courseStaff.findMany({
-    where: { userId },
-    select: { courseId: true }
-  });
-  
-  const assignedCourseIds = staffAssignments.map(s => s.courseId);
-  
-  // 2. Query certificates
   const where = { status };
-  
   const isAdmin = user.role === 'admin' || user.effectiveRole === 'admin' || user.isAdmin === true;
-  
-  if (!isAdmin) {
-    // If not admin, restrict to courses where they are staff
-    where.courseId = { in: assignedCourseIds };
-  }
 
-  return await prisma.certificate.findMany({
+  const certificates = await prisma.certificate.findMany({
     where,
     include: {
       user: { select: { id: true, name: true, email: true, department: true } },
@@ -493,6 +483,20 @@ async function getPendingApprovals({ user, status = 'PENDING' }) {
     },
     orderBy: { issuedAt: 'desc' }
   });
+
+  if (isAdmin) return certificates;
+
+  const { COURSE_MANAGEMENT_ACCESS, canManageCourse } = require('../../utils/coursePermissions');
+  const allowed = [];
+
+  for (const certificate of certificates) {
+    const { access } = await canManageCourse(user, certificate.courseId);
+    if (access === COURSE_MANAGEMENT_ACCESS.FULL || access === COURSE_MANAGEMENT_ACCESS.LIMITED) {
+      allowed.push(certificate);
+    }
+  }
+
+  return allowed;
 }
 
 module.exports = {

@@ -4,6 +4,8 @@ const { COURSE_MANAGEMENT_ACCESS, canManageCourse } = require('../utils/coursePe
 
 const ErrorResponse = require('../utils/errorResponse');
 
+const getRequestUserId = (req) => req.user?.userId || req.user?.id;
+
 /**
  * Helper to check if user has FULL access to a course
  */
@@ -20,7 +22,7 @@ async function requireManagementAccess(user, courseId) {
 exports.issueManual = async (req, res, next) => {
   try {
     const { courseId, userId } = req.params;
-    const issuedById = req.user.id;
+    const issuedById = getRequestUserId(req);
 
     await requireManagementAccess(req.user, courseId);
 
@@ -83,7 +85,7 @@ exports.reissue = async (req, res, next) => {
 
     const updatedCert = await certificateService.reissueCertificate({
       certificateId,
-      requestedById: req.user.id
+      requestedById: getRequestUserId(req)
     });
 
     const finalCert = await certificateService.generateCertificatePdfAsync(updatedCert.id);
@@ -118,7 +120,7 @@ exports.revoke = async (req, res, next) => {
 
     const revokedCert = await certificateService.revokeCertificate({
       certificateId,
-      revokedById: req.user.id,
+      revokedById: getRequestUserId(req),
       reason
     });
 
@@ -141,7 +143,7 @@ exports.revoke = async (req, res, next) => {
  */
 exports.getMyCertificates = async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    const userId = getRequestUserId(req);
     const certificates = await certificateService.getMyCertificates(userId);
     res.json(certificates);
   } catch (error) {
@@ -180,7 +182,7 @@ exports.retry = async (req, res, next) => {
 
     const updatedCert = await certificateService.retryCertificatePdfGeneration({
       certificateId,
-      requestedById: req.user.id
+      requestedById: getRequestUserId(req)
     });
 
     res.json({
