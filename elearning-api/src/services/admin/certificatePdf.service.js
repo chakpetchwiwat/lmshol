@@ -1,5 +1,4 @@
-const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
-const fontkit = require('@pdf-lib/fontkit');
+const PDFDocument = require('pdfkit');
 const axios = require('axios');
 const supabase = require('../../utils/supabase');
 
@@ -13,7 +12,6 @@ async function loadThaiFont() {
   if (sarabunFontBuffer) return sarabunFontBuffer;
   
   try {
-    // We use a direct TTF link for Sarabun
     const fontUrl = 'https://github.com/google/fonts/raw/main/ofl/sarabun/Sarabun-Regular.ttf';
     const response = await axios.get(fontUrl, { responseType: 'arraybuffer' });
     sarabunFontBuffer = response.data;
@@ -25,144 +23,95 @@ async function loadThaiFont() {
 }
 
 /**
- * Generates a PDF buffer using pdf-lib (Native, No Browser)
- * 
- * @param {String} _html - Ignored in native mode, but kept for signature compatibility
- * @param {Object} options - PDF data and options
- * @returns {Buffer} PDF buffer
+ * Generates a PDF buffer using pdfkit (Better Thai Support)
  */
 async function generatePdfBuffer(_html, options = {}) {
   const data = options.fallbackData || {};
-  
-  try {
-    // 1. Create a new PDF document
-    const pdfDoc = await PDFDocument.create();
-    pdfDoc.registerFontkit(fontkit);
+  const fontBuffer = await loadThaiFont();
 
-    // 2. Load and embed font
-    const fontBytes = await loadThaiFont();
-    let font;
-    if (fontBytes) {
-      font = await pdfDoc.embedFont(fontBytes);
-    } else {
-      // Fallback to standard font if Thai font fails (will mojibake, but won't crash)
-      font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    }
+  return new Promise((resolve, reject) => {
+    try {
+      // 1. Create a new PDF document (A4 Landscape)
+      const doc = new PDFDocument({
+        size: 'A4',
+        layout: 'landscape',
+        margin: 0
+      });
 
-    // 3. Add a page (A4 Landscape)
-    // A4 is 595.28 x 841.89 points. Landscape is 841.89 x 595.28
-    const page = pdfDoc.addPage([841.89, 595.28]);
-    const { width, height } = page.getSize();
+      const chunks = [];
+      doc.on('data', chunk => chunks.push(chunk));
+      doc.on('end', () => resolve(Buffer.concat(chunks)));
+      doc.on('error', err => reject(err));
 
-    // 4. Draw Background/Border
-    // Outer border
-    page.drawRectangle({
-      x: 20,
-      y: 20,
-      width: width - 40,
-      height: height - 40,
-      borderColor: rgb(0.1, 0.1, 0.1),
-      borderWidth: 2,
-    });
-    
-    // Inner light blue background
-    page.drawRectangle({
-      x: 30,
-      y: 30,
-      width: width - 60,
-      height: height - 60,
-      color: rgb(0.96, 0.98, 1.0), // Light bluish
-    });
+      // 2. Set Font
+      if (fontBuffer) {
+        doc.font(fontBuffer);
+      } else {
+        doc.font('Helvetica');
+      }
 
-    // Helper to draw Thai text correctly (handling combining characters)
-    const drawThaiText = (text, size, x, y, color = rgb(0, 0, 0)) => {
-      if (!text) return;
+      const width = 841.89; // A4 Landscape width
+      const height = 595.28; // A4 Landscape height
+
+      // 3. Draw Background/Border
+      // Outer border
+      doc.rect(20, 20, width - 40, height - 40)
+         .lineWidth(2)
+         .stroke('#1a1a1a');
       
-      let currentX = x;
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const charCode = char.charCodeAt(0);
-        
-        // Thai combining characters (Upper vowels, lower vowels, tone marks)
-        // Range: \u0E31, \u0E34-\u0E3A, \u0E47-\u0E4E
-        const isCombining = (charCode === 0x0E31) || 
-                            (charCode >= 0x0E34 && charCode <= 0x0E3A) || 
-                            (charCode >= 0x0E47 && charCode <= 0x0E4E);
-        
-        if (isCombining && i > 0) {
-          // Draw combining character at the SAME position as previous base character
-          // We might need a slight adjustment depending on the base char, but 0-width is a good start
-          page.drawText(char, {
-            x: currentX - font.widthOfTextAtSize(text[i-1], size), // Step back to previous char's start
-            y,
-            size,
-            font,
-            color,
-          });
-        } else {
-          page.drawText(char, {
-            x: currentX,
-            y,
-            size,
-            font,
-            color,
-          });
-          currentX += font.widthOfTextAtSize(char, size);
-        }
-      }
-      return currentX;
-    };
+      // Inner background
+      doc.rect(30, 30, width - 60, height - 60)
+         .fill('#f5faff');
 
-    // Helper to calculate Thai text width correctly
-    const getThaiWidth = (text, size) => {
-      let totalWidth = 0;
-      for (let i = 0; i < text.length; i++) {
-        const charCode = text[i].charCodeAt(0);
-        const isCombining = (charCode === 0x0E31) || 
-                            (charCode >= 0x0E34 && charCode <= 0x0E3A) || 
-                            (charCode >= 0x0E47 && charCode <= 0x0E4E);
-        if (!isCombining) {
-          totalWidth += font.widthOfTextAtSize(text[i], size);
-        }
-      }
-      return totalWidth;
-    };
+      // 4. Draw Content
+      // Header
+      doc.fillColor('#1a3a5a')
+         .fontSize(32)
+         .text('CERTIFICATE OF COMPLETION', 0, 100, { align: 'center', width });
 
-    const drawCenteredThaiText = (text, size, y, color = rgb(0, 0, 0)) => {
-      const textWidth = getThaiWidth(text, size);
-      drawThaiText(text, size, (width - textWidth) / 2, y, color);
-    };
+      doc.fillColor('#333333')
+         .fontSize(16)
+         .text('หนังสือรับรองฉบับนี้ ให้ไว้เพื่อแสดงว่า', 0, 160, { align: 'center', width });
 
-    // Header
-    drawCenteredThaiText('CERTIFICATE OF COMPLETION', 32, height - 120, rgb(0.1, 0.2, 0.4));
-    drawCenteredThaiText('หนังสือรับรองฉบับนี้ ให้ไว้เพื่อแสดงว่า', 16, height - 170);
+      // Learner Name
+      doc.fillColor('#000000')
+         .fontSize(40)
+         .text(data.learnerName || 'Learner Name', 0, 220, { align: 'center', width });
 
-    // Learner Name
-    drawCenteredThaiText(data.learnerName || 'Learner Name', 36, height - 240, rgb(0.1, 0.1, 0.1));
+      // Course Info
+      doc.fillColor('#333333')
+         .fontSize(18)
+         .text('ได้ผ่านการเรียนหลักสูตรออนไลน์', 0, 300, { align: 'center', width });
 
-    // Course Info
-    drawCenteredThaiText(`ได้ผ่านการเรียนหลักสูตรออนไลน์`, 18, height - 300);
-    drawCenteredThaiText(data.courseTitle || 'Course Title', 24, height - 350, rgb(0.2, 0.3, 0.5));
+      doc.fillColor('#2a4a7a')
+         .fontSize(26)
+         .text(data.courseTitle || 'Course Title', 0, 340, { align: 'center', width });
 
-    // Details Footer
-    const footerY = 150;
-    drawThaiText(`เลขที่เกียรติบัตร: ${data.certificateNo || '-'}`, 12, 80, footerY);
-    drawThaiText(`วันที่ออก: ${data.issuedAt || '-'}`, 12, 80, footerY - 25);
-    
-    // Verification
-    drawThaiText('ตรวจสอบความถูกต้องได้ที่:', 10, 80, footerY - 60);
-    drawThaiText(data.verificationUrl || '-', 9, 80, footerY - 75, rgb(0.3, 0.3, 0.3));
+      // Details Footer
+      const footerY = 450;
+      const leftMargin = 80;
+      
+      doc.fillColor('#333333').fontSize(12);
+      doc.text(`เลขที่เกียรติบัตร: ${data.certificateNo || '-'}`, leftMargin, footerY);
+      doc.text(`วันที่ออก: ${data.issuedAt || '-'}`, leftMargin, footerY + 20);
+      
+      doc.fontSize(10);
+      doc.text('ตรวจสอบความถูกต้องได้ที่:', leftMargin, footerY + 50);
+      doc.fillColor('#666666')
+         .text(data.verificationUrl || '-', leftMargin, footerY + 65);
 
-    // Branding
-    drawThaiText('ScaleUp Learning Management System', 10, width - 280, 60, rgb(0.5, 0.5, 0.5));
+      // Branding
+      doc.fillColor('#999999')
+         .fontSize(10)
+         .text('ScaleUp Learning Management System', width - 300, height - 60, { width: 250, align: 'right' });
 
-    // 6. Serialize the PDF document to bytes (Uint8Array)
-    const pdfBytes = await pdfDoc.save();
-    return Buffer.from(pdfBytes);
-  } catch (error) {
-    console.error('[CertificatePdf] Native generation failed:', error);
-    throw error;
-  }
+      // 5. Finalize PDF
+      doc.end();
+    } catch (error) {
+      console.error('[CertificatePdf] pdfkit generation failed:', error);
+      reject(error);
+    }
+  });
 }
 
 /**
