@@ -20,7 +20,6 @@ const getNotifications = async (userId) => {
                 }
             },
             orderBy: [
-                { readAt: 'asc' },
                 { scheduledFor: 'desc' }
             ],
             take: 20
