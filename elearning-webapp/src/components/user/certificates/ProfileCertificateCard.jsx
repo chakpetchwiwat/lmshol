@@ -15,6 +15,19 @@ const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
   const handleDownload = async () => {
     if (!certificate.id) return;
     
+    // Safari Fix: Open window immediately to avoid pop-up blocker
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.title = 'กำลังโหลดเกียรติบัตร...';
+      newWindow.document.body.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#64748b;">
+          <div style="width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#6366f1;border-radius:50%;animation:spin 1s linear infinite;"></div>
+          <p style="margin-top:16px;font-weight:bold;">กำลังโหลดเกียรติบัตร...</p>
+          <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+        </div>
+      `;
+    }
+
     try {
       setDownloading(true);
       const response = isLms 
@@ -22,12 +35,17 @@ const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
         : await userAPI.getUploadedCertificateDownloadUrl(certificate.id);
 
       if (response.data?.url) {
-        window.open(response.data.url, '_blank');
+        if (newWindow) {
+          newWindow.location.href = response.data.url;
+        } else {
+          window.open(response.data.url, '_blank');
+        }
       } else {
         throw new Error('Download URL not found');
       }
     } catch (error) {
       console.error('Download error:', error);
+      if (newWindow) newWindow.close();
       alert('ไม่สามารถเปิดไฟล์เกียรติบัตรได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง');
     } finally {
       setDownloading(false);

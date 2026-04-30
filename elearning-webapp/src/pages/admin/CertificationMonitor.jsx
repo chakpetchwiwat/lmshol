@@ -251,7 +251,7 @@ const CertificationMonitor = () => {
         </div>
 
         {/* Pagination */}
-        {!loading && pagination.pages > 1 && (
+        {!loading && pagination?.pages > 1 && (
           <div className="px-6 py-4 bg-slate-50/30 border-t border-slate-100 flex items-center justify-between">
             <span className="text-sm text-slate-500 font-medium">
               แสดงหน้าที่ {pagination.currentPage} จากทั้งหมด {pagination.pages} หน้า (ทั้งหมด {pagination.total} รายการ)
