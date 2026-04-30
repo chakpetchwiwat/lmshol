@@ -129,5 +129,7 @@ const canManageCourse = async (user, courseId) => {
 
 module.exports = {
   COURSE_MANAGEMENT_ACCESS,
+  isAdmin,
+  isManager,
   canManageCourse
 };
