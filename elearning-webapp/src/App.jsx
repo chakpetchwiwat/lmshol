@@ -36,6 +36,7 @@ const AdminReports = React.lazy(() => import('./pages/admin/Reports'));
 const AdminGoals = React.lazy(() => import('./pages/admin/GoalManagement'));
 const AdminHealth = React.lazy(() => import('./pages/admin/SystemHealth'));
 const CertificationMonitor = React.lazy(() => import('./pages/admin/CertificationMonitor'));
+const AssessmentGrading = React.lazy(() => import('./pages/admin/AssessmentGrading'));
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -116,6 +117,7 @@ function App() {
             <Route path="reports" element={<AdminReports />} />
             <Route path="goals" element={<AdminGoals />} />
             <Route path="certificates" element={<CertificationMonitor />} />
+            <Route path="assessments" element={<AssessmentGrading />} />
             <Route path="health" element={<AdminHealth />} />
           </Route>
         </Route>

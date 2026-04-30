@@ -14,6 +14,7 @@ import {
   BellRing,
   Activity,
   Award,
+  ClipboardCheck,
 } from 'lucide-react';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
@@ -97,6 +98,8 @@ const AdminLayout = () => {
     ...(isFullAdmin
       ? [{ path: '/admin/certificates', icon: <Award size={20} />, label: 'ภาพรวมเกียรติบัตร' }]
       : []),
+
+    { path: '/admin/assessments', icon: <ClipboardCheck size={20} />, label: 'ตรวจงาน' },
   ];
 
   return (

@@ -85,4 +85,7 @@ router.get('/courses/:courseId/certificates', verifyCourseAccess, certificateCon
 router.get('/certificates', certificateController.getAllCertificates);
 router.post('/certificates/:certificateId/retry', certificateController.retryGeneration);
 
+// Assessments
+router.get('/assessments', adminController.getAllAssessmentSubmissions);
+
 module.exports = router;

@@ -355,6 +355,22 @@ const getCourseQuizAttempts = asyncHandler(async (req, res) => {
   res.json({ success: true, data: attempts });
 });
 
+// ASSESSMENTS
+const getAllAssessmentSubmissions = asyncHandler(async (req, res) => {
+  const startedAt = Date.now();
+  const submissions = await AssessmentService.listAllAssessmentSubmissions(req.user, req.query);
+  const durationMs = Date.now() - startedAt;
+  
+  appendServerTiming(res, 'admin-all-assessments', durationMs);
+  logAdminTiming('admin.all_assessments.completed', req, durationMs, {
+    rows: submissions?.length || 0,
+    courseId: req.query?.courseId || null,
+    status: req.query?.status || null
+  });
+  
+  res.json({ success: true, data: submissions });
+});
+
 module.exports = {
   getDashboardStats,
   getAdvancedAnalytics,
@@ -408,5 +424,6 @@ module.exports = {
   updateLesson,
   deleteLesson,
   reorderLessons,
-  getCourseQuizAttempts
+  getCourseQuizAttempts,
+  getAllAssessmentSubmissions
 };

@@ -3,7 +3,7 @@ const supabase = require('../config/supabase');
 const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
 const { ASSESSMENT_SUBMISSION_STATUS } = require('../utils/constants/statuses');
 const { completeLessonAndRefreshCourse } = require('./user/user.progress');
-const { canManageCourse, COURSE_MANAGEMENT_ACCESS } = require('../utils/coursePermissions');
+const { canManageCourse, COURSE_MANAGEMENT_ACCESS, isAdmin } = require('../utils/coursePermissions');
 
 const clampNumber = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -256,6 +256,94 @@ const listCourseAssessmentSubmissions = async (actor, courseId) => {
   return submissions.map(serializeSubmission);
 };
 
+const listAllAssessmentSubmissions = async (actor, filters = {}) => {
+  const userId = actor?.userId || actor?.id;
+  const isUserFullAdmin = isAdmin(actor);
+
+  const where = {
+    lesson: {
+      type: 'assessment'
+    }
+  };
+
+  // If not full admin, restrict to courses they manage
+  if (!isUserFullAdmin) {
+    const managedCourses = await prisma.courseStaff.findMany({
+      where: {
+        userId,
+        role: { in: ['OWNER', 'INSTRUCTOR', 'owner', 'instructor'] }
+      },
+      select: { courseId: true }
+    });
+
+    const managedCourseIds = managedCourses.map(c => c.courseId);
+    
+    // If instructor has no courses, they see nothing
+    if (managedCourseIds.length === 0) {
+      return [];
+    }
+
+    where.lesson.courseId = { in: managedCourseIds };
+  }
+
+  // Apply filters
+  if (filters.courseId) {
+    where.lesson.courseId = filters.courseId;
+  }
+
+  if (filters.status) {
+    where.status = filters.status;
+  }
+
+  if (filters.search) {
+    where.user = {
+      name: { contains: filters.search, mode: 'insensitive' }
+    };
+  }
+
+  const submissions = await prisma.assessmentSubmission.findMany({
+    where,
+    orderBy: [
+      { status: 'asc' },
+      { submittedAt: 'desc' }
+    ],
+    include: {
+      lesson: {
+        select: {
+          id: true,
+          title: true,
+          passScore: true,
+          points: true,
+          course: {
+            select: {
+              id: true,
+              title: true
+            }
+          }
+        }
+      },
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true
+        }
+      },
+      gradedBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true
+        }
+      }
+    },
+    take: filters.limit ? parseInt(filters.limit) : 50,
+    skip: filters.skip ? parseInt(filters.skip) : 0
+  });
+
+  return submissions.map(serializeSubmission);
+};
+
 const gradeAssessmentSubmission = async (actor, submissionId, data = {}) => {
   const actorId = actor?.userId || actor?.id;
   const existing = await prisma.assessmentSubmission.findUnique({
@@ -343,6 +431,7 @@ module.exports = {
   getMyAssessmentSubmission,
   getSubmissionDownloadUrl,
   listCourseAssessmentSubmissions,
+  listAllAssessmentSubmissions,
   gradeAssessmentSubmission,
   getAssessmentPassResult
 };

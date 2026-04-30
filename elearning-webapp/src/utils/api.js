@@ -234,6 +234,7 @@ export const adminAPI = {
   updateRedeemStatus: (id, status, adminNote = '') => api.put(`/admin/redeems/${id}/status`, { status, adminNote }),
 
   getCourseQuizReports: (courseId) => api.get(`/admin/courses/${courseId}/quiz-reports`),
+  getAllAssessmentSubmissions: (params) => api.get('/admin/assessments', { params }),
   getCourseAssessmentSubmissions: (courseId) => api.get(`/courses/${courseId}/assessment-submissions`),
   gradeAssessmentSubmission: (courseId, submissionId, data) => api.patch(`/courses/${courseId}/assessment-submissions/${submissionId}/grade`, data),
   getAssessmentSubmissionDownloadUrl: (courseId, submissionId) => api.get(`/courses/${courseId}/assessment-submissions/${submissionId}/download-url`),
