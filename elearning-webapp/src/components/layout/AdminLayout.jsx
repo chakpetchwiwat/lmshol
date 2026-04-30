@@ -13,6 +13,7 @@ import {
   ClipboardList,
   BellRing,
   Activity,
+  Award,
 } from 'lucide-react';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
@@ -90,6 +91,11 @@ const AdminLayout = () => {
     // Health: SuperAdmin/Admin Only
     ...(isFullAdmin
       ? [{ path: '/admin/health', icon: <Activity size={20} />, label: 'Health Monitoring' }]
+      : []),
+    
+    // Certificates: SuperAdmin/Admin Only
+    ...(isFullAdmin
+      ? [{ path: '/admin/certificates', icon: <Award size={20} />, label: 'ระบบใบเซอร์' }]
       : []),
   ];
 

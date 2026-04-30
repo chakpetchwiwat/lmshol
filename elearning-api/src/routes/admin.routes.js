@@ -81,4 +81,8 @@ router.get('/courses/:courseId/quiz-reports', verifyCourseAccess, adminControlle
 router.get('/certificates/pending', verifyAdminOrManager, certificateController.getPendingApprovals);
 router.get('/courses/:courseId/certificates', verifyCourseAccess, certificateController.getCourseCertificates);
 
+// Certificate Management
+router.get('/certificates', certificateController.getAllCertificates);
+router.post('/certificates/:certificateId/retry', certificateController.retryGeneration);
+
 module.exports = router;

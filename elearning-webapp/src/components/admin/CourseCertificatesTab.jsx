@@ -16,6 +16,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
   const [eligibleUsers, setEligibleUsers] = React.useState([]);
   const [eligibleLoading, setEligibleLoading] = React.useState(false);
   const [manualIssueLoading, setManualIssueLoading] = React.useState(false);
+  const [manualSearchQuery, setManualSearchQuery] = React.useState('');
 
   const fetchCertificates = async () => {
     try {
@@ -122,6 +123,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
       );
       
       setEligibleUsers(eligible);
+      setManualSearchQuery(''); // Reset search on open
     } catch (error) {
       console.error('Failed to fetch eligible users:', error);
       toast.error('ไม่สามารถดึงข้อมูลรายชื่อผู้เรียนได้');
@@ -389,7 +391,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
       {/* Manual Issue Modal */}
       {isManualModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg animate-in zoom-in-95 duration-200 rounded-3xl bg-white shadow-2xl">
+          <div className="w-full max-w-2xl animate-in zoom-in-95 duration-200 rounded-3xl bg-white shadow-2xl">
             <div className="border-b border-slate-100 p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -425,8 +427,23 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
                   <p className="mt-1 text-xs font-bold text-slate-400">ผู้เรียนทุกคนในคอร์สนี้ได้รับเกียรติบัตรหมดแล้ว</p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                  {eligibleUsers.map((record) => (
+                <div className="flex flex-col gap-4">
+                  {/* Search box for manual modal */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input
+                      type="text"
+                      placeholder="ค้นหาชื่อผู้เรียน..."
+                      className="input pl-10 h-10 text-sm"
+                      value={manualSearchQuery}
+                      onChange={(e) => setManualSearchQuery(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                    {eligibleUsers
+                      .filter(u => u.user?.name?.toLowerCase().includes(manualSearchQuery.toLowerCase()))
+                      .map((record) => (
                     <div 
                       key={record.user?.id}
                       className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 transition-all hover:border-indigo-200 hover:bg-white hover:shadow-md"
@@ -454,7 +471,14 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
                         {manualIssueLoading ? <Loader2 size={14} className="animate-spin" /> : 'ออกบัตร'}
                       </button>
                     </div>
-                  ))}
+                    ))}
+                    
+                    {eligibleUsers.filter(u => u.user?.name?.toLowerCase().includes(manualSearchQuery.toLowerCase())).length === 0 && (
+                      <div className="py-10 text-center text-slate-400">
+                        <p className="text-sm font-bold">ไม่พบรายชื่อผู้เรียนที่ตรงกับการค้นหา</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

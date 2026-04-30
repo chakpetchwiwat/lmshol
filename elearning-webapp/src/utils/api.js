@@ -237,8 +237,11 @@ export const adminAPI = {
   getCourseAssessmentSubmissions: (courseId) => api.get(`/courses/${courseId}/assessment-submissions`),
   gradeAssessmentSubmission: (courseId, submissionId, data) => api.patch(`/courses/${courseId}/assessment-submissions/${submissionId}/grade`, data),
   getAssessmentSubmissionDownloadUrl: (courseId, submissionId) => api.get(`/courses/${courseId}/assessment-submissions/${submissionId}/download-url`),
-  getPendingCertificates: (params) => api.get('/admin/certificates/pending', { params }),
+  // Certificates
+  getPendingCertificates: () => api.get('/admin/certificates/pending'),
   getCourseCertificates: (courseId) => api.get(`/admin/courses/${courseId}/certificates`),
+  getAllCertificates: (params) => api.get('/admin/certificates', { params }),
+  retryCertificatePdf: (certificateId) => api.post(`/admin/certificates/${certificateId}/retry`),
   getCertificateDownloadUrl: (id) => api.get(`/certificates/${id}/download-url`),
   issueManual: (courseId, userId) => api.post(`/courses/${courseId}/certificates/issue/${userId}`),
   retryCertificate: (id) => api.post(`/certificates/${id}/retry`),

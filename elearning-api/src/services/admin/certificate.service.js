@@ -129,9 +129,13 @@ async function issueCertificate({ courseId, userId, issuedById = null, manual = 
 
     // 6. Data preparation
     const certificateId = crypto.randomUUID();
-    const certificateNo = await generateCertificateNo(tx, course);
     const verificationToken = crypto.randomUUID();
+    
+    // Resolve signer BEFORE generating certificate number to avoid wasting a number if signer resolution fails
     const signer = await resolveCertificateSigner(tx, courseId, setting);
+
+    // Generate number as the LAST step before creation
+    const certificateNo = await generateCertificateNo(tx, course);
 
     // 7. Create record
     const certificate = await tx.certificate.create({
@@ -525,6 +529,46 @@ async function getPendingApprovals({ user, status = 'PENDING' }) {
   return allowed;
 }
 
+/**
+ * List all certificates for admin monitoring
+ */
+async function listAllCertificates({ page = 1, limit = 20, status, search }) {
+  const skip = (page - 1) * limit;
+  const where = {};
+
+  if (status && status !== 'ALL') {
+    where.status = status;
+  }
+
+  if (search) {
+    where.OR = [
+      { certificateNo: { contains: search, mode: 'insensitive' } },
+      { user: { name: { contains: search, mode: 'insensitive' } } },
+      { course: { title: { contains: search, mode: 'insensitive' } } }
+    ];
+  }
+
+  const [total, items] = await Promise.all([
+    prisma.certificate.count({ where }),
+    prisma.certificate.findMany({
+      where,
+      include: {
+        user: { select: { id: true, name: true, email: true, department: true } },
+        course: { select: { id: true, title: true } }
+      },
+      orderBy: { issuedAt: 'desc' },
+      skip,
+      take: limit
+    })
+  ]);
+
+  return {
+    items,
+    total,
+    pages: Math.ceil(total / limit)
+  };
+}
+
 module.exports = {
   issueCertificate,
   reissueCertificate,
@@ -536,5 +580,6 @@ module.exports = {
   generateCertificatePdfAsync,
   createCertificateSignedUrl,
   retryCertificatePdfGeneration,
-  getPendingApprovals
+  getPendingApprovals,
+  listAllCertificates
 };

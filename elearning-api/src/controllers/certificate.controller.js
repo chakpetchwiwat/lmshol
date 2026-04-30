@@ -305,3 +305,55 @@ exports.getPendingApprovals = async (req, res, next) => {
     next(error);
   }
 };
+/**
+ * Get all certificates (Admin Only)
+ */
+exports.getAllCertificates = async (req, res, next) => {
+  try {
+    const { page, limit, status, search } = req.query;
+    const result = await certificateService.listAllCertificates({
+      page: parseInt(page) || 1,
+      limit: parseInt(limit) || 20,
+      status,
+      search
+    });
+
+    res.json({
+      success: true,
+      data: result.items,
+      pagination: {
+        total: result.total,
+        pages: result.pages,
+        currentPage: parseInt(page) || 1
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Retry failed certificate generation (Admin Only)
+ */
+exports.retryGeneration = async (req, res, next) => {
+  try {
+    const { certificateId } = req.params;
+    const requestedById = getRequestUserId(req);
+
+    const updated = await certificateService.retryCertificatePdfGeneration({
+      certificateId,
+      requestedById
+    });
+
+    res.json({
+      success: true,
+      data: {
+        id: updated.id,
+        status: updated.status
+      },
+      message: 'Retry attempt started'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
