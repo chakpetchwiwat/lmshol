@@ -46,6 +46,18 @@ const getUserDetails = async (id, authUser) => {
         include: {
             departmentRef: true,
             tier: true,
+            certificates: {
+                orderBy: { createdAt: 'desc' }
+            },
+            issuedCertificates: {
+                where: { status: 'VALID' },
+                include: {
+                    course: {
+                        select: { id: true, title: true }
+                    }
+                },
+                orderBy: { issuedAt: 'desc' }
+            },
             enrollments: {
                 include: { course: { include: { category: true } } },
                 orderBy: { startedAt: 'desc' }
@@ -73,6 +85,14 @@ const getUserDetails = async (id, authUser) => {
                 categoryName: enrollment.course.category?.name || null,
                 points: enrollment.course.points
             }
+        })),
+        externalCertificates: user.certificates || [],
+        systemCertificates: (user.issuedCertificates || []).map(cert => ({
+            id: cert.id,
+            certificateNo: cert.certificateNo,
+            courseTitle: cert.course?.title,
+            issuedAt: cert.issuedAt,
+            pdfUrl: cert.pdfUrl
         })),
         pointsHistory
     };

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   CalendarDays,
   CheckCircle2,
@@ -6,6 +6,7 @@ import {
   Coins,
   FileDown,
   Gift,
+  ExternalLink,
   Printer,
   TrendingDown,
   TrendingUp,
@@ -103,12 +104,62 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
   };
 
   const handlePrint = () => {
+    const mainTitle = activeTab === 'learning' ? 'ประวัติการเรียน' : 'ประวัติ Point';
     const data = activeTab === 'learning' ? filteredEnrollments : filteredPointsHistory;
+
+    const sections = [
+      // Always include certificates
+      {
+        title: 'เกียรติบัตรจากระบบ',
+        columns: ['หลักสูตร', 'เลขที่ใบเซอร์', 'วันที่ออก'],
+        rows: (detail?.systemCertificates || []).map(cert => [
+          cert.courseTitle || '-',
+          cert.certificateNo || '-',
+          cert.issuedAt ? formatThaiDateTime(cert.issuedAt) : '-'
+        ]),
+        emptyMessage: 'ไม่มีประวัติเกียรติบัตรจากระบบ'
+      },
+      {
+        title: 'เกียรติบัตรที่เพิ่มเอง',
+        columns: ['หัวข้อ', 'ผู้ออก', 'วันที่ได้รับ'],
+        rows: (detail?.externalCertificates || []).map(cert => [
+          cert.title || '-',
+          cert.issuer || '-',
+          cert.issueDate ? formatThaiDateTime(cert.issueDate) : '-'
+        ]),
+        emptyMessage: 'ไม่มีประวัติเกียรติบัตรที่เพิ่มเอง'
+      },
+      {
+        title: mainTitle,
+        columns: activeTab === 'learning'
+          ? ['คอร์ส', 'หมวดหมู่', 'เริ่มเรียน', 'สำเร็จเมื่อ', 'ความคืบหน้า', 'สถานะ']
+          : ['ประเภท', 'ที่มา / การใช้งาน', 'หมายเหตุ', 'Point', 'เวลา'],
+        rows: activeTab === 'learning'
+          ? data.map((item) => ([
+              item.course?.title || '-',
+              item.course?.categoryName || '-',
+              item.startedAt ? formatThaiDateTime(item.startedAt) : '-',
+              getEnrollmentCompletedAtLabel(item),
+              `${Math.round(item.progressPercent || 0)}%`,
+              item.status === ENROLLMENT_STATUS.COMPLETED ? 'เรียนจบแล้ว' : 'กำลังเรียน',
+            ]))
+          : data.map((item) => ([
+              item.points >= 0 ? 'ได้รับแต้ม' : 'ใช้แต้ม',
+              item.sourceLabel || '-',
+              item.note || (item.points >= 0 ? 'ได้รับ Point' : 'ใช้ Point'),
+              `${item.points}`,
+              item.createdAt ? formatThaiDateTime(item.createdAt) : '-',
+            ])),
+        emptyMessage: activeTab === 'learning'
+          ? 'ไม่พบประวัติการลงเรียนตามเงื่อนไขที่เลือก'
+          : 'ไม่พบประวัติ Point ตามเงื่อนไขที่เลือก',
+      }
+    ];
 
     openPrintReport({
       fileName: `user-history-${detail?.name || 'report'}-${activeTab}`,
       reportTitle: 'ประวัติผู้ใช้งานรายบุคคล',
-      subtitle: `${detail?.name || '-'} · ${activeTab === 'learning' ? 'ประวัติการเรียน' : 'ประวัติ Point'}`,
+      subtitle: `${detail?.name || '-'} · ${mainTitle}`,
       summary: [
         { label: 'พนักงาน', value: detail?.name || '-' },
         { label: 'อีเมล', value: detail?.email || '-' },
@@ -118,32 +169,11 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
         { label: 'Point Balance', value: `${detail?.pointsBalance?.toLocaleString?.() || 0}` },
       ],
       filters: [
-        { label: 'มุมมอง', value: activeTab === 'learning' ? 'ประวัติการเรียน' : 'ประวัติ Point' },
+        { label: 'มุมมอง', value: mainTitle },
         { label: 'เดือน', value: filterMonth === FILTER_VALUES.ALL ? 'ทุกเดือน' : months[parseInt(filterMonth, 10)] || 'ทุกเดือน' },
         { label: 'ปี', value: filterYear === FILTER_VALUES.ALL ? 'ทุกปี' : String(parseInt(filterYear, 10) + 543) },
       ],
-      columns: activeTab === 'learning'
-        ? ['คอร์ส', 'หมวดหมู่', 'เริ่มเรียน', 'สำเร็จเมื่อ', 'ความคืบหน้า', 'สถานะ']
-        : ['ประเภท', 'ที่มา / การใช้งาน', 'หมายเหตุ', 'Point', 'เวลา'],
-      rows: activeTab === 'learning'
-        ? data.map((item) => ([
-            item.course?.title || '-',
-            item.course?.categoryName || '-',
-            item.startedAt ? formatThaiDateTime(item.startedAt) : '-',
-            getEnrollmentCompletedAtLabel(item),
-            `${Math.round(item.progressPercent || 0)}%`,
-            item.status === ENROLLMENT_STATUS.COMPLETED ? 'เรียนจบแล้ว' : 'กำลังเรียน',
-          ]))
-        : data.map((item) => ([
-            item.points >= 0 ? 'ได้รับแต้ม' : 'ใช้แต้ม',
-            item.sourceLabel || '-',
-            item.note || (item.points >= 0 ? 'ได้รับ Point' : 'ใช้ Point'),
-            `${item.points}`,
-            item.createdAt ? formatThaiDateTime(item.createdAt) : '-',
-          ])),
-      emptyMessage: activeTab === 'learning'
-        ? 'ไม่พบประวัติการลงเรียนตามเงื่อนไขที่เลือก'
-        : 'ไม่พบประวัติ Point ตามเงื่อนไขที่เลือก',
+      sections
     });
   };
 
@@ -212,6 +242,93 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                     <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Point Balance</div>
                     <div className="mt-2 text-lg font-black text-slate-900">{detail.pointsBalance?.toLocaleString?.() || 0}</div>
                     <div className="mt-1 text-sm text-slate-500">แต้มคงเหลือล่าสุดของผู้ใช้งาน</div>
+                  </div>
+                </div>
+
+                {/* Certificates Section */}
+                <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div>
+                      <h4 className="text-base font-black text-slate-900">เกียรติบัตรของพนักงาน</h4>
+                      <p className="mt-0.5 text-xs font-bold text-slate-500">รวบรวมทั้งเกียรติบัตรในระบบและที่เพิ่มเข้ามาเอง</p>
+                    </div>
+                    <div className="rounded-2xl bg-amber-50 px-3 py-1.5 text-[10px] font-black text-amber-600 uppercase tracking-wider border border-amber-100">
+                      Total { (detail.externalCertificates?.length || 0) + (detail.systemCertificates?.length || 0) } Certs
+                    </div>
+                  </div>
+
+                  <div className="space-y-6 pt-2">
+                    {/* External Certificates */}
+                    <div>
+                      <h5 className="mb-3 flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
+                        <ExternalLink size={14} className="text-primary" />
+                        เกียรติบัตรภายนอก
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {(!detail.externalCertificates || detail.externalCertificates.length === 0) ? (
+                          <div className="col-span-2 rounded-2xl border border-dashed border-slate-200 py-6 text-center text-xs font-bold text-slate-400">
+                            ยังไม่มีเกียรติบัตรภายนอก
+                          </div>
+                        ) : (
+                          detail.externalCertificates.map((cert) => (
+                            <div 
+                              key={cert.id} 
+                              className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:bg-white hover:border-primary/20 hover:shadow-md cursor-pointer"
+                              onClick={() => cert.fileUrl && window.open(cert.fileUrl, '_blank')}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-primary border border-slate-100 shadow-sm group-hover:bg-primary group-hover:text-white transition-colors">
+                                  <ExternalLink size={18} />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-black text-slate-900 line-clamp-1">{cert.title}</p>
+                                  <p className="text-[10px] font-bold text-slate-500">{cert.issuer} · {cert.issueDate ? formatThaiDateTime(cert.issueDate) : 'ไม่ระบุวันที่'}</p>
+                                </div>
+                              </div>
+                              <div className="text-slate-300 group-hover:text-primary transition-colors">
+                                <ExternalLink size={14} />
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* System Certificates */}
+                    <div>
+                      <h5 className="mb-3 flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
+                        <Award size={14} className="text-emerald-500" />
+                        เกียรติบัตรในระบบ
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {(!detail.systemCertificates || detail.systemCertificates.length === 0) ? (
+                          <div className="col-span-2 rounded-2xl border border-dashed border-slate-200 py-6 text-center text-xs font-bold text-slate-400">
+                            ยังไม่มีเกียรติบัตรจากคอร์สเรียน
+                          </div>
+                        ) : (
+                          detail.systemCertificates.map((cert) => (
+                            <div 
+                              key={cert.id} 
+                              className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-emerald-50/30 p-4 transition-all hover:bg-white hover:border-emerald-200 hover:shadow-md cursor-pointer"
+                              onClick={() => cert.pdfUrl && window.open(cert.pdfUrl, '_blank')}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                  <Award size={18} />
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-black text-slate-900 line-clamp-1">{cert.courseTitle}</p>
+                                  <p className="text-[10px] font-bold text-emerald-600/70">{cert.certificateNo} · {cert.issuedAt ? formatThaiDateTime(cert.issuedAt) : '-'}</p>
+                                </div>
+                              </div>
+                              <div className="text-emerald-300 group-hover:text-emerald-500 transition-colors">
+                                <ExternalLink size={14} />
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
