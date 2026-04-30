@@ -1,5 +1,5 @@
 import React from 'react';
-import { GripVertical, Play, FileText, Edit, Trash2 } from 'lucide-react';
+import { GripVertical, Play, FileText, Edit, Trash2, ClipboardCheck } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -42,10 +42,16 @@ const SortableLessonItem = ({ lesson, idx, onEdit, onDelete, readOnly }) => {
       
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          {lesson.type === 'video' ? <Play size={12} className="text-primary" /> : <FileText size={12} className="text-blue-500" />}
+          {lesson.type === 'video' ? (
+            <Play size={12} className="text-primary" />
+          ) : lesson.type === 'assessment' ? (
+            <ClipboardCheck size={12} className="text-emerald-500" />
+          ) : (
+            <FileText size={12} className="text-blue-500" />
+          )}
           <h4 className="text-sm font-bold truncate">{lesson.title}</h4>
         </div>
-        <p className="text-[10px] text-gray-400 truncate font-medium">{lesson.contentUrl || 'ไม่มีที่อยู่ไฟล์'}</p>
+        <p className="text-[10px] text-gray-400 truncate font-medium">{lesson.type === 'assessment' ? 'Assessment upload' : (lesson.contentUrl || 'ไม่มีที่อยู่ไฟล์')}</p>
       </div>
       
       {!readOnly && (

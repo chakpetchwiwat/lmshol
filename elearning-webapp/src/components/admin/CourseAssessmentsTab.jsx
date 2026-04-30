@@ -56,11 +56,17 @@ const CourseAssessmentsTab = ({ courseId, readOnly }) => {
 
   const gradeSubmission = async (submission, needsRevision = false) => {
     const form = gradeForm[submission.id] || {};
-    const score = Number(form.score);
+    const rawScore = String(form.score ?? '').trim();
+    const score = Number(rawScore);
     const maxScore = Number(form.maxScore || submission.maxScore || submission.lesson?.points || 10);
 
-    if (!Number.isFinite(score) || score < 0) {
+    if (rawScore === '' || !Number.isFinite(score) || score < 0) {
       toast.warning('Please enter a valid score');
+      return;
+    }
+
+    if (score > maxScore) {
+      toast.warning('Score cannot be greater than max score');
       return;
     }
 

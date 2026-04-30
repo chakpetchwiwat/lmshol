@@ -31,6 +31,7 @@ const AssessmentSection = ({
   const passScore = lesson.passScore || 60;
   const maxScore = lesson.points || submission?.maxScore || 10;
   const canSubmit = !submission || ['FAILED', 'NEEDS_REVISION'].includes(submission.status);
+  const isWaitingForReview = submission?.status === 'SUBMITTED';
   const statusClass = STATUS_STYLES[submission?.status] || STATUS_STYLES.SUBMITTED;
 
   return (
@@ -111,6 +112,12 @@ const AssessmentSection = ({
               <FileText size={18} />
             </button>
           </div>
+        </section>
+      )}
+
+      {isWaitingForReview && (
+        <section className="rounded-[2rem] border border-amber-100 bg-amber-50 px-6 py-5 text-sm font-bold text-amber-800">
+          Your file has been submitted. This lesson will be completed automatically after the instructor gives a passing grade.
         </section>
       )}
     </div>

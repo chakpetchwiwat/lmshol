@@ -21,6 +21,17 @@ const LessonModal = ({
 
   if (!isOpen) return null;
 
+  const handleTypeChange = (event) => {
+    const nextType = event.target.value;
+    setLessonForm({
+      ...lessonForm,
+      type: nextType,
+      points: nextType === 'assessment' && !lessonForm.points ? 10 : lessonForm.points,
+      passScore: ['quiz', 'assessment'].includes(nextType) && !lessonForm.passScore ? 60 : lessonForm.passScore,
+      questions: nextType === 'quiz' ? lessonForm.questions : [],
+    });
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     onSave(event);
@@ -133,7 +144,7 @@ const LessonModal = ({
                 <CustomSelect
                   label="ประเภทเนื้อหา"
                   value={lessonForm.type}
-                  onChange={(event) => setLessonForm({ ...lessonForm, type: event.target.value })}
+                  onChange={handleTypeChange}
                   options={[
                     { value: 'video', label: 'วิดีโอ (YouTube / Vimeo)' },
                     { value: 'pdf', label: 'เอกสาร (PDF/Link)' },

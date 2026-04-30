@@ -435,6 +435,7 @@ async function generateCertificatePdfAsync(certificateId) {
     const pdfBuffer = await certificatePdfService.generatePdfBuffer(html, {
       orientation: cert.template.orientation,
       fallbackData: {
+        templateId: cert.templateId,
         certificateNo: cert.certificateNo,
         learnerName: cert.metadata?.learner?.name || cert.user?.name,
         courseTitle: cert.metadata?.course?.title || cert.course?.title,

@@ -3,6 +3,7 @@ import { Book, Trophy, Clock, Plus, ImageIcon, Upload, Trash2, FileText, Layers,
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import InstructorPresetPicker from './InstructorPresetPicker';
+import CertificateTemplateSelector from './CertificateTemplateSelector';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
 import { getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
@@ -495,6 +496,13 @@ const CourseBasicInfoForm = ({
                         </div>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="mt-8 border-t border-indigo-100 pt-8">
+                    <CertificateTemplateSelector 
+                      selectedId={courseForm.certificateTemplateId || 'CLASSIC_001'}
+                      onSelect={(id) => setCourseForm({ ...courseForm, certificateTemplateId: id })}
+                    />
                   </div>
                 </div>
               )}

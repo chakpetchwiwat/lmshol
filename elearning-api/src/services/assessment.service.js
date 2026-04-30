@@ -110,6 +110,18 @@ const submitAssessment = async (userId, lessonId, data = {}) => {
     throw new Error('This assessment has already been passed');
   }
 
+  const activeSubmission = await prisma.assessmentSubmission.findFirst({
+    where: {
+      userId,
+      lessonId,
+      status: ASSESSMENT_SUBMISSION_STATUS.SUBMITTED
+    }
+  });
+
+  if (activeSubmission) {
+    throw new Error('This assessment is already waiting for review');
+  }
+
   const fileKey = normalizeOptionalText(data.fileKey);
   const fileUrl = normalizeOptionalText(data.fileUrl);
 
@@ -270,9 +282,9 @@ const gradeAssessmentSubmission = async (actor, submissionId, data = {}) => {
   }
 
   const result = getAssessmentPassResult(existing.lesson, data.score, data.maxScore || existing.maxScore);
-  const status = result.passed
-    ? ASSESSMENT_SUBMISSION_STATUS.PASSED
-    : (data.needsRevision ? ASSESSMENT_SUBMISSION_STATUS.NEEDS_REVISION : ASSESSMENT_SUBMISSION_STATUS.FAILED);
+  const status = data.needsRevision
+    ? ASSESSMENT_SUBMISSION_STATUS.NEEDS_REVISION
+    : (result.passed ? ASSESSMENT_SUBMISSION_STATUS.PASSED : ASSESSMENT_SUBMISSION_STATUS.FAILED);
 
   const submission = await prisma.assessmentSubmission.update({
     where: { id: submissionId },
