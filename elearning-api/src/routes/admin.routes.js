@@ -13,24 +13,24 @@ router.get('/analytics', verifyAdminOrManager, adminAnalyticsRateLimiter, adminC
 router.get('/system/health', verifySuperAdmin, systemController.getSystemHealth);
 router.post('/system/security/reset', verifySuperAdmin, systemController.resetRateLimit);
 
-router.get('/users', verifyAdmin, adminController.getUsers);
-router.get('/users/:id/details', verifyAdmin, adminController.getUserDetails);
+router.get('/users', verifyAdminOrManager, adminController.getUsers);
+router.get('/users/:id/details', verifyAdminOrManager, adminController.getUserDetails);
 router.post('/users', verifySuperAdmin, adminController.createUser);
 router.put('/users/:id', verifySuperAdmin, adminController.updateUser);
 router.delete('/users/:id', verifySuperAdmin, adminController.deleteUser);
 
-router.get('/departments', verifyAdmin, adminController.getDepartments);
+router.get('/departments', adminController.getDepartments);
 router.post('/departments', verifySuperAdmin, adminController.createDepartment);
 router.put('/departments/:id', verifySuperAdmin, adminController.updateDepartment);
 router.delete('/departments/:id', verifySuperAdmin, adminController.deleteDepartment);
 
-router.get('/tiers', verifyAdmin, adminController.getTiers);
+router.get('/tiers', adminController.getTiers);
 router.post('/tiers', verifySuperAdmin, adminController.createTier);
 router.put('/tiers/reorder', verifySuperAdmin, adminController.reorderTiers);
 router.put('/tiers/:id', verifySuperAdmin, adminController.updateTier);
 router.delete('/tiers/:id', verifySuperAdmin, adminController.deleteTier);
 
-router.get('/instructor-presets', verifyAdmin, adminController.getInstructorPresets);
+router.get('/instructor-presets', adminController.getInstructorPresets);
 router.post('/instructor-presets', verifySuperAdmin, adminController.createInstructorPreset);
 router.put('/instructor-presets/:id', verifySuperAdmin, adminController.updateInstructorPreset);
 router.delete('/instructor-presets/:id', verifySuperAdmin, adminController.deleteInstructorPreset);
@@ -51,7 +51,7 @@ router.put('/announcements/:id/archive', verifyAdminOrManager, adminController.a
 router.put('/announcements/:id', verifyAdminOrManager, adminController.updateAnnouncement);
 router.delete('/announcements/:id', verifyAdminOrManager, adminController.deleteAnnouncement);
 
-router.get('/categories', verifyAdmin, adminController.getCategories);
+router.get('/categories', adminController.getCategories);
 router.post('/categories', verifySuperAdmin, adminController.createCategory);
 router.put('/categories/reorder', verifySuperAdmin, adminController.reorderCategories);
 router.put('/categories/:id/republish', verifySuperAdmin, adminController.republishCategory);
@@ -59,7 +59,7 @@ router.put('/categories/:id/archive', verifySuperAdmin, adminController.archiveC
 router.put('/categories/:id', verifySuperAdmin, adminController.updateCategory);
 router.delete('/categories/:id', verifySuperAdmin, adminController.deleteCategory);
 
-router.get('/rewards', verifyAdmin, adminController.getAdminRewards);
+router.get('/rewards', adminController.getAdminRewards);
 router.post('/rewards', verifySuperAdmin, adminController.createReward);
 router.put('/rewards/:id', verifySuperAdmin, adminController.updateReward);
 router.delete('/rewards/:id', verifySuperAdmin, adminController.deleteReward);
