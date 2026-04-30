@@ -1,5 +1,6 @@
 const prisma = require('./prisma');
 const authHelpers = require('./auth.helpers');
+const { USER_ROLES } = require('./constants/roles');
 
 const COURSE_MANAGEMENT_ACCESS = Object.freeze({
   NONE: 'none',
@@ -11,14 +12,16 @@ const COURSE_MANAGEMENT_ACCESS = Object.freeze({
 const getUserId = (user) => user?.userId || user?.id || null;
 
 const isAdmin = (user) => (
-  user?.role === 'admin' ||
-  user?.effectiveRole === 'admin' ||
+  user?.role === USER_ROLES.SUPERADMIN ||
+  user?.role === USER_ROLES.ADMIN ||
+  user?.effectiveRole === USER_ROLES.SUPERADMIN ||
+  user?.effectiveRole === USER_ROLES.ADMIN ||
   user?.isAdmin === true
 );
 
 const isManager = (user) => (
-  user?.role === 'manager' ||
-  user?.effectiveRole === 'manager' ||
+  user?.role === USER_ROLES.MANAGER ||
+  user?.effectiveRole === USER_ROLES.MANAGER ||
   user?.isManager === true
 );
 
@@ -65,32 +68,31 @@ const canManageCourse = async (user, courseId) => {
     };
   }
 
+  if (isAdmin(user)) {
+    return {
+      allowed: true,
+      access: COURSE_MANAGEMENT_ACCESS.FULL,
+      role: 'admin'
+    };
+  }
+
   const staffRoles = await prisma.courseStaff.findMany({
     where: {
       courseId,
       userId,
-      role: {
-        in: ['owner', 'instructor', 'trainer']
-      }
     },
     select: {
       role: true
     }
   });
 
-  if (staffRoles.some((staff) => staff.role === 'owner')) {
+  const roles = staffRoles.map(s => s.role.toLowerCase());
+
+  if (roles.includes('owner')) {
     return {
       allowed: true,
       access: COURSE_MANAGEMENT_ACCESS.FULL,
       role: 'owner'
-    };
-  }
-
-  if (isAdmin(user)) {
-    return {
-      allowed: true,
-      access: COURSE_MANAGEMENT_ACCESS.FULL,
-      role: 'admin'
     };
   }
 
@@ -102,7 +104,7 @@ const canManageCourse = async (user, courseId) => {
     };
   }
 
-  if (staffRoles.some((staff) => staff.role === 'instructor')) {
+  if (roles.includes('instructor')) {
     return {
       allowed: true,
       access: COURSE_MANAGEMENT_ACCESS.LIMITED,
@@ -110,7 +112,7 @@ const canManageCourse = async (user, courseId) => {
     };
   }
 
-  if (staffRoles.some((staff) => staff.role === 'trainer')) {
+  if (roles.includes('trainer')) {
     return {
       allowed: false,
       access: COURSE_MANAGEMENT_ACCESS.READ_ONLY,

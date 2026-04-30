@@ -15,6 +15,8 @@
  * @param {Array} params.staff - List of staff assigned to the course
  * @returns {'full' | 'limited' | 'read-only' | 'none'}
  */
+import { USER_ROLES } from './constants/roles';
+
 export const getCourseAccess = ({ currentUser, staff }) => {
   if (!currentUser) return 'none';
 
@@ -23,8 +25,10 @@ export const getCourseAccess = ({ currentUser, staff }) => {
 
   // Admin check
   const isAdmin = 
-    currentUser.role === 'admin' || 
-    currentUser.effectiveRole === 'admin' || 
+    currentUser.role === USER_ROLES.ADMIN || 
+    currentUser.role === USER_ROLES.SUPERADMIN ||
+    currentUser.effectiveRole === USER_ROLES.ADMIN || 
+    currentUser.effectiveRole === USER_ROLES.SUPERADMIN ||
     currentUser.isAdmin === true;
 
   if (isAdmin) return 'full';
@@ -38,7 +42,7 @@ export const getCourseAccess = ({ currentUser, staff }) => {
       const memberUserId = member.userId || member.user?.id || member.id;
       return memberUserId === currentUserId;
     })
-    .map((member) => member.role);
+    .map((member) => member.role.toLowerCase());
 
   // Apply priority
   if (staffRoles.includes('owner')) return 'full';

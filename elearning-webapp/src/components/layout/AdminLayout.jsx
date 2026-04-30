@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
+import { USER_ROLES } from '../../utils/constants/roles';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
@@ -59,17 +60,34 @@ const AdminLayout = () => {
   };
 
   const isFullAdmin = canEditAdminUsers(user);
+  const isManager = user?.role === USER_ROLES.MANAGER || user?.tier?.accessAdmin;
+  const isCourseStaffOnly = !isFullAdmin && !isManager && user?.isCourseStaff;
 
   const menuItems = [
-    { path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
-    { path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' },
+    // Dashboard: Visible to Admin and Managers
+    ...(!isCourseStaffOnly ? [{ path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' }] : []),
+    
+    // Learning Goals: Visible to Admin and Managers
+    ...(!isCourseStaffOnly ? [{ path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' }] : []),
+    
+    // Course Management: Visible to EVERYONE in Admin Panel (Admins, Managers, Staff)
     { path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' },
-    { path: '/admin/announcements', icon: <BellRing size={20} />, label: 'จัดการประกาศแผนก' },
+    
+    // Announcements: Visible to Admin and Managers
+    ...(!isCourseStaffOnly ? [{ path: '/admin/announcements', icon: <BellRing size={20} />, label: 'จัดการประกาศแผนก' }] : []),
+    
+    // Rewards: SuperAdmin/Admin Only
     ...(isFullAdmin
       ? [{ path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' }]
       : []),
-    { path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายการ Redeem' },
-    { path: '/admin/users', icon: <Users size={20} />, label: 'ผู้ใช้งาน' },
+    
+    // Reduems: Visible to Admin and Managers
+    ...(!isCourseStaffOnly ? [{ path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายการ Redeem' }] : []),
+    
+    // Users: Admin and Managers (Backend will filter the data)
+    ...(!isCourseStaffOnly ? [{ path: '/admin/users', icon: <Users size={20} />, label: 'ผู้ใช้งาน' }] : []),
+    
+    // Health: SuperAdmin/Admin Only
     ...(isFullAdmin
       ? [{ path: '/admin/health', icon: <Activity size={20} />, label: 'Health Monitoring' }]
       : []),
@@ -89,7 +107,9 @@ const AdminLayout = () => {
         >
           <Menu size={24} />
         </button>
-        <h1 className="text-lg font-bold">{isFullAdmin ? 'Admin Panel' : 'Manager Panel'}</h1>
+        <h1 className="text-lg font-bold">
+          {isFullAdmin ? 'Admin Panel' : isManager ? 'Manager Panel' : 'Staff Panel'}
+        </h1>
         <div style={{ width: 24 }} />
       </header>
 
@@ -115,7 +135,7 @@ const AdminLayout = () => {
           <div className="flex items-center gap-2 text-primary">
             <LayoutDashboard size={24} />
             <h2 id={drawerTitleId} className="font-bold text-xl">
-              {isFullAdmin ? 'LMS Admin' : 'LMS Manager'}
+              {isFullAdmin ? 'LMS Admin' : isManager ? 'LMS Manager' : 'LMS Staff'}
             </h2>
           </div>
           <button

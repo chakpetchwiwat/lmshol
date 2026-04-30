@@ -91,8 +91,8 @@ const saveCourseVisibility = async (tx, courseId, visibleToAll, visibleDepartmen
 const getAdminCourses = async (user) => {
     const where = {};
     
-    // If not superadmin, only show courses where user is staff
-    if (user?.role !== USER_ROLES.ADMIN) {
+    // If not admin/superadmin, only show courses where user is staff
+    if (user?.role !== USER_ROLES.ADMIN && user?.role !== USER_ROLES.SUPERADMIN) {
         const userId = user.userId || user.id;
         if (userId) {
             where.staff = {
