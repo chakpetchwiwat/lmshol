@@ -13,8 +13,8 @@ router.get('/analytics', verifyAdminOrManager, adminAnalyticsRateLimiter, adminC
 router.get('/system/health', verifySuperAdmin, systemController.getSystemHealth);
 router.post('/system/security/reset', verifySuperAdmin, systemController.resetRateLimit);
 
-router.get('/users', verifyAdminOrManager, adminController.getUsers);
-router.get('/users/:id/details', verifyAdminOrManager, adminController.getUserDetails);
+router.get('/users', adminController.getUsers);
+router.get('/users/:id/details', adminController.getUserDetails);
 router.post('/users', verifySuperAdmin, adminController.createUser);
 router.put('/users/:id', verifySuperAdmin, adminController.updateUser);
 router.delete('/users/:id', verifySuperAdmin, adminController.deleteUser);
