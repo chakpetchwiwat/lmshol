@@ -1,24 +1,28 @@
-const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
 const axios = require('axios');
 const supabase = require('../../utils/supabase');
 const { getTemplateById } = require('../../config/certificateTemplates');
 
-// Font caching to avoid re-downloading within the same instance
-let sarabunFontBuffer = null;
+const PDFDocument = require('pdfkit');
 
 /**
- * Downloads the Sarabun font from Google Fonts
+ * Loads the Sarabun font from local assets
  */
 async function loadThaiFont() {
-  if (sarabunFontBuffer) return sarabunFontBuffer;
-  
   try {
+    const fontPath = path.join(__dirname, '../../assets/fonts/Sarabun-Regular.ttf');
+    if (fs.existsSync(fontPath)) {
+      return fontPath; // pdfkit can take a file path directly
+    }
+    
+    // Fallback if local file is missing (unlikely after download)
+    console.warn('[CertificatePdf] Local font not found, falling back to network...');
     const fontUrl = 'https://github.com/google/fonts/raw/main/ofl/sarabun/Sarabun-Regular.ttf';
     const response = await axios.get(fontUrl, { responseType: 'arraybuffer' });
-    sarabunFontBuffer = response.data;
-    return sarabunFontBuffer;
+    return response.data;
   } catch (error) {
-    console.error('[CertificatePdf] Failed to download Thai font:', error.message);
+    console.error('[CertificatePdf] Failed to load Thai font:', error.message);
     return null;
   }
 }

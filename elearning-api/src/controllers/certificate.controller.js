@@ -55,7 +55,7 @@ exports.issueManual = async (req, res, next) => {
         certificateNo: certificate.certificateNo,
         status: finalCert?.status || certificate.status
       },
-      message: finalCert?.status === 'VALID' 
+      message: finalCert?.status === 'VALID'
         ? 'Certificate issued and generated successfully'
         : 'Certificate issued, but generation is still processing'
     });
@@ -77,7 +77,7 @@ exports.issueManual = async (req, res, next) => {
 exports.reissue = async (req, res, next) => {
   try {
     const { certificateId } = req.params;
-    
+
     const cert = await prisma.certificate.findUnique({ where: { id: certificateId } });
     if (!cert) return next(new ErrorResponse('Certificate not found', 404));
 
@@ -194,8 +194,8 @@ exports.retry = async (req, res, next) => {
         certificateId: updatedCert.id,
         status: finalCert?.status || updatedCert.status
       },
-      message: finalCert?.status === 'VALID' 
-        ? 'Certificate regenerated successfully' 
+      message: finalCert?.status === 'VALID'
+        ? 'Certificate regenerated successfully'
         : 'Certificate regeneration failed'
     });
   } catch (error) {
@@ -290,7 +290,7 @@ exports.getCourseCertificates = async (req, res, next) => {
 exports.getPendingApprovals = async (req, res, next) => {
   try {
     const { status = 'PENDING' } = req.query;
-    
+
     // Admins see all, others filtered by course staff
     const certificates = await certificateService.getPendingApprovals({
       user: req.user,

@@ -8,9 +8,9 @@ const crypto = require('crypto');
 async function generateCertificateNo(tx, course) {
   // 1. Get next serial from sequence (PostgreSQL)
   const [{ nextval }] = await tx.$queryRaw`SELECT nextval('certificate_serial_seq')::bigint as nextval`;
-  
+
   const year = new Date().getFullYear();
-  
+
   // 2. Resolve course prefix
   // Priority: 1. Code 2. Title prefix 3. ID prefix
   let rawPrefix = course.code || course.title || course.id;
@@ -46,10 +46,10 @@ async function resolveCertificateSigner(tx, courseId, setting) {
   } else if (setting.signatureType === 'INSTRUCTOR') {
     // Find primary instructor from CourseStaff
     const primaryStaff = await tx.courseStaff.findFirst({
-      where: { 
-        courseId, 
-        role: 'instructor', 
-        isPrimary: true 
+      where: {
+        courseId,
+        role: 'instructor',
+        isPrimary: true
       },
       include: { user: true }
     });
@@ -85,10 +85,10 @@ async function issueCertificate({ courseId, userId, issuedById = null, manual = 
       tx.user.findUnique({ where: { id: userId } }),
       tx.course.findUnique({
         where: { id: courseId },
-        include: { 
-          certificateSetting: { 
-            include: { template: true } 
-          } 
+        include: {
+          certificateSetting: {
+            include: { template: true }
+          }
         }
       })
     ]);
@@ -156,8 +156,10 @@ async function issueCertificate({ courseId, userId, issuedById = null, manual = 
       }
     });
 
-    // NOTE: PDF generation is triggered outside this service via controller/event
-    return certificate;
+    // Decide if we should trigger auto-generation based on mode
+    const shouldAutoGenerate = !manual && setting.issueMode === 'AUTOMATIC';
+
+    return { certificate, shouldAutoGenerate };
   });
 }
 
@@ -237,7 +239,7 @@ async function getMyCertificates(userId) {
 async function verifyCertificate(token) {
   const cert = await prisma.certificate.findUnique({
     where: { verificationToken: token },
-    include: { 
+    include: {
       user: { select: { name: true } },
       course: { select: { title: true } }
     }
@@ -246,18 +248,18 @@ async function verifyCertificate(token) {
   if (!cert) return { success: false, message: 'Certificate not found' };
 
   if (cert.status === 'REVOKED') {
-    return { 
-      success: false, 
-      status: 'REVOKED', 
-      message: 'This certificate has been revoked' 
+    return {
+      success: false,
+      status: 'REVOKED',
+      message: 'This certificate has been revoked'
     };
   }
 
   if (cert.status !== 'VALID') {
-    return { 
-      success: false, 
-      status: cert.status, 
-      message: 'Certificate is currently unavailable' 
+    return {
+      success: false,
+      status: cert.status,
+      message: 'Certificate is currently unavailable'
     };
   }
 
@@ -311,10 +313,10 @@ async function createCertificateSignedUrl({ certificateId, requester }) {
 
   // Validate Access
   if (!requester) throw new ErrorResponse('Authentication required', 401);
-  
+
   const requesterId = requester.userId || requester.id;
   let hasAccess = false;
-  
+
   // 1. Owner
   if (requesterId === cert.userId) hasAccess = true;
 
@@ -396,14 +398,14 @@ const templateRenderer = require('../../utils/certificateTemplateRenderer');
 async function generateCertificatePdfAsync(certificateId) {
   const startTime = Date.now();
   let certNo = 'unknown';
-  
+
   try {
     const cert = await prisma.certificate.findUnique({
       where: { id: certificateId },
-      include: { 
-        course: { include: { certificateSetting: true } }, 
-        user: true, 
-        template: true 
+      include: {
+        course: { include: { certificateSetting: true } },
+        user: true,
+        template: true
       }
     });
 
@@ -415,12 +417,12 @@ async function generateCertificatePdfAsync(certificateId) {
     // 1. Prepare verification URL
     // Priority: 1. FRONTEND_URL env 2. Base site URL (if we have it) 3. Hardcoded fallback (safety net)
     let frontendUrl = process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:5173');
-    
+
     if (!frontendUrl && process.env.NODE_ENV === 'production') {
       frontendUrl = 'https://lms-scaleup.vercel.app';
       console.warn('[Certificate] WARNING: FRONTEND_URL is not set in production. Falling back to hardcoded production URL.');
     }
-    
+
     const verificationUrl = `${frontendUrl || ''}/certificates/verify/${cert.verificationToken}`;
 
     // 2. Render HTML

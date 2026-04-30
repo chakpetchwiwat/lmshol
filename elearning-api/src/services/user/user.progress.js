@@ -388,9 +388,9 @@ async function handleAutoCertificateIssuance(userId, courseId) {
             userId,
             manual: false
         });
-        
+
         console.log(`[Auto-Certificate] Issued ${cert.certificateNo} for user ${userId}`);
-        
+
         // Trigger PDF generation in background
         certificateService.generateCertificatePdfAsync(cert.id).catch(err => {
             console.error(`[Auto-Certificate] PDF Generation failed for ${cert.id}:`, err);
@@ -401,7 +401,7 @@ async function handleAutoCertificateIssuance(userId, courseId) {
         if (expectedErrors.some(msg => error.message.includes(msg))) {
             return;
         }
-        
+
         console.error(`[Auto-Certificate] Failed for user ${userId} / course ${courseId}:`, error.message);
     }
 }
