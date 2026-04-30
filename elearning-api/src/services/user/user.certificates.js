@@ -1,4 +1,5 @@
 const prisma = require('../../utils/prisma');
+const supabase = require('../../utils/supabase');
 
 const normalizeOptionalText = (value) => {
     if (value === undefined || value === null) return null;
@@ -189,7 +190,7 @@ const getCertificateSignedUrl = async (userId, certificateId) => {
         throw new Error('ไม่มีไฟล์แนบสำหรับ certificate นี้');
     }
 
-    const { data, error } = await require('../../config/supabase').storage
+    const { data, error } = await supabase.storage
         .from(bucket)
         .createSignedUrl(fileKey, 3600); // 1 hour
 
