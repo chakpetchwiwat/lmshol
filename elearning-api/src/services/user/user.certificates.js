@@ -49,49 +49,12 @@ const normalizeCertificatePayload = (data = {}) => {
 };
 
 const getCertificates = async (userId) => {
-    // 1. Get user-uploaded certificates
-    const userCerts = await prisma.userCertificate.findMany({
+    return prisma.userCertificate.findMany({
         where: { userId },
         orderBy: [
             { issueDate: 'desc' },
             { createdAt: 'desc' }
         ]
-    });
-
-    // 2. Get LMS-issued certificates (from Certificate table)
-    const lmsCerts = await prisma.certificate.findMany({
-        where: { userId },
-        orderBy: { issuedAt: 'desc' },
-        include: {
-            course: { select: { title: true } },
-            template: { select: { name: true } }
-        }
-    });
-
-    // 3. Normalize and combine
-    const normalizedLmsCerts = lmsCerts.map(c => ({
-        id: c.id,
-        isLms: true,
-        status: c.status,
-        certificateNo: c.certificateNo,
-        courseTitle: c.course?.title,
-        issuer: 'ScaleUp Learning Management System',
-        issueDate: c.issuedAt,
-        pdfUrl: c.pdfUrl,
-        metadata: c.metadata,
-        createdAt: c.issuedAt
-    }));
-
-    const normalizedUserCerts = userCerts.map(c => ({
-        ...c,
-        isLms: false
-    }));
-
-    // Combine and sort by date
-    return [...normalizedLmsCerts, ...normalizedUserCerts].sort((a, b) => {
-        const dateA = new Date(a.issueDate || a.createdAt);
-        const dateB = new Date(b.issueDate || b.createdAt);
-        return dateB - dateA;
     });
 };
 

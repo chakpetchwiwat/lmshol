@@ -216,7 +216,10 @@ async function revokeCertificate({ certificateId, revokedById, reason }) {
  */
 async function getMyCertificates(userId) {
   const certs = await prisma.certificate.findMany({
-    where: { userId, status: 'VALID' },
+    where: { 
+      userId, 
+      status: { in: ['VALID', 'PENDING'] } 
+    },
     include: { course: { select: { title: true } } },
     orderBy: { issuedAt: 'desc' }
   });
