@@ -95,7 +95,7 @@ const AdminLayout = () => {
     
     // Certificates: SuperAdmin/Admin Only
     ...(isFullAdmin
-      ? [{ path: '/admin/certificates', icon: <Award size={20} />, label: 'ระบบใบเซอร์' }]
+      ? [{ path: '/admin/certificates', icon: <Award size={20} />, label: 'ภาพรวมเกียรติบัตร' }]
       : []),
   ];
 
