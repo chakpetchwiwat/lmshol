@@ -25,14 +25,20 @@ const verifyToken = (req, res, next) => {
 };
 
 const verifyAdmin = (req, res, next) => {
-  if (req.user && req.user.role === USER_ROLES.ADMIN) {
+  if (req.user && (req.user.role === USER_ROLES.ADMIN || req.user.role === 'superadmin')) {
     next();
   } else {
-    res.status(403).json({ message: 'Superadmin access required' });
+    res.status(403).json({ message: 'สิทธิ์ระดับผู้ดูแลระบบเท่านั้น (Admin access required)' });
   }
 };
 
-const verifySuperAdmin = verifyAdmin;
+const verifySuperAdmin = (req, res, next) => {
+  if (req.user && (req.user.role === 'superadmin' || req.user.role === USER_ROLES.ADMIN)) {
+    next();
+  } else {
+    res.status(403).json({ message: 'สิทธิ์ระดับผู้ดูแลระบบสูงสุดเท่านั้น (Superadmin access required)' });
+  }
+};
 
 const prisma = require('../utils/prisma');
 
@@ -64,9 +70,31 @@ const verifyAdminPanelAccess = async (req, res, next) => {
   }
 };
 
+const verifyCourseAccess = async (req, res, next) => {
+  const { canManageCourse, COURSE_MANAGEMENT_ACCESS } = require('../utils/coursePermissions');
+  const courseId = req.params.id || req.params.courseId || req.body.courseId;
+
+  if (!courseId) {
+    return res.status(400).json({ message: 'Course ID is required for permission check' });
+  }
+
+  try {
+    const { allowed, access } = await canManageCourse(req.user, courseId);
+    
+    if (allowed && (access === COURSE_MANAGEMENT_ACCESS.FULL || access === COURSE_MANAGEMENT_ACCESS.LIMITED)) {
+      next();
+    } else {
+      res.status(403).json({ message: 'คุณไม่มีสิทธิ์จัดการคอร์สนี้ (You do not have permission to manage this course)' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error verifying course permissions' });
+  }
+};
+
 module.exports = {
   verifyToken,
   verifyAdmin,
   verifySuperAdmin,
-  verifyAdminPanelAccess
+  verifyAdminPanelAccess,
+  verifyCourseAccess
 };

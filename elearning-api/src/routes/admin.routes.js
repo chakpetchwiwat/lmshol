@@ -3,7 +3,7 @@ const router = express.Router();
 const adminController = require('../controllers/admin.controller');
 const systemController = require('../controllers/system.controller');
 const certificateController = require('../controllers/certificate.controller');
-const { verifyToken, verifySuperAdmin, verifyAdminPanelAccess } = require('../middleware/auth');
+const { verifyToken, verifySuperAdmin, verifyAdminPanelAccess, verifyCourseAccess } = require('../middleware/auth');
 const { adminAnalyticsRateLimiter } = require('../middleware/rateLimiters');
 
 router.use(verifyToken, verifyAdminPanelAccess); // Admin + manager can access the admin panel
@@ -40,7 +40,7 @@ router.post('/courses', verifySuperAdmin, adminController.createCourse);
 router.put('/courses/:id/republish', verifySuperAdmin, adminController.republishCourse);
 router.put('/courses/:id/archive', verifySuperAdmin, adminController.archiveCourse);
 router.get('/courses/:id/history', adminController.getCourseHistory);
-router.put('/courses/:id', verifySuperAdmin, adminController.updateCourse);
+router.put('/courses/:id', verifyCourseAccess, adminController.updateCourse);
 router.delete('/courses/:id', verifySuperAdmin, adminController.deleteCourse);
 
 router.get('/announcements', adminController.getAdminAnnouncements);
@@ -70,9 +70,9 @@ router.put('/redeems/:id/status', adminController.updateRedeemStatus);
 // Lesson Management
 router.get('/courses/:courseId/lessons', adminController.getCourseLessons);
 router.put('/lessons/reorder', verifySuperAdmin, adminController.reorderLessons);
-router.post('/lessons', verifySuperAdmin, adminController.createLesson);
-router.put('/lessons/:id', verifySuperAdmin, adminController.updateLesson);
-router.delete('/lessons/:id', verifySuperAdmin, adminController.deleteLesson);
+router.post('/lessons', verifyCourseAccess, adminController.createLesson);
+router.put('/lessons/:id', verifyCourseAccess, adminController.updateLesson);
+router.delete('/lessons/:id', verifyCourseAccess, adminController.deleteLesson);
 
 // Quiz Reports
 router.get('/courses/:courseId/quiz-reports', adminController.getCourseQuizAttempts);

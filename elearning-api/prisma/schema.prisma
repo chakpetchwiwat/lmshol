@@ -9,36 +9,36 @@ datasource db {
 }
 
 model User {
-  id                   String               @id @default(uuid())
-  name                 String
-  email                String               @unique
-  password             String
-  role                 String               @default("user")
-  department           String?
-  pointsBalance        Int                  @default(0)
-  status               String               @default("ACTIVE")
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-  departmentId         String?
-  employmentDate       DateTime?
-  tierId               String?
-  signatureImageUrl    String?
-  signatureTitle       String?
-  createdAnnouncements Announcement[]       @relation("AnnouncementCreator")
-  announcementViews    AnnouncementView[]   @relation("UserAnnouncementViews")
-  issuedCertificates   Certificate[]
-  courseStaff          CourseStaff[]
-  pointsLedger         PointsLedger[]
-  QuizAttempt          QuizAttempt[]
-  redeems              RedeemRequest[]
-  departmentRef        Department?          @relation("DepartmentUsers", fields: [departmentId], references: [id])
-  tier                 Tier?                @relation(fields: [tierId], references: [id])
-  certificates         UserCertificate[]
-  enrollments          UserCourse[]
-  progress             UserLessonProgress[]
+  id                    String                 @id @default(uuid())
+  name                  String
+  email                 String                 @unique
+  password              String
+  role                  String                 @default("user")
+  department            String?
+  pointsBalance         Int                    @default(0)
+  status                String                 @default("ACTIVE")
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  departmentId          String?
+  employmentDate        DateTime?
+  tierId                String?
+  signatureImageUrl     String?
+  signatureTitle        String?
+  createdAnnouncements  Announcement[]         @relation("AnnouncementCreator")
+  announcementViews     AnnouncementView[]     @relation("UserAnnouncementViews")
+  gradedAssessments     AssessmentSubmission[] @relation("AssessmentGrader")
   assessmentSubmissions AssessmentSubmission[] @relation("AssessmentLearner")
-  gradedAssessments    AssessmentSubmission[] @relation("AssessmentGrader")
-  notifications        UserNotification[]
+  issuedCertificates    Certificate[]
+  courseStaff           CourseStaff[]
+  pointsLedger          PointsLedger[]
+  QuizAttempt           QuizAttempt[]
+  redeems               RedeemRequest[]
+  departmentRef         Department?            @relation("DepartmentUsers", fields: [departmentId], references: [id])
+  tier                  Tier?                  @relation(fields: [tierId], references: [id])
+  certificates          UserCertificate[]
+  enrollments           UserCourse[]
+  progress              UserLessonProgress[]
+  notifications         UserNotification[]
 
   @@index([status, departmentId, tierId])
   @@index([departmentId, status])
@@ -235,23 +235,23 @@ model CourseTierAccess {
 }
 
 model Lesson {
-  id           String               @id @default(uuid())
-  courseId     String
-  title        String
-  type         String
-  contentUrl   String?
-  content      String?
-  duration     String?
-  points       Int                  @default(0)
-  order        Int                  @default(0)
-  passScore    Int?
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  course       Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  questions    Question[]
-  quizAttempts QuizAttempt[]
-  progress     UserLessonProgress[]
+  id                    String                 @id @default(uuid())
+  courseId              String
+  title                 String
+  type                  String
+  contentUrl            String?
+  content               String?
+  duration              String?
+  points                Int                    @default(0)
+  order                 Int                    @default(0)
+  passScore             Int?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
   assessmentSubmissions AssessmentSubmission[]
+  course                Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions             Question[]
+  quizAttempts          QuizAttempt[]
+  progress              UserLessonProgress[]
 
   @@index([courseId, order])
 }
@@ -306,9 +306,9 @@ model AssessmentSubmission {
   gradedAt     DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  gradedBy     User?     @relation("AssessmentGrader", fields: [gradedById], references: [id])
   lesson       Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   user         User      @relation("AssessmentLearner", fields: [userId], references: [id], onDelete: Cascade)
-  gradedBy     User?     @relation("AssessmentGrader", fields: [gradedById], references: [id])
 
   @@index([lessonId, status, submittedAt])
   @@index([userId, submittedAt])
