@@ -38,7 +38,7 @@ exports.issueManual = async (req, res, next) => {
       });
     }
 
-    const certificate = await certificateService.issueCertificate({
+    const { certificate } = await certificateService.issueCertificate({
       courseId,
       userId,
       issuedById,

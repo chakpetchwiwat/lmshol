@@ -383,18 +383,20 @@ const submitQuiz = async (userId, lessonId, answers) => {
  */
 async function handleAutoCertificateIssuance(userId, courseId) {
     try {
-        const cert = await certificateService.issueCertificate({
+        const { certificate, shouldAutoGenerate } = await certificateService.issueCertificate({
             courseId,
             userId,
             manual: false
         });
 
-        console.log(`[Auto-Certificate] Issued ${cert.certificateNo} for user ${userId}`);
+        console.log(`[Auto-Certificate] Created ${certificate.certificateNo} for user ${userId} (Auto-Generate: ${shouldAutoGenerate})`);
 
-        // Trigger PDF generation in background
-        certificateService.generateCertificatePdfAsync(cert.id).catch(err => {
-            console.error(`[Auto-Certificate] PDF Generation failed for ${cert.id}:`, err);
-        });
+        // Trigger PDF generation only if mode is AUTOMATIC
+        if (shouldAutoGenerate) {
+            certificateService.generateCertificatePdfAsync(certificate.id).catch(err => {
+                console.error(`[Auto-Certificate] PDF Generation failed for ${certificate.id}:`, err);
+            });
+        }
     } catch (error) {
         // Safe ignore for expected service blocks (manual mode, disabled, duplicate)
         const expectedErrors = ['requires manual', 'disabled', 'already has'];
