@@ -34,7 +34,7 @@ const CertificateApprovals = () => {
     try {
       setApproving(id);
       const response = await adminAPI.reissueCertificate(id);
-      
+
       if (response.data?.status === 'VALID') {
         toast.success('อนุมัติและสร้างไฟล์เกียรติบัตรเรียบร้อยแล้ว');
       } else {
@@ -64,7 +64,7 @@ const CertificateApprovals = () => {
     }
   };
 
-  const filtered = certificates.filter(c => 
+  const filtered = certificates.filter(c =>
     c.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     c.course?.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -103,11 +103,10 @@ const CertificateApprovals = () => {
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
-                  statusFilter === status 
-                    ? 'bg-white text-primary shadow-sm ring-1 ring-slate-100' 
+                className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${statusFilter === status
+                    ? 'bg-white text-primary shadow-sm ring-1 ring-slate-100'
                     : 'text-slate-400 hover:text-slate-600'
-                }`}
+                  }`}
               >
                 {status}
               </button>
@@ -124,7 +123,7 @@ const CertificateApprovals = () => {
       ) : filtered.length > 0 ? (
         <div className="grid gap-4">
           {filtered.map((cert) => (
-            <div 
+            <div
               key={cert.id}
               className="group relative overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white p-6 shadow-sm transition-all hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5"
             >
@@ -180,8 +179,8 @@ const CertificateApprovals = () => {
                         className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-8 text-sm font-black text-white shadow-lg shadow-slate-200 transition-all hover:bg-primary hover:shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0 lg:flex-none"
                       >
                         <CheckCircle2 size={18} />
-                        {cert.status === 'PENDING' && (cert.metadata?.lastRetryAt || cert.metadata?.retryCount > 0) 
-                          ? 'ลองใหม่อีกครั้ง' 
+                        {cert.status === 'PENDING' && (cert.metadata?.lastRetryAt || cert.metadata?.retryCount > 0)
+                          ? 'ลองใหม่อีกครั้ง'
                           : 'อนุมัติออกเกียรติบัตร'}
                       </button>
                     </>

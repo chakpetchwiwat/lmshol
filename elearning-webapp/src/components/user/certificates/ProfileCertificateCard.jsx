@@ -46,14 +46,22 @@ const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
               <div className="flex items-center gap-2 flex-wrap">
                 <h5 className="break-words text-sm font-black text-slate-900">{title}</h5>
                 {isLms && (
-                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                  <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                     certificate.status === 'VALID' 
                       ? 'bg-emerald-100 text-emerald-700' 
                       : certificate.status === 'REVOKED'
                       ? 'bg-rose-100 text-rose-700'
-                      : 'bg-slate-100 text-slate-600'
+                      : certificate.status === 'FAILED'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-blue-100 text-blue-700 animate-pulse'
                   }`}>
-                    {certificate.status}
+                    {certificate.status === 'PENDING' && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-ping" />
+                    )}
+                    {certificate.status === 'VALID' ? 'พร้อมดาวน์โหลด' : 
+                     certificate.status === 'REVOKED' ? 'ถูกยกเลิก' : 
+                     certificate.status === 'FAILED' ? 'เกิดข้อผิดพลาด' : 
+                     'กำลังจัดเตรียม...'}
                   </span>
                 )}
               </div>

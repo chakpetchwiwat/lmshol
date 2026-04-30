@@ -78,11 +78,11 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-        console.error("API Error Interceptor:", error.response ? { status: error.response.status, data: error.response.data } : error.message);
+    console.error("API Error Interceptor:", error.response ? { status: error.response.status, data: error.response.data } : error.message);
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
+
       // Only redirect to login if we're not already there.
       // This prevents the page from refreshing on a failed login attempt,
       // which would wipe out the error message shown to the user.
@@ -257,7 +257,7 @@ export const adminAPI = {
   // System Settings
   getSettings: () => api.get('/settings'),
   updateSetting: (key, value) => api.patch(`/settings/${key}`, { value }),
-  
+
   // Goals
   getGoals: () => api.get('/goals?includeExpired=true'),
   createGoal: (data) => api.post('/goals', data),
