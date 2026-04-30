@@ -391,7 +391,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
       {/* Manual Issue Modal */}
       {isManualModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-2xl animate-in zoom-in-95 duration-200 rounded-3xl bg-white shadow-2xl">
+          <div className="w-full max-w-3xl animate-in zoom-in-95 duration-200 rounded-[2.5rem] bg-white shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="border-b border-slate-100 p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -429,18 +429,18 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
               ) : (
                 <div className="flex flex-col gap-4">
                   {/* Search box for manual modal */}
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <div className="relative group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
                     <input
                       type="text"
-                      placeholder="ค้นหาชื่อผู้เรียน..."
-                      className="input pl-10 h-10 text-sm"
+                      placeholder="ค้นหาชื่อผู้เรียนที่ต้องการมอบใบเซอร์..."
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3.5 pl-12 pr-4 text-sm font-bold text-slate-900 transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
                       value={manualSearchQuery}
                       onChange={(e) => setManualSearchQuery(e.target.value)}
                     />
                   </div>
 
-                  <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar pb-4">
                     {eligibleUsers
                       .filter(u => u.user?.name?.toLowerCase().includes(manualSearchQuery.toLowerCase()))
                       .map((record) => (
