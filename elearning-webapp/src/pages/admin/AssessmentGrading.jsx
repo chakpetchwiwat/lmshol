@@ -65,7 +65,8 @@ const AssessmentGrading = () => {
     if (!gradingSubmission) return;
 
     const score = Number(gradeForm.score);
-    const maxScore = gradingSubmission.maxScore || gradingSubmission.lesson?.points || 10;
+    // Prioritize lesson points as the master max score
+    const maxScore = gradingSubmission.lesson?.points || gradingSubmission.maxScore || 10;
 
     if (gradeForm.score === '' || !Number.isFinite(score) || score < 0) {
       toast.warning('Please enter a valid score');
@@ -285,7 +286,7 @@ const AssessmentGrading = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setGradingSubmission(null)} />
           
-          <div className="relative w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+          <div className="relative w-full max-w-4xl bg-white rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
             <div className="px-8 py-8 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
@@ -346,7 +347,7 @@ const AssessmentGrading = () => {
                       onChange={(e) => setGradeForm({ ...gradeForm, score: e.target.value })}
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-black">
-                      / {gradingSubmission.maxScore || gradingSubmission.lesson?.points || 10}
+                      / {gradingSubmission.lesson?.points || gradingSubmission.maxScore || 10}
                     </div>
                   </div>
                 </div>
