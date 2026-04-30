@@ -75,9 +75,7 @@ function App() {
         {/* Root Redirect - Check for existing session */}
         <Route path="/" element={
           hasToken ? (
-            canAccessAdminPanel(currentUser)
-              ? <Navigate to="/admin/dashboard" replace /> 
-              : <Navigate to="/user/home" replace />
+            <Navigate to="/user/home" replace />
           ) : <Navigate to="/login" replace />
         } />
         

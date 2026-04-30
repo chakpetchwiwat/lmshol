@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { canAccessAdminPanel } from '../../utils/roles';
@@ -19,11 +19,7 @@ const Login = () => {
     if (token && userStr) {
       const user = JSON.parse(userStr);
 
-      if (canAccessAdminPanel(user)) {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/user/home');
-      }
+      navigate('/user/home');
     }
   }, [navigate]);
 
@@ -39,11 +35,7 @@ const Login = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      if (canAccessAdminPanel(response.data.user)) {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/user/home');
-      }
+      navigate('/user/home');
     } catch (loginError) {
       setError(loginError.response?.data?.message || 'อีเมล หรือ รหัสผ่านไม่ถูกต้อง');
     } finally {
