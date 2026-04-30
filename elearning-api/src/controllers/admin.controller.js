@@ -1,4 +1,5 @@
 const AdminService = require('../services/admin.service');
+const AssessmentService = require('../services/assessment.service');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
 const { REDEEM_STATUS } = require('../utils/constants/statuses');
