@@ -272,7 +272,7 @@ const listAllAssessmentSubmissions = async (actor, filters = {}) => {
     const managedCourses = await prisma.courseStaff.findMany({
       where: {
         userId,
-        role: { in: ['OWNER', 'INSTRUCTOR'] }
+        role: { in: ['owner', 'instructor', 'OWNER', 'INSTRUCTOR'] }
       },
       select: { courseId: true }
     });
