@@ -198,13 +198,14 @@ async function generatePdfBuffer(_html, options = {}) {
  */
 async function uploadCertificatePdf({ buffer, userId, certificateId }) {
   const bucketName = 'uploads';
-  const filePath = `certificates/${userId}/${certificateId}.pdf`;
+  const filePath = `certificates/${userId}/${certificateId}/${Date.now()}.pdf`;
 
   const { error } = await supabase.storage
     .from(bucketName)
     .upload(filePath, buffer, {
       contentType: 'application/pdf',
-      upsert: true
+      cacheControl: '60',
+      upsert: false
     });
 
   if (error) throw new Error(`Failed to upload to Supabase Storage: ${error.message}`);
