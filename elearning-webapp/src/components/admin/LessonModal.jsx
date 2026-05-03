@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+﻿import React from 'react';
 import { X, Upload, FileText, Play } from 'lucide-react';
 import QuizBuilder from './QuizBuilder';
 import ModalPortal from '../common/ModalPortal';
@@ -17,9 +17,20 @@ const LessonModal = ({
   onEditorImageUpload,
   isEditing = false,
 }) => {
-  const docInputRef = useRef(null);
+  const docInputRef = React.useRef(null);
 
   if (!isOpen) return null;
+
+  const handleTypeChange = (event) => {
+    const nextType = event.target.value;
+    setLessonForm({
+      ...lessonForm,
+      type: nextType,
+      points: nextType === 'assessment' && !lessonForm.points ? 10 : lessonForm.points,
+      passScore: ['quiz', 'assessment'].includes(nextType) && !lessonForm.passScore ? 60 : lessonForm.passScore,
+      questions: nextType === 'quiz' ? lessonForm.questions : [],
+    });
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -133,12 +144,13 @@ const LessonModal = ({
                 <CustomSelect
                   label="ประเภทเนื้อหา"
                   value={lessonForm.type}
-                  onChange={(event) => setLessonForm({ ...lessonForm, type: event.target.value })}
+                  onChange={handleTypeChange}
                   options={[
                     { value: 'video', label: 'วิดีโอ (YouTube / Vimeo)' },
                     { value: 'pdf', label: 'เอกสาร (PDF/Link)' },
                     { value: 'article', label: 'บทความเนื้อหา' },
-                    { value: 'quiz', label: 'แบบทดสอบ (Quiz)' }
+                    { value: 'quiz', label: 'แบบทดสอบ (Quiz)' },
+                    { value: 'assessment', label: 'Assessment Upload' }
                   ]}
                 />
 
@@ -161,7 +173,61 @@ const LessonModal = ({
                   </div>
                 </div>
 
-                {lessonForm.type !== 'quiz' ? (
+                {lessonForm.type === 'assessment' ? (
+                  <div className="relative mt-2 flex flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm md:col-span-2">
+                    <div className="flex items-center justify-between border-b pb-3">
+                      <h5 className="text-lg font-bold text-primary">Assessment settings</h5>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-sm font-bold text-gray-700">
+                          คะแนนเต็ม (Max Score)
+                        </label>
+                        <input
+                          type="number"
+                          className="form-input w-full"
+                          value={lessonForm.points}
+                          min="1"
+                          onChange={(event) => setLessonForm({
+                            ...lessonForm,
+                            points: parseInt(event.target.value, 10) || 10,
+                          })}
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-sm font-bold text-gray-700">
+                          เกณฑ์ผ่าน (Pass Score %)
+                        </label>
+                        <input
+                          type="number"
+                          className="form-input w-full"
+                          value={lessonForm.passScore}
+                          min="0"
+                          max="100"
+                          onChange={(event) => setLessonForm({
+                            ...lessonForm,
+                            passScore: parseInt(event.target.value, 10) || 0,
+                          })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-sm font-bold text-gray-700">
+                        Subject / Instructions
+                      </label>
+                      <RichTextEditor
+                        label="Assessment instruction editor"
+                        value={lessonForm.content || ''}
+                        onChange={(content) => setLessonForm({ ...lessonForm, content })}
+                        onImageUpload={onEditorImageUpload}
+                        imageUploading={editorImageUploading}
+                        minHeight={260}
+                      />
+                    </div>
+                  </div>
+                ) : lessonForm.type !== 'quiz' ? (
                   <>
                     {renderLessonSourceField()}
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   MonitorPlay,
@@ -34,13 +34,13 @@ const CourseDetail = () => {
   const navigate = useNavigate();
   const toast = useToast();
   
-  const [course, setCourse] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [enrolling, setEnrolling] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
+  const [course, setCourse] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [enrolling, setEnrolling] = React.useState(false);
+  const [isScrolled, setIsScrolled] = React.useState(false);
+  const [showVideo, setShowVideo] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchDetail = async () => {
       try {
         const response = await userAPI.getCourseDetails(id);
@@ -89,13 +89,13 @@ const CourseDetail = () => {
     }
   };
 
-  const durationMinutes = useMemo(
+  const durationMinutes = React.useMemo(
     () => course?.lessons?.reduce((acc, lesson) => acc + (parseInt(lesson.duration, 10) || 0), 0) || 0,
     [course],
   );
   const durationHours = durationMinutes > 0 ? Math.max(1, Math.round((durationMinutes / 60) * 10) / 10) : 2;
 
-  const learningPoints = useMemo(
+  const learningPoints = React.useMemo(
     () =>
       tryParse(course?.whatYouWillLearn, [
         'เข้าใจภาพรวมของเนื้อหาและนำไปใช้ต่อยอดในการทำงานได้จริง',
@@ -106,7 +106,7 @@ const CourseDetail = () => {
     [course],
   );
 
-  const whatYouGet = useMemo(
+  const whatYouGet = React.useMemo(
     () =>
       tryParse(course?.whatYouWillGet, [
         { icon: 'video', text: `วิดีโอคุณภาพสูง ความยาวรวมประมาณ ${durationHours} ชั่วโมง` },
@@ -125,7 +125,7 @@ const CourseDetail = () => {
     lesson: BookOpen,
   };
 
-  const documentLessons = useMemo(
+  const documentLessons = React.useMemo(
     () =>
       course?.lessons?.filter(
         (lesson) => lesson.type === 'pdf' || lesson.type === 'document',

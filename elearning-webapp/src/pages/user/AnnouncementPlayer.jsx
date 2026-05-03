@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React from 'react';
 import { BellRing, CalendarClock, CheckCircle, Clock, FileText, Play, BookOpen } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getFullUrl, userAPI } from '../../utils/api';
@@ -23,21 +23,21 @@ const AnnouncementPlayer = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [announcement, setAnnouncement] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [answers, setAnswers] = useState({});
-  const [quizResult, setQuizResult] = useState(null);
-  const [updating, setUpdating] = useState(false);
-  const [showDocViewer, setShowDocViewer] = useState(false);
-  const [documentAccess, setDocumentAccess] = useState(null);
-  const [openingDocument, setOpeningDocument] = useState(false);
-  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
-  const [shouldScrollToQuizResult, setShouldScrollToQuizResult] = useState(false);
+  const [announcement, setAnnouncement] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [answers, setAnswers] = React.useState({});
+  const [quizResult, setQuizResult] = React.useState(null);
+  const [updating, setUpdating] = React.useState(false);
+  const [showDocViewer, setShowDocViewer] = React.useState(false);
+  const [documentAccess, setDocumentAccess] = React.useState(null);
+  const [openingDocument, setOpeningDocument] = React.useState(false);
+  const [isNavigatingAway, setIsNavigatingAway] = React.useState(false);
+  const [shouldScrollToQuizResult, setShouldScrollToQuizResult] = React.useState(false);
 
-  const quizResultRef = useRef(null);
-  const contentRef = useRef(null);
+  const quizResultRef = React.useRef(null);
+  const contentRef = React.useRef(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchAnnouncement = async () => {
       try {
         setLoading(true);
@@ -67,7 +67,7 @@ const AnnouncementPlayer = () => {
     fetchAnnouncement();
   }, [id, toast]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!shouldScrollToQuizResult || !quizResult) return;
 
     window.requestAnimationFrame(() => {

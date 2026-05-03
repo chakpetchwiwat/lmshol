@@ -1,29 +1,25 @@
-import React, { useEffect, useId, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { canAccessAdminPanel } from '../../utils/roles';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const emailInputId = useId();
-  const passwordInputId = useId();
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const emailInputId = React.useId();
+  const passwordInputId = React.useId();
 
-  useEffect(() => {
+  React.useEffect(() => {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
 
     if (token && userStr) {
       const user = JSON.parse(userStr);
 
-      if (canAccessAdminPanel(user)) {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/user/home');
-      }
+      navigate('/user/home');
     }
   }, [navigate]);
 
@@ -39,11 +35,7 @@ const Login = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      if (canAccessAdminPanel(response.data.user)) {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/user/home');
-      }
+      navigate('/user/home');
     } catch (loginError) {
       setError(loginError.response?.data?.message || 'อีเมล หรือ รหัสผ่านไม่ถูกต้อง');
     } finally {

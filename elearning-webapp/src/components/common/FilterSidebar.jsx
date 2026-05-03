@@ -1,4 +1,4 @@
-import React, { useId, useMemo, useRef } from 'react';
+﻿import React from 'react';
 import { Filter, Sparkles, Tag, X } from 'lucide-react';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
@@ -110,9 +110,9 @@ const FilterSidebar = ({
   setStatus,
   onReset,
 }) => {
-  const dialogRef = useRef(null);
-  const closeButtonRef = useRef(null);
-  const titleId = useId();
+  const dialogRef = React.useRef(null);
+  const closeButtonRef = React.useRef(null);
+  const titleId = React.useId();
 
   useAccessibleOverlay({
     isOpen,
@@ -123,7 +123,7 @@ const FilterSidebar = ({
 
   // Scroll lock is handled by ModalPortal, removing redundant logic
   
-  const categoryOptions = useMemo(() => {
+  const categoryOptions = React.useMemo(() => {
     const allOption = { id: FILTER_VALUES.ALL, name: FILTER_VALUES.ALL_LABEL };
     const safeCategories = Array.isArray(categories) ? categories : [];
     const deduped = safeCategories.filter((category, index, source) => (
@@ -134,7 +134,7 @@ const FilterSidebar = ({
     return hasAllOption ? deduped : [allOption, ...deduped];
   }, [categories]);
 
-  const activeFilterCount = useMemo(() => {
+  const activeFilterCount = React.useMemo(() => {
     let count = 0;
     if (sortBy !== DEFAULT_SORT) count += 1;
     if (status !== DEFAULT_STATUS) count += 1;
@@ -142,7 +142,7 @@ const FilterSidebar = ({
     return count;
   }, [activeCat, sortBy, status]);
 
-  const activeFilterSummary = useMemo(() => {
+  const activeFilterSummary = React.useMemo(() => {
     const pieces = [];
 
     if (sortBy !== DEFAULT_SORT) {

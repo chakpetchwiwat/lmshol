@@ -62,7 +62,7 @@ module.exports = {
     createInstructorPreset,
     updateInstructorPreset,
     deleteInstructorPreset,
-    getAdminCourses,
+    getAdminCourses: (user) => getAdminCourses(user),
     createCourse,
     updateCourse,
     republishCourse,

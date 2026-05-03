@@ -27,7 +27,7 @@ const CategoryEditorForm = ({
   >
     <div className="flex items-center justify-between px-1">
       <label className="text-xs font-black uppercase tracking-widest text-slate-400">
-        {editingCategoryId ? 'เธเธณเธฅเธฑเธเนเธเนเนเธเธซเธกเธงเธ”เธซเธกเธนเน' : 'เธชเธฃเนเธฒเธเธซเธกเธงเธ”เธซเธกเธนเนเนเธซเธกเน'}
+        {editingCategoryId ? 'กำลังแก้ไขหมวดหมู่' : 'สร้างหมวดหมู่ใหม่'}
       </label>
       {editingCategoryId && (
         <button
@@ -35,13 +35,13 @@ const CategoryEditorForm = ({
           onClick={onCancelEdit}
           className="text-xs font-bold uppercase tracking-widest text-primary hover:underline"
         >
-          เธขเธเน€เธฅเธดเธเธเธฒเธฃเนเธเนเนเธ
+          ยกเลิกการแก้ไข
         </button>
       )}
     </div>
 
     <CustomSelect
-      label="เธเธฅเธธเนเธกเธซเธฅเธฑเธ (Module)"
+      label="กลุ่มหลัก (Module)"
       value={categoryForm.type}
       onChange={(event) => setCategoryForm({ ...categoryForm, type: event.target.value })}
       options={CATEGORY_TYPE_OPTIONS}
@@ -49,11 +49,11 @@ const CategoryEditorForm = ({
 
     <div className="flex flex-col gap-3 md:flex-row md:items-end">
       <div className="flex-1 space-y-1.5">
-        <label className="ml-1 text-xs font-bold uppercase tracking-wider text-slate-400">เธเธทเนเธญเธซเธกเธงเธ”เธซเธกเธนเน</label>
+        <label className="ml-1 text-xs font-bold uppercase tracking-wider text-slate-400">ชื่อหมวดหมู่</label>
         <input
           required
           type="text"
-          placeholder="เน€เธเนเธ AI, Business, ..."
+          placeholder="เช่น AI, Business, ..."
           className={`form-input w-full bg-white px-4 py-3 text-sm font-bold transition-all ${
             editingCategoryId ? 'border-primary/50 ring-2 ring-primary/10' : 'border-slate-200'
           }`}
@@ -75,7 +75,7 @@ const CategoryEditorForm = ({
         type="submit"
         className={`btn h-[46px] shrink-0 px-8 text-xs font-black uppercase tracking-widest shadow-lg transition-transform active:scale-95 ${editingCategoryId ? 'bg-slate-900 text-white' : 'btn-primary'}`}
       >
-        {editingCategoryId ? 'เธเธฑเธเธ—เธถเธ' : 'เน€เธเธดเนเธก'}
+        {editingCategoryId ? 'บันทึก' : 'เพิ่ม'}
       </button>
     </div>
 
@@ -90,11 +90,11 @@ const CategoryEditorForm = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-xs font-black uppercase tracking-widest text-amber-900/70">เธซเธกเธงเธ”เธซเธกเธนเนเธเธฑเนเธงเธเธฃเธฒเธง</p>
+              <p className="text-xs font-black uppercase tracking-widest text-amber-900/70">หมวดหมู่ชั่วคราว</p>
               <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500" />
             </div>
             <p className="mt-1.5 text-sm font-medium leading-relaxed text-amber-900/80">
-              เธซเธกเธงเธ”เธเธตเนเธเธฐเธขเนเธฒเธขเนเธเธขเธฑเธ <span className="font-bold">Archive</span> เธญเธฑเธ•เนเธเธกเธฑเธ•เธดเน€เธกเธทเนเธญเธเธฃเธเธเธณเธซเธเธ”เน€เธงเธฅเธฒ
+              หมวดนี้จะย้ายไปยัง <span className="font-bold">Archive</span> อัตโนมัติเมื่อครบกำหนดเวลา
             </p>
           </div>
         </div>
@@ -113,7 +113,7 @@ const CategoryEditorForm = ({
             />
             <Plus size={14} className="absolute rotate-45 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
           </div>
-          เนเธเนเธเธฒเธเธฃเธฐเธเธเธเธฑเนเธงเธเธฃเธฒเธง
+          ใช้งานระบบชั่วคราว
         </label>
       </div>
 
@@ -122,7 +122,7 @@ const CategoryEditorForm = ({
           <CustomDateTimePicker
             value={categoryForm.expiredAt}
             onChange={(event) => setCategoryForm({ ...categoryForm, expiredAt: event.target.value })}
-            label="เธฃเธฐเธเธธเธงเธฑเธเนเธฅเธฐเน€เธงเธฅเธฒเธซเธกเธ”เธญเธฒเธขเธธ (เธ.เธจ.)"
+            label="ระบุวันและเวลาหมดอายุ (พ.ศ.)"
           />
         </div>
       )}

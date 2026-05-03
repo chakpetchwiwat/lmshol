@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Target, ArrowLeft, Calendar, BookOpen, CheckCircle2, Clock } from 'lucide-react';
 import { userAPI } from '../../utils/api';
@@ -10,12 +10,12 @@ import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 const GoalDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [goal, setGoal] = useState(null);
-    const [courses, setCourses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [goal, setGoal] = React.useState(null);
+    const [courses, setCourses] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState(null);
 
-    useEffect(() => {
+    React.useEffect(() => {
         const fetchDetails = async () => {
             try {
                 const [goalRes, coursesRes] = await Promise.all([
@@ -34,7 +34,7 @@ const GoalDetail = () => {
         fetchDetails();
     }, [id]);
 
-    const progress = useMemo(() => {
+    const progress = React.useMemo(() => {
         if (!goal || !courses.length) return { current: 0, target: 1, completedCourses: [] };
 
         const windowStart = new Date(goal.createdAt);

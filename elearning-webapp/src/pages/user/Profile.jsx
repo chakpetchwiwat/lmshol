@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useState } from 'react';
+import React from 'react';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
@@ -18,40 +18,45 @@ const Profile = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [user, setUser] = useState(null);
-  const [points, setPoints] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [savingPassword, setSavingPassword] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [showPolicyModal, setShowPolicyModal] = useState(false);
-  const [courses, setCourses] = useState([]);
-  const [certificates, setCertificates] = useState([]);
-  const [savingCertificate, setSavingCertificate] = useState(false);
-  const [uploadingCertificate, setUploadingCertificate] = useState(false);
+  const [user, setUser] = React.useState(null);
+  const [points, setPoints] = React.useState(0);
+  const [loading, setLoading] = React.useState(true);
+  const [showEditModal, setShowEditModal] = React.useState(false);
+  const [currentPassword, setCurrentPassword] = React.useState('');
+  const [newPassword, setNewPassword] = React.useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = React.useState('');
+  const [savingPassword, setSavingPassword] = React.useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
+  const [showPolicyModal, setShowPolicyModal] = React.useState(false);
+  const [courses, setCourses] = React.useState([]);
+  const [certificates, setCertificates] = React.useState([]);
+  const [lmsCertificates, setLmsCertificates] = React.useState([]);
+  const [savingCertificate, setSavingCertificate] = React.useState(false);
+  const [uploadingCertificate, setUploadingCertificate] = React.useState(false);
+  const [savingSignature, setSavingSignature] = React.useState(false);
+  const [uploadingSignature, setUploadingSignature] = React.useState(false);
 
-  const passwordDialogTitleId = useId();
-  const policyDialogTitleId = useId();
-  const currentPasswordId = useId();
-  const newPasswordId = useId();
-  const confirmNewPasswordId = useId();
+  const passwordDialogTitleId = React.useId();
+  const policyDialogTitleId = React.useId();
+  const currentPasswordId = React.useId();
+  const newPasswordId = React.useId();
+  const confirmNewPasswordId = React.useId();
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const [userRes, pointsRes, coursesRes, certificatesRes] = await Promise.all([
+        const [userRes, pointsRes, coursesRes, certificatesRes, lmsCertificatesRes] = await Promise.all([
           authAPI.getCurrentUser(),
           userAPI.getPoints(),
           userAPI.getCourses(),
           userAPI.getCertificates(),
+          userAPI.getLmsCertificates(),
         ]);
         setUser(userRes?.data || userRes);
         setPoints(pointsRes?.data?.balance ?? pointsRes?.balance ?? 0);
         setCourses(Array.isArray(coursesRes?.data) ? coursesRes.data : Array.isArray(coursesRes) ? coursesRes : []);
         setCertificates(Array.isArray(certificatesRes?.data) ? certificatesRes.data : Array.isArray(certificatesRes) ? certificatesRes : []);
+        setLmsCertificates(Array.isArray(lmsCertificatesRes?.data) ? lmsCertificatesRes.data : Array.isArray(lmsCertificatesRes) ? lmsCertificatesRes : []);
       } catch (error) {
         console.error('Fetch profile error:', error);
       } finally {
@@ -168,6 +173,37 @@ const Profile = () => {
     }
   };
 
+  const handleUploadSignatureFile = async (file) => {
+    try {
+      setUploadingSignature(true);
+      const response = await userAPI.uploadSignatureFile(file);
+      toast.success('Signature uploaded');
+      return response?.data || response;
+    } catch (error) {
+      console.error('Upload signature error', error);
+      toast.error(error.response?.data?.message || 'Unable to upload signature');
+      return null;
+    } finally {
+      setUploadingSignature(false);
+    }
+  };
+
+  const handleSaveSignature = async ({ signatureTitle, signatureImageUrl }) => {
+    try {
+      setSavingSignature(true);
+      const response = await userAPI.updateProfile({ signatureTitle, signatureImageUrl });
+      const updatedUser = response?.data || response;
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      toast.success('Signature saved');
+    } catch (error) {
+      console.error('Save signature error', error);
+      toast.error(error.response?.data?.message || 'Unable to save signature');
+    } finally {
+      setSavingSignature(false);
+    }
+  };
+
   if (loading) {
     return <Skeleton.List count={5} />;
   }
@@ -191,6 +227,7 @@ const Profile = () => {
 
       <ProfileCertificates
         certificates={certificates}
+        lmsCertificates={lmsCertificates}
         saving={savingCertificate}
         uploading={uploadingCertificate}
         onCreate={handleCreateCertificate}
@@ -200,10 +237,15 @@ const Profile = () => {
       />
 
       <ProfileSettings 
+        user={user}
         notificationsEnabled={notificationsEnabled}
         onToggleNotifications={toggleNotifications}
         onShowPasswordModal={() => setShowEditModal(true)}
         onShowPrivacyModal={() => setShowPolicyModal(true)}
+        onSaveSignature={handleSaveSignature}
+        onUploadSignature={handleUploadSignatureFile}
+        savingSignature={savingSignature}
+        uploadingSignature={uploadingSignature}
       />
 
       <div className="mb-8 mt-4">

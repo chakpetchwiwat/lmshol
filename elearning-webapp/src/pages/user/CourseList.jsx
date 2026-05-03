@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+﻿import React from 'react';
 import { Filter, Grid, Search } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
@@ -19,25 +19,25 @@ const CourseList = () => {
   const [searchParams] = useSearchParams();
   const urlCategory = searchParams.get('category');
 
-  const [courses, setCourses] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [courses, setCourses] = React.useState([]);
+  const [categories, setCategories] = React.useState([]);
 
-  const [activeCat, setActiveCat] = useState(urlCategory || FILTER_VALUES.ALL_LABEL);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [status, setStatus] = useState(searchParams.get('status') || DEFAULT_STATUS);
-  const [sortBy, setSortBy] = useState(DEFAULT_SORT);
+  const [activeCat, setActiveCat] = React.useState(urlCategory || FILTER_VALUES.ALL_LABEL);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [status, setStatus] = React.useState(searchParams.get('status') || DEFAULT_STATUS);
+  const [sortBy, setSortBy] = React.useState(DEFAULT_SORT);
 
-  const [loading, setLoading] = useState(true);
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [isCatModalOpen, setIsCatModalOpen] = useState(false);
-  const scrollRef = useRef(null);
-  useEffect(() => {
+  const [loading, setLoading] = React.useState(true);
+  const [showFilterModal, setShowFilterModal] = React.useState(false);
+  const [isCatModalOpen, setIsCatModalOpen] = React.useState(false);
+  const scrollRef = React.useRef(null);
+  React.useEffect(() => {
     if (urlCategory) {
       setActiveCat(urlCategory);
     }
   }, [urlCategory]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Scroll to top of the main container when category changes
     if (!loading) {
       const scrollContainer = document.querySelector('.user-main');
@@ -49,7 +49,7 @@ const CourseList = () => {
     }
   }, [activeCat, loading]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchData = async () => {
       try {
         const [coursesRes, catRes] = await Promise.all([
@@ -72,7 +72,7 @@ const CourseList = () => {
     fetchData();
   }, []);
 
-  const filtered = useMemo(() => {
+  const filtered = React.useMemo(() => {
     if (!Array.isArray(courses)) return [];
 
     return sortCourses(

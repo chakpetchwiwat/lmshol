@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+﻿import React from 'react';
 import ModalPortal from './ModalPortal';
 import PdfCanvasViewer from './PdfCanvasViewer';
 
@@ -21,19 +21,19 @@ const DocViewer = ({
   onRefreshUrl,
   isCompleted = false,
 }) => {
-  const overlayRef = useRef(null);
-  const [viewerUrl, setViewerUrl] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [completionReady, setCompletionReady] = useState(Boolean(isCompleted));
-  const [completionError, setCompletionError] = useState('');
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [hasTimedOut, setHasTimedOut] = useState(false);
-  const [isRetrying, setIsRetrying] = useState(false);
-  const loadTimeoutRef = useRef(null);
-  const autoRetryAttemptedRef = useRef(false);
-  const iframeLoadedRef = useRef(false);
+  const overlayRef = React.useRef(null);
+  const [viewerUrl, setViewerUrl] = React.useState('');
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [completionReady, setCompletionReady] = React.useState(Boolean(isCompleted));
+  const [completionError, setCompletionError] = React.useState('');
+  const [iframeLoaded, setIframeLoaded] = React.useState(false);
+  const [hasTimedOut, setHasTimedOut] = React.useState(false);
+  const [isRetrying, setIsRetrying] = React.useState(false);
+  const loadTimeoutRef = React.useRef(null);
+  const autoRetryAttemptedRef = React.useRef(false);
+  const iframeLoadedRef = React.useRef(false);
 
   const normalizedFileName = String(fileName || '').toLowerCase();
   const normalizedExtension = String(extension || '').toLowerCase();
@@ -46,17 +46,17 @@ const DocViewer = ({
   const isIosMobilePdf = isIosDevice && isMobileViewport && isPdfDocument;
   const shouldUsePdfCanvasViewer = isPdfDocument && isMobileViewport;
 
-  useEffect(() => {
+  React.useEffect(() => {
     setCompletionReady(Boolean(isCompleted));
     setCompletionError('');
     setSubmitting(false);
   }, [isCompleted, url]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     iframeLoadedRef.current = iframeLoaded;
   }, [iframeLoaded]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleKeyDown = (event) => {
       if ((event.ctrlKey || event.metaKey) && (event.key === 's' || event.key === 'p')) {
         event.preventDefault();
@@ -146,7 +146,7 @@ const DocViewer = ({
     }
   };
 
-  const handleRetryLoad = useCallback(async ({ silent = false } = {}) => {
+  const handleRetryLoad = React.useCallback(async ({ silent = false } = {}) => {
     setHasTimedOut(false);
     setIframeLoaded(false);
     setError(null);
@@ -171,12 +171,12 @@ const DocViewer = ({
     setIsRetrying(false);
   }, [onRefreshUrl]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     document.body.classList.add('modal-open');
     return () => document.body.classList.remove('modal-open');
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!hasTimedOut || autoRetryAttemptedRef.current || typeof onRefreshUrl !== 'function') return;
     autoRetryAttemptedRef.current = true;
     const retryTimer = window.setTimeout(() => handleRetryLoad({ silent: true }), 400);

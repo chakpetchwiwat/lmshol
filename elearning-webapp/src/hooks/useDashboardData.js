@@ -1,3 +1,4 @@
+﻿import React from 'react';
 import { useEffect, useState } from 'react';
 import { adminAPI } from '../utils/api';
 import { FILTER_VALUES } from '../utils/constants/filters';
@@ -55,13 +56,13 @@ const useDashboardData = ({
     setAdvancedStats,
     setDepartments,
 }) => {
-    const [loading, setLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [goalTrackingItems, setGoalTrackingItems] = useState([]);
-    const [goalTrackingLoading, setGoalTrackingLoading] = useState(false);
+    const [loading, setLoading] = React.useState(true);
+    const [errorMessage, setErrorMessage] = React.useState('');
+    const [goalTrackingItems, setGoalTrackingItems] = React.useState([]);
+    const [goalTrackingLoading, setGoalTrackingLoading] = React.useState(false);
 
     // --- Fetch departments (admin only, once) ---
-    useEffect(() => {
+    React.useEffect(() => {
         if (!isFullAdmin) return undefined;
 
         let isMounted = true;
@@ -85,7 +86,7 @@ const useDashboardData = ({
     }, [isFullAdmin, setDepartments]);
 
     // --- Fetch dashboard stats + advanced analytics ---
-    useEffect(() => {
+    React.useEffect(() => {
         let isMounted = true;
 
         const fetchAllStats = async () => {
@@ -147,7 +148,7 @@ const useDashboardData = ({
     }, [filters, isFullAdmin, setStats, setAdvancedStats]);
 
     // --- Fetch goal tracking ---
-    useEffect(() => {
+    React.useEffect(() => {
         let isMounted = true;
 
         const fetchGoalTracking = async () => {

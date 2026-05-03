@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+﻿import React from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Home, BookOpen, Gift, User, BookMarked, LogOut, Settings, Bell, Target } from 'lucide-react';
 import { userAPI } from '../../utils/api';
@@ -9,17 +9,17 @@ import './UserLayout.css';
 const UserLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const mainRef = useRef(null);
-  const desktopNotificationRef = useRef(null);
-  const mobileNotificationRef = useRef(null);
-  const [user, setUser] = useState(null);
-  const [points, setPoints] = useState(0);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const mainRef = React.useRef(null);
+  const desktopNotificationRef = React.useRef(null);
+  const mobileNotificationRef = React.useRef(null);
+  const [user, setUser] = React.useState(null);
+  const [points, setPoints] = React.useState(0);
+  const [notifications, setNotifications] = React.useState([]);
+  const [unreadNotificationCount, setUnreadNotificationCount] = React.useState(0);
+  const [isNotificationOpen, setIsNotificationOpen] = React.useState(false);
+  const [showClearConfirm, setShowClearConfirm] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchUser = async () => {
       try {
         const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -44,7 +44,7 @@ const UserLayout = () => {
     return () => window.clearInterval(intervalId);
   }, [location.pathname]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleClickOutside = (event) => {
       const clickedDesktop = desktopNotificationRef.current?.contains(event.target);
       const clickedMobile = mobileNotificationRef.current?.contains(event.target);
@@ -58,7 +58,7 @@ const UserLayout = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
@@ -113,7 +113,7 @@ const UserLayout = () => {
     }
   };
 
-  const displayNotifications = useMemo(() => {
+  const displayNotifications = React.useMemo(() => {
     // Basic de-duplication: show only the latest notification per goalId + type
     const seen = new Set();
     return notifications.filter(n => {

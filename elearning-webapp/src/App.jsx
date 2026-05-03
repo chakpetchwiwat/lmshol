@@ -1,38 +1,42 @@
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
+import { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { canAccessAdminPanel } from './utils/roles';
 
 // Layouts
-const UserLayout = lazy(() => import('./components/layout/UserLayout'));
-const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
+const UserLayout = React.lazy(() => import('./components/layout/UserLayout'));
+const AdminLayout = React.lazy(() => import('./components/layout/AdminLayout'));
 
 // Auth Pages
-const Login = lazy(() => import('./pages/auth/Login'));
+const Login = React.lazy(() => import('./pages/auth/Login'));
 
 // User Pages
-const Home = lazy(() => import('./pages/user/Home'));
-const CourseList = lazy(() => import('./pages/user/CourseList'));
-const CompletedCourses = lazy(() => import('./pages/user/CompletedCourses'));
-const CourseDetail = lazy(() => import('./pages/user/CourseDetail'));
-const LessonPlayer = lazy(() => import('./pages/user/LessonPlayer'));
-const AnnouncementPlayer = lazy(() => import('./pages/user/AnnouncementPlayer'));
-const Rewards = lazy(() => import('./pages/user/Rewards'));
-const PointsHistory = lazy(() => import('./pages/user/PointsHistory'));
-const Profile = lazy(() => import('./pages/user/Profile'));
-const OngoingCourses = lazy(() => import('./pages/user/OngoingCourses'));
-const GoalDetail = lazy(() => import('./pages/user/GoalDetail'));
-const PrintReportPage = lazy(() => import('./pages/common/PrintReportPage'));
+const Home = React.lazy(() => import('./pages/user/Home'));
+const CourseList = React.lazy(() => import('./pages/user/CourseList'));
+const CompletedCourses = React.lazy(() => import('./pages/user/CompletedCourses'));
+const CourseDetail = React.lazy(() => import('./pages/user/CourseDetail'));
+const LessonPlayer = React.lazy(() => import('./pages/user/LessonPlayer'));
+const AnnouncementPlayer = React.lazy(() => import('./pages/user/AnnouncementPlayer'));
+const Rewards = React.lazy(() => import('./pages/user/Rewards'));
+const PointsHistory = React.lazy(() => import('./pages/user/PointsHistory'));
+const Profile = React.lazy(() => import('./pages/user/Profile'));
+const OngoingCourses = React.lazy(() => import('./pages/user/OngoingCourses'));
+const GoalDetail = React.lazy(() => import('./pages/user/GoalDetail'));
+const PrintReportPage = React.lazy(() => import('./pages/common/PrintReportPage'));
+const CertificateVerification = React.lazy(() => import('./pages/common/CertificateVerification'));
 
 // Admin Pages
-const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'));
-const AdminCourses = lazy(() => import('./pages/admin/CourseManagement'));
-const AdminAnnouncements = lazy(() => import('./pages/admin/AnnouncementManagement'));
-const AdminUsers = lazy(() => import('./pages/admin/UserManagement'));
-const AdminRewards = lazy(() => import('./pages/admin/RewardsManagement'));
-const AdminRedeems = lazy(() => import('./pages/admin/RedeemRequests'));
-const AdminReports = lazy(() => import('./pages/admin/Reports'));
-const AdminGoals = lazy(() => import('./pages/admin/GoalManagement'));
-const AdminHealth = lazy(() => import('./pages/admin/SystemHealth'));
+const AdminDashboard = React.lazy(() => import('./pages/admin/Dashboard'));
+const AdminCourses = React.lazy(() => import('./pages/admin/CourseManagement'));
+const AdminAnnouncements = React.lazy(() => import('./pages/admin/AnnouncementManagement'));
+const AdminUsers = React.lazy(() => import('./pages/admin/UserManagement'));
+const AdminRewards = React.lazy(() => import('./pages/admin/RewardsManagement'));
+const AdminRedeems = React.lazy(() => import('./pages/admin/RedeemRequests'));
+const AdminReports = React.lazy(() => import('./pages/admin/Reports'));
+const AdminGoals = React.lazy(() => import('./pages/admin/GoalManagement'));
+const AdminHealth = React.lazy(() => import('./pages/admin/SystemHealth'));
+const CertificationMonitor = React.lazy(() => import('./pages/admin/CertificationMonitor'));
+const AssessmentGrading = React.lazy(() => import('./pages/admin/AssessmentGrading'));
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -73,15 +77,14 @@ function App() {
         {/* Root Redirect - Check for existing session */}
         <Route path="/" element={
           hasToken ? (
-            canAccessAdminPanel(currentUser)
-              ? <Navigate to="/admin/dashboard" replace /> 
-              : <Navigate to="/user/home" replace />
+            <Navigate to="/user/home" replace />
           ) : <Navigate to="/login" replace />
         } />
         
         {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/print/report/:reportId" element={<PrintReportPage />} />
+        <Route path="/certificates/verify/:token" element={<CertificateVerification />} />
 
         {/* User Area */}
         <Route element={<ProtectedRoute allowedRoles={['user', 'admin', 'manager']} />}>
@@ -113,6 +116,8 @@ function App() {
             <Route path="redeems" element={<AdminRedeems />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="goals" element={<AdminGoals />} />
+            <Route path="certificates" element={<CertificationMonitor />} />
+            <Route path="assessments" element={<AssessmentGrading />} />
             <Route path="health" element={<AdminHealth />} />
           </Route>
         </Route>

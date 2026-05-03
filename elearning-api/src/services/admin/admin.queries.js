@@ -15,6 +15,7 @@ const courseInclude = {
             tier: true
         }
     },
+    certificateSetting: true,
     _count: {
         select: {
             enrollments: true,

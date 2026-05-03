@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+﻿import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
 import ModalPortal from './ModalPortal';
 
@@ -27,18 +27,18 @@ const ConfirmDialog = ({
   onConfirm,
   onCancel,
 }) => {
-  const cancelRef = useRef(null);
-  const overlayRef = useRef(null);
+  const cancelRef = React.useRef(null);
+  const overlayRef = React.useRef(null);
 
   // Focus the cancel button when opening (safe default)
-  useEffect(() => {
+  React.useEffect(() => {
     if (isOpen && cancelRef.current) {
       cancelRef.current.focus();
     }
   }, [isOpen]);
 
   // Close on Escape
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') onCancel?.();

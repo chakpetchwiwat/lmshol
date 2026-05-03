@@ -1,3 +1,4 @@
+﻿import React from 'react';
 import { useCallback } from 'react';
 import { adminAPI } from '../../../utils/api';
 import { toUTCISOString } from '../../../utils/dateUtils';
@@ -18,13 +19,13 @@ const useCoursePublishing = ({
   setShowModal,
   toast
 }) => {
-  const buildCoursePayload = useCallback((status) => ({
+  const buildCoursePayload = React.useCallback((status) => ({
     ...courseForm,
     status,
     expiredAt: courseForm.isTemporary ? toUTCISOString(courseForm.expiredAt) : null,
   }), [courseForm]);
 
-  const saveCourseRecord = useCallback(async (status) => {
+  const saveCourseRecord = React.useCallback(async (status) => {
     const shouldPublish = status === ENTITY_STATUS.PUBLISHED;
 
     if (shouldPublish && (!isEditing || lessons.length === 0)) {
@@ -43,7 +44,7 @@ const useCoursePublishing = ({
     };
   }, [buildCoursePayload, editingId, isEditing, lessons.length, toast]);
 
-  const finishDraftSave = useCallback(async ({ payload, savedCourse }) => {
+  const finishDraftSave = React.useCallback(async ({ payload, savedCourse }) => {
     const savedCourseId = savedCourse?.id || editingId;
 
     toast.success(isEditing ? 'บันทึกแบบร่างเรียบร้อย' : 'สร้างฉบับร่างแล้ว เพิ่มบทเรียนต่อได้เลย');
@@ -62,14 +63,14 @@ const useCoursePublishing = ({
     await fetchData();
   }, [editingId, fetchData, fetchLessons, isEditing, setActiveTab, setCourseForm, setEditingId, setIsEditing, toast]);
 
-  const finishPublishSave = useCallback(async () => {
+  const finishPublishSave = React.useCallback(async () => {
     toast.success('เผยแพร่คอร์สเรียบร้อย');
     setShowModal(false);
     resetCourseForm();
     await fetchData();
   }, [fetchData, resetCourseForm, setShowModal, toast]);
 
-  const saveFromFormSubmit = useCallback(async (event) => {
+  const saveFromFormSubmit = React.useCallback(async (event) => {
     event.preventDefault();
     const action = event.nativeEvent?.submitter?.value || 'draft';
     const nextStatus = action === 'publish' ? ENTITY_STATUS.PUBLISHED : ENTITY_STATUS.DRAFT;
@@ -90,7 +91,7 @@ const useCoursePublishing = ({
     }
   }, [finishDraftSave, finishPublishSave, saveCourseRecord, toast]);
 
-  const saveDraftFromBuilder = useCallback(async () => {
+  const saveDraftFromBuilder = React.useCallback(async () => {
     try {
       const result = await saveCourseRecord(ENTITY_STATUS.DRAFT);
       if (result) await finishDraftSave(result);
@@ -100,7 +101,7 @@ const useCoursePublishing = ({
     }
   }, [finishDraftSave, saveCourseRecord, toast]);
 
-  const publishFromBuilder = useCallback(async () => {
+  const publishFromBuilder = React.useCallback(async () => {
     try {
       const result = await saveCourseRecord(ENTITY_STATUS.PUBLISHED);
       if (result) await finishPublishSave();

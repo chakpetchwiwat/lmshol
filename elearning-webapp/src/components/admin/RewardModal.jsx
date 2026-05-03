@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+﻿import React from 'react';
 import { X, Upload, ImageIcon } from 'lucide-react';
 import { getFullUrl } from '../../utils/api';
 import ModalPortal from '../common/ModalPortal';
@@ -13,7 +13,7 @@ const RewardModal = ({
   onImageUpload, 
   uploadingImage 
 }) => {
-  const fileInputRef = useRef(null);
+  const fileInputRef = React.useRef(null);
 
   if (!isOpen) return null;
 

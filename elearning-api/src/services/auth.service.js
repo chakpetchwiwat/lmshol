@@ -13,7 +13,8 @@ const login = async (email, password) => {
         where: { email },
         include: {
             departmentRef: true,
-            tier: true
+            tier: true,
+            courseStaff: { take: 1 }
         }
     });
 
@@ -47,7 +48,8 @@ const getCurrentUser = async (userId) => {
         where: { id: userId },
         include: {
             departmentRef: true,
-            tier: true
+            tier: true,
+            courseStaff: { take: 1 }
         }
     });
 

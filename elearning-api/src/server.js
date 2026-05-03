@@ -11,6 +11,8 @@ const adminRoutes = require('./routes/admin.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const settingRoutes = require('./routes/setting.routes');
 const goalRoutes = require('./routes/goal.routes');
+const courseRoutes = require('./routes/course.routes');
+const certificateRoutes = require('./routes/certificate.routes');
 const {
   buildCorsOptions,
   buildHelmetOptions,
@@ -44,6 +46,8 @@ app.get('/', (req, res) => {
 app.use('/api', createDefaultApiLimiter(securityConfig));
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/certificates', certificateRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/settings', settingRoutes);

@@ -9,7 +9,7 @@ const getApiUrl = () => {
   if (typeof window !== 'undefined') {
     return new URL(API_DEFAULTS.API_PATH, window.location.origin).toString();
   }
-  return new URL(API_DEFAULTS.API_PATH, API_DEFAULTS.LOCAL_API_ORIGIN).toString();
+  return new URL(API_DEFAULTS.API_PATH, 'http://localhost:5000').toString();
 };
 
 const getBaseUrl = (apiUrl) => {
@@ -78,11 +78,17 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error("API Error Interceptor:", error.response?.data || error.message);
+    console.error("API Error Interceptor:", error.response ? { status: error.response.status, data: error.response.data } : error.message);
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+
+      // Only redirect to login if we're not already there.
+      // This prevents the page from refreshing on a failed login attempt,
+      // which would wipe out the error message shown to the user.
+      if (!window.location.pathname.endsWith('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -106,6 +112,9 @@ export const userAPI = {
   getCategories: () => api.get('/user/categories'),
   requestRedeem: (rewardId) => api.post(`/user/redeem/${rewardId}`),
   submitQuiz: (lessonId, data) => api.post(`/user/lessons/${lessonId}/quiz`, data),
+  getAssessmentSubmission: (lessonId) => api.get(`/user/lessons/${lessonId}/assessment`),
+  submitAssessment: (lessonId, data) => api.post(`/user/lessons/${lessonId}/assessment`, data),
+  getAssessmentSubmissionDownloadUrl: (submissionId) => api.get(`/user/assessment-submissions/${submissionId}/download-url`),
   submitAnnouncementQuiz: (announcementId, data) => api.post(`/user/announcements/${announcementId}/quiz`, data),
   getLessonQuestions: (lessonId) => api.get(`/user/lessons/${lessonId}/questions`),
   getAnnouncementQuestions: (announcementId) => api.get(`/user/announcements/${announcementId}/questions`),
@@ -113,6 +122,10 @@ export const userAPI = {
   getAnnouncementDocumentAccess: (announcementId) => api.get(`/user/announcements/${announcementId}/document-access`),
   updateProfile: (data) => api.put('/user/profile', data),
   getCertificates: () => api.get('/user/certificates'),
+  getUploadedCertificateDownloadUrl: (id) => api.get(`/user/certificates/${id}/download-url`),
+  getLmsCertificates: () => api.get('/certificates/me'),
+  getCertificateDownloadUrl: (id) => api.get(`/certificates/${id}/download-url`),
+  verifyLmsCertificate: (token) => api.get(`/certificates/verify/${token}`),
   createCertificate: (data) => api.post('/user/certificates', data),
   updateCertificate: (id, data) => api.put(`/user/certificates/${id}`, data),
   deleteCertificate: (id) => api.delete(`/user/certificates/${id}`),
@@ -132,6 +145,20 @@ export const userAPI = {
     const formData = new FormData();
     formData.append('file', file);
     return api.post('/upload/certificate', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadAssessmentFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/assessment', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadSignatureFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/signature', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
@@ -207,6 +234,20 @@ export const adminAPI = {
   updateRedeemStatus: (id, status, adminNote = '') => api.put(`/admin/redeems/${id}/status`, { status, adminNote }),
 
   getCourseQuizReports: (courseId) => api.get(`/admin/courses/${courseId}/quiz-reports`),
+  getAllAssessmentSubmissions: (params) => api.get('/admin/assessments', { params }),
+  getCourseAssessmentSubmissions: (courseId) => api.get(`/courses/${courseId}/assessment-submissions`),
+  gradeAssessmentSubmission: (courseId, submissionId, data) => api.patch(`/courses/${courseId}/assessment-submissions/${submissionId}/grade`, data),
+  getAssessmentSubmissionDownloadUrl: (courseId, submissionId) => api.get(`/courses/${courseId}/assessment-submissions/${submissionId}/download-url`),
+  // Certificates
+  getPendingCertificates: () => api.get('/admin/certificates/pending'),
+  getCourseCertificates: (courseId) => api.get(`/admin/courses/${courseId}/certificates`),
+  getAllCertificates: (params) => api.get('/admin/certificates', { params }),
+  retryCertificatePdf: (certificateId) => api.post(`/admin/certificates/${certificateId}/retry`),
+  getCertificateDownloadUrl: (id) => api.get(`/certificates/${id}/download-url`),
+  issueManual: (courseId, userId) => api.post(`/courses/${courseId}/certificates/issue/${userId}`),
+  retryCertificate: (id) => api.post(`/certificates/${id}/retry`),
+  reissueCertificate: (id) => api.post(`/certificates/${id}/reissue`),
+  revokeCertificate: (id, data = {}) => api.post(`/certificates/${id}/revoke`, data),
 
   // File Upload
   uploadFile: (file) => {
@@ -220,7 +261,7 @@ export const adminAPI = {
   // System Settings
   getSettings: () => api.get('/settings'),
   updateSetting: (key, value) => api.patch(`/settings/${key}`, { value }),
-  
+
   // Goals
   getGoals: () => api.get('/goals?includeExpired=true'),
   createGoal: (data) => api.post('/goals', data),
@@ -231,6 +272,13 @@ export const adminAPI = {
   getGoalReport: (id, config = {}) => api.get(`/goals/${id}/report`, config),
   getGoalTrackingSummary: (config = {}) => api.get('/goals/tracking-summary', config),
 
+};
+
+export const courseStaffAPI = {
+  getStaff: (courseId) => api.get(`/courses/${courseId}/staff`),
+  assignStaff: (courseId, data) => api.post(`/courses/${courseId}/staff`, data),
+  updateStaff: (courseId, staffId, data) => api.patch(`/courses/${courseId}/staff/${staffId}`, data),
+  deleteStaff: (courseId, staffId) => api.delete(`/courses/${courseId}/staff/${staffId}`)
 };
 
 export default api;

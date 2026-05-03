@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import React from 'react';
 import { Plus, CalendarClock } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -44,53 +44,53 @@ const GoalManagement = () => {
     const toast = useToast();
     const { confirm, ConfirmDialogProps } = useConfirm();
 
-    const stableConfirmProps = useMemo(() => ConfirmDialogProps, [ConfirmDialogProps]);
+    const stableConfirmProps = React.useMemo(() => ConfirmDialogProps, [ConfirmDialogProps]);
 
-    const [goals, setGoals] = useState([]);
-    const [courses, setCourses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [reportGoal, setReportGoal] = useState(null);
-    const [reportData, setReportData] = useState(null);
-    const [reportLoading, setReportLoading] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editingId, setEditingId] = useState(null);
-    const [departments, setDepartments] = useState([]);
-    const [currentUser, setCurrentUser] = useState(null);
-    const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
-    const [formData, setFormData] = useState(getDefaultGoalForm());
-    const [courseSearch, setCourseSearch] = useState('');
-    const currentThaiMonthYear = useMemo(() => getCurrentThaiMonthYear(), []);
-    const [filters, setFilters] = useState({
+    const [goals, setGoals] = React.useState([]);
+    const [courses, setCourses] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+    const [isModalOpen, setIsModalOpen] = React.useState(false);
+    const [reportGoal, setReportGoal] = React.useState(null);
+    const [reportData, setReportData] = React.useState(null);
+    const [reportLoading, setReportLoading] = React.useState(false);
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [editingId, setEditingId] = React.useState(null);
+    const [departments, setDepartments] = React.useState([]);
+    const [currentUser, setCurrentUser] = React.useState(null);
+    const [viewMode, setViewMode] = React.useState(ENTITY_VIEW_STATUS.ACTIVE);
+    const [formData, setFormData] = React.useState(getDefaultGoalForm());
+    const [courseSearch, setCourseSearch] = React.useState('');
+    const currentThaiMonthYear = React.useMemo(() => getCurrentThaiMonthYear(), []);
+    const [filters, setFilters] = React.useState({
         month: currentThaiMonthYear.month,
         year: currentThaiMonthYear.year,
         departmentId: ''
     });
 
-    const yearOptions = useMemo(() => {
+    const yearOptions = React.useMemo(() => {
         const currentYear = Number.parseInt(currentThaiMonthYear.year, 10);
         return Array.from({ length: 5 }, (_, index) => ({
             value: String(currentYear - 2 + index),
             label: String(currentYear - 2 + index)
         }));
     }, [currentThaiMonthYear.year]);
-    const goalReportCacheRef = useRef(new Map());
-    const goalReportRequestRef = useRef(null);
+    const goalReportCacheRef = React.useRef(new Map());
+    const goalReportRequestRef = React.useRef(null);
 
-    const invalidateGoalReportCache = useCallback((goalId) => {
+    const invalidateGoalReportCache = React.useCallback((goalId) => {
         if (goalId) {
             goalReportCacheRef.current.delete(goalId);
         }
     }, []);
 
-    const cancelGoalReportRequest = useCallback(() => {
+    const cancelGoalReportRequest = React.useCallback(() => {
         if (goalReportRequestRef.current) {
             goalReportRequestRef.current.abort();
             goalReportRequestRef.current = null;
         }
     }, []);
 
-    const fetchData = useCallback(async () => {
+    const fetchData = React.useCallback(async () => {
         setLoading(true);
         try {
             const user = JSON.parse(localStorage.getItem('user'));
@@ -126,11 +126,11 @@ const GoalManagement = () => {
         }
     }, []);
 
-    useEffect(() => {
+    React.useEffect(() => {
         fetchData();
     }, [fetchData]);
 
-    useEffect(() => () => {
+    React.useEffect(() => () => {
         cancelGoalReportRequest();
     }, [cancelGoalReportRequest]);
 
@@ -156,7 +156,7 @@ const GoalManagement = () => {
         }
     };
 
-    const handleEditGoal = useCallback((goal) => {
+    const handleEditGoal = React.useCallback((goal) => {
         setFormData({
             title: goal.title,
             type: goal.type,
@@ -175,14 +175,14 @@ const GoalManagement = () => {
         setIsModalOpen(true);
     }, []);
 
-    const handleCloseModal = useCallback(() => {
+    const handleCloseModal = React.useCallback(() => {
         setIsModalOpen(false);
         setIsEditing(false);
         setEditingId(null);
         setFormData(getDefaultGoalForm(currentUser));
     }, [currentUser]);
 
-    const handleDeleteGoal = useCallback(async (id) => {
+    const handleDeleteGoal = React.useCallback(async (id) => {
         const ok = await confirm({
             title: 'ยืนยันการลบเป้าหมาย',
             message: 'คุณแน่ใจหรือไม่ว่าต้องการลบเป้าหมายนี้?',
@@ -203,7 +203,7 @@ const GoalManagement = () => {
         }
     }, [confirm, fetchData, invalidateGoalReportCache, toast]);
 
-    const handleArchiveGoal = useCallback(async (id) => {
+    const handleArchiveGoal = React.useCallback(async (id) => {
         try {
             await adminAPI.archiveGoal(id);
             invalidateGoalReportCache(id);
@@ -215,7 +215,7 @@ const GoalManagement = () => {
         }
     }, [fetchData, invalidateGoalReportCache, toast]);
 
-    const handleRepublishGoal = useCallback(async (id) => {
+    const handleRepublishGoal = React.useCallback(async (id) => {
         try {
             await adminAPI.republishGoal(id);
             invalidateGoalReportCache(id);
@@ -227,7 +227,7 @@ const GoalManagement = () => {
         }
     }, [fetchData, invalidateGoalReportCache, toast]);
 
-    const handleViewReport = useCallback(async (goal) => {
+    const handleViewReport = React.useCallback(async (goal) => {
         setReportGoal(goal);
 
         const cachedReport = goalReportCacheRef.current.get(goal.id);
@@ -265,14 +265,14 @@ const GoalManagement = () => {
         }
     }, [cancelGoalReportRequest, toast]);
 
-    const handleCloseReport = useCallback(() => {
+    const handleCloseReport = React.useCallback(() => {
         cancelGoalReportRequest();
         setReportGoal(null);
         setReportData(null);
         setReportLoading(false);
     }, [cancelGoalReportRequest]);
 
-    const filteredCourses = useMemo(() => {
+    const filteredCourses = React.useMemo(() => {
         return courses.filter((course) =>
             course.title.toLowerCase().includes(courseSearch.toLowerCase()) &&
             !formData.courseIds.includes(course.id)
@@ -288,17 +288,17 @@ const GoalManagement = () => {
         }));
     };
 
-    const activeGoals = useMemo(() => {
+    const activeGoals = React.useMemo(() => {
         const now = new Date();
         return goals.filter((goal) => goal.status !== 'ARCHIVED' && (!goal.expiryDate || new Date(goal.expiryDate) > now));
     }, [goals]);
 
-    const archivedGoals = useMemo(() => {
+    const archivedGoals = React.useMemo(() => {
         const now = new Date();
         return goals.filter((goal) => goal.status === 'ARCHIVED' || (goal.expiryDate && new Date(goal.expiryDate) <= now));
     }, [goals]);
 
-    const displayGoals = useMemo(() => {
+    const displayGoals = React.useMemo(() => {
         let baseGoals = viewMode === ENTITY_VIEW_STATUS.ACTIVE ? activeGoals : archivedGoals;
         
         return baseGoals.filter((goal) => {
@@ -319,7 +319,7 @@ const GoalManagement = () => {
         });
     }, [viewMode, activeGoals, archivedGoals, filters.month, filters.year, filters.departmentId, currentUser]);
 
-    const columns = useMemo(() => [
+    const columns = React.useMemo(() => [
         { label: 'ชื่อเป้าหมาย' },
         { label: 'ประเภท' },
         { label: 'รายละเอียด' },
@@ -328,7 +328,7 @@ const GoalManagement = () => {
         { label: 'จัดการ', className: 'text-center' }
     ], []);
 
-    const tabs = useMemo(() => [
+    const tabs = React.useMemo(() => [
         { key: ENTITY_VIEW_STATUS.ACTIVE, label: `กำลังใช้งาน (${activeGoals.length})`, icon: CalendarClock },
         { key: ENTITY_VIEW_STATUS.ARCHIVED, label: `เก็บเข้าคลัง (${archivedGoals.length})`, icon: CalendarClock }
     ], [activeGoals.length, archivedGoals.length]);

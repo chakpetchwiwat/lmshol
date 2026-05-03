@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React from 'react';
 import { History, Edit3, Archive, Trash2, RotateCcw } from 'lucide-react';
 import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -23,7 +23,7 @@ const AnnouncementTable = ({
   onRepublish,
   onDelete
 }) => {
-  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [openDropdownId, setOpenDropdownId] = React.useState(null);
 
   return (
     <AdminTable

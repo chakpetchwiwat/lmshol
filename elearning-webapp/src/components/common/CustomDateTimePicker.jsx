@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React from 'react';
 import { Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { formatThaiDateTime, toUTCISOString, toThailandCalendarDate } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
@@ -18,17 +18,17 @@ const CustomDateTimePicker = ({
   showTime = true,
   isEndOfDay = false 
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [view, setView] = useState('calendar'); // 'calendar', 'time', 'month', 'year'
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [view, setView] = React.useState('calendar'); // 'calendar', 'time', 'month', 'year'
   
   // Date logic
   const initialDate = value ? toThailandCalendarDate(value) : new Date();
-  const [viewDate, setViewDate] = useState(new Date(initialDate));
-  const [selectedDate, setSelectedDate] = useState(value ? toThailandCalendarDate(value) : null);
+  const [viewDate, setViewDate] = React.useState(new Date(initialDate));
+  const [selectedDate, setSelectedDate] = React.useState(value ? toThailandCalendarDate(value) : null);
   
   // Time logic
-  const [hours, setHours] = useState(selectedDate ? selectedDate.getHours() : 23);
-  const [minutes, setMinutes] = useState(selectedDate ? selectedDate.getMinutes() : 59);
+  const [hours, setHours] = React.useState(selectedDate ? selectedDate.getHours() : 23);
+  const [minutes, setMinutes] = React.useState(selectedDate ? selectedDate.getMinutes() : 59);
   
   const months = [
     'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -40,7 +40,7 @@ const CustomDateTimePicker = ({
   const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
 
-  const calendarDays = useMemo(() => {
+  const calendarDays = React.useMemo(() => {
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
     const daysInMonth = getDaysInMonth(year, month);

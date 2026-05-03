@@ -2,6 +2,7 @@ const UserService = require('../services/user.service');
 const { Readable } = require('stream');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
+const AssessmentService = require('../services/assessment.service');
 
 // Get all courses (with enrollment status if applicable)
 const getCourses = asyncHandler(async (req, res) => {
@@ -75,6 +76,16 @@ const submitQuiz = asyncHandler(async (req, res) => {
   res.json({ success: true, data: result });
 });
 
+const submitAssessment = asyncHandler(async (req, res) => {
+  const result = await AssessmentService.submitAssessment(req.user.userId, req.params.id, req.body);
+  res.status(201).json({ success: true, data: result });
+});
+
+const getMyAssessmentSubmission = asyncHandler(async (req, res) => {
+  const result = await AssessmentService.getMyAssessmentSubmission(req.user.userId, req.params.id);
+  res.json({ success: true, data: result });
+});
+
 const submitAnnouncementQuiz = asyncHandler(async (req, res) => {
   const result = await UserService.submitAnnouncementQuiz(req.user.userId, req.params.id, req.body.answers);
   res.json({ success: true, data: result });
@@ -123,6 +134,16 @@ const getLessonDocumentAccess = asyncHandler(async (req, res) => {
 const getAnnouncementDocumentAccess = asyncHandler(async (req, res) => {
   const documentAccess = await UserService.getAnnouncementDocumentAccess(req.user.userId, req.params.id);
   res.json({ success: true, data: documentAccess });
+});
+
+const getCertificateDownloadUrl = asyncHandler(async (req, res) => {
+  const result = await UserService.getCertificateSignedUrl(req.user.userId, req.params.id);
+  res.json({ success: true, data: result });
+});
+
+const getAssessmentSubmissionDownloadUrl = asyncHandler(async (req, res) => {
+  const result = await AssessmentService.getSubmissionDownloadUrl(req.user, req.params.id);
+  res.json({ success: true, data: result });
 });
 
 const getLessonDocumentStream = asyncHandler(async (req, res) => {
@@ -193,9 +214,13 @@ module.exports = {
   requestRedeem,
   getCategories,
   submitQuiz,
+  submitAssessment,
+  getMyAssessmentSubmission,
   submitAnnouncementQuiz,
   updateProfile,
   getCertificates,
+  getCertificateDownloadUrl,
+  getAssessmentSubmissionDownloadUrl,
   createCertificate,
   updateCertificate,
   deleteCertificate,

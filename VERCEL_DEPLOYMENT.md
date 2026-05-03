@@ -45,5 +45,16 @@ The database has RLS enabled. The API automatically propagates the user identity
 ### File Uploads
 Uploads are handled via Supabase Storage. Ensure you have created a bucket named `uploads` in your Supabase project and set it to **Public**.
 
+### Certificate PDF Generation
+LMS certificates are rendered with headless Chromium via `@sparticuz/chromium` and `puppeteer-core`.
+
+If your API is deployed on a custom Linux host or container and certificate approval fails with an error like `libnss3.so: cannot open shared object file`, install the Chromium runtime dependencies on that host. For Debian/Ubuntu based images, the minimum fix is usually:
+
+```bash
+apt-get update && apt-get install -y libnss3 libatk-bridge2.0-0 libgtk-3-0 libxss1 libasound2
+```
+
+If the host already has Chrome or Chromium installed, set `CHROME_EXECUTABLE_PATH` to that binary path so the API uses it instead of the packaged serverless Chromium.
+
 ### Rate Limiting
 Without a valid `REDIS_URL`, rate limiting will fall back to in-memory, which is **not effective** in Vercel's serverless environment (each request may hit a different instance). Use **Upstash Redis** for the best experience.

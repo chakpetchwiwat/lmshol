@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React from 'react';
 import { ArrowLeft, Gift, CheckCircle, TrendingUp, TrendingDown, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
@@ -7,12 +7,12 @@ import { formatThaiDateTime } from '../../utils/dateUtils';
 
 const PointsHistory = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('earned');
-  const [history, setHistory] = useState([]);
-  const [balance, setBalance] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = React.useState('earned');
+  const [history, setHistory] = React.useState([]);
+  const [balance, setBalance] = React.useState(0);
+  const [loading, setLoading] = React.useState(true);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchHistory = async () => {
       try {
         const res = await userAPI.getPointsHistory();

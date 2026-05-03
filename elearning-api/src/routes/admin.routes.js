@@ -2,14 +2,16 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin.controller');
 const systemController = require('../controllers/system.controller');
-const { verifyToken, verifySuperAdmin, verifyAdminPanelAccess } = require('../middleware/auth');
+const certificateController = require('../controllers/certificate.controller');
+const { verifyToken, verifyAdmin, verifySuperAdmin, verifyAdminOrManager, verifyAdminPanelAccess, verifyCourseAccess } = require('../middleware/auth');
 const { adminAnalyticsRateLimiter } = require('../middleware/rateLimiters');
 
 router.use(verifyToken, verifyAdminPanelAccess); // Admin + manager can access the admin panel
 
-router.get('/dashboard', adminAnalyticsRateLimiter, adminController.getDashboardStats);
-router.get('/analytics', adminAnalyticsRateLimiter, adminController.getAdvancedAnalytics);
+router.get('/dashboard', verifyAdminOrManager, adminAnalyticsRateLimiter, adminController.getDashboardStats);
+router.get('/analytics', verifyAdminOrManager, adminAnalyticsRateLimiter, adminController.getAdvancedAnalytics);
 router.get('/system/health', verifySuperAdmin, systemController.getSystemHealth);
+router.post('/system/security/reset', verifySuperAdmin, systemController.resetRateLimit);
 
 router.get('/users', adminController.getUsers);
 router.get('/users/:id/details', adminController.getUserDetails);
@@ -28,28 +30,28 @@ router.put('/tiers/reorder', verifySuperAdmin, adminController.reorderTiers);
 router.put('/tiers/:id', verifySuperAdmin, adminController.updateTier);
 router.delete('/tiers/:id', verifySuperAdmin, adminController.deleteTier);
 
-router.get('/instructor-presets', verifySuperAdmin, adminController.getInstructorPresets);
+router.get('/instructor-presets', adminController.getInstructorPresets);
 router.post('/instructor-presets', verifySuperAdmin, adminController.createInstructorPreset);
 router.put('/instructor-presets/:id', verifySuperAdmin, adminController.updateInstructorPreset);
 router.delete('/instructor-presets/:id', verifySuperAdmin, adminController.deleteInstructorPreset);
 
 router.get('/courses', adminController.getAdminCourses);
-router.post('/courses', verifySuperAdmin, adminController.createCourse);
+router.post('/courses', verifyAdmin, adminController.createCourse);
 router.put('/courses/:id/republish', verifySuperAdmin, adminController.republishCourse);
 router.put('/courses/:id/archive', verifySuperAdmin, adminController.archiveCourse);
-router.get('/courses/:id/history', verifySuperAdmin, adminController.getCourseHistory);
-router.put('/courses/:id', verifySuperAdmin, adminController.updateCourse);
+router.get('/courses/:id/history', verifyCourseAccess, adminController.getCourseHistory);
+router.put('/courses/:id', verifyCourseAccess, adminController.updateCourse);
 router.delete('/courses/:id', verifySuperAdmin, adminController.deleteCourse);
 
-router.get('/announcements', adminController.getAdminAnnouncements);
-router.post('/announcements', adminController.createAnnouncement);
-router.get('/announcements/:id/history', adminController.getAnnouncementHistory);
-router.put('/announcements/:id/republish', adminController.republishAnnouncement);
-router.put('/announcements/:id/archive', adminController.archiveAnnouncement);
-router.put('/announcements/:id', adminController.updateAnnouncement);
-router.delete('/announcements/:id', adminController.deleteAnnouncement);
+router.get('/announcements', verifyAdminOrManager, adminController.getAdminAnnouncements);
+router.post('/announcements', verifyAdminOrManager, adminController.createAnnouncement);
+router.get('/announcements/:id/history', verifyAdminOrManager, adminController.getAnnouncementHistory);
+router.put('/announcements/:id/republish', verifyAdminOrManager, adminController.republishAnnouncement);
+router.put('/announcements/:id/archive', verifyAdminOrManager, adminController.archiveAnnouncement);
+router.put('/announcements/:id', verifyAdminOrManager, adminController.updateAnnouncement);
+router.delete('/announcements/:id', verifyAdminOrManager, adminController.deleteAnnouncement);
 
-router.get('/categories', verifySuperAdmin, adminController.getCategories);
+router.get('/categories', adminController.getCategories);
 router.post('/categories', verifySuperAdmin, adminController.createCategory);
 router.put('/categories/reorder', verifySuperAdmin, adminController.reorderCategories);
 router.put('/categories/:id/republish', verifySuperAdmin, adminController.republishCategory);
@@ -57,22 +59,33 @@ router.put('/categories/:id/archive', verifySuperAdmin, adminController.archiveC
 router.put('/categories/:id', verifySuperAdmin, adminController.updateCategory);
 router.delete('/categories/:id', verifySuperAdmin, adminController.deleteCategory);
 
-router.get('/rewards', verifySuperAdmin, adminController.getAdminRewards);
+router.get('/rewards', adminController.getAdminRewards);
 router.post('/rewards', verifySuperAdmin, adminController.createReward);
 router.put('/rewards/:id', verifySuperAdmin, adminController.updateReward);
 router.delete('/rewards/:id', verifySuperAdmin, adminController.deleteReward);
 
-router.get('/redeems', adminController.getRedeemRequests);
-router.put('/redeems/:id/status', adminController.updateRedeemStatus);
+router.get('/redeems', verifyAdminOrManager, adminController.getRedeemRequests);
+router.put('/redeems/:id/status', verifyAdminOrManager, adminController.updateRedeemStatus);
 
 // Lesson Management
-router.get('/courses/:courseId/lessons', verifySuperAdmin, adminController.getCourseLessons);
+router.get('/courses/:courseId/lessons', verifyCourseAccess, adminController.getCourseLessons);
 router.put('/lessons/reorder', verifySuperAdmin, adminController.reorderLessons);
-router.post('/lessons', verifySuperAdmin, adminController.createLesson);
-router.put('/lessons/:id', verifySuperAdmin, adminController.updateLesson);
-router.delete('/lessons/:id', verifySuperAdmin, adminController.deleteLesson);
+router.post('/lessons', verifyCourseAccess, adminController.createLesson);
+router.put('/lessons/:id', verifyCourseAccess, adminController.updateLesson);
+router.delete('/lessons/:id', verifyCourseAccess, adminController.deleteLesson);
 
 // Quiz Reports
-router.get('/courses/:courseId/quiz-reports', verifySuperAdmin, adminController.getCourseQuizAttempts);
+router.get('/courses/:courseId/quiz-reports', verifyCourseAccess, adminController.getCourseQuizAttempts);
+
+// Certificates
+router.get('/certificates/pending', verifyAdminOrManager, certificateController.getPendingApprovals);
+router.get('/courses/:courseId/certificates', verifyCourseAccess, certificateController.getCourseCertificates);
+
+// Certificate Management
+router.get('/certificates', certificateController.getAllCertificates);
+router.post('/certificates/:certificateId/retry', certificateController.retryGeneration);
+
+// Assessments
+router.get('/assessments', adminController.getAllAssessmentSubmissions);
 
 module.exports = router;

@@ -57,16 +57,16 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/72 via-slate-900/12 to-transparent" />
   
           <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
-            <span className="inline-flex max-w-[65%] rounded-full bg-white/92 px-3 py-1 text-[11px] font-black tracking-[0.04em] text-slate-700 shadow-sm">
+            <span className="inline-flex max-w-[65%] shrink-0 whitespace-nowrap rounded-full bg-white/92 px-3 py-1 text-[11px] font-black tracking-[0.04em] text-slate-700 shadow-sm">
               {categoryLabel}
             </span>
   
             {course.isEnrolled && (
               <span
-                className={`inline-flex rounded-full px-3 py-1 text-[11px] font-black tracking-[0.04em] shadow-sm ${
+                className={`inline-flex shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-black tracking-[0.04em] shadow-sm ${
                   isCompleted
                     ? 'bg-success-bg text-success-text'
-                    : 'bg-primary/10 text-primary'
+                    : 'bg-blue-600 text-white shadow-md'
                 }`}
               >
                 {statusLabel}

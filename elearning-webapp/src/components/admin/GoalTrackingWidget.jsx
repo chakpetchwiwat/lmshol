@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React from 'react';
 import Skeleton from '../common/Skeleton';
 import { CheckCircle2, Clock3, Printer, Target, Users, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -36,7 +36,7 @@ const GoalTrackingWidget = ({
   selectedDepartmentName = '',
   onOpenGoalReport,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(false);
   const displayedGoals = isExpanded ? goals : goals.slice(0, 5);
 
   return (

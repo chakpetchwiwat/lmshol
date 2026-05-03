@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+﻿import React from 'react';
 import { ChevronDown, Check } from 'lucide-react';
 
 const CustomSelect = ({ 
@@ -12,12 +12,12 @@ const CustomSelect = ({
   disabled = false,
   size = 'md' // 'sm' or 'md'
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef(null);
+  const [isOpen, setIsOpen] = React.useState(false);
+  const containerRef = React.useRef(null);
 
   const selectedOption = options.find(opt => opt.value === value);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setIsOpen(false);

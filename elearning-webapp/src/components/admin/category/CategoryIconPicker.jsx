@@ -11,7 +11,7 @@ const CategoryIconPicker = ({
   setShowIconPicker,
 }) => (
   <div className="w-full space-y-1.5 md:w-64" ref={iconPickerRef}>
-    <label className="ml-1 text-xs font-bold uppercase tracking-wider text-slate-400">เนเธญเธเธญเธเนเธชเธ”เธเธเธฅ</label>
+    <label className="ml-1 text-xs font-bold uppercase tracking-wider text-slate-400">ไอคอนแสดงผล</label>
     <div className="relative">
       <button
         type="button"

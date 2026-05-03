@@ -1,7 +1,7 @@
-import React, { Suspense, lazy } from 'react';
-import { ArrowLeft, FileText, BookOpen } from 'lucide-react';
+import React, { Suspense } from 'react';
+import { ArrowLeft, FileText, BookOpen, ClipboardCheck } from 'lucide-react';
 
-const VideoPlayer = lazy(() => import('../common/VideoPlayer'));
+const VideoPlayer = React.lazy(() => import('../common/VideoPlayer'));
 
 const LessonMedia = ({
   lesson,
@@ -16,6 +16,7 @@ const LessonMedia = ({
 }) => {
   const isVideo = lesson.type === 'video';
   const isQuiz = lesson.type === 'quiz';
+  const isAssessment = lesson.type === 'assessment';
   const isArticle = lesson.type === 'article';
 
   return (
@@ -67,6 +68,18 @@ const LessonMedia = ({
               <h2 className="mb-4 text-3xl font-extrabold tracking-tighter md:text-5xl">แบบทดสอบท้ายบท</h2>
               <p className="text-lg font-medium leading-relaxed text-slate-400">
                 ทดสอบความเข้าใจของคุณเกี่ยวกับบทเรียนนี้ เพื่อปลดล็อกเนื้อหาถัดไป
+              </p>
+            </div>
+          </div>
+        ) : isAssessment ? (
+          <div className="relative flex min-h-full flex-col items-center justify-center gap-6 px-6 py-20 text-center text-white md:py-32">
+            <div className="relative z-10 flex h-24 w-24 items-center justify-center rounded-[2.5rem] border border-white/10 bg-white/10 text-primary shadow-[0_24px_60px_-32px_rgba(79,70,229,0.45)] backdrop-blur-2xl">
+              <ClipboardCheck size={48} strokeWidth={1.3} />
+            </div>
+            <div className="relative z-10 max-w-lg">
+              <h2 className="mb-4 text-3xl font-extrabold tracking-tighter md:text-5xl">Assessment</h2>
+              <p className="text-lg font-medium leading-relaxed text-slate-400">
+                Upload your work for instructor review. The lesson completes after your submission passes the required score.
               </p>
             </div>
           </div>

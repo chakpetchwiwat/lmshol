@@ -91,6 +91,7 @@ const normalizeReportData = (report = {}) => ({
   filters: Array.isArray(report.filters) ? report.filters : [],
   columns: Array.isArray(report.columns) ? report.columns : [],
   rows: Array.isArray(report.rows) ? report.rows : [],
+  sections: Array.isArray(report.sections) ? report.sections : [],
   emptyMessage: report.emptyMessage || 'ไม่พบข้อมูล',
   dashboardData: report.dashboardData || null,
   generatedAt: report.generatedAt || formatThaiDateTime(new Date(), true),
@@ -337,14 +338,33 @@ export const renderPrintReportMarkup = (report) => {
           : ''
       }
 
-      <section class="section">
-        <h2 class="section-title">รายละเอียดรายการ</h2>
-        ${renderTable({
-          columns: data.columns,
-          rows: data.rows,
-          emptyMessage: data.emptyMessage,
-        })}
-      </section>
+      ${
+        data.sections.length
+          ? data.sections
+              .map(
+                (section) => `
+                <section class="section">
+                  <h2 class="section-title">${escapeHtml(section.title || 'รายละเอียด')}</h2>
+                  ${renderTable({
+                    columns: section.columns || [],
+                    rows: section.rows || [],
+                    emptyMessage: section.emptyMessage || 'ไม่พบข้อมูล',
+                  })}
+                </section>
+              `
+              )
+              .join('')
+          : `
+            <section class="section">
+              <h2 class="section-title">รายละเอียดรายการ</h2>
+              ${renderTable({
+                columns: data.columns,
+                rows: data.rows,
+                emptyMessage: data.emptyMessage,
+              })}
+            </section>
+          `
+      }
     </main>
   `;
 };

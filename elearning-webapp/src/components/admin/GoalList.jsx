@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React from 'react';
 import { Calendar, FileText, Trash2, Archive, RotateCcw } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminTable from './AdminTable';
@@ -8,7 +8,7 @@ import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 
 const GoalList = ({ goals, columns, viewMode, onViewReport, onEditGoal, onDeleteGoal, onArchiveGoal, onRepublishGoal }) => {
 
-  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [openDropdownId, setOpenDropdownId] = React.useState(null);
   return (
     <div className="card">
       <AdminTable 

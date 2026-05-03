@@ -3,7 +3,7 @@ const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
 const ErrorResponse = require('../../utils/errorResponse');
 
-const SUPABASE_BUCKET = 'uploads';
+const SUPABASE_BUCKET = 'secure-documents';
 const DOCUMENT_SIGNED_URL_TTL_SECONDS = 90;
 const DOCUMENT_ACCESS_TOKEN_TTL_SECONDS = 120;
 const supabaseUrl = process.env.SUPABASE_URL;

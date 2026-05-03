@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+﻿import React from 'react';
 import { Bold, Eraser, ImagePlus, Italic, Link2, Palette, Underline } from 'lucide-react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -42,14 +42,14 @@ const RichTextEditor = ({
   imageUploading = false,
   minHeight = 280,
 }) => {
-  const colorInputId = useId();
-  const imageInputId = useId();
-  const imageInputRef = useRef(null);
-  const [, setToolbarVersion] = useState(0);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [isDragActive, setIsDragActive] = useState(false);
+  const colorInputId = React.useId();
+  const imageInputId = React.useId();
+  const imageInputRef = React.useRef(null);
+  const [, setToolbarVersion] = React.useState(0);
+  const [isUploadingImage, setIsUploadingImage] = React.useState(false);
+  const [isDragActive, setIsDragActive] = React.useState(false);
 
-  const normalizedValue = useMemo(
+  const normalizedValue = React.useMemo(
     () => normalizeLessonContentToHtml(value),
     [value],
   );
@@ -173,7 +173,7 @@ const RichTextEditor = ({
     },
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!editor) return undefined;
 
     const rerender = () => setToolbarVersion((current) => current + 1);
@@ -186,7 +186,7 @@ const RichTextEditor = ({
     };
   }, [editor]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!editor) return;
     const currentHtml = editor.getHTML();
     if (currentHtml === normalizedValue) return;

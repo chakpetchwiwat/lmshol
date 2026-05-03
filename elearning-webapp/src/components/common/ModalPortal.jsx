@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+﻿import React from 'react';
 import { createPortal } from 'react-dom';
 
 const ModalPortal = ({ children, isOpen = true, lockScroll = true }) => {
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isOpen || !lockScroll || typeof document === 'undefined') {
       return undefined;
     }

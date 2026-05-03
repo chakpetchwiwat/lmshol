@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Plus, Settings2, Sparkles } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -38,31 +38,31 @@ const formatDateForInput = (value) => {
 const UserManagement = () => {
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
-  const [users, setUsers] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [tiers, setTiers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [referenceLoading, setReferenceLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState(FILTER_VALUES.ALL);
-  const [selectedTier, setSelectedTier] = useState(FILTER_VALUES.ALL);
+  const [users, setUsers] = React.useState([]);
+  const [departments, setDepartments] = React.useState([]);
+  const [tiers, setTiers] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [referenceLoading, setReferenceLoading] = React.useState(true);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [selectedDepartment, setSelectedDepartment] = React.useState(FILTER_VALUES.ALL);
+  const [selectedTier, setSelectedTier] = React.useState(FILTER_VALUES.ALL);
 
-  const [showUserModal, setShowUserModal] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [formData, setFormData] = useState(getDefaultFormData());
+  const [showUserModal, setShowUserModal] = React.useState(false);
+  const [editingUser, setEditingUser] = React.useState(null);
+  const [formData, setFormData] = React.useState(getDefaultFormData());
 
-  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
-  const [showTierModal, setShowTierModal] = useState(false);
+  const [showDepartmentModal, setShowDepartmentModal] = React.useState(false);
+  const [showTierModal, setShowTierModal] = React.useState(false);
 
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [selectedUserDetail, setSelectedUserDetail] = useState(null);
+  const [showDetailModal, setShowDetailModal] = React.useState(false);
+  const [detailLoading, setDetailLoading] = React.useState(false);
+  const [selectedUserDetail, setSelectedUserDetail] = React.useState(null);
 
-  const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
+  const currentUser = React.useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const canEditUsers = canEditAdminUsers(currentUser);
   const isManagerView = !canEditUsers;
 
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = React.useCallback(async () => {
     try {
       const response = await adminAPI.getUsers();
       setUsers(response.data);
@@ -74,7 +74,7 @@ const UserManagement = () => {
     }
   }, [toast]);
 
-  const fetchReferenceData = useCallback(async () => {
+  const fetchReferenceData = React.useCallback(async () => {
     try {
       const requests = [
         adminAPI.getDepartments(),
@@ -90,7 +90,7 @@ const UserManagement = () => {
     }
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const bootstrap = async () => {
       await Promise.all([fetchUsers(), fetchReferenceData()]);
     };
@@ -231,7 +231,7 @@ const UserManagement = () => {
     }
   };
 
-  const filteredUsers = useMemo(() => {
+  const filteredUsers = React.useMemo(() => {
     const tierOrderMap = Object.fromEntries(tiers.map((t) => [t.id, t.order]));
     
     return users
@@ -262,7 +262,7 @@ const UserManagement = () => {
       });
   }, [searchTerm, selectedDepartment, selectedTier, users, tiers]);
 
-  const columns = useMemo(() => [
+  const columns = React.useMemo(() => [
     { label: 'ผู้ใช้งาน' },
     { label: 'Role ระบบ' },
     { label: 'แผนก' },

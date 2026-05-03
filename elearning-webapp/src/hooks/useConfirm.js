@@ -1,3 +1,4 @@
+﻿import React from 'react';
 import { useCallback, useRef, useState } from 'react';
 
 /**
@@ -17,8 +18,8 @@ import { useCallback, useRef, useState } from 'react';
  *   };
  */
 const useConfirm = () => {
-  const resolveRef = useRef(null);
-  const [state, setState] = useState({
+  const resolveRef = React.useRef(null);
+  const [state, setState] = React.useState({
     isOpen: false,
     title: '',
     message: '',
@@ -27,7 +28,7 @@ const useConfirm = () => {
     variant: 'danger',
   });
 
-  const confirm = useCallback(({ title, message, confirmLabel, cancelLabel, variant } = {}) => (
+  const confirm = React.useCallback(({ title, message, confirmLabel, cancelLabel, variant } = {}) => (
     new Promise((resolve) => {
       resolveRef.current = resolve;
       setState({
@@ -41,7 +42,7 @@ const useConfirm = () => {
     })
   ), []);
 
-  const closeDialog = useCallback((confirmed) => {
+  const closeDialog = React.useCallback((confirmed) => {
     resolveRef.current?.(confirmed);
     resolveRef.current = null;
     setState((prev) => ({ ...prev, isOpen: false }));

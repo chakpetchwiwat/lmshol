@@ -1,4 +1,5 @@
 const AdminService = require('../services/admin.service');
+const AssessmentService = require('../services/assessment.service');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
 const { REDEEM_STATUS } = require('../utils/constants/statuses');
@@ -156,7 +157,7 @@ const deleteInstructorPreset = asyncHandler(async (req, res) => {
 
 // COURSES
 const getAdminCourses = asyncHandler(async (req, res) => {
-  const courses = await AdminService.getAdminCourses();
+  const courses = await AdminService.getAdminCourses(req.user);
   res.json({ success: true, data: courses });
 });
 
@@ -355,6 +356,22 @@ const getCourseQuizAttempts = asyncHandler(async (req, res) => {
   res.json({ success: true, data: attempts });
 });
 
+// ASSESSMENTS
+const getAllAssessmentSubmissions = asyncHandler(async (req, res) => {
+  const startedAt = Date.now();
+  const submissions = await AssessmentService.listAllAssessmentSubmissions(req.user, req.query);
+  const durationMs = Date.now() - startedAt;
+  
+  appendServerTiming(res, 'admin-all-assessments', durationMs);
+  logAdminTiming('admin.all_assessments.completed', req, durationMs, {
+    rows: submissions?.length || 0,
+    courseId: req.query?.courseId || null,
+    status: req.query?.status || null
+  });
+  
+  res.json({ success: true, data: submissions });
+});
+
 module.exports = {
   getDashboardStats,
   getAdvancedAnalytics,
@@ -408,5 +425,6 @@ module.exports = {
   updateLesson,
   deleteLesson,
   reorderLessons,
-  getCourseQuizAttempts
+  getCourseQuizAttempts,
+  getAllAssessmentSubmissions
 };

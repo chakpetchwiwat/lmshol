@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React from 'react';
 import { Search, Clock, ArrowRight, BookOpen, PlayCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
@@ -8,11 +8,11 @@ import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const OngoingCourses = () => {
   const navigate = useNavigate();
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [courses, setCourses] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [searchQuery, setSearchQuery] = React.useState('');
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await userAPI.getCourses();
@@ -29,7 +29,7 @@ const OngoingCourses = () => {
     fetchData();
   }, []);
 
-  const filteredCourses = useMemo(() => {
+  const filteredCourses = React.useMemo(() => {
     if (!Array.isArray(courses)) return [];
     return courses.filter((course) =>
       course.title.toLowerCase().includes(searchQuery.toLowerCase())

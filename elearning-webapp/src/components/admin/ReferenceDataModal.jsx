@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React from 'react';
 import { Edit2, Plus, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
@@ -25,10 +25,10 @@ const ReferenceDataModal = ({
   ]
 }) => {
   const toast = useToast();
-  const [draftName, setDraftName] = useState('');
-  const [accessAdmin, setAccessAdmin] = useState(false);
-  const [draftType, setDraftType] = useState('FUNCTION');
-  const [editingItem, setEditingItem] = useState(null);
+  const [draftName, setDraftName] = React.useState('');
+  const [accessAdmin, setAccessAdmin] = React.useState(false);
+  const [draftType, setDraftType] = React.useState('FUNCTION');
+  const [editingItem, setEditingItem] = React.useState(null);
 
   const handleMove = async (index, direction) => {
     if (!onReorder) return;
@@ -46,7 +46,7 @@ const ReferenceDataModal = ({
   };
 
 
-  const submitLabel = useMemo(
+  const submitLabel = React.useMemo(
     () => (editingItem ? `บันทึกการแก้ไข` : `เพิ่ม${itemLabel}ใหม่`),
     [editingItem, itemLabel]
   );

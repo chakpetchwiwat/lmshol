@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React from 'react';
 import { X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
@@ -16,7 +16,7 @@ const UserModal = ({
   canEditRole = true,
 }) => {
   // Sync Role with Tier managerAccess
-  useEffect(() => {
+  React.useEffect(() => {
     // Protected: Don't sync for superadmins (they shouldn't be downgraded by changing tier)
     if (formData.role === 'admin') return;
 

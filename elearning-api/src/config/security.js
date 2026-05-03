@@ -16,14 +16,24 @@ const getAllowedOrigins = (
 ) => {
     const configuredOrigins = splitCsv(allowedOriginsValue);
 
+    // Always include local origins for development and debugging
+    const defaultOrigins = [
+        ...SECURITY_DEFAULTS.LOCAL_ALLOWED_ORIGINS,
+        'https://lms-scaleup.vercel.app' // Hardcoded fallback for current deployment to prevent lockout
+    ];
+
     if (nodeEnv !== 'production') {
         return toUniqueList([
             ...configuredOrigins,
-            ...SECURITY_DEFAULTS.LOCAL_ALLOWED_ORIGINS
+            ...defaultOrigins
         ]);
     }
 
-    return toUniqueList(configuredOrigins);
+    // In production, prioritize configured origins but allow the current deployment as safety net
+    return toUniqueList([
+        ...configuredOrigins,
+        'https://lms-scaleup.vercel.app'
+    ]);
 };
 
 const isOriginAllowed = (origin, allowedOrigins) => {
@@ -177,13 +187,18 @@ const getSecurityConfig = (env = process.env) => ({
     ) * 1024 * 1024,
     redis: {
         enabled: parseBoolean(env.REDIS_ENABLED, false),
-        url: env.REDIS_URL || 'redis://localhost:6379'
+        url: env.REDIS_URL || (env.NODE_ENV === 'production' ? undefined : 'redis://localhost:6379')
     }
 });
 
 let redisClient = null;
 const getRedisClient = async (config = getSecurityConfig().redis) => {
     if (!config.enabled) return null;
+    if (!config.url) {
+        console.warn('[Redis] Connection URL is missing. Redis features will be disabled.');
+        return null;
+    }
+    
     if (redisClient) return redisClient;
 
     try {
@@ -193,6 +208,7 @@ const getRedisClient = async (config = getSecurityConfig().redis) => {
         return redisClient;
     } catch (err) {
         console.error('Failed to connect to Redis', err);
+        redisClient = null; // Ensure we don't keep a broken client
         return null;
     }
 };

@@ -85,6 +85,47 @@ test('serializeCourseDetail preserves lesson document and quiz metadata contract
     assert.equal(serialized.lessons[1].questionCount, 3);
 });
 
+test('serializeCourseDetail returns staff and uses primary CourseStaff instructor before legacy instructor', () => {
+    const course = {
+        ...createCourse(),
+        instructorName: 'Legacy Instructor',
+        staff: [{
+            id: 'staff-1',
+            userId: 'user-1',
+            role: 'instructor',
+            isPrimary: true,
+            user: {
+                id: 'user-1',
+                name: 'Primary Instructor'
+            }
+        }]
+    };
+
+    const serialized = serializeCourseDetail(course);
+
+    assert.equal(serialized.instructorName, 'Primary Instructor');
+    assert.deepEqual(serialized.staff, [{
+        id: 'staff-1',
+        userId: 'user-1',
+        name: 'Primary Instructor',
+        role: 'instructor',
+        isPrimary: true
+    }]);
+});
+
+test('serializeCourseDetail falls back to legacy instructor when no primary CourseStaff instructor exists', () => {
+    const course = {
+        ...createCourse(),
+        instructorName: 'Legacy Instructor',
+        staff: []
+    };
+
+    const serialized = serializeCourseDetail(course);
+
+    assert.equal(serialized.instructorName, 'Legacy Instructor');
+    assert.deepEqual(serialized.staff, []);
+});
+
 test('serializeAnnouncementSummary preserves announcement list contract', () => {
     const serialized = serializeAnnouncementSummary({
         id: 'announcement-1',
