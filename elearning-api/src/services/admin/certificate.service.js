@@ -172,11 +172,22 @@ async function issueCertificate({ courseId, userId, issuedById = null, manual = 
  */
 async function reissueCertificate({ certificateId, requestedById }) {
   const cert = await prisma.certificate.findUnique({
-    where: { id: certificateId }
+    where: { id: certificateId },
+    include: {
+      course: {
+        include: {
+          certificateSetting: true
+        }
+      }
+    }
   });
 
   if (!cert) throw new Error('Certificate not found');
   if (cert.status === 'REVOKED') throw new Error('Cannot reissue a revoked certificate');
+
+  const signer = cert.course?.certificateSetting
+    ? await prisma.$transaction((tx) => resolveCertificateSigner(tx, cert.courseId, cert.course.certificateSetting))
+    : cert.metadata?.signer;
 
   return await prisma.certificate.update({
     where: { id: certificateId },
@@ -185,6 +196,7 @@ async function reissueCertificate({ certificateId, requestedById }) {
       pdfUrl: null,
       metadata: {
         ...(cert.metadata || {}),
+        signer,
         reissuedAt: new Date().toISOString(),
         reissuedById: requestedById
       }
@@ -441,6 +453,9 @@ async function generateCertificatePdfAsync(certificateId) {
         certificateNo: cert.certificateNo,
         learnerName: cert.metadata?.learner?.name || cert.user?.name,
         courseTitle: cert.metadata?.course?.title || cert.course?.title,
+        signerName: cert.metadata?.signer?.name,
+        signerTitle: cert.metadata?.signer?.title,
+        signatureImageUrl: cert.metadata?.signer?.signatureImageUrl,
         issuedAt: cert.metadata?.issuedAt
           ? new Date(cert.metadata.issuedAt).toISOString().slice(0, 10)
           : new Date(cert.issuedAt).toISOString().slice(0, 10),

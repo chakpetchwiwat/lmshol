@@ -35,7 +35,8 @@ const updateProfile = async (userId, data) => {
             data: dataToUpdate,
             include: {
                 departmentRef: true,
-                tier: true
+                tier: true,
+                courseStaff: { take: 1 }
             }
         });
 
@@ -46,7 +47,8 @@ const updateProfile = async (userId, data) => {
         where: { id: userId },
         include: {
             departmentRef: true,
-            tier: true
+            tier: true,
+            courseStaff: { take: 1 }
         }
     });
 

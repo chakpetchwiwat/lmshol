@@ -27,6 +27,18 @@ async function loadThaiFont() {
   }
 }
 
+async function loadImageBuffer(imageUrl) {
+  if (!imageUrl) return null;
+
+  try {
+    const response = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 10000 });
+    return Buffer.from(response.data);
+  } catch (error) {
+    console.warn('[CertificatePdf] Failed to load signature image:', error.message);
+    return null;
+  }
+}
+
 /**
  * Helper to draw a border with optional accent color
  */
@@ -34,6 +46,36 @@ const drawBorder = (doc, width, height, color, thickness = 2, padding = 20) => {
   doc.rect(padding, padding, width - (padding * 2), height - (padding * 2))
      .lineWidth(thickness)
      .stroke(color);
+};
+
+const drawSignature = (doc, data, x, y, width, align = 'center') => {
+  const signerName = data.signerName || '';
+  const signerTitle = data.signerTitle || '';
+  const signatureBuffer = data.signatureImageBuffer;
+  const signatureHeight = 58;
+
+  if (signatureBuffer) {
+    try {
+      doc.image(signatureBuffer, x, y, {
+        fit: [width, signatureHeight],
+        align,
+        valign: 'center'
+      });
+    } catch (error) {
+      console.warn('[CertificatePdf] Failed to draw signature image:', error.message);
+      doc.moveTo(x + width * 0.18, y + signatureHeight).lineTo(x + width * 0.82, y + signatureHeight).lineWidth(0.7).stroke('#9ca3af');
+    }
+  } else {
+    doc.moveTo(x + width * 0.18, y + signatureHeight).lineTo(x + width * 0.82, y + signatureHeight).lineWidth(0.7).stroke('#9ca3af');
+  }
+
+  doc.fillColor('#111827')
+     .fontSize(12)
+     .text(signerName || 'LMS Administrator', x, y + signatureHeight + 8, { width, align });
+
+  doc.fillColor('#6b7280')
+     .fontSize(9)
+     .text(signerTitle || 'Authorized Signer', x, y + signatureHeight + 24, { width, align });
 };
 
 /**
@@ -66,6 +108,8 @@ const drawClassic = (doc, data, width, height) => {
   doc.fillColor('#1a3a5a')
      .fontSize(28)
      .text(data.courseTitle || 'Course Title', 0, 340, { align: 'center', width });
+
+  drawSignature(doc, data, width - 280, height - 165, 180, 'center');
 };
 
 /**
@@ -102,6 +146,8 @@ const drawModern = (doc, data, width, height) => {
   doc.fillColor('#1f2937')
      .fontSize(24)
      .text(data.courseTitle || 'Course Title', contentX, 340, { width: contentWidth });
+
+  drawSignature(doc, data, width - 280, height - 165, 190, 'center');
 };
 
 /**
@@ -133,6 +179,8 @@ const drawMinimal = (doc, data, width, height) => {
   
   // Thin decorative line
   doc.moveTo(width / 4, 380).lineTo(width * 3 / 4, 380).lineWidth(0.5).stroke('#e5e7eb');
+
+  drawSignature(doc, data, (width - 220) / 2, height - 165, 220, 'center');
 };
 
 /**
@@ -142,6 +190,11 @@ async function generatePdfBuffer(_html, options = {}) {
   const data = options.fallbackData || {};
   const fontBuffer = await loadThaiFont();
   const template = getTemplateById(data.templateId);
+  const signatureImageBuffer = await loadImageBuffer(data.signatureImageUrl);
+  const renderData = {
+    ...data,
+    signatureImageBuffer
+  };
 
   return new Promise((resolve, reject) => {
     try {
@@ -163,9 +216,9 @@ async function generatePdfBuffer(_html, options = {}) {
 
       // Draw Template Layout
       switch (template.layout) {
-        case 'modern': drawModern(doc, data, width, height); break;
-        case 'minimal': drawMinimal(doc, data, width, height); break;
-        default: drawClassic(doc, data, width, height); break;
+        case 'modern': drawModern(doc, renderData, width, height); break;
+        case 'minimal': drawMinimal(doc, renderData, width, height); break;
+        default: drawClassic(doc, renderData, width, height); break;
       }
 
       // Shared Footer Details
