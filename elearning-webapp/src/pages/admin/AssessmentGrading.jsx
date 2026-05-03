@@ -260,7 +260,7 @@ const AssessmentGrading = () => {
                         {sub.status && (
                           <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black border ${STATUS_CONFIG[sub.status]?.color}`}>
                             {STATUS_CONFIG[sub.status]?.icon}
-                            {STATUS_CONFIG[sub.status]?.label.toUpperCase()}
+                            {STATUS_CONFIG[sub.status]?.label?.toUpperCase() || sub.status}
                           </div>
                         )}
                       </td>

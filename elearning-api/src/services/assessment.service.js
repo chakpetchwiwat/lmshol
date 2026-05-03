@@ -3,7 +3,7 @@ const supabase = require('../config/supabase');
 const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
 const { ASSESSMENT_SUBMISSION_STATUS } = require('../utils/constants/statuses');
 const { completeLessonAndRefreshCourse } = require('./user/user.progress');
-const { canManageCourse, COURSE_MANAGEMENT_ACCESS, isAdmin } = require('../utils/coursePermissions');
+const { canManageCourse, COURSE_MANAGEMENT_ACCESS, isAdmin, isManager } = require('../utils/coursePermissions');
 
 const clampNumber = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -268,6 +268,7 @@ const listAllAssessmentSubmissions = async (actor, filters = {}) => {
 
   // If not full admin, restrict to courses they manage
   if (!isUserFullAdmin) {
+    const isUserManager = isManager(actor);
     const managedCourses = await prisma.courseStaff.findMany({
       where: {
         userId,
@@ -277,8 +278,33 @@ const listAllAssessmentSubmissions = async (actor, filters = {}) => {
     });
 
     const managedCourseIds = managedCourses.map(c => c.courseId);
+
+    // If user is a manager, also include courses from their department
+    if (isUserManager && actor?.departmentId) {
+      const departmentCourses = await prisma.course.findMany({
+        where: {
+          OR: [
+            { visibleToAll: true },
+            {
+              departmentAccess: {
+                some: {
+                  departmentId: actor.departmentId
+                }
+              }
+            }
+          ]
+        },
+        select: { id: true }
+      });
+
+      departmentCourses.forEach(c => {
+        if (!managedCourseIds.includes(c.id)) {
+          managedCourseIds.push(c.id);
+        }
+      });
+    }
     
-    // If instructor has no courses, they see nothing
+    // If instructor/manager has no courses, they see nothing
     if (managedCourseIds.length === 0) {
       return [];
     }

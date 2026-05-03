@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Award,
   CalendarDays,
   CheckCircle2,
   Clock3,
