@@ -280,20 +280,24 @@ const listAllAssessmentSubmissions = async (actor, filters = {}) => {
     const managedCourseIds = managedCourses.map(c => c.courseId);
 
     // If user is a manager, also include courses from their department
-    if (isUserManager && actor?.departmentId) {
-      const departmentCourses = await prisma.course.findMany({
-        where: {
-          OR: [
-            { visibleToAll: true },
-            {
-              departmentAccess: {
-                some: {
-                  departmentId: actor.departmentId
-                }
-              }
+    if (isUserManager) {
+      const orConditions = [
+        { visibleToAll: true },
+        { departmentAccess: { none: {} } }
+      ];
+
+      if (actor?.departmentId) {
+        orConditions.push({
+          departmentAccess: {
+            some: {
+              departmentId: actor.departmentId
             }
-          ]
-        },
+          }
+        });
+      }
+
+      const departmentCourses = await prisma.course.findMany({
+        where: { OR: orConditions },
         select: { id: true }
       });
 
