@@ -75,6 +75,70 @@ async function resolveCertificateSigner(tx, courseId, setting) {
   return snapshot;
 }
 
+async function resolveInstructorSigner(tx, courseId, slot = {}) {
+  if (slot.instructorPresetId) {
+    const preset = await tx.instructorPreset.findUnique({
+      where: { id: slot.instructorPresetId }
+    });
+
+    if (preset) {
+      return {
+        type: 'INSTRUCTOR',
+        label: slot.label || 'Instructor signature',
+        name: slot.name || preset.name,
+        title: slot.title || preset.signatureTitle || preset.role || 'Instructor',
+        signatureImageUrl: slot.signatureImageUrl || preset.signatureImageUrl || null
+      };
+    }
+  }
+
+  const legacySigner = await resolveCertificateSigner(tx, courseId, {
+    signatureType: 'INSTRUCTOR'
+  });
+
+  return {
+    type: 'INSTRUCTOR',
+    label: slot.label || 'Instructor signature',
+    name: slot.name || legacySigner?.name || 'Instructor',
+    title: slot.title || legacySigner?.title || 'Instructor',
+    signatureImageUrl: slot.signatureImageUrl || legacySigner?.signatureImageUrl || null
+  };
+}
+
+async function resolveCertificateSignatureSlots(tx, courseId, setting) {
+  const configuredSlots = Array.isArray(setting?.signatureSlots)
+    ? setting.signatureSlots.filter((slot) => slot && slot.enabled !== false).slice(0, 2)
+    : [];
+
+  if (configuredSlots.length === 0) {
+    const signer = await resolveCertificateSigner(tx, courseId, setting);
+    return signer ? [{ ...signer, label: 'Signature' }] : [];
+  }
+
+  const signers = [];
+
+  for (const slot of configuredSlots) {
+    if (slot.type === 'INSTRUCTOR') {
+      signers.push(await resolveInstructorSigner(tx, courseId, slot));
+      continue;
+    }
+
+    if (slot.type === 'CUSTOM' && !slot.name) {
+      throw new Error(`${slot.label || 'Signature'} name is required`);
+    }
+
+    signers.push({
+      type: slot.type || 'ORGANIZATION',
+      label: slot.label || 'Signature',
+      name: slot.name || process.env.ORGANIZATION_SIGNER_NAME || 'เธเธนเนเธญเธณเธเธงเธขเธเธฒเธฃเธชเธ–เธฒเธเธฑเธ',
+      title: slot.title || process.env.ORGANIZATION_SIGNER_TITLE || 'Director',
+      signatureImageUrl: slot.signatureImageUrl || null
+    });
+  }
+
+  return signers;
+}
+
 /**
  * Main service to issue a certificate
  */
@@ -131,8 +195,9 @@ async function issueCertificate({ courseId, userId, issuedById = null, manual = 
     const certificateId = crypto.randomUUID();
     const verificationToken = crypto.randomUUID();
     
-    // Resolve signer BEFORE generating certificate number to avoid wasting a number if signer resolution fails
+    // Resolve signers BEFORE generating certificate number to avoid wasting a number if signer resolution fails
     const signer = await resolveCertificateSigner(tx, courseId, setting);
+    const signers = await resolveCertificateSignatureSlots(tx, courseId, setting);
 
     // Generate number as the LAST step before creation
     const certificateNo = await generateCertificateNo(tx, course);
@@ -152,7 +217,8 @@ async function issueCertificate({ courseId, userId, issuedById = null, manual = 
           version: 1,
           learner: { id: user.id, name: user.name },
           course: { id: course.id, title: course.title },
-          signer: signer,
+          signer,
+          signers,
           template: { id: setting.template.id, name: setting.template.name },
           issue: { mode: setting.issueMode, manual },
           issuedAt: new Date().toISOString()
@@ -188,6 +254,9 @@ async function reissueCertificate({ certificateId, requestedById }) {
   const signer = cert.course?.certificateSetting
     ? await prisma.$transaction((tx) => resolveCertificateSigner(tx, cert.courseId, cert.course.certificateSetting))
     : cert.metadata?.signer;
+  const signers = cert.course?.certificateSetting
+    ? await prisma.$transaction((tx) => resolveCertificateSignatureSlots(tx, cert.courseId, cert.course.certificateSetting))
+    : cert.metadata?.signers;
 
   return await prisma.certificate.update({
     where: { id: certificateId },
@@ -197,6 +266,7 @@ async function reissueCertificate({ certificateId, requestedById }) {
       metadata: {
         ...(cert.metadata || {}),
         signer,
+        signers,
         reissuedAt: new Date().toISOString(),
         reissuedById: requestedById
       }
@@ -456,6 +526,7 @@ async function generateCertificatePdfAsync(certificateId) {
         signerName: cert.metadata?.signer?.name,
         signerTitle: cert.metadata?.signer?.title,
         signatureImageUrl: cert.metadata?.signer?.signatureImageUrl,
+        signers: cert.metadata?.signers || (cert.metadata?.signer ? [cert.metadata.signer] : []),
         issuedAt: cert.metadata?.issuedAt
           ? new Date(cert.metadata.issuedAt).toISOString().slice(0, 10)
           : new Date(cert.issuedAt).toISOString().slice(0, 10),
@@ -585,6 +656,7 @@ module.exports = {
   verifyCertificate,
   generateCertificateNo,
   resolveCertificateSigner,
+  resolveCertificateSignatureSlots,
   generateCertificatePdfAsync,
   createCertificateSignedUrl,
   retryCertificatePdfGeneration,

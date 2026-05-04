@@ -51,13 +51,28 @@ const buildCourseMutationPayload = async (tx, input) => {
 
     const certificateEnabled = input.certificateEnabled !== undefined ? Boolean(input.certificateEnabled) : undefined;
     const certificatePassingScore = input.certificatePassingScore !== undefined ? parseInteger(input.certificatePassingScore, 80) : undefined;
+    const certificateTemplateId = normalizeNullableId(input.certificateTemplateId);
+    const certificateSignatureSlots = Array.isArray(input.certificateSignatureSlots)
+        ? input.certificateSignatureSlots.slice(0, 2).map((slot, index) => ({
+            id: slot.id || `signature-${index + 1}`,
+            label: slot.label || `Signature ${index + 1}`,
+            type: slot.type || (index === 0 ? 'ORGANIZATION' : 'INSTRUCTOR'),
+            enabled: slot.enabled !== false,
+            instructorPresetId: slot.instructorPresetId || null,
+            name: slot.name || null,
+            title: slot.title || null,
+            signatureImageUrl: slot.signatureImageUrl || null
+        }))
+        : undefined;
 
     return {
         data,
         visibleDepartmentIds,
         visibleTierIds,
         certificateEnabled,
-        certificatePassingScore
+        certificatePassingScore,
+        certificateTemplateId,
+        certificateSignatureSlots
     };
 };
 
@@ -119,12 +134,14 @@ const getAdminCourses = async (user) => {
 };
 
 const createCourse = async (input) => prisma.$transaction(async (tx) => {
-    const { data, visibleDepartmentIds, visibleTierIds, certificateEnabled, certificatePassingScore } = await buildCourseMutationPayload(tx, input);
+    const { data, visibleDepartmentIds, visibleTierIds, certificateEnabled, certificatePassingScore, certificateTemplateId, certificateSignatureSlots } = await buildCourseMutationPayload(tx, input);
     const course = await tx.course.create({ data });
     await saveCourseVisibility(tx, course.id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
 
     if (certificateEnabled !== undefined) {
-        const defaultTemplate = await tx.certificateTemplate.findFirst({ where: { isDefault: true } });
+        const defaultTemplate = certificateTemplateId
+            ? await tx.certificateTemplate.findUnique({ where: { id: certificateTemplateId } })
+            : await tx.certificateTemplate.findFirst({ where: { isDefault: true } });
         if (defaultTemplate) {
             await tx.courseCertificateSetting.upsert({
                 where: { courseId: course.id },
@@ -133,12 +150,15 @@ const createCourse = async (input) => prisma.$transaction(async (tx) => {
                     templateId: defaultTemplate.id,
                     enabled: certificateEnabled,
                     issueMode: 'AUTOMATIC',
-                    passingScore: certificatePassingScore || 80
+                    passingScore: certificatePassingScore || 80,
+                    signatureSlots: certificateSignatureSlots
                 },
                 update: {
+                    templateId: defaultTemplate.id,
                     enabled: certificateEnabled,
                     issueMode: 'AUTOMATIC',
-                    passingScore: certificatePassingScore || 80
+                    passingScore: certificatePassingScore || 80,
+                    signatureSlots: certificateSignatureSlots
                 }
             });
         }
@@ -154,12 +174,14 @@ const createCourse = async (input) => prisma.$transaction(async (tx) => {
 });
 
 const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
-    const { data, visibleDepartmentIds, visibleTierIds, certificateEnabled, certificatePassingScore } = await buildCourseMutationPayload(tx, input);
+    const { data, visibleDepartmentIds, visibleTierIds, certificateEnabled, certificatePassingScore, certificateTemplateId, certificateSignatureSlots } = await buildCourseMutationPayload(tx, input);
     await tx.course.update({ where: { id }, data });
     await saveCourseVisibility(tx, id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
 
     if (certificateEnabled !== undefined) {
-        const defaultTemplate = await tx.certificateTemplate.findFirst({ where: { isDefault: true } });
+        const defaultTemplate = certificateTemplateId
+            ? await tx.certificateTemplate.findUnique({ where: { id: certificateTemplateId } })
+            : await tx.certificateTemplate.findFirst({ where: { isDefault: true } });
         if (defaultTemplate) {
             await tx.courseCertificateSetting.upsert({
                 where: { courseId: id },
@@ -168,12 +190,15 @@ const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
                     templateId: defaultTemplate.id,
                     enabled: certificateEnabled,
                     issueMode: 'AUTOMATIC',
-                    passingScore: certificatePassingScore || 80
+                    passingScore: certificatePassingScore || 80,
+                    signatureSlots: certificateSignatureSlots
                 },
                 update: {
+                    templateId: defaultTemplate.id,
                     enabled: certificateEnabled,
                     issueMode: 'AUTOMATIC',
-                    passingScore: certificatePassingScore || 80
+                    passingScore: certificatePassingScore || 80,
+                    signatureSlots: certificateSignatureSlots
                 }
             });
         }

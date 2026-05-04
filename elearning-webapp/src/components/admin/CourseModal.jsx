@@ -212,7 +212,7 @@ const CourseModal = ({
                 uploading={uploading}
                 imageInputRef={imageInputRef}
                 onClose={onClose}
-                readOnly={!permissions.canEditSettings}
+                readOnly={!permissions.canEditSettings && !permissions.canManageCertificates}
               />
             ) : activeTab === 'content' ? (
               <CourseContentEditor 

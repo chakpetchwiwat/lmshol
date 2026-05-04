@@ -40,6 +40,30 @@ const getDefaultCourseForm = () => ({
   isTemporary: false,
   expiredAt: '',
   status: ENTITY_STATUS.DRAFT,
+  certificateEnabled: false,
+  certificatePassingScore: 80,
+  certificateTemplateId: 'CLASSIC_001',
+  certificateSignatureSlots: [
+    {
+      id: 'organization',
+      label: 'Signature 1',
+      type: 'ORGANIZATION',
+      enabled: true,
+      name: '',
+      title: 'Organization Signature',
+      signatureImageUrl: '',
+    },
+    {
+      id: 'instructor',
+      label: 'Signature 2',
+      type: 'INSTRUCTOR',
+      enabled: true,
+      instructorPresetId: '',
+      name: '',
+      title: '',
+      signatureImageUrl: '',
+    },
+  ],
 });
 
 const getDefaultLessonForm = (order = 0) => ({
@@ -165,6 +189,8 @@ const CourseManagement = () => {
       status: course.status || ENTITY_STATUS.DRAFT,
       certificateEnabled: course.certificateEnabled ?? false,
       certificatePassingScore: course.certificatePassingScore ?? 80,
+      certificateTemplateId: course.certificateTemplateId || 'CLASSIC_001',
+      certificateSignatureSlots: course.certificateSignatureSlots || getDefaultCourseForm().certificateSignatureSlots,
     });
     setActiveTab('basic');
     setShowModal(true);

@@ -17,7 +17,9 @@ const mapCourseRecord = (course) => {
         visibleTiers,
         visibleTierIds: visibleTiers.map((t) => t.id),
         certificateEnabled: rest.certificateSetting?.enabled || false,
-        certificatePassingScore: rest.certificateSetting?.passingScore || 80
+        certificatePassingScore: rest.certificateSetting?.passingScore || 80,
+        certificateTemplateId: rest.certificateSetting?.templateId || '',
+        certificateSignatureSlots: rest.certificateSetting?.signatureSlots || null
     };
 };
 

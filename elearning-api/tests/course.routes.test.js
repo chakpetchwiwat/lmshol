@@ -23,7 +23,10 @@ const loadRoutes = () => {
       getCourseStaff: noop,
       assignCourseStaff: noop,
       updateCourseStaff: noop,
-      deleteCourseStaff: noop
+      deleteCourseStaff: noop,
+      getAssessmentSubmissions: noop,
+      gradeAssessmentSubmission: noop,
+      getAssessmentSubmissionDownloadUrl: noop
     }
   };
 

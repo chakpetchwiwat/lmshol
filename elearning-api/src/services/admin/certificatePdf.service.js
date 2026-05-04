@@ -78,6 +78,27 @@ const drawSignature = (doc, data, x, y, width, align = 'center') => {
      .text(signerTitle || 'Authorized Signer', x, y + signatureHeight + 24, { width, align });
 };
 
+const drawSignatureGroup = (doc, data, y, width, height, mode = 'right') => {
+  const signers = Array.isArray(data.signers) && data.signers.length > 0
+    ? data.signers.slice(0, 2)
+    : [{
+        name: data.signerName,
+        title: data.signerTitle,
+        signatureImageBuffer: data.signatureImageBuffer
+      }];
+
+  if (signers.length === 1) {
+    const x = mode === 'center' ? (width - 220) / 2 : width - 280;
+    drawSignature(doc, { ...data, ...signers[0] }, x, y, mode === 'center' ? 220 : 190, 'center');
+    return;
+  }
+
+  const leftX = mode === 'modern' ? 220 : 150;
+  const rightX = width - 330;
+  drawSignature(doc, { ...data, ...signers[0] }, leftX, y, 190, 'center');
+  drawSignature(doc, { ...data, ...signers[1] }, rightX, y, 190, 'center');
+};
+
 /**
  * Template: CLASSIC
  */
@@ -109,7 +130,7 @@ const drawClassic = (doc, data, width, height) => {
      .fontSize(28)
      .text(data.courseTitle || 'Course Title', 0, 340, { align: 'center', width });
 
-  drawSignature(doc, data, width - 280, height - 165, 180, 'center');
+  drawSignatureGroup(doc, data, height - 165, width, height);
 };
 
 /**
@@ -147,7 +168,7 @@ const drawModern = (doc, data, width, height) => {
      .fontSize(24)
      .text(data.courseTitle || 'Course Title', contentX, 340, { width: contentWidth });
 
-  drawSignature(doc, data, width - 280, height - 165, 190, 'center');
+  drawSignatureGroup(doc, data, height - 165, width, height, 'modern');
 };
 
 /**
@@ -180,7 +201,7 @@ const drawMinimal = (doc, data, width, height) => {
   // Thin decorative line
   doc.moveTo(width / 4, 380).lineTo(width * 3 / 4, 380).lineWidth(0.5).stroke('#e5e7eb');
 
-  drawSignature(doc, data, (width - 220) / 2, height - 165, 220, 'center');
+  drawSignatureGroup(doc, data, height - 165, width, height, 'center');
 };
 
 /**
@@ -191,9 +212,18 @@ async function generatePdfBuffer(_html, options = {}) {
   const fontBuffer = await loadThaiFont();
   const template = getTemplateById(data.templateId);
   const signatureImageBuffer = await loadImageBuffer(data.signatureImageUrl);
+  const signers = Array.isArray(data.signers)
+    ? await Promise.all(data.signers.slice(0, 2).map(async (signer) => ({
+        ...signer,
+        signerName: signer.name,
+        signerTitle: signer.title,
+        signatureImageBuffer: await loadImageBuffer(signer.signatureImageUrl)
+      })))
+    : [];
   const renderData = {
     ...data,
-    signatureImageBuffer
+    signatureImageBuffer,
+    signers
   };
 
   return new Promise((resolve, reject) => {

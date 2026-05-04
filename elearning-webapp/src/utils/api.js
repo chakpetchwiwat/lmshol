@@ -257,6 +257,13 @@ export const adminAPI = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
+  uploadSignatureFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/signature', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
 
   // System Settings
   getSettings: () => api.get('/settings'),
