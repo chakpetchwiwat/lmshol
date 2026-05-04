@@ -11,6 +11,7 @@
     "test:security": "node tests/security.config.test.js && node tests/loginProtection.test.js",
     "test:refactor-contracts": "node scripts/compare_refactor_contracts.js",
     "certificates:regenerate": "node scripts/regenerate_certificates_by_no.js",
+    "db:migrate:deploy": "prisma migrate deploy",
     "seed": "tsx prisma/seed.ts",
     "seed:demo": "tsx prisma/seed-demo.ts",
     "postinstall": "prisma generate"
