@@ -194,6 +194,10 @@ export const adminAPI = {
   updateInstructorPreset: (id, data) => api.put(`/admin/instructor-presets/${id}`, data),
   deleteInstructorPreset: (id) => api.delete(`/admin/instructor-presets/${id}`),
 
+  getOrganizationPresets: () => api.get('/admin/organization-presets'),
+  createOrganizationPreset: (data) => api.post('/admin/organization-presets', data),
+  updateOrganizationPreset: (id, data) => api.put(`/admin/organization-presets/${id}`, data),
+  deleteOrganizationPreset: (id) => api.delete(`/admin/organization-presets/${id}`),
 
   getCourses: () => api.get('/admin/courses'),
   createCourse: (data) => api.post('/admin/courses', data),

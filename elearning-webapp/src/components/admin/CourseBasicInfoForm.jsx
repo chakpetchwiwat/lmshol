@@ -16,6 +16,7 @@ const CourseBasicInfoForm = ({
   setCourseForm,
   categories,
   instructorPresets,
+  organizationPresets = [],
   departments,
   tiers,
   onSaveCourse,
@@ -30,8 +31,8 @@ const CourseBasicInfoForm = ({
   const signatureSlots = Array.isArray(courseForm.certificateSignatureSlots) && courseForm.certificateSignatureSlots.length > 0
     ? courseForm.certificateSignatureSlots
     : [
-        { id: 'organization', label: 'Signature 1', type: 'ORGANIZATION', enabled: true, name: '', title: 'Organization Signature', signatureImageUrl: '' },
-        { id: 'instructor', label: 'Signature 2', type: 'INSTRUCTOR', enabled: true, instructorPresetId: '', name: '', title: '', signatureImageUrl: '' },
+        { id: 'organization', label: 'Signature 1', type: 'ORGANIZATION', enabled: true, organizationPresetId: '', name: '', title: '', signatureImageUrl: '', stampImageUrl: '' },
+        { id: 'instructor', label: 'Signature 2', type: 'INSTRUCTOR', enabled: true, name: '', title: '', signatureImageUrl: '' },
       ];
 
   const updateSignatureSlot = (index, changes) => {
@@ -580,13 +581,12 @@ const CourseBasicInfoForm = ({
                                   <button
                                     type="button"
                                     onClick={() => {
-                                      const preset = instructorPresets.find((item) => item.id === courseForm.instructorPresetId) || instructorPresets[0];
                                       updateSignatureSlot(index, {
                                         type: 'INSTRUCTOR',
-                                        instructorPresetId: preset?.id || '',
-                                        name: preset?.name || courseForm.instructorName || '',
-                                        title: preset?.signatureTitle || preset?.role || courseForm.instructorRole || '',
-                                        signatureImageUrl: preset?.signatureImageUrl || '',
+                                        instructorPresetId: '',
+                                        name: '',
+                                        title: 'Instructor',
+                                        signatureImageUrl: '',
                                       });
                                     }}
                                     className={`rounded-xl border px-3 py-2 text-xs font-black transition-all ${slot.type === 'INSTRUCTOR' ? 'border-indigo-300 bg-white text-indigo-700 shadow-sm' : 'border-slate-200 bg-white/60 text-slate-500 hover:bg-white'}`}
@@ -595,30 +595,28 @@ const CourseBasicInfoForm = ({
                                   </button>
                                 </div>
 
-                                {slot.type === 'INSTRUCTOR' && (
+                                {slot.type === 'ORGANIZATION' && (
                                   <div>
-                                    <label className="mb-1.5 block text-xs font-black text-slate-500">วิทยากร preset</label>
+                                    <label className="mb-1.5 block text-xs font-black text-slate-500">เลือกพรีเซ็ตหน่วยงาน</label>
                                     <select
-                                      className="form-input w-full bg-white"
-                                      value={slot.instructorPresetId || ''}
+                                      className="form-input w-full bg-white text-sm"
+                                      value={slot.organizationPresetId || ''}
                                       onChange={(event) => {
-                                        const preset = instructorPresets.find((item) => item.id === event.target.value);
+                                        const preset = organizationPresets.find((item) => item.id === event.target.value);
                                         updateSignatureSlot(index, {
-                                          instructorPresetId: event.target.value,
+                                          organizationPresetId: event.target.value,
                                           name: preset?.name || '',
-                                          title: preset?.signatureTitle || preset?.role || '',
+                                          title: preset?.signatureTitle || '',
                                           signatureImageUrl: preset?.signatureImageUrl || '',
+                                          stampImageUrl: preset?.stampImageUrl || '',
                                         });
                                       }}
                                     >
-                                      <option value="">ใช้วิทยากรหลักของคอร์ส</option>
-                                      {instructorPresets.map((preset) => (
-                                        <option key={preset.id} value={preset.id}>{preset.name}</option>
+                                      <option value="">-- ไม่ใช้พรีเซ็ต (ระบุเอง) --</option>
+                                      {organizationPresets.map((p) => (
+                                        <option key={p.id} value={p.id}>{p.name}</option>
                                       ))}
                                     </select>
-                                    {selectedPreset?.signatureImageUrl && (
-                                      <p className="mt-1 text-[11px] font-bold text-emerald-600">Preset นี้มีลายเซ็นพร้อมใช้</p>
-                                    )}
                                   </div>
                                 )}
 

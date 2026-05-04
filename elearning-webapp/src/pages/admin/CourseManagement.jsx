@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Sparkles } from 'lucide-react';
+import { Plus, Sparkles, Building2 } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { toLocalInputValue } from '../../utils/dateUtils';
 import { compressImage } from '../../utils/imageUtils';
@@ -12,6 +12,7 @@ import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
 import CategoryManagementModal from '../../components/admin/CategoryManagementModal';
 import InstructorPresetModal from '../../components/admin/InstructorPresetModal';
+import OrganizationPresetModal from '../../components/admin/OrganizationPresetModal';
 import CourseFilters from '../../components/admin/CourseFilters';
 import CourseTable from '../../components/admin/CourseTable';
 import CourseAttendanceModal from '../../components/admin/CourseAttendanceModal';
@@ -49,6 +50,7 @@ const getDefaultCourseForm = () => ({
       label: 'Signature 1',
       type: 'ORGANIZATION',
       enabled: true,
+      organizationPresetId: '',
       name: '',
       title: 'Organization Signature',
       signatureImageUrl: '',
@@ -58,7 +60,6 @@ const getDefaultCourseForm = () => ({
       label: 'Signature 2',
       type: 'INSTRUCTOR',
       enabled: true,
-      instructorPresetId: '',
       name: '',
       title: '',
       signatureImageUrl: '',
@@ -96,6 +97,7 @@ const CourseManagement = () => {
   const [departments, setDepartments] = React.useState([]);
   const [tiers, setTiers] = React.useState([]);
   const [instructorPresets, setInstructorPresets] = React.useState([]);
+  const [organizationPresets, setOrganizationPresets] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedCategory, setSelectedCategory] = React.useState(FILTER_VALUES.ALL);
@@ -121,15 +123,17 @@ const CourseManagement = () => {
   const [uploading, setUploading] = React.useState(false);
   const [editorImageUploading, setEditorImageUploading] = React.useState(false);
   const [showInstructorPresetModal, setShowInstructorPresetModal] = React.useState(false);
+  const [showOrganizationPresetModal, setShowOrganizationPresetModal] = React.useState(false);
 
   const fetchData = React.useCallback(async () => {
     try {
-      const [courseResponse, categoryResponse, departmentResponse, tierResponse, instructorPresetResponse] = await Promise.all([
+      const [courseResponse, categoryResponse, departmentResponse, tierResponse, instructorPresetResponse, organizationPresetResponse] = await Promise.all([
         adminAPI.getCourses(),
         adminAPI.getCategories(),
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
         adminAPI.getInstructorPresets(),
+        adminAPI.getOrganizationPresets(),
       ]);
 
       setCourses(courseResponse.data);
@@ -137,6 +141,7 @@ const CourseManagement = () => {
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
       setInstructorPresets(instructorPresetResponse.data);
+      setOrganizationPresets(organizationPresetResponse.data);
     } catch (error) {
       console.error('Fetch course management data error:', error);
       toast.error('ไม่สามารถโหลดข้อมูลได้');
@@ -303,6 +308,25 @@ const CourseManagement = () => {
     }
   };
 
+  const handleOrganizationPresetDelete = async (id, name) => {
+    const ok = await confirm({
+      title: 'ยืนยันการลบข้อมูลหน่วยงาน',
+      message: `ต้องการลบข้อมูลหน่วยงาน "${name}" ใช่หรือไม่? พรีเซ็ตนี้จะไม่สามารถนำมาใช้ในเกียรติบัตรได้อีก`,
+      confirmLabel: 'ลบ',
+      variant: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      await adminAPI.deleteOrganizationPreset(id);
+      toast.success('ลบข้อมูลหน่วยงานเรียบร้อย');
+      await fetchData();
+    } catch (error) {
+      console.error('Delete organization preset error:', error);
+      toast.error(error.response?.data?.message || 'ลบข้อมูลหน่วยงานไม่สำเร็จ');
+    }
+  };
+
   const handleSaveLesson = async (event) => {
     event.preventDefault();
 
@@ -465,6 +489,10 @@ const CourseManagement = () => {
             <Sparkles size={18} />
             จัดการวิทยากร
           </button>
+          <button type="button" onClick={() => setShowOrganizationPresetModal(true)} className="btn btn-outline">
+            <Building2 size={18} />
+            จัดการหน่วยงาน
+          </button>
           <button type="button" onClick={openAddCourse} className="btn btn-primary shadow-lg shadow-primary/20">
             <Plus size={18} />
             สร้างคอร์สใหม่
@@ -508,6 +536,7 @@ const CourseManagement = () => {
         setCourseForm={setCourseForm}
         categories={selectableCategories}
         instructorPresets={instructorPresets}
+        organizationPresets={organizationPresets}
         departments={departments}
         tiers={tiers}
         lessons={lessons}
@@ -581,6 +610,25 @@ const CourseManagement = () => {
         }}
         onDelete={handleInstructorPresetDelete}
       />
+
+      <OrganizationPresetModal
+        isOpen={showOrganizationPresetModal}
+        presets={organizationPresets}
+        loading={loading}
+        onClose={() => setShowOrganizationPresetModal(false)}
+        onCreate={async (payload) => {
+          await adminAPI.createOrganizationPreset(payload);
+          toast.success('สร้างพรีเซ็ตหน่วยงานเรียบร้อย');
+          await fetchData();
+        }}
+        onUpdate={async (id, payload) => {
+          await adminAPI.updateOrganizationPreset(id, payload);
+          toast.success('อัปเดตพรีเซ็ตหน่วยงานเรียบร้อย');
+          await fetchData();
+        }}
+        onDelete={handleOrganizationPresetDelete}
+      />
+
       <ConfirmDialog {...ConfirmDialogProps} />
     </div>
   );

@@ -151,7 +151,27 @@ const updateInstructorPreset = asyncHandler(async (req, res) => {
 
 const deleteInstructorPreset = asyncHandler(async (req, res) => {
   await AdminService.deleteInstructorPreset(req.params.id);
-  res.json({ success: true, message: 'Instructor preset deleted successfully' });
+  res.status(204).end();
+});
+
+const getOrganizationPresets = asyncHandler(async (req, res) => {
+  const presets = await AdminService.getOrganizationPresets();
+  res.json({ data: presets });
+});
+
+const createOrganizationPreset = asyncHandler(async (req, res) => {
+  const preset = await AdminService.createOrganizationPreset(req.body);
+  res.status(201).json({ data: preset });
+});
+
+const updateOrganizationPreset = asyncHandler(async (req, res) => {
+  const preset = await AdminService.updateOrganizationPreset(req.params.id, req.body);
+  res.json({ data: preset });
+});
+
+const deleteOrganizationPreset = asyncHandler(async (req, res) => {
+  await AdminService.deleteOrganizationPreset(req.params.id);
+  res.status(204).end();
 });
 
 
@@ -420,6 +440,10 @@ module.exports = {
   createInstructorPreset,
   updateInstructorPreset,
   deleteInstructorPreset,
+  getOrganizationPresets,
+  createOrganizationPreset,
+  updateOrganizationPreset,
+  deleteOrganizationPreset,
   getCourseLessons,
   createLesson,
   updateLesson,

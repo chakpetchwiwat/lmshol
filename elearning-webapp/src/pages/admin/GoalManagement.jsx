@@ -62,7 +62,7 @@ const GoalManagement = () => {
     const [courseSearch, setCourseSearch] = React.useState('');
     const currentThaiMonthYear = React.useMemo(() => getCurrentThaiMonthYear(), []);
     const [filters, setFilters] = React.useState({
-        month: currentThaiMonthYear.month,
+        month: FILTER_VALUES.ALL,
         year: currentThaiMonthYear.year,
         departmentId: ''
     });

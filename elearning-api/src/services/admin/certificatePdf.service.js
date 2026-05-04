@@ -134,48 +134,75 @@ const drawClassic = (doc, data, width, height) => {
 };
 
 /**
- * Template: MODERN
+ * Template: MODERN (Template 2)
  */
 const drawModern = (doc, data, width, height) => {
-  // Side bar
-  doc.rect(0, 0, 150, height).fill('#1f2937');
-  doc.rect(150, 0, 10, height).fill('#3b82f6');
+  // 1. Background
+  doc.rect(0, 0, width, height).fill('#ffffff');
   
-  const contentX = 200;
-  const contentWidth = width - contentX - 50;
+  // 2. Top-left accent line
+  doc.rect(80, 80, 120, 5).fill('#3b82f6');
+  
+  const contentX = 80;
+  const contentWidth = width - 160;
 
+  // 3. Title Section
   doc.fillColor('#3b82f6')
-     .fontSize(38)
-     .text('CERTIFICATE', contentX, 100);
+     .fontSize(42)
+     .text('CERTIFICATE', contentX, 140, { characterSpacing: 1 });
   
-  doc.fillColor('#1f2937')
+  doc.fillColor('#3b82f6')
      .fontSize(18)
-     .text('OF COMPLETION', contentX, 140);
+     .text('OF COMPLETION', contentX, 185, { characterSpacing: 2 });
 
-  doc.fillColor('#666666')
+  // 4. Body Section
+  doc.fillColor('#6b7280')
      .fontSize(14)
-     .text('This is to certify that', contentX, 200);
+     .text('This is to certify that', contentX, 260);
 
-  doc.fillColor('#000000')
-     .fontSize(48)
-     .text(data.learnerName || 'Learner Name', contentX, 230);
+  doc.fillColor('#111827')
+     .fontSize(52)
+     .text(data.learnerName || 'Learner Name', contentX, 290);
+  
+  // Underline for name
+  doc.moveTo(contentX, 350).lineTo(contentX + 300, 350).lineWidth(0.5).stroke('#e5e7eb');
 
-  doc.fillColor('#666666')
+  doc.fillColor('#6b7280')
      .fontSize(14)
-     .text('has successfully completed the course', contentX, 310);
+     .text('has successfully completed the course', contentX, 400);
 
-  doc.fillColor('#1f2937')
-     .fontSize(24)
-     .text(data.courseTitle || 'Course Title', contentX, 340, { width: contentWidth });
+  doc.fillColor('#111827')
+     .fontSize(28)
+     .text(data.courseTitle || 'Course Title', contentX, 430, { width: contentWidth * 0.6 });
 
-  drawSignatureGroup(doc, data, height - 165, width, height, 'modern');
+  // 5. Metadata Box (Bottom Left)
+  const boxWidth = 380;
+  const boxHeight = 110;
+  const boxY = height - 160;
+  
+  // Box background
+  doc.rect(80, boxY, boxWidth, boxHeight).fill('#f8fafc');
+  // Left accent border
+  doc.rect(80, boxY, 4, boxHeight).fill('#3b82f6');
+  
+  doc.fillColor('#94a3b8').fontSize(8);
+  doc.text('Certificate No', 100, boxY + 15);
+  doc.text('Issue Date', 100, boxY + 45);
+  doc.text('Verify', 100, boxY + 75);
+
+  doc.fillColor('#1e293b').fontSize(11);
+  doc.text(data.certificateNo || '-', 200, boxY + 15);
+  doc.text(data.issuedAt || '-', 200, boxY + 45);
+  doc.fontSize(8).text(data.verificationUrl || '-', 200, boxY + 75);
+
+  // 6. Signatures (Bottom Right)
+  drawSignatureGroup(doc, data, height - 200, width, height, 'right');
 };
 
 /**
  * Template: MINIMAL
  */
 const drawMinimal = (doc, data, width, height) => {
-  // Soft background
   doc.rect(0, 0, width, height).fill('#ffffff');
 
   doc.fillColor('#4b5563')
@@ -198,7 +225,6 @@ const drawMinimal = (doc, data, width, height) => {
      .fontSize(22)
      .text(data.courseTitle || 'Course Title', 0, 330, { align: 'center', width });
   
-  // Thin decorative line
   doc.moveTo(width / 4, 380).lineTo(width * 3 / 4, 380).lineWidth(0.5).stroke('#e5e7eb');
 
   drawSignatureGroup(doc, data, height - 165, width, height, 'center');

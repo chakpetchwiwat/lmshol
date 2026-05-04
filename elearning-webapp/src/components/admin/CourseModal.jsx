@@ -34,6 +34,7 @@ const CourseModal = ({
   setCourseForm,
   categories,
   instructorPresets,
+  organizationPresets,
   departments,
   tiers,
   lessons,
@@ -205,6 +206,7 @@ const CourseModal = ({
                 lessonCount={lessons.length}
                 categories={categories}
                 instructorPresets={instructorPresets}
+                organizationPresets={organizationPresets}
                 departments={departments}
                 tiers={tiers}
                 onSaveCourse={onSaveCourse}

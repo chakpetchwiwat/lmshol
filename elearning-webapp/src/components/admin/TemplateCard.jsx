@@ -18,19 +18,32 @@ const CertificateArtwork = ({ template, size = 'card' }) => {
   if (template.id === 'MODERN_001') {
     return (
       <div className={pageClass}>
-        <div className="absolute inset-y-0 left-0 w-[18%] bg-slate-900" />
-        <div className="absolute inset-y-0 left-[18%] w-[1.8%] bg-blue-500" />
-        <div className="absolute left-[28%] top-[18%] w-[62%]">
-          <p className="text-[2.7em] font-black uppercase leading-none tracking-normal text-blue-500">Certificate</p>
-          <p className="mt-[0.2em] text-[1.1em] font-black uppercase tracking-[0.12em] text-slate-800">of completion</p>
-          <p className="mt-[3.2em] text-[0.95em] font-bold text-slate-500">This is to certify that</p>
-          <p className="mt-[0.25em] text-[3.2em] font-black leading-none text-slate-950">{demo.learnerName}</p>
-          <p className="mt-[1.4em] text-[0.95em] font-bold text-slate-500">has successfully completed the course</p>
-          <p className="mt-[0.25em] text-[1.8em] font-black leading-tight text-slate-800">{demo.courseTitle}</p>
+        {/* Top-left accent line */}
+        <div className="absolute left-[10%] top-[14%] h-[1.2%] w-[15%] bg-blue-500" />
+        
+        <div className="absolute left-[10%] top-[25%] w-[80%]">
+          <p className="text-[2.8em] font-black uppercase leading-none tracking-tight text-blue-500">Certificate</p>
+          <p className="mt-[0.3em] text-[1.1em] font-black uppercase tracking-[0.12em] text-blue-400">of completion</p>
+          
+          <p className="mt-[2.8em] text-[0.9em] font-bold text-slate-400">This is to certify that</p>
+          <div className="mt-[0.2em] relative inline-block">
+            <p className="text-[3.4em] font-black leading-none text-slate-900">{demo.learnerName}</p>
+            <div className="absolute -bottom-2 left-0 w-1/2 h-[1px] bg-slate-200" />
+          </div>
+          
+          <p className="mt-[3.2em] text-[0.9em] font-bold text-slate-400">has successfully completed the course</p>
+          <p className="mt-[0.25em] text-[1.9em] font-black leading-tight text-slate-800">{demo.courseTitle}</p>
         </div>
-        <div className="absolute bottom-[10%] left-[28%] text-[0.75em] font-bold text-slate-500">
-          <p>{demo.certificateNo}</p>
-          <p>{demo.issuedAt}</p>
+
+        {/* Metadata Box (Bottom Left) */}
+        <div className="absolute bottom-[10%] left-[10%] w-[45%] rounded-lg bg-slate-50 p-[1.5%] shadow-sm overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-[3%] bg-blue-500" />
+          <div className="grid grid-cols-[1fr_2fr] gap-x-2 text-[0.6em] font-bold">
+            <span className="text-slate-400">Certificate No</span>
+            <span className="text-slate-700">{demo.certificateNo}</span>
+            <span className="text-slate-400">Issue Date</span>
+            <span className="text-slate-700">{demo.issuedAt}</span>
+          </div>
         </div>
       </div>
     );

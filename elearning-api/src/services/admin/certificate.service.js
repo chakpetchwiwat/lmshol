@@ -76,22 +76,6 @@ async function resolveCertificateSigner(tx, courseId, setting) {
 }
 
 async function resolveInstructorSigner(tx, courseId, slot = {}) {
-  if (slot.instructorPresetId) {
-    const preset = await tx.instructorPreset.findUnique({
-      where: { id: slot.instructorPresetId }
-    });
-
-    if (preset) {
-      return {
-        type: 'INSTRUCTOR',
-        label: slot.label || 'Instructor signature',
-        name: slot.name || preset.name,
-        title: slot.title || preset.signatureTitle || preset.role || 'Instructor',
-        signatureImageUrl: slot.signatureImageUrl || preset.signatureImageUrl || null
-      };
-    }
-  }
-
   const legacySigner = await resolveCertificateSigner(tx, courseId, {
     signatureType: 'INSTRUCTOR'
   });
@@ -123,15 +107,44 @@ async function resolveCertificateSignatureSlots(tx, courseId, setting) {
       continue;
     }
 
+    if (slot.type === 'ORGANIZATION') {
+      let orgName = slot.name;
+      let orgTitle = slot.title;
+      let orgSignature = slot.signatureImageUrl;
+      let orgStamp = slot.stampImageUrl;
+
+      if (slot.organizationPresetId) {
+        const preset = await tx.organizationPreset.findUnique({
+          where: { id: slot.organizationPresetId }
+        });
+        if (preset) {
+          orgName = orgName || preset.name;
+          orgTitle = orgTitle || preset.signatureTitle;
+          orgSignature = orgSignature || preset.signatureImageUrl;
+          orgStamp = orgStamp || preset.stampImageUrl;
+        }
+      }
+
+      signers.push({
+        type: 'ORGANIZATION',
+        label: slot.label || 'Organization signature',
+        name: orgName || process.env.ORGANIZATION_SIGNER_NAME || 'ผู้อำนวยการสถาบัน',
+        title: orgTitle || process.env.ORGANIZATION_SIGNER_TITLE || 'Director',
+        signatureImageUrl: orgSignature || null,
+        stampImageUrl: orgStamp || null
+      });
+      continue;
+    }
+
     if (slot.type === 'CUSTOM' && !slot.name) {
       throw new Error(`${slot.label || 'Signature'} name is required`);
     }
 
     signers.push({
-      type: slot.type || 'ORGANIZATION',
+      type: slot.type || 'CUSTOM',
       label: slot.label || 'Signature',
-      name: slot.name || process.env.ORGANIZATION_SIGNER_NAME || 'เธเธนเนเธญเธณเธเธงเธขเธเธฒเธฃเธชเธ–เธฒเธเธฑเธ',
-      title: slot.title || process.env.ORGANIZATION_SIGNER_TITLE || 'Director',
+      name: slot.name || 'Signature',
+      title: slot.title || '',
       signatureImageUrl: slot.signatureImageUrl || null
     });
   }
