@@ -1,13 +1,36 @@
 import React from 'react';
 import { Check, Eye } from 'lucide-react';
 
-const CertificateArtwork = ({ template, size = 'card' }) => {
+const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) => {
   const isFull = size === 'full';
+  const activeSlots = (signatureSlots || []).filter(s => s.enabled);
+
   const demo = {
     learnerName: 'Alex Morgan',
     courseTitle: 'Advanced Workplace Learning',
     certificateNo: 'CERT-2026-0427',
     issuedAt: '03 May 2026'
+  };
+
+  const SignatureArea = ({ alignment = 'right' }) => {
+    if (activeSlots.length === 0) return null;
+    return (
+      <div className={`absolute bottom-[10%] ${
+        alignment === 'right' ? 'right-[10%]' : 
+        alignment === 'center' ? 'left-0 right-0 flex justify-center' : 
+        'left-[10%]'
+      } flex items-end gap-[3em]`}>
+        {activeSlots.map((slot, i) => (
+          <div key={slot.id || i} className="flex flex-col items-center text-center">
+            <div className="mb-[0.2em] flex h-[2.5em] w-[6em] items-end justify-center border-b border-slate-300 pb-1">
+              <span className="text-[0.5em] font-black uppercase italic tracking-widest text-slate-200">Signature</span>
+            </div>
+            <p className="max-w-[10em] truncate text-[0.65em] font-black text-slate-800">{slot.name || `ผู้ลงนามคนที่ ${i + 1}`}</p>
+            <p className="max-w-[12em] truncate text-[0.5em] font-bold text-slate-400">{slot.title || 'ตำแหน่ง'}</p>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const scaleClass = isFull
@@ -45,6 +68,8 @@ const CertificateArtwork = ({ template, size = 'card' }) => {
             <span className="text-slate-700">{demo.issuedAt}</span>
           </div>
         </div>
+
+        <SignatureArea alignment="right" />
       </div>
     );
   }
@@ -65,6 +90,8 @@ const CertificateArtwork = ({ template, size = 'card' }) => {
           <span>{demo.certificateNo}</span>
           <span>{demo.issuedAt}</span>
         </div>
+
+        <SignatureArea alignment="center" />
       </div>
     );
   }
@@ -84,12 +111,15 @@ const CertificateArtwork = ({ template, size = 'card' }) => {
         <p>เลขที่เกียรติบัตร: {demo.certificateNo}</p>
         <p>วันที่ออก: {demo.issuedAt}</p>
       </div>
-      <p className="absolute bottom-[8%] right-[10%] text-[0.65em] font-bold text-slate-400">ScaleUp Learning Management System</p>
+      
+      <SignatureArea alignment="right" />
+      
+      <p className="absolute bottom-[4%] left-0 right-0 text-center text-[0.55em] font-bold text-slate-300">ScaleUp Learning Management System</p>
     </div>
   );
 };
 
-const TemplateCard = ({ template, isSelected, onSelect, onPreview }) => {
+const TemplateCard = ({ template, isSelected, onSelect, onPreview, signatureSlots = [] }) => {
   const handlePreview = (event) => {
     event.stopPropagation();
     onPreview(template);
@@ -107,7 +137,7 @@ const TemplateCard = ({ template, isSelected, onSelect, onPreview }) => {
       {/* Visual Preview (CSS Based) */}
       <div className="aspect-[1.4/1] w-full overflow-hidden bg-slate-50 p-3">
         <div className={`h-full w-full overflow-hidden rounded border ${template.id === 'CLASSIC_001' ? 'border-amber-200' : 'border-slate-200'}`}>
-          <CertificateArtwork template={template} />
+          <CertificateArtwork template={template} signatureSlots={signatureSlots} />
         </div>
       </div>
 

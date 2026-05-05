@@ -684,6 +684,7 @@ const CourseBasicInfoForm = ({
                     <CertificateTemplateSelector 
                       selectedId={courseForm.certificateTemplateId || 'CLASSIC_001'}
                       onSelect={(id) => setCourseForm({ ...courseForm, certificateTemplateId: id })}
+                      signatureSlots={signatureSlots}
                     />
                   </div>
                 </div>
