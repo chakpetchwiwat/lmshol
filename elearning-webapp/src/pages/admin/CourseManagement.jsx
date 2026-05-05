@@ -136,12 +136,12 @@ const CourseManagement = () => {
         adminAPI.getOrganizationPresets(),
       ]);
 
-      setCourses(courseResponse.data);
-      setCategories(categoryResponse.data);
-      setDepartments(departmentResponse.data);
-      setTiers(tierResponse.data);
-      setInstructorPresets(instructorPresetResponse.data);
-      setOrganizationPresets(organizationPresetResponse.data);
+      setCourses(courseResponse.data || []);
+      setCategories(categoryResponse.data || []);
+      setDepartments(departmentResponse.data || []);
+      setTiers(tierResponse.data || []);
+      setInstructorPresets(instructorPresetResponse.data || []);
+      setOrganizationPresets(organizationPresetResponse.data || []);
     } catch (error) {
       console.error('Fetch course management data error:', error);
       toast.error('ไม่สามารถโหลดข้อมูลได้');
@@ -439,7 +439,7 @@ const CourseManagement = () => {
   };
 
   const filteredCourses = React.useMemo(() => (
-    courses.filter((course) => {
+    (courses || []).filter((course) => {
       const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === FILTER_VALUES.ALL || course.categoryId === selectedCategory;
       const matchesModuleGroup = selectedModuleGroup === FILTER_VALUES.ALL || course.category?.type === selectedModuleGroup;
@@ -451,7 +451,7 @@ const CourseManagement = () => {
   const moduleGroupOptions = React.useMemo(() => {
     const visibleTypes = Array.from(
       new Set(
-        categories
+        (categories || [])
           .filter((category) => !category.isArchived && category.type)
           .map((category) => category.type)
       )
@@ -467,7 +467,7 @@ const CourseManagement = () => {
   }, [categories]);
 
   const selectableCategories = React.useMemo(() => (
-    categories.filter((category) => !category.isArchived || category.id === courseForm.categoryId)
+    (categories || []).filter((category) => !category.isArchived || category.id === courseForm.categoryId)
   ), [categories, courseForm.categoryId]);
 
   return (
