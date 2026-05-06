@@ -39,6 +39,7 @@ model User {
   enrollments           UserCourse[]
   progress              UserLessonProgress[]
   notifications         UserNotification[]
+  targetedGoals         GoalTargetUser[]
 
   @@index([status, departmentId, tierId])
   @@index([departmentId, status])
@@ -191,6 +192,7 @@ model Department {
   categoryAccess CategoryDepartmentAccess[]
   courseAccess   CourseDepartmentAccess[]
   learningGoals  LearningGoal[]
+  goalTargets    GoalTargetDepartment[]
   users          User[]                     @relation("DepartmentUsers")
 }
 
@@ -430,10 +432,34 @@ model LearningGoal {
   preDeadlineReminderTime    String?
   courses                    GoalCourse[]
   department                 Department?        @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  targetDepartments          GoalTargetDepartment[]
+  targetUsers                GoalTargetUser[]
   notifications              UserNotification[]
 
   @@index([status, expiryDate, departmentId])
   @@index([scope, departmentId, status])
+}
+
+model GoalTargetDepartment {
+  goalId       String
+  departmentId String
+  createdAt    DateTime     @default(now())
+  department   Department   @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  goal         LearningGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@id([goalId, departmentId])
+  @@index([departmentId, goalId])
+}
+
+model GoalTargetUser {
+  goalId    String
+  userId    String
+  createdAt DateTime     @default(now())
+  goal      LearningGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([goalId, userId])
+  @@index([userId, goalId])
 }
 
 model GoalCourse {

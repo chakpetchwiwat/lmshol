@@ -137,7 +137,9 @@ const getDashboardStats = async (authUser, filters = {}) => {
                     ...(scopeFilters.departmentId ? {
                         OR: [
                             { scope: GOAL_SCOPES.GLOBAL },
-                            { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId }
+                            { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId },
+                            { targetDepartments: { some: { departmentId: scopeFilters.departmentId } } },
+                            { targetUsers: { some: { user: { departmentId: scopeFilters.departmentId } } } }
                         ]
                     } : {})
                 },
@@ -146,7 +148,9 @@ const getDashboardStats = async (authUser, filters = {}) => {
                         select: {
                             courseId: true
                         }
-                    }
+                    },
+                    targetDepartments: true,
+                    targetUsers: true
                 }
             })
         ]);

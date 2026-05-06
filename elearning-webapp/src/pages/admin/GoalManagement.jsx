@@ -25,6 +25,8 @@ const getDefaultGoalForm = (currentUser = null) => ({
     expiryDate: '',
     scope: currentUser?.departmentId ? 'DEPARTMENT' : 'GLOBAL',
     departmentId: currentUser?.departmentId || '',
+    departmentIds: currentUser?.departmentId ? [currentUser.departmentId] : [],
+    userIds: [],
     courseIds: [],
     postAssignmentReminderDays: '',
     preDeadlineReminderDays: '',
@@ -56,6 +58,7 @@ const GoalManagement = () => {
     const [isEditing, setIsEditing] = React.useState(false);
     const [editingId, setEditingId] = React.useState(null);
     const [departments, setDepartments] = React.useState([]);
+    const [users, setUsers] = React.useState([]);
     const [currentUser, setCurrentUser] = React.useState(null);
     const [viewMode, setViewMode] = React.useState(ENTITY_VIEW_STATUS.ACTIVE);
     const [formData, setFormData] = React.useState(getDefaultGoalForm());
@@ -96,15 +99,17 @@ const GoalManagement = () => {
             const user = JSON.parse(localStorage.getItem('user'));
             setCurrentUser(user);
 
-            const [goalsRes, coursesRes, deptsRes] = await Promise.all([
+            const [goalsRes, coursesRes, deptsRes, usersRes] = await Promise.all([
                 adminAPI.getGoals(),
                 adminAPI.getCourses(),
-                adminAPI.getDepartments()
+                adminAPI.getDepartments(),
+                adminAPI.getUsers()
             ]);
 
             setGoals(goalsRes.data || []);
             setCourses(coursesRes.data || []);
             setDepartments(deptsRes.data || []);
+            setUsers(usersRes.data || []);
 
             if (user?.departmentId) {
                 setFormData((prev) => {
@@ -115,7 +120,8 @@ const GoalManagement = () => {
                     return {
                         ...prev,
                         scope: 'DEPARTMENT',
-                        departmentId: user.departmentId
+                        departmentId: user.departmentId,
+                        departmentIds: [user.departmentId]
                     };
                 });
             }
@@ -164,6 +170,8 @@ const GoalManagement = () => {
             expiryDate: toThaiDateInputValue(goal.expiryDate),
             scope: goal.scope,
             departmentId: goal.departmentId || '',
+            departmentIds: goal.targetDepartments?.map((target) => target.departmentId) || (goal.departmentId ? [goal.departmentId] : []),
+            userIds: goal.targetUsers?.map((target) => target.userId) || [],
             courseIds: goal.courses.map(c => c.courseId),
             postAssignmentReminderDays: goal.postAssignmentReminderDays !== null && goal.postAssignmentReminderDays !== undefined ? String(goal.postAssignmentReminderDays) : '',
             preDeadlineReminderDays: goal.preDeadlineReminderDays !== null && goal.preDeadlineReminderDays !== undefined ? String(goal.preDeadlineReminderDays) : '',
@@ -309,9 +317,13 @@ const GoalManagement = () => {
             let matchesScope = true;
             if (isSuperAdmin(currentUser) && filters.departmentId) {
                 if (filters.departmentId === 'GLOBAL') {
-                    matchesScope = goal.scope === 'GLOBAL';
+                    matchesScope = goal.scope === 'GLOBAL'
+                        && (goal.targetDepartments?.length || 0) === 0
+                        && (goal.targetUsers?.length || 0) === 0;
                 } else {
-                    matchesScope = goal.scope === 'DEPARTMENT' && goal.departmentId === filters.departmentId;
+                    matchesScope = goal.departmentId === filters.departmentId
+                        || goal.targetDepartments?.some((target) => target.departmentId === filters.departmentId)
+                        || goal.targetUsers?.some((target) => target.user?.departmentId === filters.departmentId);
                 }
             }
 
@@ -418,6 +430,7 @@ const GoalManagement = () => {
                 setFormData={setFormData}
                 currentUser={currentUser}
                 departments={departments}
+                users={users}
                 courses={courses}
                 onSave={handleSaveGoal}
                 isEditing={isEditing}
