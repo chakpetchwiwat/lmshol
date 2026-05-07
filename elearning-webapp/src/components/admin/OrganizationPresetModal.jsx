@@ -74,12 +74,15 @@ const OrganizationPresetModal = ({
 
     try {
       setUploading(true);
-      const response = await adminAPI.uploadSignatureFile(file);
+      const uploadRequest = field === 'stampImageUrl'
+        ? adminAPI.uploadFile(file)
+        : adminAPI.uploadSignatureFile(file);
+      const response = await uploadRequest;
       setForm((current) => ({ ...current, [field]: response.data.fileUrl }));
       toast.success('อัปโหลดไฟล์เรียบร้อย');
     } catch (error) {
       console.error(`Upload organization ${field} error:`, error);
-      toast.error('อัปโหลดไฟล์ไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'อัปโหลดไฟล์ไม่สำเร็จ');
     } finally {
       setUploading(false);
       event.target.value = '';
