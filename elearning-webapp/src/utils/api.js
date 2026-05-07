@@ -72,8 +72,16 @@ api.interceptors.response.use(
     // 2. Automatically unwrap { success: true, data: ... } 
     // We return the WHOLE response object but with response.data being the inner data
     // This maintains compatibility with standard Axios usage (res.data)
-    if (response.data && response.data.success === true && response.data.data !== undefined) {
-      return { ...response, data: response.data.data };
+    // CRITICAL: We must preserve sibling fields like 'summary', 'pagination', 'hasCertificate'
+    if (response.data && response.data.success === true) {
+      const { data, success, ...metadata } = response.data;
+      if (data !== undefined) {
+        return { 
+          ...response, 
+          data: data,
+          ...metadata // Merges summary, pagination, etc. into the response object
+        };
+      }
     }
     return response;
   },

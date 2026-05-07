@@ -255,7 +255,9 @@ async function reissueCertificate({ certificateId, requestedById }) {
     include: {
       course: {
         include: {
-          certificateSetting: true
+          certificateSetting: {
+            include: { template: true }
+          }
         }
       }
     }
@@ -265,10 +267,10 @@ async function reissueCertificate({ certificateId, requestedById }) {
   if (cert.status === 'REVOKED') throw new Error('Cannot reissue a revoked certificate');
 
   const signer = cert.course?.certificateSetting
-    ? await prisma.$transaction((tx) => resolveCertificateSigner(tx, cert.courseId, cert.course.certificateSetting))
+    ? await resolveCertificateSigner(prisma, cert.courseId, cert.course.certificateSetting)
     : cert.metadata?.signer;
   const signers = cert.course?.certificateSetting
-    ? await prisma.$transaction((tx) => resolveCertificateSignatureSlots(tx, cert.courseId, cert.course.certificateSetting))
+    ? await resolveCertificateSignatureSlots(prisma, cert.courseId, cert.course.certificateSetting)
     : cert.metadata?.signers;
 
   return await prisma.certificate.update({
@@ -276,10 +278,15 @@ async function reissueCertificate({ certificateId, requestedById }) {
     data: {
       status: 'PENDING',
       pdfUrl: null,
+      templateId: cert.course?.certificateSetting?.templateId || cert.templateId,
       metadata: {
         ...(cert.metadata || {}),
         signer,
         signers,
+        template: cert.course?.certificateSetting?.template ? {
+          id: cert.course.certificateSetting.template.id,
+          name: cert.course.certificateSetting.template.name
+        } : cert.metadata?.template,
         reissuedAt: new Date().toISOString(),
         reissuedById: requestedById
       }
