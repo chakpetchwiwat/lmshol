@@ -1,9 +1,10 @@
 import React from 'react';
 import { Check, Eye } from 'lucide-react';
+import { getFullUrl } from '../../utils/api';
 
 const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) => {
   const isFull = size === 'full';
-  const activeSlots = (signatureSlots || []).filter(s => s.enabled);
+  const activeSlots = (signatureSlots || []).filter(s => s && s.enabled !== false).slice(0, 2);
 
   const demo = {
     learnerName: 'Alex Morgan',
@@ -16,17 +17,24 @@ const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) =>
     if (activeSlots.length === 0) return null;
     return (
       <div className={`absolute bottom-[10%] ${
-        alignment === 'right' ? 'right-[10%]' : 
-        alignment === 'center' ? 'left-0 right-0 flex justify-center' : 
-        'left-[10%]'
-      } flex items-end gap-[3em]`}>
+        alignment === 'right' ? 'right-[8%] justify-end' : 
+        alignment === 'center' ? 'left-0 right-0 justify-center' : 
+        'left-[10%] justify-start'
+      } flex w-[36%] items-end gap-[1.8em]`}>
         {activeSlots.map((slot, i) => (
-          <div key={slot.id || i} className="flex flex-col items-center text-center">
-            <div className="mb-[0.2em] flex h-[2.5em] w-[6em] items-end justify-center border-b border-slate-300 pb-1">
-              <span className="text-[0.5em] font-black uppercase italic tracking-widest text-slate-200">Signature</span>
+          <div key={slot.id || i} className="relative flex min-w-0 flex-1 flex-col items-center text-center">
+            {slot.stampImageUrl ? (
+              <img src={getFullUrl(slot.stampImageUrl)} alt="" className="absolute bottom-[1.8em] right-[8%] h-[2.6em] w-[2.6em] object-contain opacity-80" />
+            ) : null}
+            <div className="relative mb-[0.2em] flex h-[2.5em] w-full items-end justify-center border-b border-slate-300 pb-1">
+              {slot.signatureImageUrl ? (
+                <img src={getFullUrl(slot.signatureImageUrl)} alt="" className="max-h-full max-w-full object-contain" />
+              ) : (
+                <span className="text-[0.5em] font-black uppercase italic tracking-widest text-slate-200">Signature</span>
+              )}
             </div>
-            <p className="max-w-[10em] truncate text-[0.65em] font-black text-slate-800">{slot.name || `ผู้ลงนามคนที่ ${i + 1}`}</p>
-            <p className="max-w-[12em] truncate text-[0.5em] font-bold text-slate-400">{slot.title || 'ตำแหน่ง'}</p>
+            <p className="max-w-full truncate text-[0.65em] font-black text-slate-800">{slot.name || `Signature ${i + 1}`}</p>
+            <p className="max-w-full truncate text-[0.5em] font-bold text-slate-400">{slot.title || 'Title'}</p>
           </div>
         ))}
       </div>
