@@ -27,14 +27,52 @@ async function loadThaiFont() {
   }
 }
 
+/**
+ * Standardizes relative storage paths into absolute URLs
+ */
+const getFullUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  
+  const supabaseUrl = process.env.SUPABASE_URL;
+  if (!supabaseUrl) return url;
+  
+  // Case 1: Already has storage prefix
+  if (url.startsWith('/storage/v1/object/public/')) {
+    return `${supabaseUrl}${url}`;
+  }
+
+  // Case 2: Starts with /uploads (common in our DB)
+  if (url.startsWith('/uploads/')) {
+    return `${supabaseUrl}/storage/v1/object/public${url}`;
+  }
+
+  // Case 3: Starts with uploads/ (no leading slash)
+  if (url.startsWith('uploads/')) {
+    return `${supabaseUrl}/storage/v1/object/public/${url}`;
+  }
+  
+  // Case 4: Just a relative path or filename
+  const cleanPath = url.startsWith('/') ? url.slice(1) : url;
+  return `${supabaseUrl}/storage/v1/object/public/uploads/${cleanPath}`;
+};
+
 async function loadImageBuffer(imageUrl) {
-  if (!imageUrl) return null;
+  const absoluteUrl = getFullUrl(imageUrl);
+  if (!absoluteUrl) return null;
 
   try {
-    const response = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 10000 });
+    const response = await axios.get(absoluteUrl, { 
+      responseType: 'arraybuffer', 
+      timeout: 15000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+      }
+    });
     return Buffer.from(response.data);
   } catch (error) {
-    console.warn('[CertificatePdf] Failed to load signature image:', error.message);
+    console.warn(`[CertificatePdf] Failed to load image: ${absoluteUrl} | Error: ${error.message}`);
     return null;
   }
 }
@@ -55,18 +93,7 @@ const drawSignature = (doc, data, x, y, width, align = 'center') => {
   const stampBuffer = data.stampImageBuffer;
   const signatureHeight = 58;
 
-  if (stampBuffer) {
-    try {
-      doc.image(stampBuffer, x + width - 46, y + 18, {
-        fit: [42, 42],
-        align: 'center',
-        valign: 'center'
-      });
-    } catch (error) {
-      console.warn('[CertificatePdf] Failed to draw stamp image:', error.message);
-    }
-  }
-
+  // Draw signature image first
   if (signatureBuffer) {
     try {
       doc.image(signatureBuffer, x, y, {
@@ -80,6 +107,21 @@ const drawSignature = (doc, data, x, y, width, align = 'center') => {
     }
   } else {
     doc.moveTo(x + width * 0.18, y + signatureHeight).lineTo(x + width * 0.82, y + signatureHeight).lineWidth(0.7).stroke('#9ca3af');
+  }
+
+  // Draw stamp overlapping the signature area
+  if (stampBuffer) {
+    try {
+      // Position stamp to the right of the signature center
+      const stampX = align === 'center' ? x + (width / 2) + 10 : x + width - 55;
+      doc.image(stampBuffer, stampX, y + 5, {
+        fit: [55, 55],
+        align: 'center',
+        valign: 'center'
+      });
+    } catch (error) {
+      console.warn('[CertificatePdf] Failed to draw stamp image:', error.message);
+    }
   }
 
   doc.fillColor('#111827')
@@ -102,17 +144,17 @@ const drawSignatureGroup = (doc, data, y, width, height, mode = 'right') => {
       }];
 
   if (signers.length === 1) {
-    const x = mode === 'center' ? (width - 220) / 2 : width - 280;
-    drawSignature(doc, { ...data, ...signers[0] }, x, y, mode === 'center' ? 220 : 190, 'center');
+    const x = mode === 'center' ? (width - 240) / 2 : width - 300;
+    drawSignature(doc, { ...data, ...signers[0] }, x, y, mode === 'center' ? 240 : 200, 'center');
     return;
   }
 
-  const signatureWidth = mode === 'center' ? 210 : 150;
-  const gap = mode === 'center' ? 36 : 30;
+  const signatureWidth = mode === 'center' ? 220 : 180;
+  const gap = mode === 'center' ? 40 : 35;
   const groupWidth = (signatureWidth * 2) + gap;
   const startX = mode === 'center'
     ? (width - groupWidth) / 2
-    : Math.max(width - groupWidth - 30, width * 0.57);
+    : Math.max(width - groupWidth - 40, width * 0.55);
 
   drawSignature(doc, { ...data, ...signers[0] }, startX, y, signatureWidth, 'center');
   drawSignature(doc, { ...data, ...signers[1] }, startX + signatureWidth + gap, y, signatureWidth, 'center');

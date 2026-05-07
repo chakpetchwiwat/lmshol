@@ -126,12 +126,14 @@ async function resolveCertificateSignatureSlots(tx, courseId, setting) {
       }
 
       signers.push({
+        id: slot.id,
         type: 'ORGANIZATION',
         label: slot.label || 'Organization signature',
-        name: orgName || process.env.ORGANIZATION_SIGNER_NAME || 'ผู้อำนวยการสถาบัน',
-        title: orgTitle || process.env.ORGANIZATION_SIGNER_TITLE || 'Director',
+        name: (orgName || '').trim() || process.env.ORGANIZATION_SIGNER_NAME || 'ผู้อำนวยการสถาบัน',
+        title: (orgTitle || '').trim() || process.env.ORGANIZATION_SIGNER_TITLE || 'Director',
         signatureImageUrl: orgSignature || null,
-        stampImageUrl: orgStamp || null
+        stampImageUrl: orgStamp || null,
+        organizationPresetId: slot.organizationPresetId
       });
       continue;
     }
