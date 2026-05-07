@@ -13,6 +13,9 @@ All notable changes to this project will be documented in this file.
 - **Advanced Storage Path Resolution**:
     - Developed a robust `getFullUrl` helper in `certificatePdf.service.js` to handle complex storage path formats (relative, `/uploads/`, and Supabase internal object paths).
     - Improved image fetching with custom `User-Agent` and `Accept` headers to bypass CDN blocks.
+- **WebP & Native Image Support**:
+    - Integrated `sharp` for automatic image conversion. Non-native formats (like WebP) are now transparently converted to PNG during PDF generation to ensure compatibility with `pdfkit`.
+
 
 ### Fixed
 - **Certificate Metadata Stale-Sync**: 

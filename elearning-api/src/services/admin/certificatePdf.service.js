@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
+const sharp = require('sharp');
 const supabase = require('../../utils/supabase');
 const { getTemplateById } = require('../../config/certificateTemplates');
 
@@ -70,7 +71,18 @@ async function loadImageBuffer(imageUrl) {
         'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
       }
     });
-    return Buffer.from(response.data);
+    const imageBuffer = Buffer.from(response.data);
+    const contentType = String(response.headers?.['content-type'] || '').toLowerCase();
+    const isPdfKitNativeImage = contentType.includes('image/png')
+      || contentType.includes('image/jpeg')
+      || contentType.includes('image/jpg')
+      || /\.(png|jpe?g)(\?|$)/i.test(absoluteUrl);
+
+    if (isPdfKitNativeImage) {
+      return imageBuffer;
+    }
+
+    return await sharp(imageBuffer).png().toBuffer();
   } catch (error) {
     console.warn(`[CertificatePdf] Failed to load image: ${absoluteUrl} | Error: ${error.message}`);
     return null;

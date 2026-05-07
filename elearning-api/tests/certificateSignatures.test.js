@@ -63,13 +63,15 @@ test('resolveCertificateSignatureSlots resolves organization and instructor pres
     label: 'Signature 1',
     name: 'ScaleUp Academy',
     title: 'Organization Signature',
-    signatureImageUrl: 'https://example.com/org.png'
+    signatureImageUrl: 'https://example.com/org.png',
+    stampImageUrl: null
   });
   assert.deepEqual(signers[1], {
     type: 'INSTRUCTOR',
     label: 'Signature 2',
     name: 'Alex Morgan',
     title: 'Lead Facilitator',
-    signatureImageUrl: 'https://example.com/instructor.png'
+    signatureImageUrl: 'https://example.com/instructor.png',
+    instructorPresetId: 'preset-1'
   });
 });

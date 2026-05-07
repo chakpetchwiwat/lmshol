@@ -76,6 +76,21 @@ async function resolveCertificateSigner(tx, courseId, setting) {
 }
 
 async function resolveInstructorSigner(tx, courseId, slot = {}) {
+  let presetSigner = null;
+  if (slot.instructorPresetId) {
+    const preset = await tx.instructorPreset.findUnique({
+      where: { id: slot.instructorPresetId }
+    });
+
+    if (preset) {
+      presetSigner = {
+        name: preset.name,
+        title: preset.signatureTitle || preset.role,
+        signatureImageUrl: preset.signatureImageUrl
+      };
+    }
+  }
+
   const legacySigner = await resolveCertificateSigner(tx, courseId, {
     signatureType: 'INSTRUCTOR'
   });
@@ -83,9 +98,10 @@ async function resolveInstructorSigner(tx, courseId, slot = {}) {
   return {
     type: 'INSTRUCTOR',
     label: slot.label || 'Instructor signature',
-    name: slot.name || legacySigner?.name || 'Instructor',
-    title: slot.title || legacySigner?.title || 'Instructor',
-    signatureImageUrl: slot.signatureImageUrl || legacySigner?.signatureImageUrl || null
+    name: slot.name || presetSigner?.name || legacySigner?.name || 'Instructor',
+    title: slot.title || presetSigner?.title || legacySigner?.title || 'Instructor',
+    signatureImageUrl: slot.signatureImageUrl || presetSigner?.signatureImageUrl || legacySigner?.signatureImageUrl || null,
+    ...(slot.instructorPresetId ? { instructorPresetId: slot.instructorPresetId } : {})
   };
 }
 
@@ -126,14 +142,14 @@ async function resolveCertificateSignatureSlots(tx, courseId, setting) {
       }
 
       signers.push({
-        id: slot.id,
+        ...(slot.id ? { id: slot.id } : {}),
         type: 'ORGANIZATION',
         label: slot.label || 'Organization signature',
         name: (orgName || '').trim() || process.env.ORGANIZATION_SIGNER_NAME || 'ผู้อำนวยการสถาบัน',
         title: (orgTitle || '').trim() || process.env.ORGANIZATION_SIGNER_TITLE || 'Director',
         signatureImageUrl: orgSignature || null,
         stampImageUrl: orgStamp || null,
-        organizationPresetId: slot.organizationPresetId
+        ...(slot.organizationPresetId ? { organizationPresetId: slot.organizationPresetId } : {})
       });
       continue;
     }
