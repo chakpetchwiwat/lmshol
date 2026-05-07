@@ -528,12 +528,23 @@ async function generateCertificatePdfAsync(certificateId) {
 
     // 1. Prepare verification URL
     const verificationUrl = buildCertificateVerificationUrl(cert.verificationToken);
+    const currentSigners = cert.course?.certificateSetting
+      ? await resolveCertificateSignatureSlots(prisma, cert.courseId, cert.course.certificateSetting)
+      : null;
+    const effectiveSigners = Array.isArray(currentSigners) && currentSigners.length > 0
+      ? currentSigners
+      : (cert.metadata?.signers || (cert.metadata?.signer ? [cert.metadata.signer] : []));
+    const effectiveSigner = effectiveSigners[0] || cert.metadata?.signer || {};
 
     // 2. Render HTML
     const html = templateRenderer.renderCertificateHtml({
       template: cert.template,
       certificate: cert,
-      metadata: cert.metadata || {},
+      metadata: {
+        ...(cert.metadata || {}),
+        signer: effectiveSigner,
+        signers: effectiveSigners
+      },
       verificationUrl
     });
 
@@ -545,10 +556,10 @@ async function generateCertificatePdfAsync(certificateId) {
         certificateNo: cert.certificateNo,
         learnerName: cert.metadata?.learner?.name || cert.user?.name,
         courseTitle: cert.metadata?.course?.title || cert.course?.title,
-        signerName: cert.metadata?.signer?.name,
-        signerTitle: cert.metadata?.signer?.title,
-        signatureImageUrl: cert.metadata?.signer?.signatureImageUrl,
-        signers: cert.metadata?.signers || (cert.metadata?.signer ? [cert.metadata.signer] : []),
+        signerName: effectiveSigner.name,
+        signerTitle: effectiveSigner.title,
+        signatureImageUrl: effectiveSigner.signatureImageUrl,
+        signers: effectiveSigners,
         issuedAt: cert.metadata?.issuedAt
           ? new Date(cert.metadata.issuedAt).toISOString().slice(0, 10)
           : new Date(cert.issuedAt).toISOString().slice(0, 10),
