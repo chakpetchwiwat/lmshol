@@ -102,10 +102,13 @@ export const authAPI = {
 
 export const userAPI = {
   getCourses: () => api.get('/user/courses'),
+  getBookmarkedCourses: () => api.get('/user/course-bookmarks'),
   getAnnouncements: () => api.get('/user/announcements'),
   getCourseDetails: (id) => api.get(`/user/courses/${id}`),
   getAnnouncementDetails: (id) => api.get(`/user/announcements/${id}`),
   enrollCourse: (id) => api.post(`/user/courses/${id}/enroll`),
+  bookmarkCourse: (id) => api.post(`/user/courses/${id}/bookmark`),
+  unbookmarkCourse: (id) => api.delete(`/user/courses/${id}/bookmark`),
   updateProgress: (lessonId, progress) => api.put(`/user/lessons/${lessonId}/progress`, { progress }),
   getPoints: () => api.get('/user/points'),
   getRewards: () => api.get('/user/rewards'),

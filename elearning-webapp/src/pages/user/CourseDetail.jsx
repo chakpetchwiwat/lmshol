@@ -6,6 +6,7 @@ import {
   Infinity as InfinityIcon,
   Award,
   BookOpen,
+  Bookmark,
 } from 'lucide-react';
 import { userAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
@@ -39,6 +40,7 @@ const CourseDetail = () => {
   const [enrolling, setEnrolling] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [showVideo, setShowVideo] = React.useState(false);
+  const [bookmarking, setBookmarking] = React.useState(false);
 
   React.useEffect(() => {
     const fetchDetail = async () => {
@@ -145,12 +147,51 @@ const CourseDetail = () => {
     navigate('/user/courses');
   };
 
+  const handleBookmarkToggle = async () => {
+    if (!course || bookmarking) return;
+
+    const nextValue = !course.isBookmarked;
+    setCourse((currentCourse) => ({ ...currentCourse, isBookmarked: nextValue }));
+    setBookmarking(true);
+
+    try {
+      if (nextValue) {
+        await userAPI.bookmarkCourse(course.id);
+        toast.success('บันทึกคอร์สแล้ว');
+      } else {
+        await userAPI.unbookmarkCourse(course.id);
+        toast.success('นำออกจากคอร์สที่บันทึกแล้ว');
+      }
+    } catch (error) {
+      console.error('Bookmark course error:', error);
+      setCourse((currentCourse) => ({ ...currentCourse, isBookmarked: !nextValue }));
+      toast.error('อัปเดตคอร์สที่บันทึกไม่สำเร็จ');
+    } finally {
+      setBookmarking(false);
+    }
+  };
+
   if (loading || !course) {
     return <Skeleton.CourseDetail />;
   }
 
   return (
     <div className="relative -mx-6 -mt-6 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
+      <button
+        type="button"
+        onClick={handleBookmarkToggle}
+        disabled={bookmarking}
+        aria-label={course.isBookmarked ? 'นำออกจากคอร์สที่บันทึก' : 'บันทึกคอร์สนี้'}
+        aria-pressed={!!course.isBookmarked}
+        className={`absolute right-4 top-6 z-30 flex h-11 w-11 items-center justify-center rounded-full border shadow-lg transition-all active:scale-95 disabled:opacity-60 md:hidden ${
+          course.isBookmarked
+            ? 'border-amber-200 bg-amber-400 text-slate-950'
+            : 'border-white/25 bg-slate-950/35 text-white backdrop-blur-md'
+        }`}
+      >
+        <Bookmark size={19} fill={course.isBookmarked ? 'currentColor' : 'none'} strokeWidth={2.4} />
+      </button>
+
       <CourseHero 
         course={course}
         totalRewardPoints={totalRewardPoints}

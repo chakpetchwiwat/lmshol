@@ -45,7 +45,8 @@ const getNotifications = async (userId) => {
             scheduledFor: notification.scheduledFor,
             readAt: notification.readAt,
             goalId: notification.goalId,
-            actionUrl: notification.goalId ? `/user/goals/${notification.goalId}` : null,
+            assessmentSubmissionId: notification.assessmentSubmissionId,
+            actionUrl: notification.actionUrl || (notification.goalId ? `/user/goals/${notification.goalId}` : null),
             goal: notification.goal
         }))
     };

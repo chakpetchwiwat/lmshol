@@ -1,4 +1,6 @@
 const prisma = require('../../utils/prisma');
+const { Prisma } = require('@prisma/client');
+const crypto = require('crypto');
 const authHelpers = require('../../utils/auth.helpers');
 const {
     buildCategoryVisibilityWhere,
@@ -10,6 +12,26 @@ const {
     serializeCourseDetail,
     serializeCourseSummary
 } = require('./user.serializers');
+
+const getBookmarkedCourseIds = async (userId, courseIds = []) => {
+    if (!courseIds.length) return new Set();
+
+    const rows = await prisma.$queryRaw`
+        SELECT "courseId"
+        FROM "UserCourseBookmark"
+        WHERE "userId" = ${userId}
+        AND "courseId" IN (${Prisma.join(courseIds)})
+    `;
+
+    return new Set(rows.map((row) => row.courseId));
+};
+
+const withBookmarkState = (courses, bookmarkedCourseIds) => (
+    courses.map((course) => ({
+        ...course,
+        isBookmarked: bookmarkedCourseIds.has(course.id)
+    }))
+);
 
 const getCourses = async (userId) => {
     const userContext = await getVisibleCourseQuery(userId);
@@ -57,9 +79,15 @@ const getCourses = async (userId) => {
         }
     });
 
-    return courses
-        .filter((course) => canAccessCourse(course, userContext, referenceDate))
-        .map(serializeCourseSummary);
+    const visibleCourses = courses.filter((course) => canAccessCourse(course, userContext, referenceDate));
+    const bookmarkedCourseIds = await getBookmarkedCourseIds(userId, visibleCourses.map((course) => course.id));
+
+    return withBookmarkState(visibleCourses, bookmarkedCourseIds).map(serializeCourseSummary);
+};
+
+const getBookmarkedCourses = async (userId) => {
+    const courses = await getCourses(userId);
+    return courses.filter((course) => course.isBookmarked);
 };
 
 const getCourseDetails = async (courseId, userId) => {
@@ -149,7 +177,36 @@ const getCourseDetails = async (courseId, userId) => {
         return null;
     }
 
-    return serializeCourseDetail(course);
+    const bookmarkedCourseIds = await getBookmarkedCourseIds(userId, [course.id]);
+    return serializeCourseDetail({
+        ...course,
+        isBookmarked: bookmarkedCourseIds.has(course.id)
+    });
+};
+
+const bookmarkCourse = async (userId, courseId) => {
+    const course = await getCourseDetails(courseId, userId);
+    if (!course) {
+        throw new Error('Course not found');
+    }
+
+    await prisma.$executeRaw`
+        INSERT INTO "UserCourseBookmark" ("id", "userId", "courseId", "createdAt")
+        VALUES (${crypto.randomUUID()}, ${userId}, ${courseId}, CURRENT_TIMESTAMP)
+        ON CONFLICT ("userId", "courseId") DO NOTHING
+    `;
+
+    return { courseId, isBookmarked: true };
+};
+
+const unbookmarkCourse = async (userId, courseId) => {
+    await prisma.$executeRaw`
+        DELETE FROM "UserCourseBookmark"
+        WHERE "userId" = ${userId}
+        AND "courseId" = ${courseId}
+    `;
+
+    return { courseId, isBookmarked: false };
 };
 
 const getCategories = async (userId) => {
@@ -212,7 +269,10 @@ const getLessonQuestions = async (lessonId) => {
 
 module.exports = {
     getCourses,
+    getBookmarkedCourses,
     getCourseDetails,
+    bookmarkCourse,
+    unbookmarkCourse,
     getCategories,
     getLessonQuestions
 };
