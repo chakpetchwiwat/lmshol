@@ -565,7 +565,7 @@ const CourseBasicInfoForm = ({
                                     checked={slot.enabled !== false}
                                     onChange={(event) => updateSignatureSlot(index, { enabled: event.target.checked })}
                                   />
-                                  <div className="h-6 w-11 rounded-full bg-slate-200 transition-all after:absolute after:left-[3px] after:top-[3px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-5"></div>
+                                  <div className="h-6 w-11 rounded-full bg-slate-200 transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-5"></div>
                                 </label>
                               </div>
 
