@@ -59,9 +59,11 @@ const buildCourseMutationPayload = async (tx, input) => {
             type: slot.type || (index === 0 ? 'ORGANIZATION' : 'INSTRUCTOR'),
             enabled: slot.enabled !== false,
             instructorPresetId: slot.instructorPresetId || null,
+            organizationPresetId: slot.organizationPresetId || null,
             name: slot.name || null,
             title: slot.title || null,
-            signatureImageUrl: slot.signatureImageUrl || null
+            signatureImageUrl: slot.signatureImageUrl || null,
+            stampImageUrl: slot.stampImageUrl || null
         }))
         : undefined;
 
