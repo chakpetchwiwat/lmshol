@@ -1,9 +1,10 @@
-﻿import React from 'react';
-import { ImagePlus, PenLine, Plus, Save, Search, Trash2, UserRound, X } from 'lucide-react';
+import React from 'react';
+import { ImagePlus, PenLine, PencilLine, Plus, Save, Search, Trash2, Upload, UserRound, X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import { compressImage } from '../../utils/imageUtils';
 import { useToast } from '../../context/useToast';
+import SignaturePadModal from '../common/SignaturePadModal';
 
 const getDefaultForm = () => ({
   name: '',
@@ -29,6 +30,8 @@ const InstructorPresetModal = ({
   const [editingPreset, setEditingPreset] = React.useState(null);
   const [form, setForm] = React.useState(getDefaultForm());
   const [uploading, setUploading] = React.useState(false);
+  const [signatureMode, setSignatureMode] = React.useState('upload');
+  const [showSignaturePad, setShowSignaturePad] = React.useState(false);
 
   if (!isOpen) {
     return null;
@@ -37,6 +40,8 @@ const InstructorPresetModal = ({
   const resetForm = () => {
     setEditingPreset(null);
     setForm(getDefaultForm());
+    setSignatureMode('upload');
+    setShowSignaturePad(false);
   };
 
   const filteredPresets = Array.isArray(presets)
@@ -107,6 +112,20 @@ const InstructorPresetModal = ({
     } finally {
       setUploading(false);
       event.target.value = '';
+    }
+  };
+
+  const handleDrawnSignature = async (file) => {
+    try {
+      setUploading(true);
+      const response = await adminAPI.uploadSignatureFile(file);
+      setForm((current) => ({ ...current, signatureImageUrl: response.data.fileUrl }));
+      toast.success('บันทึกลายเซ็นเรียบร้อย');
+    } catch (error) {
+      console.error('Upload instructor signature error:', error);
+      toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกลายเซ็นได้');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -300,15 +319,15 @@ const InstructorPresetModal = ({
                   />
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <div className="mb-3">
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <div className="mb-4">
                     <p className="text-sm font-black text-slate-900">ลายเซ็นสำหรับเกียรติบัตร</p>
-                    <p className="mt-1 text-xs font-medium text-slate-500">ใช้เมื่อตั้งค่าให้วิทยากรเป็นผู้ลงนามในเกียรติบัตร</p>
+                    <p className="mt-1 text-[11px] font-medium text-slate-500 uppercase tracking-wider">ใช้สำหรับคอร์สที่วิทยากรคนนี้เป็นผู้ลงนาม</p>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div>
-                      <label className="mb-1.5 block text-xs font-black text-slate-500">ตำแหน่งใต้ลายเซ็น</label>
+                      <label className="mb-1.5 block text-xs font-black text-slate-500 uppercase tracking-widest">ตำแหน่งใต้ลายเซ็น</label>
                       <input
                         type="text"
                         className="form-input w-full"
@@ -319,30 +338,73 @@ const InstructorPresetModal = ({
                     </div>
 
                     <div>
-                      <label className="mb-1.5 block text-xs font-black text-slate-500">ไฟล์ลายเซ็น</label>
-                      <input
-                        type="file"
-                        accept="image/png,image/webp"
-                        className="hidden"
-                        id="instructor-signature-upload"
-                        onChange={handleSignatureUpload}
-                      />
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          className="form-input flex-1"
-                          value={form.signatureImageUrl}
-                          onChange={(event) => setForm((current) => ({ ...current, signatureImageUrl: event.target.value }))}
-                          placeholder="URL ลายเซ็น หรืออัปโหลด PNG/WebP 1000 x 300"
-                        />
-                        <label htmlFor="instructor-signature-upload" className="btn btn-outline btn-sm cursor-pointer gap-1">
-                          <PenLine size={14} />
-                          อัปโหลด
-                        </label>
+                      <label className="mb-2 block text-xs font-black text-slate-500 uppercase tracking-widest">ไฟล์ลายเซ็น</label>
+                      
+                      <div className="mb-3 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+                        <button
+                          type="button"
+                          onClick={() => setSignatureMode('upload')}
+                          className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-colors ${
+                            signatureMode === 'upload' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                          }`}
+                        >
+                          <Upload size={14} />
+                          Upload
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSignatureMode('draw')}
+                          className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-colors ${
+                            signatureMode === 'draw' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                          }`}
+                        >
+                          <PencilLine size={14} />
+                          Sign on web
+                        </button>
                       </div>
+
+                      {signatureMode === 'upload' ? (
+                        <div className="space-y-2">
+                          <input
+                            type="file"
+                            accept="image/png,image/webp"
+                            className="hidden"
+                            id="instructor-signature-upload"
+                            onChange={handleSignatureUpload}
+                          />
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              className="form-input flex-1 text-xs"
+                              value={form.signatureImageUrl}
+                              onChange={(event) => setForm((current) => ({ ...current, signatureImageUrl: event.target.value }))}
+                              placeholder="URL ลายเซ็น หรืออัปโหลด PNG/WebP"
+                            />
+                            <label htmlFor="instructor-signature-upload" className="btn btn-outline btn-sm cursor-pointer gap-1">
+                              <PenLine size={14} />
+                              อัปโหลด
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center">
+                          <button
+                            type="button"
+                            onClick={() => setShowSignaturePad(true)}
+                            className="btn btn-primary btn-sm mx-auto flex gap-2"
+                          >
+                            <PenLine size={14} /> เซ็นชื่อบนเว็บ
+                          </button>
+                          <p className="mt-3 text-[10px] font-medium text-slate-400">
+                            เซ็นผ่านหน้าจอขนาดใหญ่เพื่อความสะดวก
+                          </p>
+                        </div>
+                      )}
+
                       {form.signatureImageUrl && (
-                        <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                          <img src={getFullUrl(form.signatureImageUrl)} alt="Instructor signature preview" className="h-14 max-w-full object-contain" />
+                        <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4">
+                          <p className="mb-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">Preview</p>
+                          <img src={getFullUrl(form.signatureImageUrl)} alt="Instructor signature preview" className="h-14 max-w-full object-contain mx-auto" />
                         </div>
                       )}
                     </div>
@@ -350,8 +412,10 @@ const InstructorPresetModal = ({
                 </div>
 
                 <div className="sticky bottom-0 mt-auto flex gap-3 border-t border-slate-200 bg-slate-50/95 pb-1 pt-4 backdrop-blur">
-                  <button type="submit" className="btn btn-primary flex-1 gap-2">
-                    {editingPreset ? <Save size={16} /> : <Plus size={16} />}
+                  <button type="submit" disabled={uploading} className="btn btn-primary flex-1 gap-2">
+                    {uploading ? (
+                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    ) : editingPreset ? <Save size={16} /> : <Plus size={16} />}
                     {editingPreset ? 'บันทึกการแก้ไข' : 'เพิ่มวิทยากร'}
                   </button>
                 </div>
@@ -360,6 +424,12 @@ const InstructorPresetModal = ({
           </div>
         </div>
       </div>
+      <SignaturePadModal
+        isOpen={showSignaturePad}
+        onClose={() => setShowSignaturePad(false)}
+        onSave={handleDrawnSignature}
+        title={`เซ็นชื่อสำหรับวิทยากร: ${form.name || 'วิทยากรใหม่'}`}
+      />
     </ModalPortal>
   );
 };

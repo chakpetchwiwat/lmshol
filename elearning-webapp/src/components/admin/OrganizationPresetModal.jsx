@@ -3,6 +3,7 @@ import { Building2, CheckCircle2, Eraser, PenLine, PencilLine, Plus, Save, Searc
 import ModalPortal from '../common/ModalPortal';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import { useToast } from '../../context/useToast';
+import SignaturePadModal from '../common/SignaturePadModal';
 
 const getDefaultForm = () => ({
   name: '',
@@ -79,26 +80,8 @@ const OrganizationPresetModal = ({
   const [form, setForm] = React.useState(getDefaultForm());
   const [uploading, setUploading] = React.useState(false);
   const [signatureMode, setSignatureMode] = React.useState('upload');
-  const [drawn, setDrawn] = React.useState(false);
+  const [showSignaturePad, setShowSignaturePad] = React.useState(false);
   const signatureFileInputRef = React.useRef(null);
-  const canvasRef = React.useRef(null);
-  const isDrawingRef = React.useRef(false);
-  const lastPointRef = React.useRef(null);
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    canvas.width = SIGNATURE_WIDTH;
-    canvas.height = SIGNATURE_HEIGHT;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#0f172a';
-    ctx.lineWidth = 7;
-    setDrawn(false);
-  }, [signatureMode, editingPreset?.id]);
 
   if (!isOpen) {
     return null;
@@ -108,7 +91,7 @@ const OrganizationPresetModal = ({
     setEditingPreset(null);
     setForm(getDefaultForm());
     setSignatureMode('upload');
-    setDrawn(false);
+    setShowSignaturePad(false);
   };
 
   const filteredPresets = Array.isArray(presets)
@@ -196,55 +179,7 @@ const OrganizationPresetModal = ({
     }
   };
 
-  const getCanvasPoint = (event) => {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: ((event.clientX - rect.left) / rect.width) * SIGNATURE_WIDTH,
-      y: ((event.clientY - rect.top) / rect.height) * SIGNATURE_HEIGHT
-    };
-  };
-
-  const startDrawing = (event) => {
-    event.preventDefault();
-    isDrawingRef.current = true;
-    lastPointRef.current = getCanvasPoint(event);
-    canvasRef.current?.setPointerCapture?.(event.pointerId);
-  };
-
-  const continueDrawing = (event) => {
-    if (!isDrawingRef.current || !lastPointRef.current) return;
-
-    event.preventDefault();
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const nextPoint = getCanvasPoint(event);
-
-    ctx.beginPath();
-    ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
-    ctx.lineTo(nextPoint.x, nextPoint.y);
-    ctx.stroke();
-    lastPointRef.current = nextPoint;
-    setDrawn(true);
-  };
-
-  const stopDrawing = () => {
-    isDrawingRef.current = false;
-    lastPointRef.current = null;
-  };
-
-  const clearDrawing = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
-    setDrawn(false);
-  };
-
-  const saveDrawnSignature = async () => {
-    if (!drawn || !canvasRef.current) return;
-
-    const file = await canvasToFile(canvasRef.current);
+  const handleDrawnSignature = async (file) => {
     await uploadSignatureFile(file);
   };
 
@@ -462,31 +397,21 @@ const OrganizationPresetModal = ({
                         </div>
                       </div>
                     ) : (
-                      <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                        <div className="overflow-hidden rounded-xl border border-slate-200 bg-[linear-gradient(45deg,#f8fafc_25%,transparent_25%),linear-gradient(-45deg,#f8fafc_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f8fafc_75%),linear-gradient(-45deg,transparent_75%,#f8fafc_75%)] bg-[length:20px_20px] bg-[position:0_0,0_10px,10px_-10px,-10px_0]">
-                          <canvas
-                            ref={canvasRef}
-                            className="block aspect-[10/3] w-full touch-none bg-white/70"
-                            onPointerDown={startDrawing}
-                            onPointerMove={continueDrawing}
-                            onPointerUp={stopDrawing}
-                            onPointerCancel={stopDrawing}
-                            onPointerLeave={stopDrawing}
-                          />
+                      <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
+                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                          <PencilLine size={32} />
                         </div>
-                        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
-                          <button type="button" onClick={clearDrawing} className="btn btn-outline btn-sm gap-2">
-                            <Eraser size={14} /> Clear
-                          </button>
-                          <button
-                            type="button"
-                            onClick={saveDrawnSignature}
-                            disabled={!drawn || uploading}
-                            className="btn btn-primary btn-sm gap-2"
-                          >
-                            <CheckCircle2 size={14} /> {uploading ? 'Saving...' : 'Use this signature'}
-                          </button>
-                        </div>
+                        <h5 className="mb-2 text-sm font-black text-slate-900">เซ็นชื่อด้วยลายมือของคุณ</h5>
+                        <p className="mb-4 text-xs font-medium text-slate-500">
+                          เราได้เตรียมพื้นที่เซ็นชื่อขนาดใหญ่ไว้ให้ เพื่อความสะดวกในการใช้งาน
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setShowSignaturePad(true)}
+                          className="btn btn-primary btn-sm mx-auto flex gap-2"
+                        >
+                          <PenLine size={14} /> เปิดหน้าจอสำหรับเซ็นชื่อ
+                        </button>
                       </div>
                     )}
 
@@ -553,6 +478,12 @@ const OrganizationPresetModal = ({
           </div>
         </div>
       </div>
+      <SignaturePadModal
+        isOpen={showSignaturePad}
+        onClose={() => setShowSignaturePad(false)}
+        onSave={handleDrawnSignature}
+        title={`เซ็นชื่อสำหรับหน่วยงาน: ${form.name || 'หน่วยงานใหม่'}`}
+      />
     </ModalPortal>
   );
 };

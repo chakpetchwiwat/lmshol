@@ -48,9 +48,11 @@ const uploadToSupabase = async (req, res, { forceSubDir } = {}) => {
         }
 
         const isImage = req.file.mimetype.startsWith('image/');
-        const privateSubDirs = new Set(['certificates', 'assessments']);
+        const privateSubDirs = new Set(['certificates', 'assessments', 'signatures']);
         // Use 'secure-documents' bucket for sensitive files, 'uploads' for public images
-        const isSensitive = privateSubDirs.has(forceSubDir) || !isImage;
+        // We only treat it as sensitive if it's explicitly in a private subdirectory.
+        // General uploads (like lesson documents) should be public even if they are not images.
+        const isSensitive = privateSubDirs.has(forceSubDir);
         const bucketName = isSensitive ? 'secure-documents' : 'uploads';
         const subDir = forceSubDir || (isImage ? 'images' : 'documents');
         const ext = path.extname(req.file.originalname);
