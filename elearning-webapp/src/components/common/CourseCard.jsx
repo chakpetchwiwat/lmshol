@@ -104,7 +104,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default', onBo
               {categoryLabel}
             </span>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 flex-col items-end gap-2">
               {course.isEnrolled && (
                 <span
                   className={`inline-flex shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-black tracking-[0.04em] shadow-sm ${
