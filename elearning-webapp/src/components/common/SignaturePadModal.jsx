@@ -7,9 +7,11 @@ const SIGNATURE_HEIGHT = 300;
 
 const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นชื่อบนเว็บ' }) => {
   const canvasRef = React.useRef(null);
+  const ctxRef = React.useRef(null);
   const isDrawingRef = React.useRef(false);
   const lastPointRef = React.useRef(null);
   const canvasRectRef = React.useRef(null);
+  const scaleRef = React.useRef({ x: 1, y: 1 });
   const hasNewDrawingRef = React.useRef(false);
   const [hasNewDrawing, setHasNewDrawing] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -17,38 +19,35 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
   // Initialize Canvas
   React.useEffect(() => {
     if (isOpen) {
-      const timer = setTimeout(() => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-          canvas.width = SIGNATURE_WIDTH;
-          canvas.height = SIGNATURE_HEIGHT;
-          const ctx = canvas.getContext('2d');
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          ctx.strokeStyle = '#0f172a';
-          ctx.lineWidth = 4;
-          ctx.clearRect(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
-          hasNewDrawingRef.current = false;
-          setHasNewDrawing(false);
-        }
-      }, 150);
-      return () => clearTimeout(timer);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.width = SIGNATURE_WIDTH;
+        canvas.height = SIGNATURE_HEIGHT;
+        const ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
+        ctxRef.current = ctx;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 4;
+        ctx.clearRect(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
+        hasNewDrawingRef.current = false;
+        setHasNewDrawing(false);
+      }
     }
+    return undefined;
   }, [isOpen]);
 
   const getCanvasPoint = (event) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvasRectRef.current || canvas.getBoundingClientRect();
-    const scaleX = SIGNATURE_WIDTH / rect.width;
-    const scaleY = SIGNATURE_HEIGHT / rect.height;
 
     const clientX = event.clientX || (event.touches && event.touches[0].clientX);
     const clientY = event.clientY || (event.touches && event.touches[0].clientY);
 
     return {
-      x: (clientX - rect.left) * scaleX,
-      y: (clientY - rect.top) * scaleY,
+      x: (clientX - rect.left) * scaleRef.current.x,
+      y: (clientY - rect.top) * scaleRef.current.y,
     };
   };
 
@@ -56,6 +55,12 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
     event.preventDefault();
     isDrawingRef.current = true;
     canvasRectRef.current = canvasRef.current?.getBoundingClientRect() || null;
+    scaleRef.current = canvasRectRef.current
+      ? {
+          x: SIGNATURE_WIDTH / canvasRectRef.current.width,
+          y: SIGNATURE_HEIGHT / canvasRectRef.current.height,
+        }
+      : { x: 1, y: 1 };
     lastPointRef.current = getCanvasPoint(event);
     if (canvasRef.current?.setPointerCapture) {
       canvasRef.current.setPointerCapture(event.pointerId);
@@ -67,7 +72,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
     event.preventDefault();
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = ctxRef.current || canvas.getContext('2d');
     const events = typeof event.getCoalescedEvents === 'function'
       ? event.getCoalescedEvents()
       : typeof event.nativeEvent?.getCoalescedEvents === 'function'
@@ -79,7 +84,12 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
 
       ctx.beginPath();
       ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
-      ctx.lineTo(nextPoint.x, nextPoint.y);
+      ctx.quadraticCurveTo(
+        lastPointRef.current.x,
+        lastPointRef.current.y,
+        (lastPointRef.current.x + nextPoint.x) / 2,
+        (lastPointRef.current.y + nextPoint.y) / 2,
+      );
       ctx.stroke();
 
       lastPointRef.current = nextPoint;
@@ -95,12 +105,13 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
     isDrawingRef.current = false;
     lastPointRef.current = null;
     canvasRectRef.current = null;
+    scaleRef.current = { x: 1, y: 1 };
   };
 
   const clearDrawing = () => {
     const canvas = canvasRef.current;
     if (canvas) {
-      const ctx = canvas.getContext('2d');
+      const ctx = ctxRef.current || canvas.getContext('2d');
       ctx.clearRect(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
       hasNewDrawingRef.current = false;
       setHasNewDrawing(false);
@@ -127,6 +138,32 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
       setIsSaving(false);
     }
   };
+
+  React.useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return undefined;
+
+    const pointerMoveEvent = 'onpointerrawupdate' in window ? 'pointerrawupdate' : 'pointermove';
+    const listenerOptions = { passive: false };
+
+    canvas.addEventListener('pointerdown', startDrawing, listenerOptions);
+    canvas.addEventListener(pointerMoveEvent, continueDrawing, listenerOptions);
+    canvas.addEventListener('pointerup', stopDrawing);
+    canvas.addEventListener('pointercancel', stopDrawing);
+    canvas.addEventListener('lostpointercapture', stopDrawing);
+    canvas.addEventListener('pointerleave', stopDrawing);
+
+    return () => {
+      canvas.removeEventListener('pointerdown', startDrawing, listenerOptions);
+      canvas.removeEventListener(pointerMoveEvent, continueDrawing, listenerOptions);
+      canvas.removeEventListener('pointerup', stopDrawing);
+      canvas.removeEventListener('pointercancel', stopDrawing);
+      canvas.removeEventListener('lostpointercapture', stopDrawing);
+      canvas.removeEventListener('pointerleave', stopDrawing);
+    };
+  }, [isOpen]);
 
   return (
     <ModalPortal isOpen={isOpen}>
@@ -163,11 +200,6 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
               <canvas
                 ref={canvasRef}
                 className="relative z-10 block h-full w-full touch-none cursor-crosshair"
-                onPointerDown={startDrawing}
-                onPointerMove={continueDrawing}
-                onPointerUp={stopDrawing}
-                onPointerCancel={stopDrawing}
-                onPointerLeave={stopDrawing}
               />
               
               {!hasNewDrawing && (
