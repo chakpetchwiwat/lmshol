@@ -450,7 +450,14 @@ const gradeAssessmentSubmission = async (actor, submissionId, data = {}) => {
           id: true,
           title: true,
           passScore: true,
-          points: true
+          points: true,
+          courseId: true,
+          course: {
+            select: {
+              id: true,
+              title: true
+            }
+          }
         }
       },
       user: {

@@ -55,7 +55,7 @@ const SortableLessonItem = ({ lesson, idx, onEdit, onDelete, readOnly }) => {
       </div>
       
       {!readOnly && (
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex gap-1 transition-opacity">
           <button
             type="button"
             onClick={() => onEdit(lesson)}

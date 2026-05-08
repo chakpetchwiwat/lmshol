@@ -545,8 +545,9 @@ const CourseManagement = () => {
         onSaveCourse={handleSaveCourse}
         onImageUpload={handleImageUpload}
         onEditLesson={(lesson) => {
+          if (!lesson) return;
           setEditingLesson(lesson);
-          setLessonForm(lesson);
+          setLessonForm({ ...lesson });
           setShowLessonModal(true);
         }}
         onDeleteLesson={handleDeleteLesson}

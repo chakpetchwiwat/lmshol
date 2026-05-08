@@ -72,15 +72,15 @@ const CustomSelect = ({
 
   const dropdownList = (
     <div 
+      className="custom-select-dropdown mt-2 max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_10px_40px_-10px_rgba(15,23,42,0.15)] animate-in fade-in zoom-in-95 duration-200"
       style={{
         position: 'fixed',
         top: `${coords.top}px`,
         left: `${coords.left}px`,
         width: `${coords.width}px`,
-        zIndex: 9999
+        zIndex: 9999,
+        overscrollBehavior: 'contain'
       }}
-
-      className="custom-select-dropdown mt-2 max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_10px_40px_-10px_rgba(15,23,42,0.15)] animate-in fade-in zoom-in-95 duration-200"
     >
       {options.length === 0 ? (
         <div className="px-4 py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">

@@ -15,10 +15,10 @@ import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 
 const STATUS_CONFIG = {
-  SUBMITTED: { label: 'Waiting', color: 'text-amber-600 bg-amber-50 border-amber-100', icon: <AlertCircle size={14} /> },
-  PASSED: { label: 'Passed', color: 'text-emerald-600 bg-emerald-50 border-emerald-100', icon: <CheckCircle size={14} /> },
-  FAILED: { label: 'Failed', color: 'text-rose-600 bg-rose-50 border-rose-100', icon: <XCircle size={14} /> },
-  NEEDS_REVISION: { label: 'Revision', color: 'text-sky-600 bg-sky-50 border-sky-100', icon: <RefreshCw size={14} /> },
+  SUBMITTED: { label: 'รอตรวจ', color: 'text-amber-600 bg-amber-50 border-amber-100', icon: <AlertCircle size={14} /> },
+  PASSED: { label: 'ผ่านแล้ว', color: 'text-emerald-600 bg-emerald-50 border-emerald-100', icon: <CheckCircle size={14} /> },
+  FAILED: { label: 'ไม่ผ่าน', color: 'text-rose-600 bg-rose-50 border-rose-100', icon: <XCircle size={14} /> },
+  NEEDS_REVISION: { label: 'ต้องแก้ไข', color: 'text-sky-600 bg-sky-50 border-sky-100', icon: <RefreshCw size={14} /> },
 };
 
 const AssessmentGrading = () => {
@@ -175,6 +175,12 @@ const AssessmentGrading = () => {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2 mb-6">
           <button 
+            onClick={() => setStatusFilter('ALL')}
+            className={`px-6 py-2.5 rounded-full text-sm font-black transition-all ${statusFilter === 'ALL' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+          >
+            ทั้งหมด
+          </button>
+          <button 
             onClick={() => setStatusFilter('SUBMITTED')}
             className={`px-6 py-2.5 rounded-full text-sm font-black transition-all ${statusFilter === 'SUBMITTED' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
@@ -187,10 +193,16 @@ const AssessmentGrading = () => {
             ผ่านแล้ว
           </button>
           <button 
-            onClick={() => setStatusFilter('ALL')}
-            className={`px-6 py-2.5 rounded-full text-sm font-black transition-all ${statusFilter === 'ALL' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+            onClick={() => setStatusFilter('NEEDS_REVISION')}
+            className={`px-6 py-2.5 rounded-full text-sm font-black transition-all ${statusFilter === 'NEEDS_REVISION' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
           >
-            ทั้งหมด
+            ต้องแก้ไข
+          </button>
+          <button 
+            onClick={() => setStatusFilter('FAILED')}
+            className={`px-6 py-2.5 rounded-full text-sm font-black transition-all ${statusFilter === 'FAILED' ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}
+          >
+            ไม่ผ่าน
           </button>
         </div>
 
@@ -200,11 +212,11 @@ const AssessmentGrading = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100">
-                  <th className="px-6 py-5 text-left text-xs font-black text-slate-400 uppercase tracking-widest">ผู้เรียน</th>
-                  <th className="px-6 py-5 text-left text-xs font-black text-slate-400 uppercase tracking-widest">คอร์ส / บทเรียน</th>
-                  <th className="px-6 py-5 text-left text-xs font-black text-slate-400 uppercase tracking-widest">วันที่ส่ง</th>
-                  <th className="px-6 py-5 text-left text-xs font-black text-slate-400 uppercase tracking-widest">สถานะ</th>
-                  <th className="px-6 py-5 text-right text-xs font-black text-slate-400 uppercase tracking-widest">จัดการ</th>
+                  <th className="px-6 py-4 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">ผู้เรียน</th>
+                  <th className="px-6 py-4 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">คอร์ส / บทเรียน</th>
+                  <th className="px-6 py-4 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">วันที่ส่ง</th>
+                  <th className="px-6 py-4 text-left text-[11px] font-black text-slate-400 uppercase tracking-widest">สถานะ</th>
+                  <th className="px-6 py-4 text-right text-[11px] font-black text-slate-400 uppercase tracking-widest">จัดการ</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -389,12 +401,14 @@ const AssessmentGrading = () => {
               <button 
                 onClick={submitGrade}
                 disabled={isSubmitting}
-                className="flex-[2] btn btn-primary py-4 font-black shadow-lg shadow-primary/20 disabled:opacity-50"
+                className="flex-[2] py-4 bg-primary text-white rounded-3xl font-black shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all active:scale-95 disabled:opacity-50"
               >
                 {isSubmitting ? (
-                  <RefreshCw size={20} className="animate-spin" />
+                  <RefreshCw size={20} className="animate-spin mx-auto" />
                 ) : (
-                  <>บันทึกผลการตรวจ <CheckCircle size={20} className="ml-2" /></>
+                  <div className="flex items-center justify-center gap-2">
+                    บันทึกผลการตรวจ <CheckCircle size={20} />
+                  </div>
                 )}
               </button>
             </div>
