@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useEffect, useState } from 'react';
 import { adminAPI } from '../utils/api';
 import { FILTER_VALUES } from '../utils/constants/filters';
@@ -171,12 +171,15 @@ const useDashboardData = ({
                 });
                 
                 const reports = summaryResponse.data || [];
+                
+                if (Array.isArray(reports)) {
+                    reports.sort((left, right) => {
+                        const leftDate = new Date(left.expiryDate || '9999-12-31').getTime();
+                        const rightDate = new Date(right.expiryDate || '9999-12-31').getTime();
+                        return leftDate - rightDate;
+                    });
+                }
 
-                reports.sort((left, right) => {
-                    const leftDate = new Date(left.expiryDate || '9999-12-31').getTime();
-                    const rightDate = new Date(right.expiryDate || '9999-12-31').getTime();
-                    return leftDate - rightDate;
-                });
 
                 if (isMounted) {
                     setGoalTrackingItems(reports.map(report => ({
