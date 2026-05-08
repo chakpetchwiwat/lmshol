@@ -9,9 +9,9 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
   const canvasRef = React.useRef(null);
   const isDrawingRef = React.useRef(false);
   const lastPointRef = React.useRef(null);
-  const [drawn, setDrawn] = React.useState(false);
-  const [imgLoaded, setImgLoaded] = React.useState(false);
+  const [hasNewDrawing, setHasNewDrawing] = React.useState(false);
   const [loadingImg, setLoadingImg] = React.useState(false);
+  const [showInitial, setShowInitial] = React.useState(false);
 
   // Initialize Canvas
   React.useEffect(() => {
@@ -27,30 +27,29 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
           ctx.strokeStyle = '#0f172a';
           ctx.lineWidth = 5;
           ctx.clearRect(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
-          setDrawn(false);
+          setHasNewDrawing(false);
         }
       }, 150);
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
-  // Handle Initial Image Loading
+  // Handle Initial Image State
   React.useEffect(() => {
     if (isOpen && initialImageUrl) {
       setLoadingImg(true);
-      setImgLoaded(false);
       const img = new Image();
       img.src = initialImageUrl;
       img.onload = () => {
-        setImgLoaded(true);
+        setShowInitial(true);
         setLoadingImg(false);
-        // We mark it as "drawn" if there's an initial image so they can "save" it as is
-        setDrawn(true); 
       };
       img.onerror = () => {
         setLoadingImg(false);
         console.error('Failed to load initial signature image');
       };
+    } else {
+        setShowInitial(false);
     }
   }, [isOpen, initialImageUrl]);
 
@@ -93,7 +92,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
     ctx.stroke();
 
     lastPointRef.current = nextPoint;
-    if (!drawn) setDrawn(true);
+    if (!hasNewDrawing) setHasNewDrawing(true);
   };
 
   const stopDrawing = () => {
@@ -106,55 +105,26 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
     if (canvas) {
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
-      setDrawn(false);
-      setImgLoaded(false); // Hide the background image too
+      setHasNewDrawing(false);
+      setShowInitial(false); // Clear the reference to old signature too
     }
   };
 
   const handleSave = () => {
-    if (!drawn || !canvasRef.current) return;
+    if (!canvasRef.current) return;
 
-    // We create a temporary canvas to merge the background image and the drawing 
-    // IF the user hasn't cleared the drawing.
-    // However, to keep it simple and high-quality, we just save the current canvas.
-    // If they want the background image saved too, we draw it onto the canvas before toBlob.
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    if (imgLoaded && initialImageUrl) {
-        // Option A: They drew over it, or just want to keep it.
-        // We'll draw the image behind the current content.
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = SIGNATURE_WIDTH;
-        tempCanvas.height = SIGNATURE_HEIGHT;
-        const tempCtx = tempCanvas.getContext('2d');
-        
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = initialImageUrl;
-        img.onload = () => {
-            tempCtx.drawImage(img, 0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
-            tempCtx.drawImage(canvas, 0, 0);
-            tempCanvas.toBlob((blob) => {
-                const file = new File([blob], `signature-${Date.now()}.png`, { type: 'image/png' });
-                onSave(file);
-                onClose();
-            }, 'image/png');
-        };
-        img.onerror = () => {
-             // Fallback: save only the canvas
-             canvas.toBlob((blob) => {
-                const file = new File([blob], `signature-${Date.now()}.png`, { type: 'image/png' });
-                onSave(file);
-                onClose();
-            }, 'image/png');
-        }
-    } else {
-        canvas.toBlob((blob) => {
+    // If they drew something new, save the new one
+    if (hasNewDrawing) {
+        canvasRef.current.toBlob((blob) => {
             const file = new File([blob], `signature-${Date.now()}.png`, { type: 'image/png' });
             onSave(file);
             onClose();
         }, 'image/png');
+    } else {
+        // If they didn't draw anything, but there's an old one, just close (keep old)
+        // Or if they cleared everything, they might want to save an empty one?
+        // Usually, clicking save without drawing means "I'm happy with what's there"
+        onClose();
     }
   };
 
@@ -172,7 +142,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
               </div>
               <div>
                 <h3 className="text-xl font-black text-slate-900">{title}</h3>
-                <p className="text-sm font-medium text-slate-500">เซ็นชื่อในกรอบด้านล่างเพื่ออัปเดตลายเซ็น</p>
+                <p className="text-sm font-medium text-slate-500">เซ็นชื่อในกรอบด้านล่าง หรือใช้ของเดิมที่มีอยู่</p>
               </div>
             </div>
             <button
@@ -187,9 +157,9 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
           {/* Canvas Body */}
           <div className="p-8">
             <div className="relative aspect-[10/3] w-full overflow-hidden rounded-3xl border-2 border-slate-200 bg-white transition-all focus-within:border-primary/50 shadow-inner">
-              {/* Overlay: Initial Image Background */}
-              {imgLoaded && initialImageUrl && (
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-4 opacity-40">
+              {/* Overlay: Initial Image Background (Lower layer) */}
+              {showInitial && initialImageUrl && !hasNewDrawing && (
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-4 opacity-30">
                   <img src={initialImageUrl} alt="Existing signature" className="h-full w-full object-contain" />
                 </div>
               )}
@@ -207,7 +177,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
                 onPointerLeave={stopDrawing}
               />
               
-              {!drawn && !loadingImg && (
+              {!hasNewDrawing && !loadingImg && !showInitial && (
                 <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
                   <p className="text-slate-200 font-black uppercase tracking-[0.2em] text-2xl md:text-4xl opacity-30">
                     SIGN HERE
@@ -238,16 +208,15 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
               className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white font-black text-slate-600 transition-all hover:bg-slate-100 active:scale-95 shadow-sm"
             >
               <Eraser size={20} />
-              ล้างพื้นที่เซ็น
+              ล้างและเซ็นใหม่
             </button>
             <button
               type="button"
               onClick={handleSave}
-              disabled={!drawn || loadingImg}
               className="flex h-14 flex-[2] items-center justify-center gap-2 rounded-2xl bg-primary font-black text-white shadow-xl shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-2xl active:scale-95 disabled:opacity-50 disabled:shadow-none disabled:active:scale-100"
             >
               <CheckCircle2 size={20} />
-              {imgLoaded ? 'บันทึกการเปลี่ยนแปลง' : 'บันทึกและใช้งานลายเซ็น'}
+              {hasNewDrawing ? 'บันทึกลายเซ็นใหม่' : (showInitial ? 'ใช้ลายเซ็นเดิม' : 'ตกลง')}
             </button>
           </div>
         </div>

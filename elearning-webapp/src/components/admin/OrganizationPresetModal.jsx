@@ -375,7 +375,7 @@ const OrganizationPresetModal = ({
                             type="text"
                             className="form-input w-full rounded-xl bg-white text-[10px] font-medium border-slate-200 shadow-sm"
                             value={form.signatureImageUrl}
-                            onChange={(e) => setForm(c => ({ ...current, signatureImageUrl: e.target.value }))}
+                            onChange={(e) => setForm(c => ({ ...c, signatureImageUrl: e.target.value }))}
                             placeholder="Image URL ลายเซ็น..."
                         />
                       </div>
@@ -416,7 +416,7 @@ const OrganizationPresetModal = ({
                                 type="text"
                                 className="form-input w-full rounded-xl bg-white text-[10px] font-medium border-slate-200 shadow-sm"
                                 value={form.stampImageUrl}
-                                onChange={(e) => setForm(c => ({ ...current, stampImageUrl: e.target.value }))}
+                                onChange={(e) => setForm(c => ({ ...c, stampImageUrl: e.target.value }))}
                                 placeholder="Image URL ตราประทับ..."
                             />
                         </div>

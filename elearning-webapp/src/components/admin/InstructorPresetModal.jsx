@@ -350,7 +350,7 @@ const InstructorPresetModal = ({
                                 type="text"
                                 className="form-input w-full rounded-xl bg-white text-xs border-slate-200"
                                 value={form.signatureTitle}
-                                onChange={(event) => setForm((current) => ({ ...current, signatureTitle: event.target.value }))}
+                                onChange={(event) => setForm((c) => ({ ...c, signatureTitle: event.target.value }))}
                                 placeholder="เช่น Instructor, Specialist"
                             />
                         </div>
