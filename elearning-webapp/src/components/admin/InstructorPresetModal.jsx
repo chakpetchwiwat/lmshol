@@ -120,7 +120,7 @@ const InstructorPresetModal = ({
       setUploading(true);
       const response = await adminAPI.uploadSignatureFile(file);
       setForm((current) => ({ ...current, signatureImageUrl: response.data.fileUrl }));
-      toast.success('บันทึกลายเซ็นเรียบร้อย');
+      toast.success('บันทึกลายเซ็นเข้าแบบฟอร์มแล้ว');
     } catch (error) {
       console.error('Upload instructor signature error:', error);
       toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกลายเซ็นได้');

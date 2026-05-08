@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, CheckCircle2, Eraser, PenLine, PencilLine, Plus, Save, Search, ShieldCheck, Trash2, Upload, X } from 'lucide-react';
+import { Building2, ImagePlus, PenLine, PencilLine, Plus, Save, Search, ShieldCheck, Trash2, Upload, X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import { useToast } from '../../context/useToast';
@@ -11,59 +11,6 @@ const getDefaultForm = () => ({
   signatureImageUrl: '',
   stampImageUrl: '',
 });
-
-const SIGNATURE_WIDTH = 1000;
-const SIGNATURE_HEIGHT = 300;
-
-const fileToImage = (file) => new Promise((resolve, reject) => {
-  const url = URL.createObjectURL(file);
-  const image = new Image();
-
-  image.onload = () => {
-    URL.revokeObjectURL(url);
-    resolve(image);
-  };
-  image.onerror = () => {
-    URL.revokeObjectURL(url);
-    reject(new Error('Unable to read image.'));
-  };
-  image.src = url;
-});
-
-const canvasToFile = (canvas) => new Promise((resolve) => {
-  canvas.toBlob((blob) => {
-    resolve(new File([blob], `organization-signature-${Date.now()}.png`, { type: 'image/png' }));
-  }, 'image/png');
-});
-
-const normalizeSignatureFile = async (file) => {
-  const image = await fileToImage(file);
-  if (image.naturalWidth !== SIGNATURE_WIDTH || image.naturalHeight !== SIGNATURE_HEIGHT) {
-    throw new Error('Signature image must be exactly 1000 x 300 px.');
-  }
-
-  const canvas = document.createElement('canvas');
-  canvas.width = SIGNATURE_WIDTH;
-  canvas.height = SIGNATURE_HEIGHT;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
-  ctx.drawImage(image, 0, 0);
-
-  const pixels = ctx.getImageData(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT).data;
-  let hasTransparentPixel = false;
-  for (let index = 3; index < pixels.length; index += 4) {
-    if (pixels[index] < 255) {
-      hasTransparentPixel = true;
-      break;
-    }
-  }
-
-  if (!hasTransparentPixel) {
-    throw new Error('Signature image must have a transparent background.');
-  }
-
-  return canvasToFile(canvas);
-};
 
 const OrganizationPresetModal = ({
   isOpen,
@@ -81,6 +28,7 @@ const OrganizationPresetModal = ({
   const [uploading, setUploading] = React.useState(false);
   const [signatureMode, setSignatureMode] = React.useState('upload');
   const [showSignaturePad, setShowSignaturePad] = React.useState(false);
+  const stampFileInputRef = React.useRef(null);
   const signatureFileInputRef = React.useRef(null);
 
   if (!isOpen) {
@@ -127,28 +75,28 @@ const OrganizationPresetModal = ({
     }
   };
 
-  const handleFileUpload = async (event, field) => {
+  const handleStampUpload = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     try {
       setUploading(true);
-      const uploadRequest = field === 'stampImageUrl'
-        ? adminAPI.uploadFile(file)
-        : adminAPI.uploadSignatureFile(file);
-      const response = await uploadRequest;
-      setForm((current) => ({ ...current, [field]: response.data.fileUrl }));
-      toast.success('อัปโหลดไฟล์เรียบร้อย');
+      const response = await adminAPI.uploadFile(file);
+      setForm((current) => ({ ...current, stampImageUrl: response.data.fileUrl }));
+      toast.success('อัปโหลดตราประทับเรียบร้อย');
     } catch (error) {
-      console.error(`Upload organization ${field} error:`, error);
-      toast.error(error.response?.data?.message || 'อัปโหลดไฟล์ไม่สำเร็จ');
+      console.error('Upload organization stamp error:', error);
+      toast.error(error.response?.data?.message || 'อัปโหลดตราประทับไม่สำเร็จ');
     } finally {
       setUploading(false);
       event.target.value = '';
     }
   };
 
-  const uploadSignatureFile = async (file) => {
+  const handleSignatureUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
     try {
       setUploading(true);
       const response = await adminAPI.uploadSignatureFile(file);
@@ -156,31 +104,25 @@ const OrganizationPresetModal = ({
       toast.success('อัปโหลดลายเซ็นเรียบร้อย');
     } catch (error) {
       console.error('Upload organization signature error:', error);
-      toast.error(error.response?.data?.message || error.message || 'อัปโหลดลายเซ็นไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'อัปโหลดลายเซ็นไม่สำเร็จ');
     } finally {
       setUploading(false);
-    }
-  };
-
-  const handleSignatureFile = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      if (!['image/png', 'image/webp'].includes(file.type)) {
-        throw new Error('Signature must be PNG or WebP.');
-      }
-      const normalizedFile = await normalizeSignatureFile(file);
-      await uploadSignatureFile(normalizedFile);
-    } catch (error) {
-      toast.error(error.message || 'Invalid signature image.');
-    } finally {
       event.target.value = '';
     }
   };
 
   const handleDrawnSignature = async (file) => {
-    await uploadSignatureFile(file);
+    try {
+      setUploading(true);
+      const response = await adminAPI.uploadSignatureFile(file);
+      setForm((current) => ({ ...current, signatureImageUrl: response.data.fileUrl }));
+      toast.success('บันทึกลายเซ็นเข้าแบบฟอร์มแล้ว');
+    } catch (error) {
+      console.error('Upload organization signature error:', error);
+      toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกลายเซ็นได้');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -193,7 +135,7 @@ const OrganizationPresetModal = ({
             resetForm();
             onClose();
           }}
-          aria-label="ปิดหน้าต่างจัดการพรีเซ็ตหน่วยงาน"
+          aria-label="ปิดหน้าต่างจัดการหน่วยงาน"
         />
 
         <div className="relative flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)]">
@@ -342,18 +284,10 @@ const OrganizationPresetModal = ({
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="rounded-2xl border border-slate-200 bg-white p-4">
                     <div className="mb-4">
-                      <p className="text-sm font-black text-slate-900">ไฟล์ลายเซ็น (กลาง)</p>
-                      <p className="text-[10px] text-slate-500">PNG พื้นหลังโปร่งใส</p>
+                      <p className="text-sm font-black text-slate-900">ลายเซ็น (กลาง)</p>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">ใช้เซ็นในเกียรติบัตร</p>
                     </div>
                     
-                    <input
-                      ref={signatureFileInputRef}
-                      type="file"
-                      accept="image/png,image/webp"
-                      className="hidden"
-                      onChange={handleSignatureFile}
-                    />
-
                     <div className="mb-3 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
                       <button
                         type="button"
@@ -378,90 +312,88 @@ const OrganizationPresetModal = ({
                     </div>
 
                     {signatureMode === 'upload' ? (
-                      <div className="mb-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4">
-                        <div className="flex flex-col gap-3">
-                          <div>
-                            <p className="text-sm font-black text-slate-900">Upload transparent signature</p>
-                            <p className="mt-1 text-xs font-bold leading-relaxed text-slate-500">
-                              PNG or WebP only. Transparent background. Exact size: 1000 x 300 px.
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => signatureFileInputRef.current?.click()}
-                            disabled={uploading}
-                            className="btn btn-outline btn-sm inline-flex items-center justify-center gap-2"
-                          >
-                            <Upload size={14} /> {uploading ? 'Uploading...' : 'Choose file'}
+                      <div className="mb-3 space-y-2">
+                        <input
+                          ref={signatureFileInputRef}
+                          type="file"
+                          accept="image/png,image/webp"
+                          className="hidden"
+                          onChange={handleSignatureUpload}
+                        />
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            className="form-input flex-1 text-[10px]"
+                            value={form.signatureImageUrl}
+                            onChange={(e) => setForm(c => ({ ...c, signatureImageUrl: e.target.value }))}
+                            placeholder="URL ลายเซ็น หรืออัปโหลด"
+                          />
+                          <button type="button" onClick={() => signatureFileInputRef.current?.click()} className="btn btn-outline btn-sm shrink-0">
+                            <Upload size={14} />
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
-                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-                          <PencilLine size={32} />
-                        </div>
-                        <h5 className="mb-2 text-sm font-black text-slate-900">เซ็นชื่อด้วยลายมือของคุณ</h5>
-                        <p className="mb-4 text-xs font-medium text-slate-500">
-                          เราได้เตรียมพื้นที่เซ็นชื่อขนาดใหญ่ไว้ให้ เพื่อความสะดวกในการใช้งาน
-                        </p>
+                      <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
                         <button
                           type="button"
                           onClick={() => setShowSignaturePad(true)}
                           className="btn btn-primary btn-sm mx-auto flex gap-2"
                         >
-                          <PenLine size={14} /> เปิดหน้าจอสำหรับเซ็นชื่อ
+                          <PenLine size={14} /> เปิดหน้าจอเซ็นชื่อ
                         </button>
+                        <p className="mt-2 text-[10px] font-medium text-slate-400">
+                          เซ็นผ่านหน้าจอขนาดใหญ่เพื่อความชัดเจน
+                        </p>
                       </div>
                     )}
 
-                    {form.signatureImageUrl ? (
-                      <div className="mb-3 overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
-                        <img src={getFullUrl(form.signatureImageUrl)} alt="Signature preview" className="h-20 w-full object-contain p-3" />
+                    {form.signatureImageUrl && (
+                      <div className="mt-2 rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+                        <p className="mb-1 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Preview</p>
+                        <img src={getFullUrl(form.signatureImageUrl)} alt="Signature preview" className="h-12 w-full object-contain" />
                       </div>
-                    ) : null}
-                    <input
-                      type="text"
-                      className="form-input text-[10px] w-full"
-                      value={form.signatureImageUrl}
-                      onChange={(e) => setForm(c => ({ ...c, signatureImageUrl: e.target.value }))}
-                      placeholder="หรือใส่ URL ลายเซ็น"
-                    />
+                    )}
                   </div>
 
                   <div className="rounded-2xl border border-slate-200 bg-white p-4">
                     <div className="mb-4">
                       <p className="text-sm font-black text-slate-900">ตราประทับองค์กร</p>
-                      <p className="text-[10px] text-slate-500">สำหรับแสดงบนเกียรติบัตร แนะนำ PNG/JPEG เพื่อให้ติดใน PDF</p>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">แนะนำ PNG/JPEG</p>
                     </div>
 
                     <input
+                      ref={stampFileInputRef}
                       type="file"
                       accept="image/png,image/jpeg"
                       className="hidden"
-                      id="org-stamp-upload"
-                      onChange={(e) => handleFileUpload(e, 'stampImageUrl')}
+                      onChange={handleStampUpload}
                     />
 
-                    {form.stampImageUrl ? (
-                      <div className="group relative mb-3 aspect-square w-24 mx-auto overflow-hidden rounded-xl bg-slate-50 border border-slate-100">
-                        <img src={getFullUrl(form.stampImageUrl)} alt="Stamp preview" className="h-full w-full object-contain p-2" />
-                        <label htmlFor="org-stamp-upload" className="absolute inset-0 flex cursor-pointer items-center justify-center bg-slate-900/40 opacity-0 transition-opacity group-hover:opacity-100">
-                          <Plus className="text-white" size={20} />
-                        </label>
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="group relative aspect-square w-20 overflow-hidden rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
+                        {form.stampImageUrl ? (
+                          <img src={getFullUrl(form.stampImageUrl)} alt="Stamp preview" className="h-full w-full object-contain p-2" />
+                        ) : (
+                          <Building2 className="text-slate-300" size={32} />
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => stampFileInputRef.current?.click()}
+                          className="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                          <ImagePlus className="text-white" size={20} />
+                        </button>
                       </div>
-                    ) : (
-                      <label htmlFor="org-stamp-upload" className="mb-3 aspect-square w-24 mx-auto flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 transition-colors hover:border-primary/50 hover:bg-primary/5">
-                        <Plus className="text-slate-400" size={20} />
-                      </label>
-                    )}
-                    <input
-                      type="text"
-                      className="form-input text-[10px] w-full"
-                      value={form.stampImageUrl}
-                      onChange={(e) => setForm(c => ({ ...c, stampImageUrl: e.target.value }))}
-                      placeholder="หรือใส่ URL ตราประทับ"
-                    />
+                      
+                      <input
+                        type="text"
+                        className="form-input text-[10px] w-full"
+                        value={form.stampImageUrl}
+                        onChange={(e) => setForm(c => ({ ...c, stampImageUrl: e.target.value }))}
+                        placeholder="URL ตราประทับ หรืออัปโหลดด้านบน"
+                      />
+                    </div>
                   </div>
                 </div>
 
