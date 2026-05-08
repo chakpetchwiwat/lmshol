@@ -38,6 +38,14 @@ export const getFullUrl = (url) => {
   return url;
 };
 
+export const isSignatureStorageKey = (url) => Boolean(url && !url.startsWith('http') && url.startsWith('signatures/'));
+
+export const getSignaturePreviewUrl = async (fileKey) => {
+  if (!isSignatureStorageKey(fileKey)) return getFullUrl(fileKey);
+  const response = await api.get('/upload/signature-url', { params: { key: fileKey } });
+  return response?.data?.url || '';
+};
+
 export const DEFAULT_COURSE_IMAGE = DEFAULT_VALUES.DEFAULT_COURSE_IMAGE;
 const api = axios.create({
   baseURL: API_URL,

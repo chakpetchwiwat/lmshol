@@ -1,6 +1,7 @@
 import React from 'react';
 import { Check, Eye } from 'lucide-react';
 import { getFullUrl } from '../../utils/api';
+import SignatureImage from '../common/SignatureImage';
 
 const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) => {
   const isFull = size === 'full';
@@ -28,7 +29,7 @@ const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) =>
             ) : null}
             <div className="relative mb-[0.2em] flex h-[2.5em] w-full items-end justify-center border-b border-slate-300 pb-1">
               {slot.signatureImageUrl ? (
-                <img src={getFullUrl(slot.signatureImageUrl)} alt="" className="max-h-full max-w-full object-contain" />
+                <SignatureImage src={slot.signatureImageUrl} alt="" className="max-h-full max-w-full object-contain" />
               ) : (
                 <span className="text-[0.5em] font-black uppercase italic tracking-widest text-slate-200">Signature</span>
               )}

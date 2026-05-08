@@ -1,6 +1,7 @@
 import React from 'react';
 import { Settings, ChevronRight, Bell, Shield, PenLine, Upload, PencilLine } from 'lucide-react';
 import SignaturePadModal from '../common/SignaturePadModal';
+import SignatureImage from '../common/SignatureImage';
 import { getFullUrl } from '../../utils/api';
 
 const ProfileSettings = ({
@@ -16,6 +17,7 @@ const ProfileSettings = ({
 }) => {
   const [signatureTitle, setSignatureTitle] = React.useState(user?.signatureTitle || 'Instructor');
   const [signatureImageUrl, setSignatureImageUrl] = React.useState(user?.signatureImageUrl || '');
+  const [signaturePreviewUrl, setSignaturePreviewUrl] = React.useState('');
   const [signatureMode, setSignatureMode] = React.useState('upload');
   const [setupOpen, setSetupOpen] = React.useState(false);
   const [showSignaturePad, setShowSignaturePad] = React.useState(false);
@@ -24,6 +26,7 @@ const ProfileSettings = ({
   React.useEffect(() => {
     setSignatureTitle(user?.signatureTitle || 'Instructor');
     setSignatureImageUrl(user?.signatureImageUrl || '');
+    setSignaturePreviewUrl('');
     setSetupOpen(false);
   }, [user?.signatureImageUrl, user?.signatureTitle]);
 
@@ -43,8 +46,12 @@ const ProfileSettings = ({
       // but for simplicity on user side, we'll trust the upload or let the backend handle it.
       // Actually, it's better to keep the same validation if possible.
       const uploaded = await onUploadSignature(file);
-      if (uploaded?.fileUrl) {
-        setSignatureImageUrl(uploaded.fileUrl);
+      const signatureUrl = uploaded?.fileUrl || uploaded?.fileKey;
+      if (signatureUrl) {
+        setSignatureImageUrl(signatureUrl);
+        setSignaturePreviewUrl(uploaded?.signedUrl || '');
+      } else {
+        throw new Error('Unable to upload signature.');
       }
     } catch (error) {
       window.alert(error.message || 'Invalid signature image.');
@@ -55,9 +62,13 @@ const ProfileSettings = ({
 
   const handleDrawnSignature = async (file) => {
     const uploaded = await onUploadSignature(file);
-    if (uploaded?.fileUrl) {
-      setSignatureImageUrl(uploaded.fileUrl);
+    const signatureUrl = uploaded?.fileUrl || uploaded?.fileKey;
+    if (signatureUrl) {
+      setSignatureImageUrl(signatureUrl);
+      setSignaturePreviewUrl(uploaded?.signedUrl || '');
+      return;
     }
+    throw new Error('Unable to upload signature.');
   };
 
   return (
@@ -115,7 +126,7 @@ const ProfileSettings = ({
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <p className="mb-2 text-[11px] font-black uppercase tracking-wider text-slate-400">Current signature</p>
-                    <img src={signatureImageUrl} alt="Instructor signature" className="h-16 max-w-full object-contain" />
+                    <SignatureImage src={signatureImageUrl} previewSrc={signaturePreviewUrl} alt="Instructor signature" className="h-16 max-w-full object-contain" />
                   </div>
                   <button
                     type="button"
@@ -207,7 +218,7 @@ const ProfileSettings = ({
                     {signatureImageUrl && (
                       <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
                         <p className="mb-2 text-[11px] font-black uppercase tracking-wider text-slate-400">Current signature</p>
-                        <img src={signatureImageUrl} alt="Instructor signature" className="h-16 max-w-full object-contain" />
+                        <SignatureImage src={signatureImageUrl} previewSrc={signaturePreviewUrl} alt="Instructor signature" className="h-16 max-w-full object-contain" />
                       </div>
                     )}
 

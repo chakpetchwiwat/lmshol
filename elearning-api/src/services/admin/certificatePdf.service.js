@@ -59,6 +59,27 @@ const getFullUrl = (url) => {
 };
 
 async function loadImageBuffer(imageUrl) {
+  if (imageUrl && !imageUrl.startsWith('http') && imageUrl.startsWith('signatures/')) {
+    try {
+      const { data, error } = await supabase.storage
+        .from('secure-documents')
+        .download(imageUrl);
+
+      if (error || !data) {
+        throw error || new Error('No signature data returned from storage');
+      }
+
+      const arrayBuffer = await data.arrayBuffer();
+      const imageBuffer = Buffer.from(arrayBuffer);
+      return /\.(png|jpe?g)$/i.test(imageUrl)
+        ? imageBuffer
+        : await sharp(imageBuffer).png().toBuffer();
+    } catch (error) {
+      console.warn(`[CertificatePdf] Failed to load private signature: ${imageUrl} | Error: ${error.message}`);
+      return null;
+    }
+  }
+
   const absoluteUrl = getFullUrl(imageUrl);
   if (!absoluteUrl) return null;
 

@@ -4,6 +4,7 @@ import ModalPortal from '../common/ModalPortal';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 import SignaturePadModal from '../common/SignaturePadModal';
+import SignatureImage from '../common/SignatureImage';
 
 const getDefaultForm = () => ({
   name: '',
@@ -28,6 +29,7 @@ const OrganizationPresetModal = ({
   const [uploading, setUploading] = React.useState(false);
   const [signatureMode, setSignatureMode] = React.useState('upload');
   const [showSignaturePad, setShowSignaturePad] = React.useState(false);
+  const [signaturePreviewUrl, setSignaturePreviewUrl] = React.useState('');
   const stampFileInputRef = React.useRef(null);
   const signatureFileInputRef = React.useRef(null);
 
@@ -40,6 +42,7 @@ const OrganizationPresetModal = ({
     setForm(getDefaultForm());
     setSignatureMode('upload');
     setShowSignaturePad(false);
+    setSignaturePreviewUrl('');
   };
 
   const filteredPresets = Array.isArray(presets)
@@ -57,6 +60,7 @@ const OrganizationPresetModal = ({
       signatureImageUrl: preset.signatureImageUrl || '',
       stampImageUrl: preset.stampImageUrl || '',
     });
+    setSignaturePreviewUrl('');
   };
 
   const handleSubmit = async (event) => {
@@ -100,7 +104,9 @@ const OrganizationPresetModal = ({
     try {
       setUploading(true);
       const response = await adminAPI.uploadSignatureFile(file);
-      setForm((current) => ({ ...current, signatureImageUrl: response.data.fileUrl }));
+      const signatureUrl = response.data.fileUrl || response.data.fileKey;
+      setForm((current) => ({ ...current, signatureImageUrl: signatureUrl }));
+      setSignaturePreviewUrl(response.data.signedUrl || '');
       toast.success('อัปโหลดลายเซ็นเรียบร้อย');
     } catch (error) {
       console.error('Upload organization signature error:', error);
@@ -115,11 +121,14 @@ const OrganizationPresetModal = ({
     try {
       setUploading(true);
       const response = await adminAPI.uploadSignatureFile(file);
-      setForm((current) => ({ ...current, signatureImageUrl: response.data.fileUrl }));
+      const signatureUrl = response.data.fileUrl || response.data.fileKey;
+      setForm((current) => ({ ...current, signatureImageUrl: signatureUrl }));
+      setSignaturePreviewUrl(response.data.signedUrl || '');
       toast.success('บันทึกลายเซ็นเข้าแบบฟอร์มแล้ว');
     } catch (error) {
       console.error('Upload organization signature error:', error);
       toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกลายเซ็นได้');
+      throw error;
     } finally {
       setUploading(false);
     }
@@ -324,7 +333,7 @@ const OrganizationPresetModal = ({
                       <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
                         <div className="relative aspect-[10/3] w-full overflow-hidden rounded-2xl border-2 border-white bg-white shadow-inner">
                           {form.signatureImageUrl ? (
-                            <img src={getFullUrl(form.signatureImageUrl)} alt="Preview" className="h-full w-full object-contain p-2" />
+                            <SignatureImage src={form.signatureImageUrl} previewSrc={signaturePreviewUrl} alt="Preview" className="h-full w-full object-contain p-2" />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center text-slate-100">
                               <PenLine size={48} />

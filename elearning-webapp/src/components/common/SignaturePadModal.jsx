@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Eraser, CheckCircle2, PenLine } from 'lucide-react';
+import { X, Eraser, CheckCircle2, Loader2, PenLine } from 'lucide-react';
 import ModalPortal from './ModalPortal';
 
 const SIGNATURE_WIDTH = 1000;
@@ -9,7 +9,10 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
   const canvasRef = React.useRef(null);
   const isDrawingRef = React.useRef(false);
   const lastPointRef = React.useRef(null);
+  const canvasRectRef = React.useRef(null);
+  const hasNewDrawingRef = React.useRef(false);
   const [hasNewDrawing, setHasNewDrawing] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
 
   // Initialize Canvas
   React.useEffect(() => {
@@ -23,8 +26,9 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
           ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
           ctx.strokeStyle = '#0f172a';
-          ctx.lineWidth = 5;
+          ctx.lineWidth = 4;
           ctx.clearRect(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
+          hasNewDrawingRef.current = false;
           setHasNewDrawing(false);
         }
       }, 150);
@@ -35,7 +39,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
   const getCanvasPoint = (event) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvasRectRef.current || canvas.getBoundingClientRect();
     const scaleX = SIGNATURE_WIDTH / rect.width;
     const scaleY = SIGNATURE_HEIGHT / rect.height;
 
@@ -51,6 +55,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
   const startDrawing = (event) => {
     event.preventDefault();
     isDrawingRef.current = true;
+    canvasRectRef.current = canvasRef.current?.getBoundingClientRect() || null;
     lastPointRef.current = getCanvasPoint(event);
     if (canvasRef.current?.setPointerCapture) {
       canvasRef.current.setPointerCapture(event.pointerId);
@@ -63,20 +68,33 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    const nextPoint = getCanvasPoint(event);
+    const events = typeof event.getCoalescedEvents === 'function'
+      ? event.getCoalescedEvents()
+      : typeof event.nativeEvent?.getCoalescedEvents === 'function'
+        ? event.nativeEvent.getCoalescedEvents()
+        : [event];
 
-    ctx.beginPath();
-    ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
-    ctx.lineTo(nextPoint.x, nextPoint.y);
-    ctx.stroke();
+    events.forEach((pointerEvent) => {
+      const nextPoint = getCanvasPoint(pointerEvent);
 
-    lastPointRef.current = nextPoint;
-    if (!hasNewDrawing) setHasNewDrawing(true);
+      ctx.beginPath();
+      ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
+      ctx.lineTo(nextPoint.x, nextPoint.y);
+      ctx.stroke();
+
+      lastPointRef.current = nextPoint;
+    });
+
+    if (!hasNewDrawingRef.current) {
+      hasNewDrawingRef.current = true;
+      setHasNewDrawing(true);
+    }
   };
 
   const stopDrawing = () => {
     isDrawingRef.current = false;
     lastPointRef.current = null;
+    canvasRectRef.current = null;
   };
 
   const clearDrawing = () => {
@@ -84,18 +102,30 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
     if (canvas) {
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, SIGNATURE_WIDTH, SIGNATURE_HEIGHT);
+      hasNewDrawingRef.current = false;
       setHasNewDrawing(false);
     }
   };
 
-  const handleSave = () => {
-    if (!canvasRef.current || !hasNewDrawing) return;
+  const handleSave = async () => {
+    if (!canvasRef.current || !hasNewDrawing || isSaving) return;
 
-    canvasRef.current.toBlob((blob) => {
-        const file = new File([blob], `signature-${Date.now()}.png`, { type: 'image/png' });
-        onSave(file);
-        onClose();
-    }, 'image/png');
+    setIsSaving(true);
+    try {
+      const blob = await new Promise((resolve, reject) => {
+        canvasRef.current.toBlob((result) => {
+          if (result) resolve(result);
+          else reject(new Error('Unable to create signature image.'));
+        }, 'image/png');
+      });
+      const file = new File([blob], `signature-${Date.now()}.png`, { type: 'image/png' });
+      await onSave(file);
+      onClose();
+    } catch (error) {
+      console.error('Save drawn signature error:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -162,6 +192,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
             <button
               type="button"
               onClick={clearDrawing}
+              disabled={isSaving}
               className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-slate-200 bg-white font-black text-slate-600 transition-all hover:bg-slate-100 active:scale-95 shadow-sm"
             >
               <Eraser size={20} />
@@ -170,11 +201,11 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
             <button
               type="button"
               onClick={handleSave}
-              disabled={!hasNewDrawing}
+              disabled={!hasNewDrawing || isSaving}
               className="flex h-14 flex-[2] items-center justify-center gap-2 rounded-2xl bg-primary font-black text-white shadow-xl shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-2xl active:scale-95 disabled:opacity-50 disabled:shadow-none disabled:active:scale-100"
             >
-              <CheckCircle2 size={20} />
-              บันทึกและเปลี่ยนลายเซ็น
+              {isSaving ? <Loader2 size={20} className="animate-spin" /> : <CheckCircle2 size={20} />}
+              <span>{isSaving ? 'Saving...' : 'บันทึกและเปลี่ยนลายเซ็น'}</span>
             </button>
           </div>
         </div>

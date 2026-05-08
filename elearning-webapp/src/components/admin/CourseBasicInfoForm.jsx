@@ -8,6 +8,7 @@ import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
 import { adminAPI, getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
 import CourseBuilderFooter from './course-builder/CourseBuilderFooter';
+import SignatureImage from '../common/SignatureImage';
 
 const CourseBasicInfoForm = ({
   isPersisted,
@@ -47,7 +48,7 @@ const CourseBasicInfoForm = ({
 
     try {
       const response = await adminAPI.uploadSignatureFile(file);
-      updateSignatureSlot(index, { signatureImageUrl: response.data.fileUrl });
+      updateSignatureSlot(index, { signatureImageUrl: response.data.fileUrl || response.data.fileKey });
     } catch (error) {
       console.error('Upload certificate signature error:', error);
       window.alert(error.response?.data?.message || 'Unable to upload signature image.');
@@ -670,7 +671,7 @@ const CourseBasicInfoForm = ({
                                   </div>
                                   {slot.signatureImageUrl && (
                                     <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
-                                      <img src={getFullUrl(slot.signatureImageUrl)} alt={`${slot.label || 'Signature'} preview`} className="h-14 max-w-full object-contain" />
+                                      <SignatureImage src={slot.signatureImageUrl} alt={`${slot.label || 'Signature'} preview`} className="h-14 max-w-full object-contain" />
                                     </div>
                                   )}
                                 </div>
