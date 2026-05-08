@@ -138,8 +138,8 @@ const OrganizationPresetModal = ({
           aria-label="ปิดหน้าต่างจัดการหน่วยงาน"
         />
 
-        <div className="relative flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)]">
-          <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+        <div className="relative flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)]">
+          <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-8 py-6">
             <div>
               <h3 className="text-xl font-black text-slate-900">จัดการหน่วยงาน (Organization Presets)</h3>
               <p className="mt-1 text-sm text-slate-500">
@@ -158,27 +158,28 @@ const OrganizationPresetModal = ({
             </button>
           </div>
 
-          <div className="grid flex-1 gap-0 overflow-hidden lg:grid-cols-[1.1fr_1fr]">
-            <div className="min-h-0 border-r border-slate-100 px-6 py-5">
-              <div className="relative mb-5">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <div className="grid flex-1 gap-0 overflow-hidden lg:grid-cols-[1fr_1.1fr]">
+            {/* Left Side: Preset List */}
+            <div className="flex min-h-0 flex-col border-r border-slate-100 bg-slate-50/30 px-6 py-6">
+              <div className="relative mb-6">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
-                  className="form-input w-full pl-10"
+                  className="form-input w-full pl-11 shadow-sm border-slate-200"
                   placeholder="ค้นหาชื่อหน่วยงาน..."
                 />
               </div>
 
-              <div className="max-h-[58vh] space-y-3 overflow-y-auto pr-1">
+              <div className="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
                 {loading ? (
-                  <div className="py-12 text-center">
-                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+                  <div className="py-20 text-center">
+                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : filteredPresets.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
-                    ยังไม่มีข้อมูลพรีเซ็ตหน่วยงาน
+                  <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white/50 px-4 py-12 text-center text-sm font-bold text-slate-400">
+                    ไม่พบข้อมูลหน่วยงาน
                   </div>
                 ) : (
                   filteredPresets.map((preset) => {
@@ -186,49 +187,55 @@ const OrganizationPresetModal = ({
                     return (
                       <div
                         key={preset.id}
-                        className={`flex items-start justify-between gap-4 rounded-2xl border px-4 py-4 transition-all ${
+                        className={`group relative flex items-start justify-between gap-4 rounded-3xl border p-4 transition-all ${
                           isEditing
-                            ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10'
-                            : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-md'
+                            ? 'border-primary bg-primary/5 shadow-xl shadow-primary/10'
+                            : 'border-white bg-white shadow-sm hover:border-slate-200 hover:shadow-lg'
                         }`}
                       >
                         <div className="flex min-w-0 gap-4">
-                          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-slate-100 p-2">
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[1.25rem] bg-slate-50 p-2.5 shadow-inner transition-transform group-hover:scale-105">
                             {preset.stampImageUrl ? (
                               <img src={getFullUrl(preset.stampImageUrl)} alt={preset.name} className="h-full w-full object-contain" />
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center text-slate-400">
-                                <Building2 size={22} />
+                              <div className="flex h-full w-full items-center justify-center text-slate-300">
+                                <Building2 size={24} />
                               </div>
                             )}
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-0 py-0.5">
                             <p className="truncate font-black text-slate-900">{preset.name}</p>
-                            <p className="mt-1 text-sm font-medium text-primary">{preset.signatureTitle || 'ไม่ได้ระบุตำแหน่งผู้ลงนาม'}</p>
-                            <div className="mt-2 flex flex-wrap gap-2">
+                            <p className="mt-1 text-xs font-bold text-primary">{preset.signatureTitle || 'ไม่ได้ระบุตำแหน่ง'}</p>
+                            <div className="mt-2.5 flex flex-wrap gap-1.5">
                               {preset.signatureImageUrl && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase text-emerald-700">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[9px] font-black uppercase text-emerald-600 border border-emerald-100">
                                   <PenLine size={10} /> Signature
                                 </span>
                               )}
                               {preset.stampImageUrl && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-black uppercase text-blue-700">
-                                  <ShieldCheck size={10} /> Official Stamp
+                                <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[9px] font-black uppercase text-blue-600 border border-blue-100">
+                                  <ShieldCheck size={10} /> Stamp
                                 </span>
                               )}
                             </div>
                           </div>
                         </div>
                         <div className="flex shrink-0 gap-2">
-                          <button type="button" onClick={() => handleEdit(preset)} className="btn btn-outline btn-sm">
+                          <button 
+                            type="button" 
+                            onClick={() => handleEdit(preset)} 
+                            className={`btn btn-sm px-4 rounded-xl font-bold transition-all ${
+                              isEditing ? 'btn-primary' : 'btn-outline border-slate-200'
+                            }`}
+                          >
                             {isEditing ? 'แก้ไขอยู่' : 'แก้ไข'}
                           </button>
                           <button
                             type="button"
                             onClick={() => onDelete(preset.id, preset.name)}
-                            className="btn btn-outline btn-sm border-danger/30 text-danger"
+                            className="btn btn-outline btn-sm h-9 w-9 rounded-xl border-slate-100 p-0 text-slate-400 hover:border-danger/30 hover:bg-danger/5 hover:text-danger transition-colors"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </div>
@@ -238,171 +245,196 @@ const OrganizationPresetModal = ({
               </div>
             </div>
 
-            <div className="min-h-0 overflow-y-auto bg-slate-50/60 px-6 py-5">
-              <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-6">
-                <div className="flex items-center justify-between">
+            {/* Right Side: Editor Form */}
+            <div className="flex min-h-0 flex-col bg-white px-8 py-6">
+              <form onSubmit={handleSubmit} className="flex h-full flex-col">
+                <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">
-                      {editingPreset ? 'Edit Preset' : 'New Preset'}
-                    </p>
-                    <h4 className="mt-1 text-lg font-black text-slate-900">
-                      {editingPreset ? 'แก้ไขข้อมูลหน่วยงาน' : 'เพิ่มพรีเซ็ตหน่วยงานใหม่'}
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+                      {editingPreset ? 'Edit Organization' : 'New Organization'}
+                    </span>
+                    <h4 className="mt-1 text-xl font-black text-slate-900">
+                      {editingPreset ? 'ข้อมูลหน่วยงานที่กำลังแก้ไข' : 'เพิ่มข้อมูลหน่วยงานใหม่'}
                     </h4>
                   </div>
                   {editingPreset && (
-                    <button type="button" onClick={resetForm} className="btn btn-outline btn-sm">
+                    <button type="button" onClick={resetForm} className="btn btn-outline btn-sm rounded-xl">
                       ยกเลิกแก้ไข
                     </button>
                   )}
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="mb-1.5 block text-sm font-bold text-slate-700">ชื่อหน่วยงาน / องค์กร</label>
-                    <input
-                      required
-                      type="text"
-                      className="form-input w-full"
-                      value={form.name}
-                      onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-                      placeholder="เช่น ScaleUp Academy"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-sm font-bold text-slate-700">ตำแหน่งผู้ลงนามกลาง</label>
-                    <input
-                      type="text"
-                      className="form-input w-full"
-                      value={form.signatureTitle}
-                      onChange={(event) => setForm((current) => ({ ...current, signatureTitle: event.target.value }))}
-                      placeholder="เช่น ผู้อำนวยการสถาบัน"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <div className="mb-4">
-                      <p className="text-sm font-black text-slate-900">ลายเซ็น (กลาง)</p>
-                      <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">ใช้เซ็นในเกียรติบัตร</p>
-                    </div>
-                    
-                    <div className="mb-3 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
-                      <button
-                        type="button"
-                        onClick={() => setSignatureMode('upload')}
-                        className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-colors ${
-                          signatureMode === 'upload' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-900'
-                        }`}
-                      >
-                        <Upload size={14} />
-                        Upload
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSignatureMode('draw')}
-                        className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-colors ${
-                          signatureMode === 'draw' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-900'
-                        }`}
-                      >
-                        <PencilLine size={14} />
-                        Sign on web
-                      </button>
+                <div className="flex-1 space-y-6 overflow-y-auto pr-1">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <label className="ml-1 text-xs font-black text-slate-500 uppercase tracking-widest">ชื่อหน่วยงาน</label>
+                      <input
+                        required
+                        type="text"
+                        className="form-input w-full rounded-2xl border-slate-200 shadow-sm focus:ring-4 focus:ring-primary/5"
+                        value={form.name}
+                        onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+                        placeholder="เช่น ScaleUp Consulting"
+                      />
                     </div>
 
-                    {signatureMode === 'upload' ? (
-                      <div className="mb-3 space-y-2">
-                        <input
-                          ref={signatureFileInputRef}
-                          type="file"
-                          accept="image/png,image/webp"
-                          className="hidden"
-                          onChange={handleSignatureUpload}
-                        />
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            className="form-input flex-1 text-[10px]"
-                            value={form.signatureImageUrl}
-                            onChange={(e) => setForm(c => ({ ...c, signatureImageUrl: e.target.value }))}
-                            placeholder="URL ลายเซ็น หรืออัปโหลด"
-                          />
-                          <button type="button" onClick={() => signatureFileInputRef.current?.click()} className="btn btn-outline btn-sm shrink-0">
-                            <Upload size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => setShowSignaturePad(true)}
-                          className="btn btn-primary btn-sm mx-auto flex gap-2"
-                        >
-                          <PenLine size={14} /> เปิดหน้าจอเซ็นชื่อ
-                        </button>
-                        <p className="mt-2 text-[10px] font-medium text-slate-400">
-                          เซ็นผ่านหน้าจอขนาดใหญ่เพื่อความชัดเจน
-                        </p>
-                      </div>
-                    )}
-
-                    {form.signatureImageUrl && (
-                      <div className="mt-2 rounded-xl border border-slate-100 bg-slate-50/50 p-3">
-                        <p className="mb-1 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Preview</p>
-                        <img src={getFullUrl(form.signatureImageUrl)} alt="Signature preview" className="h-12 w-full object-contain" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <div className="mb-4">
-                      <p className="text-sm font-black text-slate-900">ตราประทับองค์กร</p>
-                      <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">แนะนำ PNG/JPEG</p>
-                    </div>
-
-                    <input
-                      ref={stampFileInputRef}
-                      type="file"
-                      accept="image/png,image/jpeg"
-                      className="hidden"
-                      onChange={handleStampUpload}
-                    />
-
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="group relative aspect-square w-20 overflow-hidden rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-                        {form.stampImageUrl ? (
-                          <img src={getFullUrl(form.stampImageUrl)} alt="Stamp preview" className="h-full w-full object-contain p-2" />
-                        ) : (
-                          <Building2 className="text-slate-300" size={32} />
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => stampFileInputRef.current?.click()}
-                          className="absolute inset-0 flex items-center justify-center bg-slate-900/40 opacity-0 transition-opacity group-hover:opacity-100"
-                        >
-                          <ImagePlus className="text-white" size={20} />
-                        </button>
-                      </div>
-                      
+                    <div className="space-y-1">
+                      <label className="ml-1 text-xs font-black text-slate-500 uppercase tracking-widest">ตำแหน่งผู้ลงนาม</label>
                       <input
                         type="text"
-                        className="form-input text-[10px] w-full"
-                        value={form.stampImageUrl}
-                        onChange={(e) => setForm(c => ({ ...c, stampImageUrl: e.target.value }))}
-                        placeholder="URL ตราประทับ หรืออัปโหลดด้านบน"
+                        className="form-input w-full rounded-2xl border-slate-200 shadow-sm focus:ring-4 focus:ring-primary/5"
+                        value={form.signatureTitle}
+                        onChange={(event) => setForm((current) => ({ ...current, signatureTitle: event.target.value }))}
+                        placeholder="เช่น ผู้อำนวยการ"
                       />
                     </div>
                   </div>
+
+                  {/* High Consistency Grid for Assets */}
+                  <div className="grid grid-cols-1 gap-6">
+                    {/* Signature Module */}
+                    <div className="rounded-[2rem] border-2 border-slate-100 bg-slate-50/50 p-6 shadow-sm">
+                      <div className="mb-4 flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-black text-slate-900">ลายเซ็นดิจิทัล (Digital Signature)</p>
+                          <p className="text-[10px] font-bold text-slate-400">ขนาดที่แนะนำ: 1000 x 300 px (พื้นหลังใส)</p>
+                        </div>
+                        <div className="flex rounded-xl bg-slate-200/60 p-1">
+                          <button
+                            type="button"
+                            onClick={() => setSignatureMode('upload')}
+                            className={`flex h-8 items-center gap-2 rounded-lg px-3 text-[10px] font-black transition-all ${
+                              signatureMode === 'upload' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'
+                            }`}
+                          >
+                            <Upload size={12} /> UPLOAD
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSignatureMode('draw')}
+                            className={`flex h-8 items-center gap-2 rounded-lg px-3 text-[10px] font-black transition-all ${
+                              signatureMode === 'draw' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'
+                            }`}
+                          >
+                            <PencilLine size={12} /> DRAW
+                          </button>
+                        </div>
+                      </div>
+
+                      {signatureMode === 'upload' ? (
+                        <div className="group relative flex aspect-[10/2.5] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white transition-all hover:border-primary/50 hover:bg-primary/5">
+                          {form.signatureImageUrl ? (
+                            <img src={getFullUrl(form.signatureImageUrl)} alt="Preview" className="h-full w-full object-contain p-4" />
+                          ) : (
+                            <div className="flex flex-col items-center gap-2 text-slate-300">
+                              <PenLine size={32} />
+                              <span className="text-[10px] font-black tracking-widest uppercase">No Signature</span>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => signatureFileInputRef.current?.click()}
+                            className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100 rounded-2xl"
+                          >
+                             <Upload className="text-white mb-2" size={24} />
+                             <span className="text-[10px] font-black text-white tracking-widest">CHANGE FILE</span>
+                          </button>
+                          <input ref={signatureFileInputRef} type="file" accept="image/png,image/webp" className="hidden" onChange={handleSignatureUpload} />
+                        </div>
+                      ) : (
+                        <div className="flex aspect-[10/2.5] w-full flex-col items-center justify-center rounded-2xl border-2 border-slate-200 bg-white shadow-sm">
+                           {form.signatureImageUrl ? (
+                               <div className="relative h-full w-full group">
+                                  <img src={getFullUrl(form.signatureImageUrl)} alt="Preview" className="h-full w-full object-contain p-4" />
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowSignaturePad(true)}
+                                    className="absolute inset-0 flex flex-col items-center justify-center bg-primary/80 opacity-0 transition-opacity group-hover:opacity-100 rounded-2xl"
+                                  >
+                                     <PencilLine className="text-white mb-2" size={24} />
+                                     <span className="text-[10px] font-black text-white tracking-widest uppercase">Redraw Signature</span>
+                                  </button>
+                               </div>
+                           ) : (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowSignaturePad(true)}
+                                    className="flex h-full w-full flex-col items-center justify-center gap-3 transition-colors hover:bg-slate-50"
+                                >
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                        <PenLine size={24} />
+                                    </div>
+                                    <span className="text-xs font-black text-slate-900 uppercase tracking-widest">Click to Start Drawing</span>
+                                </button>
+                           )}
+                        </div>
+                      )}
+                      
+                      <div className="mt-3">
+                        <input
+                            type="text"
+                            className="form-input w-full rounded-xl bg-white text-[10px] font-medium border-slate-200 shadow-sm"
+                            value={form.signatureImageUrl}
+                            onChange={(e) => setForm(c => ({ ...current, signatureImageUrl: e.target.value }))}
+                            placeholder="Image URL ลายเซ็น..."
+                        />
+                      </div>
+                    </div>
+
+                    {/* Stamp Module */}
+                    <div className="rounded-[2rem] border-2 border-slate-100 bg-slate-50/50 p-6 shadow-sm">
+                      <div className="mb-4">
+                        <p className="text-sm font-black text-slate-900">ตราประทับองค์กร (Official Stamp)</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ใช้ประทับบน PDF เกียรติบัตร</p>
+                      </div>
+
+                      <div className="flex items-center gap-6">
+                        <div className="group relative h-32 w-32 shrink-0 overflow-hidden rounded-[2rem] border-2 border-white bg-white shadow-md transition-transform hover:scale-105">
+                          {form.stampImageUrl ? (
+                            <img src={getFullUrl(form.stampImageUrl)} alt="Stamp Preview" className="h-full w-full object-contain p-3" />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-slate-200">
+                              <Building2 size={40} />
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => stampFileInputRef.current?.click()}
+                            className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100"
+                          >
+                             <Upload className="text-white mb-2" size={20} />
+                             <span className="text-[8px] font-black text-white tracking-[0.2em] uppercase">Upload</span>
+                          </button>
+                          <input ref={stampFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleStampUpload} />
+                        </div>
+
+                        <div className="flex-1 space-y-3">
+                            <p className="text-xs font-bold text-slate-500 leading-relaxed">
+                                แนะนำเป็นไฟล์ PNG พื้นหลังโปร่งใส หรือรูปทรงกลม/สี่เหลี่ยมจตุรัส เพื่อความสวยงามในเอกสาร
+                            </p>
+                            <input
+                                type="text"
+                                className="form-input w-full rounded-xl bg-white text-[10px] font-medium border-slate-200 shadow-sm"
+                                value={form.stampImageUrl}
+                                onChange={(e) => setForm(c => ({ ...current, stampImageUrl: e.target.value }))}
+                                placeholder="Image URL ตราประทับ..."
+                            />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="sticky bottom-0 mt-auto flex gap-3 border-t border-slate-200 bg-slate-50/95 pb-1 pt-4 backdrop-blur">
-                  <button type="submit" disabled={uploading} className="btn btn-primary flex-1 gap-2">
+                <div className="sticky bottom-0 mt-6 flex gap-3 border-t border-slate-100 bg-white pb-1 pt-6">
+                  <button 
+                    type="submit" 
+                    disabled={uploading || loading} 
+                    className="flex h-14 flex-1 items-center justify-center gap-3 rounded-2xl bg-primary font-black text-white shadow-xl shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-2xl active:scale-[0.98] disabled:opacity-50"
+                  >
                     {uploading ? (
-                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    ) : editingPreset ? <Save size={16} /> : <Plus size={16} />}
-                    {editingPreset ? 'บันทึกการแก้ไข' : 'เพิ่มพรีเซ็ตหน่วยงาน'}
+                       <Loader2 className="animate-spin" size={20} />
+                    ) : editingPreset ? <Save size={20} /> : <Plus size={20} />}
+                    {editingPreset ? 'บันทึกการเปลี่ยนแปลงทั้งหมด' : 'สร้างพรีเซ็ตหน่วยงานใหม่'}
                   </button>
                 </div>
               </form>
@@ -410,6 +442,7 @@ const OrganizationPresetModal = ({
           </div>
         </div>
       </div>
+
       <SignaturePadModal
         isOpen={showSignaturePad}
         onClose={() => setShowSignaturePad(false)}

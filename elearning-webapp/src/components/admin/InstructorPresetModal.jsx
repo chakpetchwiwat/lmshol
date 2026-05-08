@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImagePlus, PenLine, PencilLine, Plus, Save, Search, Trash2, Upload, UserRound, X } from 'lucide-react';
+import { ImagePlus, Loader2, PenLine, PencilLine, Plus, Save, Search, Trash2, Upload, UserRound, X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import { compressImage } from '../../utils/imageUtils';
@@ -26,6 +26,7 @@ const InstructorPresetModal = ({
 }) => {
   const toast = useToast();
   const imageInputRef = React.useRef(null);
+  const signatureFileInputRef = React.useRef(null);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [editingPreset, setEditingPreset] = React.useState(null);
   const [form, setForm] = React.useState(getDefaultForm());
@@ -142,8 +143,8 @@ const InstructorPresetModal = ({
           aria-label="ปิดหน้าต่างจัดการวิทยากร"
         />
 
-        <div className="relative flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)]">
-          <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+        <div className="relative flex h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-[0_32px_100px_-32px_rgba(15,23,42,0.55)]">
+          <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-8 py-6">
             <div>
               <h3 className="text-xl font-black text-slate-900">จัดการวิทยากร</h3>
               <p className="mt-1 text-sm text-slate-500">
@@ -162,27 +163,28 @@ const InstructorPresetModal = ({
             </button>
           </div>
 
-          <div className="grid flex-1 gap-0 overflow-hidden lg:grid-cols-[1.2fr_0.95fr]">
-            <div className="min-h-0 border-r border-slate-100 px-6 py-5">
-              <div className="relative mb-5">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <div className="grid flex-1 gap-0 overflow-hidden lg:grid-cols-[1fr_1.1fr]">
+             {/* Left Side: Preset List */}
+             <div className="flex min-h-0 flex-col border-r border-slate-100 bg-slate-50/30 px-6 py-6">
+              <div className="relative mb-6">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
-                  className="form-input w-full pl-10"
-                  placeholder="ค้นหาชื่อหรือตำแหน่งวิทยากร..."
+                  className="form-input w-full pl-11 shadow-sm border-slate-200"
+                  placeholder="ค้นหาชื่อหรือตำแหน่ง..."
                 />
               </div>
 
-              <div className="max-h-[58vh] space-y-3 overflow-y-auto pr-1">
+              <div className="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
                 {loading ? (
-                  <div className="py-12 text-center">
-                    <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+                  <div className="py-20 text-center">
+                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : filteredPresets.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
-                    ยังไม่มีข้อมูลวิทยากรที่ตรงกับคำค้น
+                  <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white/50 px-4 py-12 text-center text-sm font-bold text-slate-400">
+                    ไม่พบข้อมูลวิทยากร
                   </div>
                 ) : (
                   filteredPresets.map((preset) => {
@@ -190,45 +192,44 @@ const InstructorPresetModal = ({
                     return (
                       <div
                         key={preset.id}
-                        className={`flex items-start justify-between gap-4 rounded-2xl border px-4 py-4 transition-all ${
+                        className={`group relative flex items-start justify-between gap-4 rounded-3xl border p-4 transition-all ${
                           isEditing
-                            ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10'
-                            : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-md'
+                            ? 'border-primary bg-primary/5 shadow-xl shadow-primary/10'
+                            : 'border-white bg-white shadow-sm hover:border-slate-200 hover:shadow-lg'
                         }`}
                       >
                         <div className="flex min-w-0 gap-4">
-                          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[1.25rem] bg-slate-100 shadow-inner transition-transform group-hover:scale-105">
                             {preset.avatar ? (
                               <img src={getFullUrl(preset.avatar)} alt={preset.name} className="h-full w-full object-cover" />
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center text-slate-400">
-                                <UserRound size={22} />
+                              <div className="flex h-full w-full items-center justify-center text-slate-300">
+                                <UserRound size={24} />
                               </div>
                             )}
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-0 py-0.5">
                             <p className="truncate font-black text-slate-900">{preset.name}</p>
-                            <p className="mt-1 text-sm font-medium text-primary">{preset.role || 'ไม่ได้ระบุตำแหน่ง'}</p>
-                            {preset.bio && (
-                              <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500">{preset.bio}</p>
-                            )}
+                            <p className="mt-1 text-xs font-bold text-primary">{preset.role || 'ไม่ได้ระบุตำแหน่ง'}</p>
                             {preset.signatureImageUrl && (
-                              <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase text-emerald-700">
-                                <PenLine size={11} /> Signature ready
-                              </p>
+                                <div className="mt-2.5">
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[9px] font-black uppercase text-emerald-600 border border-emerald-100">
+                                        <PenLine size={10} /> Signature Ready
+                                    </span>
+                                </div>
                             )}
                           </div>
                         </div>
                         <div className="flex shrink-0 gap-2">
-                          <button type="button" onClick={() => handleEdit(preset)} className="btn btn-outline btn-sm">
-                            {isEditing ? 'กำลังแก้ไข' : 'แก้ไข'}
+                          <button type="button" onClick={() => handleEdit(preset)} className={`btn btn-sm px-4 rounded-xl font-bold transition-all ${isEditing ? 'btn-primary' : 'btn-outline border-slate-200'}`}>
+                            {isEditing ? 'แก้ไขอยู่' : 'แก้ไข'}
                           </button>
                           <button
                             type="button"
                             onClick={() => onDelete(preset.id, preset.name)}
-                            className="btn btn-outline btn-sm border-danger/30 text-danger"
+                            className="btn btn-outline btn-sm h-9 w-9 rounded-xl border-slate-100 p-0 text-slate-400 hover:border-danger/30 hover:bg-danger/5 hover:text-danger transition-colors"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </div>
@@ -238,185 +239,184 @@ const InstructorPresetModal = ({
               </div>
             </div>
 
-            <div className="min-h-0 overflow-y-auto bg-slate-50/60 px-6 py-5">
-              <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-4">
-                <div className="flex items-center justify-between">
+            {/* Right Side: Form */}
+            <div className="flex min-h-0 flex-col bg-white px-8 py-6">
+              <form onSubmit={handleSubmit} className="flex h-full flex-col">
+                <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">
                       {editingPreset ? 'Edit Instructor' : 'New Instructor'}
-                    </p>
-                    <h4 className="mt-1 text-lg font-black text-slate-900">
-                      {editingPreset ? 'แก้ไขข้อมูลวิทยากร' : 'เพิ่มข้อมูลวิทยากร'}
+                    </span>
+                    <h4 className="mt-1 text-xl font-black text-slate-900">
+                      {editingPreset ? 'แก้ไขข้อมูลวิทยากร' : 'เพิ่มวิทยากรใหม่'}
                     </h4>
                   </div>
                   {editingPreset && (
-                    <button type="button" onClick={resetForm} className="btn btn-outline btn-sm">
+                    <button type="button" onClick={resetForm} className="btn btn-outline btn-sm rounded-xl">
                       ยกเลิกแก้ไข
                     </button>
                   )}
                 </div>
 
-                <div>
-                  <label className="mb-1.5 block text-sm font-bold text-slate-700">ชื่อวิทยากร</label>
-                  <input
-                    required
-                    type="text"
-                    className="form-input w-full"
-                    value={form.name}
-                    onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-                    placeholder="เช่น อาจารย์สมชาย ใจดี"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-bold text-slate-700">ตำแหน่ง</label>
-                  <input
-                    type="text"
-                    className="form-input w-full"
-                    value={form.role}
-                    onChange={(event) => setForm((current) => ({ ...current, role: event.target.value }))}
-                    placeholder="เช่น Head of Learning Experience"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-bold text-slate-700">รูปวิทยากร</label>
-                  <input
-                    ref={imageInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      className="form-input flex-1"
-                      value={form.avatar}
-                      onChange={(event) => setForm((current) => ({ ...current, avatar: event.target.value }))}
-                      placeholder="URL รูป หรืออัปโหลดไฟล์"
-                    />
-                    <button type="button" onClick={() => imageInputRef.current?.click()} className="btn btn-outline btn-sm gap-1" disabled={uploading}>
-                      <ImagePlus size={14} />
-                      อัปโหลด
-                    </button>
-                  </div>
-                  {form.avatar && (
-                    <div className="mt-3 h-24 w-24 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                      <img src={getFullUrl(form.avatar)} alt="Instructor avatar preview" className="h-full w-full object-cover" />
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-bold text-slate-700">ประวัติ / คำอธิบาย</label>
-                  <textarea
-                    rows={5}
-                    className="form-input w-full resize-none"
-                    value={form.bio}
-                    onChange={(event) => setForm((current) => ({ ...current, bio: event.target.value }))}
-                    placeholder="ใส่คำอธิบายสั้น ๆ ของวิทยากร"
-                  />
-                </div>
-
-                <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                  <div className="mb-4">
-                    <p className="text-sm font-black text-slate-900">ลายเซ็นสำหรับเกียรติบัตร</p>
-                    <p className="mt-1 text-[11px] font-medium text-slate-500 uppercase tracking-wider">ใช้สำหรับคอร์สที่วิทยากรคนนี้เป็นผู้ลงนาม</p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="mb-1.5 block text-xs font-black text-slate-500 uppercase tracking-widest">ตำแหน่งใต้ลายเซ็น</label>
-                      <input
-                        type="text"
-                        className="form-input w-full"
-                        value={form.signatureTitle}
-                        onChange={(event) => setForm((current) => ({ ...current, signatureTitle: event.target.value }))}
-                        placeholder="เช่น Instructor, Lead Facilitator"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-2 block text-xs font-black text-slate-500 uppercase tracking-widest">ไฟล์ลายเซ็น</label>
-                      
-                      <div className="mb-3 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
-                        <button
-                          type="button"
-                          onClick={() => setSignatureMode('upload')}
-                          className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-colors ${
-                            signatureMode === 'upload' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-900'
-                          }`}
-                        >
-                          <Upload size={14} />
-                          Upload
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSignatureMode('draw')}
-                          className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-colors ${
-                            signatureMode === 'draw' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-900'
-                          }`}
-                        >
-                          <PencilLine size={14} />
-                          Sign on web
-                        </button>
-                      </div>
-
-                      {signatureMode === 'upload' ? (
-                        <div className="space-y-2">
-                          <input
-                            type="file"
-                            accept="image/png,image/webp"
-                            className="hidden"
-                            id="instructor-signature-upload"
-                            onChange={handleSignatureUpload}
-                          />
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              className="form-input flex-1 text-xs"
-                              value={form.signatureImageUrl}
-                              onChange={(event) => setForm((current) => ({ ...current, signatureImageUrl: event.target.value }))}
-                              placeholder="URL ลายเซ็น หรืออัปโหลด PNG/WebP"
-                            />
-                            <label htmlFor="instructor-signature-upload" className="btn btn-outline btn-sm cursor-pointer gap-1">
-                              <PenLine size={14} />
-                              อัปโหลด
-                            </label>
-                          </div>
+                <div className="flex-1 space-y-6 overflow-y-auto pr-1">
+                   <div className="flex items-start gap-6">
+                        <div className="group relative h-28 w-28 shrink-0 overflow-hidden rounded-[2rem] border-4 border-slate-50 bg-slate-100 shadow-lg">
+                            {form.avatar ? (
+                                <img src={getFullUrl(form.avatar)} alt="Avatar" className="h-full w-full object-cover" />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center text-slate-300">
+                                    <UserRound size={40} />
+                                </div>
+                            )}
+                            <button
+                                type="button"
+                                onClick={() => imageInputRef.current?.click()}
+                                className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100"
+                            >
+                                <Upload className="text-white mb-1" size={20} />
+                                <span className="text-[8px] font-black text-white tracking-widest uppercase">Upload</span>
+                            </button>
+                            <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                         </div>
-                      ) : (
-                        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center">
+                        <div className="flex-1 space-y-4">
+                            <div className="space-y-1">
+                                <label className="ml-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">ชื่อวิทยากร</label>
+                                <input
+                                    required
+                                    type="text"
+                                    className="form-input w-full rounded-2xl border-slate-200"
+                                    value={form.name}
+                                    onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+                                    placeholder="เช่น อาจารย์สมชาย ใจดี"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="ml-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">ตำแหน่งงาน</label>
+                                <input
+                                    type="text"
+                                    className="form-input w-full rounded-2xl border-slate-200"
+                                    value={form.role}
+                                    onChange={(event) => setForm((current) => ({ ...current, role: event.target.value }))}
+                                    placeholder="เช่น Head of Education"
+                                />
+                            </div>
+                        </div>
+                   </div>
+
+                   <div className="space-y-1">
+                        <label className="ml-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">ประวัติ / คำอธิบาย (Bio)</label>
+                        <textarea
+                            rows={3}
+                            className="form-input w-full rounded-2xl border-slate-200 resize-none"
+                            value={form.bio}
+                            onChange={(event) => setForm((current) => ({ ...current, bio: event.target.value }))}
+                            placeholder="ระบุประวัติย่อของวิทยากร..."
+                        />
+                   </div>
+
+                   {/* Signature Module */}
+                   <div className="rounded-[2rem] border-2 border-slate-100 bg-slate-50/50 p-6 shadow-sm">
+                      <div className="mb-4 flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-black text-slate-900">ลายเซ็นวิทยากร</p>
+                          <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">สำหรับคอร์สที่วิทยากรลงนาม</p>
+                        </div>
+                        <div className="flex rounded-xl bg-slate-200/60 p-1">
                           <button
                             type="button"
-                            onClick={() => setShowSignaturePad(true)}
-                            className="btn btn-primary btn-sm mx-auto flex gap-2"
+                            onClick={() => setSignatureMode('upload')}
+                            className={`flex h-8 items-center gap-2 rounded-lg px-3 text-[10px] font-black transition-all ${
+                              signatureMode === 'upload' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'
+                            }`}
                           >
-                            <PenLine size={14} /> เซ็นชื่อบนเว็บ
+                            <Upload size={12} /> UPLOAD
                           </button>
-                          <p className="mt-3 text-[10px] font-medium text-slate-400">
-                            เซ็นผ่านหน้าจอขนาดใหญ่เพื่อความสะดวก
-                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setSignatureMode('draw')}
+                            className={`flex h-8 items-center gap-2 rounded-lg px-3 text-[10px] font-black transition-all ${
+                              signatureMode === 'draw' ? 'bg-white text-primary shadow-sm' : 'text-slate-500'
+                            }`}
+                          >
+                            <PencilLine size={12} /> DRAW
+                          </button>
                         </div>
-                      )}
+                      </div>
 
-                      {form.signatureImageUrl && (
-                        <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/50 p-4">
-                          <p className="mb-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">Preview</p>
-                          <img src={getFullUrl(form.signatureImageUrl)} alt="Instructor signature preview" className="h-14 max-w-full object-contain mx-auto" />
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                            <label className="ml-1 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">ตำแหน่งใต้ลายเซ็น</label>
+                            <input
+                                type="text"
+                                className="form-input w-full rounded-xl bg-white text-xs border-slate-200"
+                                value={form.signatureTitle}
+                                onChange={(event) => setForm((current) => ({ ...current, signatureTitle: event.target.value }))}
+                                placeholder="เช่น Instructor, Specialist"
+                            />
                         </div>
-                      )}
-                    </div>
-                  </div>
+
+                        {signatureMode === 'upload' ? (
+                            <div className="group relative flex aspect-[10/3] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white transition-all hover:border-primary/50 hover:bg-primary/5">
+                            {form.signatureImageUrl ? (
+                                <img src={getFullUrl(form.signatureImageUrl)} alt="Preview" className="h-full w-full object-contain p-4" />
+                            ) : (
+                                <div className="flex flex-col items-center gap-2 text-slate-300">
+                                <PenLine size={32} />
+                                <span className="text-[10px] font-black tracking-widest uppercase">No Signature</span>
+                                </div>
+                            )}
+                            <button
+                                type="button"
+                                onClick={() => signatureFileInputRef.current?.click()}
+                                className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100 rounded-2xl"
+                            >
+                                <Upload className="text-white mb-2" size={24} />
+                                <span className="text-[10px] font-black text-white tracking-widest">CHANGE FILE</span>
+                            </button>
+                            <input ref={signatureFileInputRef} type="file" accept="image/png,image/webp" className="hidden" onChange={handleSignatureUpload} />
+                            </div>
+                        ) : (
+                            <div className="flex aspect-[10/3] w-full flex-col items-center justify-center rounded-2xl border-2 border-slate-200 bg-white shadow-sm overflow-hidden">
+                            {form.signatureImageUrl ? (
+                                <div className="relative h-full w-full group">
+                                    <img src={getFullUrl(form.signatureImageUrl)} alt="Preview" className="h-full w-full object-contain p-4" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSignaturePad(true)}
+                                        className="absolute inset-0 flex flex-col items-center justify-center bg-primary/80 opacity-0 transition-opacity group-hover:opacity-100"
+                                    >
+                                        <PencilLine className="text-white mb-2" size={24} />
+                                        <span className="text-[10px] font-black text-white tracking-widest uppercase">Redraw Signature</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSignaturePad(true)}
+                                        className="flex h-full w-full flex-col items-center justify-center gap-3 transition-colors hover:bg-slate-50"
+                                    >
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                            <PenLine size={20} />
+                                        </div>
+                                        <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Start Drawing</span>
+                                    </button>
+                            )}
+                            </div>
+                        )}
+                      </div>
+                   </div>
                 </div>
 
-                <div className="sticky bottom-0 mt-auto flex gap-3 border-t border-slate-200 bg-slate-50/95 pb-1 pt-4 backdrop-blur">
-                  <button type="submit" disabled={uploading} className="btn btn-primary flex-1 gap-2">
+                <div className="sticky bottom-0 mt-6 flex gap-3 border-t border-slate-100 bg-white pb-1 pt-6">
+                  <button 
+                    type="submit" 
+                    disabled={uploading || loading} 
+                    className="flex h-14 flex-1 items-center justify-center gap-3 rounded-2xl bg-primary font-black text-white shadow-xl shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-2xl active:scale-[0.98] disabled:opacity-50"
+                  >
                     {uploading ? (
-                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    ) : editingPreset ? <Save size={16} /> : <Plus size={16} />}
-                    {editingPreset ? 'บันทึกการแก้ไข' : 'เพิ่มวิทยากร'}
+                       <Loader2 className="animate-spin" size={20} />
+                    ) : editingPreset ? <Save size={20} /> : <Plus size={20} />}
+                    {editingPreset ? 'บันทึกการเปลี่ยนแปลงวิทยากร' : 'เพิ่มข้อมูลวิทยากรใหม่'}
                   </button>
                 </div>
               </form>
@@ -424,6 +424,7 @@ const InstructorPresetModal = ({
           </div>
         </div>
       </div>
+
       <SignaturePadModal
         isOpen={showSignaturePad}
         onClose={() => setShowSignaturePad(false)}
