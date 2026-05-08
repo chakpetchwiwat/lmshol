@@ -428,6 +428,7 @@ const InstructorPresetModal = ({
         isOpen={showSignaturePad}
         onClose={() => setShowSignaturePad(false)}
         onSave={handleDrawnSignature}
+        initialImageUrl={form.signatureImageUrl ? getFullUrl(form.signatureImageUrl) : null}
         title={`เซ็นชื่อสำหรับวิทยากร: ${form.name || 'วิทยากรใหม่'}`}
       />
     </ModalPortal>

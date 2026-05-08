@@ -1,6 +1,7 @@
 import React from 'react';
 import { Settings, ChevronRight, Bell, Shield, PenLine, Upload, PencilLine } from 'lucide-react';
 import SignaturePadModal from '../common/SignaturePadModal';
+import { getFullUrl } from '../../utils/api';
 
 const ProfileSettings = ({
   user,
@@ -290,6 +291,7 @@ const ProfileSettings = ({
         isOpen={showSignaturePad}
         onClose={() => setShowSignaturePad(false)}
         onSave={handleDrawnSignature}
+        initialImageUrl={signatureImageUrl ? getFullUrl(signatureImageUrl) : null}
         title={`เซ็นชื่อวิทยากร: ${user?.name}`}
       />
     </div>

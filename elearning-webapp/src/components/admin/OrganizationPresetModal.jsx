@@ -414,6 +414,7 @@ const OrganizationPresetModal = ({
         isOpen={showSignaturePad}
         onClose={() => setShowSignaturePad(false)}
         onSave={handleDrawnSignature}
+        initialImageUrl={form.signatureImageUrl ? getFullUrl(form.signatureImageUrl) : null}
         title={`เซ็นชื่อสำหรับหน่วยงาน: ${form.name || 'หน่วยงานใหม่'}`}
       />
     </ModalPortal>
