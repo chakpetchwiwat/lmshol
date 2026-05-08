@@ -2,7 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2026-05-01] - Centralized Assessment & Profile Certification
+
+## [2026-05-07] - Certificate Rendering & Signature Pad
+
+### Added
+- **Web Signature Pad (Organization Preset)**: 
+    - Integrated an interactive drawing canvas in the `OrganizationPresetModal`.
+    - Supports pressure-sensitive signing with automatic normalization to standard size (1000 x 300 px).
+    - Automatic transparent background enforcement for professional-grade PDF integration.
+- **Advanced Storage Path Resolution**:
+    - Developed a robust `getFullUrl` helper in `certificatePdf.service.js` to handle complex storage path formats (relative, `/uploads/`, and Supabase internal object paths).
+    - Improved image fetching with custom `User-Agent` and `Accept` headers to bypass CDN blocks.
+- **WebP & Native Image Support**:
+    - Integrated `sharp` for automatic image conversion. Non-native formats (like WebP) are now transparently converted to PNG during PDF generation to ensure compatibility with `pdfkit`.
+
+
+### Fixed
+- **Certificate Metadata Stale-Sync**: 
+    - Resolved a critical issue where "Reissue" would use old organization data.
+    - Updated `generateCertificatePdfAsync` to dynamically resolve latest presets during the generation process.
+- **Organization Stamp Visibility**: 
+    - Fixed a bug where stamps failed to render on PDF certificates due to malformed URLs.
+    - Adjusted stamp positioning and layering logic to ensure proper visibility across all templates (Classic, Modern, Minimal).
+- **Signer Metadata Robustness**: 
+    - Improved the backend resolver to correctly merge organization preset names and titles even when course-specific slots are empty.
+    - Added defensive trimming and fallback defaults for organizational signature blocks.
+
+### Improved
+- **PDF Visual Aesthetics**: 
+    - Adjusted stamp size (42px -> 55px) and alignment for a more balanced "Official" look.
+    - Increased signature area width to prevent text/image overlap in multi-signer scenarios.
+
 
 ### Added
 - **Centralized Assessment Grading Dashboard**: 

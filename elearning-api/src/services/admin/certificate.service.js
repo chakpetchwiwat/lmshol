@@ -75,6 +75,101 @@ async function resolveCertificateSigner(tx, courseId, setting) {
   return snapshot;
 }
 
+async function resolveInstructorSigner(tx, courseId, slot = {}) {
+  let presetSigner = null;
+  if (slot.instructorPresetId) {
+    const preset = await tx.instructorPreset.findUnique({
+      where: { id: slot.instructorPresetId }
+    });
+
+    if (preset) {
+      presetSigner = {
+        name: preset.name,
+        title: preset.signatureTitle || preset.role,
+        signatureImageUrl: preset.signatureImageUrl
+      };
+    }
+  }
+
+  const legacySigner = await resolveCertificateSigner(tx, courseId, {
+    signatureType: 'INSTRUCTOR'
+  });
+
+  return {
+    type: 'INSTRUCTOR',
+    label: slot.label || 'Instructor signature',
+    name: slot.name || presetSigner?.name || legacySigner?.name || 'Instructor',
+    title: slot.title || presetSigner?.title || legacySigner?.title || 'Instructor',
+    signatureImageUrl: slot.signatureImageUrl || presetSigner?.signatureImageUrl || legacySigner?.signatureImageUrl || null,
+    ...(slot.instructorPresetId ? { instructorPresetId: slot.instructorPresetId } : {})
+  };
+}
+
+async function resolveCertificateSignatureSlots(tx, courseId, setting) {
+  const configuredSlots = Array.isArray(setting?.signatureSlots)
+    ? setting.signatureSlots.filter((slot) => slot && slot.enabled !== false).slice(0, 2)
+    : [];
+
+  if (configuredSlots.length === 0) {
+    const signer = await resolveCertificateSigner(tx, courseId, setting);
+    return signer ? [{ ...signer, label: 'Signature' }] : [];
+  }
+
+  const signers = [];
+
+  for (const slot of configuredSlots) {
+    if (slot.type === 'INSTRUCTOR') {
+      signers.push(await resolveInstructorSigner(tx, courseId, slot));
+      continue;
+    }
+
+    if (slot.type === 'ORGANIZATION') {
+      let orgName = slot.name;
+      let orgTitle = slot.title;
+      let orgSignature = slot.signatureImageUrl;
+      let orgStamp = slot.stampImageUrl;
+
+      if (slot.organizationPresetId) {
+        const preset = await tx.organizationPreset.findUnique({
+          where: { id: slot.organizationPresetId }
+        });
+        if (preset) {
+          orgName = orgName || preset.name;
+          orgTitle = orgTitle || preset.signatureTitle;
+          orgSignature = orgSignature || preset.signatureImageUrl;
+          orgStamp = orgStamp || preset.stampImageUrl;
+        }
+      }
+
+      signers.push({
+        ...(slot.id ? { id: slot.id } : {}),
+        type: 'ORGANIZATION',
+        label: slot.label || 'Organization signature',
+        name: (orgName || '').trim() || process.env.ORGANIZATION_SIGNER_NAME || 'ผู้อำนวยการสถาบัน',
+        title: (orgTitle || '').trim() || process.env.ORGANIZATION_SIGNER_TITLE || 'Director',
+        signatureImageUrl: orgSignature || null,
+        stampImageUrl: orgStamp || null,
+        ...(slot.organizationPresetId ? { organizationPresetId: slot.organizationPresetId } : {})
+      });
+      continue;
+    }
+
+    if (slot.type === 'CUSTOM' && !slot.name) {
+      throw new Error(`${slot.label || 'Signature'} name is required`);
+    }
+
+    signers.push({
+      type: slot.type || 'CUSTOM',
+      label: slot.label || 'Signature',
+      name: slot.name || 'Signature',
+      title: slot.title || '',
+      signatureImageUrl: slot.signatureImageUrl || null
+    });
+  }
+
+  return signers;
+}
+
 /**
  * Main service to issue a certificate
  */
@@ -131,8 +226,9 @@ async function issueCertificate({ courseId, userId, issuedById = null, manual = 
     const certificateId = crypto.randomUUID();
     const verificationToken = crypto.randomUUID();
     
-    // Resolve signer BEFORE generating certificate number to avoid wasting a number if signer resolution fails
+    // Resolve signers BEFORE generating certificate number to avoid wasting a number if signer resolution fails
     const signer = await resolveCertificateSigner(tx, courseId, setting);
+    const signers = await resolveCertificateSignatureSlots(tx, courseId, setting);
 
     // Generate number as the LAST step before creation
     const certificateNo = await generateCertificateNo(tx, course);
@@ -152,7 +248,8 @@ async function issueCertificate({ courseId, userId, issuedById = null, manual = 
           version: 1,
           learner: { id: user.id, name: user.name },
           course: { id: course.id, title: course.title },
-          signer: signer,
+          signer,
+          signers,
           template: { id: setting.template.id, name: setting.template.name },
           issue: { mode: setting.issueMode, manual },
           issuedAt: new Date().toISOString()
@@ -176,7 +273,9 @@ async function reissueCertificate({ certificateId, requestedById }) {
     include: {
       course: {
         include: {
-          certificateSetting: true
+          certificateSetting: {
+            include: { template: true }
+          }
         }
       }
     }
@@ -186,17 +285,26 @@ async function reissueCertificate({ certificateId, requestedById }) {
   if (cert.status === 'REVOKED') throw new Error('Cannot reissue a revoked certificate');
 
   const signer = cert.course?.certificateSetting
-    ? await prisma.$transaction((tx) => resolveCertificateSigner(tx, cert.courseId, cert.course.certificateSetting))
+    ? await resolveCertificateSigner(prisma, cert.courseId, cert.course.certificateSetting)
     : cert.metadata?.signer;
+  const signers = cert.course?.certificateSetting
+    ? await resolveCertificateSignatureSlots(prisma, cert.courseId, cert.course.certificateSetting)
+    : cert.metadata?.signers;
 
   return await prisma.certificate.update({
     where: { id: certificateId },
     data: {
       status: 'PENDING',
       pdfUrl: null,
+      templateId: cert.course?.certificateSetting?.templateId || cert.templateId,
       metadata: {
         ...(cert.metadata || {}),
         signer,
+        signers,
+        template: cert.course?.certificateSetting?.template ? {
+          id: cert.course.certificateSetting.template.id,
+          name: cert.course.certificateSetting.template.name
+        } : cert.metadata?.template,
         reissuedAt: new Date().toISOString(),
         reissuedById: requestedById
       }
@@ -436,12 +544,23 @@ async function generateCertificatePdfAsync(certificateId) {
 
     // 1. Prepare verification URL
     const verificationUrl = buildCertificateVerificationUrl(cert.verificationToken);
+    const currentSigners = cert.course?.certificateSetting
+      ? await resolveCertificateSignatureSlots(prisma, cert.courseId, cert.course.certificateSetting)
+      : null;
+    const effectiveSigners = Array.isArray(currentSigners) && currentSigners.length > 0
+      ? currentSigners
+      : (cert.metadata?.signers || (cert.metadata?.signer ? [cert.metadata.signer] : []));
+    const effectiveSigner = effectiveSigners[0] || cert.metadata?.signer || {};
 
     // 2. Render HTML
     const html = templateRenderer.renderCertificateHtml({
       template: cert.template,
       certificate: cert,
-      metadata: cert.metadata || {},
+      metadata: {
+        ...(cert.metadata || {}),
+        signer: effectiveSigner,
+        signers: effectiveSigners
+      },
       verificationUrl
     });
 
@@ -453,9 +572,10 @@ async function generateCertificatePdfAsync(certificateId) {
         certificateNo: cert.certificateNo,
         learnerName: cert.metadata?.learner?.name || cert.user?.name,
         courseTitle: cert.metadata?.course?.title || cert.course?.title,
-        signerName: cert.metadata?.signer?.name,
-        signerTitle: cert.metadata?.signer?.title,
-        signatureImageUrl: cert.metadata?.signer?.signatureImageUrl,
+        signerName: effectiveSigner.name,
+        signerTitle: effectiveSigner.title,
+        signatureImageUrl: effectiveSigner.signatureImageUrl,
+        signers: effectiveSigners,
         issuedAt: cert.metadata?.issuedAt
           ? new Date(cert.metadata.issuedAt).toISOString().slice(0, 10)
           : new Date(cert.issuedAt).toISOString().slice(0, 10),
@@ -585,6 +705,7 @@ module.exports = {
   verifyCertificate,
   generateCertificateNo,
   resolveCertificateSigner,
+  resolveCertificateSignatureSlots,
   generateCertificatePdfAsync,
   createCertificateSignedUrl,
   retryCertificatePdfGeneration,

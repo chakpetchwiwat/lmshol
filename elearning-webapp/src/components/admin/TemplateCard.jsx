@@ -1,13 +1,45 @@
 import React from 'react';
 import { Check, Eye } from 'lucide-react';
+import { getFullUrl } from '../../utils/api';
+import SignatureImage from '../common/SignatureImage';
 
-const CertificateArtwork = ({ template, size = 'card' }) => {
+const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) => {
   const isFull = size === 'full';
+  const activeSlots = (signatureSlots || []).filter(s => s && s.enabled !== false).slice(0, 2);
+
   const demo = {
     learnerName: 'Alex Morgan',
     courseTitle: 'Advanced Workplace Learning',
     certificateNo: 'CERT-2026-0427',
     issuedAt: '03 May 2026'
+  };
+
+  const SignatureArea = ({ alignment = 'right' }) => {
+    if (activeSlots.length === 0) return null;
+    return (
+      <div className={`absolute bottom-[10%] ${
+        alignment === 'right' ? 'right-[8%] justify-end' : 
+        alignment === 'center' ? 'left-0 right-0 justify-center' : 
+        'left-[10%] justify-start'
+      } flex w-[36%] items-end gap-[1.8em]`}>
+        {activeSlots.map((slot, i) => (
+          <div key={slot.id || i} className="relative flex min-w-0 flex-1 flex-col items-center text-center">
+            {slot.stampImageUrl ? (
+              <img src={getFullUrl(slot.stampImageUrl)} alt="" className="absolute bottom-[1.8em] right-[8%] h-[2.6em] w-[2.6em] object-contain opacity-80" />
+            ) : null}
+            <div className="relative mb-[0.2em] flex h-[2.5em] w-full items-end justify-center border-b border-slate-300 pb-1">
+              {slot.signatureImageUrl ? (
+                <SignatureImage src={slot.signatureImageUrl} alt="" className="max-h-full max-w-full object-contain" />
+              ) : (
+                <span className="text-[0.5em] font-black uppercase italic tracking-widest text-slate-200">Signature</span>
+              )}
+            </div>
+            <p className="max-w-full truncate text-[0.65em] font-black text-slate-800">{slot.name || `Signature ${i + 1}`}</p>
+            <p className="max-w-full truncate text-[0.5em] font-bold text-slate-400">{slot.title || 'Title'}</p>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const scaleClass = isFull
@@ -18,20 +50,35 @@ const CertificateArtwork = ({ template, size = 'card' }) => {
   if (template.id === 'MODERN_001') {
     return (
       <div className={pageClass}>
-        <div className="absolute inset-y-0 left-0 w-[18%] bg-slate-900" />
-        <div className="absolute inset-y-0 left-[18%] w-[1.8%] bg-blue-500" />
-        <div className="absolute left-[28%] top-[18%] w-[62%]">
-          <p className="text-[2.7em] font-black uppercase leading-none tracking-normal text-blue-500">Certificate</p>
-          <p className="mt-[0.2em] text-[1.1em] font-black uppercase tracking-[0.12em] text-slate-800">of completion</p>
-          <p className="mt-[3.2em] text-[0.95em] font-bold text-slate-500">This is to certify that</p>
-          <p className="mt-[0.25em] text-[3.2em] font-black leading-none text-slate-950">{demo.learnerName}</p>
-          <p className="mt-[1.4em] text-[0.95em] font-bold text-slate-500">has successfully completed the course</p>
-          <p className="mt-[0.25em] text-[1.8em] font-black leading-tight text-slate-800">{demo.courseTitle}</p>
+        {/* Top-left accent line */}
+        <div className="absolute left-[10%] top-[14%] h-[1.2%] w-[15%] bg-blue-500" />
+        
+        <div className="absolute left-[10%] top-[25%] w-[80%]">
+          <p className="text-[2.8em] font-black uppercase leading-none tracking-tight text-blue-500">Certificate</p>
+          <p className="mt-[0.3em] text-[1.1em] font-black uppercase tracking-[0.12em] text-blue-400">of completion</p>
+          
+          <p className="mt-[2.8em] text-[0.9em] font-bold text-slate-400">This is to certify that</p>
+          <div className="mt-[0.2em] relative inline-block">
+            <p className="text-[3.4em] font-black leading-none text-slate-900">{demo.learnerName}</p>
+            <div className="absolute -bottom-2 left-0 w-1/2 h-[1px] bg-slate-200" />
+          </div>
+          
+          <p className="mt-[3.2em] text-[0.9em] font-bold text-slate-400">has successfully completed the course</p>
+          <p className="mt-[0.25em] text-[1.9em] font-black leading-tight text-slate-800">{demo.courseTitle}</p>
         </div>
-        <div className="absolute bottom-[10%] left-[28%] text-[0.75em] font-bold text-slate-500">
-          <p>{demo.certificateNo}</p>
-          <p>{demo.issuedAt}</p>
+
+        {/* Metadata Box (Bottom Left) */}
+        <div className="absolute bottom-[10%] left-[10%] w-[45%] rounded-lg bg-slate-50 p-[1.5%] shadow-sm overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-[3%] bg-blue-500" />
+          <div className="grid grid-cols-[1fr_2fr] gap-x-2 text-[0.6em] font-bold">
+            <span className="text-slate-400">Certificate No</span>
+            <span className="text-slate-700">{demo.certificateNo}</span>
+            <span className="text-slate-400">Issue Date</span>
+            <span className="text-slate-700">{demo.issuedAt}</span>
+          </div>
         </div>
+
+        <SignatureArea alignment="right" />
       </div>
     );
   }
@@ -52,6 +99,8 @@ const CertificateArtwork = ({ template, size = 'card' }) => {
           <span>{demo.certificateNo}</span>
           <span>{demo.issuedAt}</span>
         </div>
+
+        <SignatureArea alignment="center" />
       </div>
     );
   }
@@ -71,12 +120,15 @@ const CertificateArtwork = ({ template, size = 'card' }) => {
         <p>เลขที่เกียรติบัตร: {demo.certificateNo}</p>
         <p>วันที่ออก: {demo.issuedAt}</p>
       </div>
-      <p className="absolute bottom-[8%] right-[10%] text-[0.65em] font-bold text-slate-400">ScaleUp Learning Management System</p>
+      
+      <SignatureArea alignment="right" />
+      
+      <p className="absolute bottom-[4%] left-0 right-0 text-center text-[0.55em] font-bold text-slate-300">ScaleUp Learning Management System</p>
     </div>
   );
 };
 
-const TemplateCard = ({ template, isSelected, onSelect, onPreview }) => {
+const TemplateCard = ({ template, isSelected, onSelect, onPreview, signatureSlots = [] }) => {
   const handlePreview = (event) => {
     event.stopPropagation();
     onPreview(template);
@@ -94,7 +146,7 @@ const TemplateCard = ({ template, isSelected, onSelect, onPreview }) => {
       {/* Visual Preview (CSS Based) */}
       <div className="aspect-[1.4/1] w-full overflow-hidden bg-slate-50 p-3">
         <div className={`h-full w-full overflow-hidden rounded border ${template.id === 'CLASSIC_001' ? 'border-amber-200' : 'border-slate-200'}`}>
-          <CertificateArtwork template={template} />
+          <CertificateArtwork template={template} signatureSlots={signatureSlots} />
         </div>
       </div>
 

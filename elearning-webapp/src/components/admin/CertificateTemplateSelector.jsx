@@ -21,7 +21,7 @@ const TEMPLATES = [
   }
 ];
 
-const CertificateTemplateSelector = ({ selectedId, onSelect }) => {
+const CertificateTemplateSelector = ({ selectedId, onSelect, signatureSlots = [] }) => {
   const [previewTemplate, setPreviewTemplate] = React.useState(null);
 
   return (
@@ -41,6 +41,7 @@ const CertificateTemplateSelector = ({ selectedId, onSelect }) => {
             isSelected={selectedId === template.id}
             onSelect={onSelect}
             onPreview={setPreviewTemplate}
+            signatureSlots={signatureSlots}
           />
         ))}
       </div>
@@ -64,7 +65,7 @@ const CertificateTemplateSelector = ({ selectedId, onSelect }) => {
             </div>
             <div className="bg-slate-100 p-4 sm:p-6">
               <div className="mx-auto max-w-4xl overflow-hidden rounded-xl ring-1 ring-slate-200">
-                {previewTemplate && <CertificateArtwork template={previewTemplate} size="full" />}
+                {previewTemplate && <CertificateArtwork template={previewTemplate} size="full" signatureSlots={signatureSlots} />}
               </div>
             </div>
             <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">

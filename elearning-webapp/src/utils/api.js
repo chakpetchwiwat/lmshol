@@ -38,6 +38,14 @@ export const getFullUrl = (url) => {
   return url;
 };
 
+export const isSignatureStorageKey = (url) => Boolean(url && !url.startsWith('http') && url.startsWith('signatures/'));
+
+export const getSignaturePreviewUrl = async (fileKey) => {
+  if (!isSignatureStorageKey(fileKey)) return getFullUrl(fileKey);
+  const response = await api.get('/upload/signature-url', { params: { key: fileKey } });
+  return response?.data?.url || '';
+};
+
 export const DEFAULT_COURSE_IMAGE = DEFAULT_VALUES.DEFAULT_COURSE_IMAGE;
 const api = axios.create({
   baseURL: API_URL,
@@ -72,8 +80,16 @@ api.interceptors.response.use(
     // 2. Automatically unwrap { success: true, data: ... } 
     // We return the WHOLE response object but with response.data being the inner data
     // This maintains compatibility with standard Axios usage (res.data)
-    if (response.data && response.data.success === true && response.data.data !== undefined) {
-      return { ...response, data: response.data.data };
+    // CRITICAL: We must preserve sibling fields like 'summary', 'pagination', 'hasCertificate'
+    if (response.data && response.data.success === true) {
+      const { data, success, ...metadata } = response.data;
+      if (data !== undefined) {
+        return { 
+          ...response, 
+          data: data,
+          ...metadata // Merges summary, pagination, etc. into the response object
+        };
+      }
     }
     return response;
   },
@@ -102,10 +118,13 @@ export const authAPI = {
 
 export const userAPI = {
   getCourses: () => api.get('/user/courses'),
+  getBookmarkedCourses: () => api.get('/user/course-bookmarks'),
   getAnnouncements: () => api.get('/user/announcements'),
   getCourseDetails: (id) => api.get(`/user/courses/${id}`),
   getAnnouncementDetails: (id) => api.get(`/user/announcements/${id}`),
   enrollCourse: (id) => api.post(`/user/courses/${id}/enroll`),
+  bookmarkCourse: (id) => api.post(`/user/courses/${id}/bookmark`),
+  unbookmarkCourse: (id) => api.delete(`/user/courses/${id}/bookmark`),
   updateProgress: (lessonId, progress) => api.put(`/user/lessons/${lessonId}/progress`, { progress }),
   getPoints: () => api.get('/user/points'),
   getRewards: () => api.get('/user/rewards'),
@@ -194,6 +213,10 @@ export const adminAPI = {
   updateInstructorPreset: (id, data) => api.put(`/admin/instructor-presets/${id}`, data),
   deleteInstructorPreset: (id) => api.delete(`/admin/instructor-presets/${id}`),
 
+  getOrganizationPresets: () => api.get('/admin/organization-presets'),
+  createOrganizationPreset: (data) => api.post('/admin/organization-presets', data),
+  updateOrganizationPreset: (id, data) => api.put(`/admin/organization-presets/${id}`, data),
+  deleteOrganizationPreset: (id) => api.delete(`/admin/organization-presets/${id}`),
 
   getCourses: () => api.get('/admin/courses'),
   createCourse: (data) => api.post('/admin/courses', data),
@@ -254,6 +277,13 @@ export const adminAPI = {
     const formData = new FormData();
     formData.append('file', file);
     return api.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadSignatureFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/signature', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },

@@ -8,6 +8,8 @@ const { verifyToken, verifyAdminPanelAccess } = require('../middleware/auth');
 const { uploadRateLimiter } = require('../middleware/rateLimiters');
 const { logSecurityEvent } = require('../utils/securityEvents');
 const { validateUploadedFile, ALLOWED_UPLOAD_TYPES } = require('../utils/uploadValidation');
+const { ADMIN_PANEL_ROLES } = require('../utils/constants/roles');
+const prisma = require('../utils/prisma');
 
 const router = express.Router();
 const securityConfig = getSecurityConfig();
@@ -31,7 +33,19 @@ const upload = multer({
     limits: { fileSize: securityConfig.uploadMaxFileSizeBytes }
 });
 
-const uploadToSupabase = async (req, res, { forceSubDir } = {}) => {
+const createSecureDocumentSignedUrl = async (fileKey, expiresIn = 3600) => {
+    const { data, error } = await supabase.storage
+        .from('secure-documents')
+        .createSignedUrl(fileKey, expiresIn);
+
+    if (error || !data?.signedUrl) {
+        throw error || new Error('Failed to create signed URL');
+    }
+
+    return data.signedUrl;
+};
+
+const uploadToSupabase = async (req, res, { forceSubDir, includeSignedUrl = false } = {}) => {
     try {
         if (req.file) {
             req.file.originalname = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
@@ -48,9 +62,11 @@ const uploadToSupabase = async (req, res, { forceSubDir } = {}) => {
         }
 
         const isImage = req.file.mimetype.startsWith('image/');
-        const privateSubDirs = new Set(['certificates', 'assessments']);
+        const privateSubDirs = new Set(['certificates', 'assessments', 'signatures']);
         // Use 'secure-documents' bucket for sensitive files, 'uploads' for public images
-        const isSensitive = privateSubDirs.has(forceSubDir) || !isImage;
+        // We only treat it as sensitive if it's explicitly in a private subdirectory.
+        // General uploads (like lesson documents) should be public even if they are not images.
+        const isSensitive = privateSubDirs.has(forceSubDir);
         const bucketName = isSensitive ? 'secure-documents' : 'uploads';
         const subDir = forceSubDir || (isImage ? 'images' : 'documents');
         const ext = path.extname(req.file.originalname);
@@ -75,13 +91,20 @@ const uploadToSupabase = async (req, res, { forceSubDir } = {}) => {
         // Frontend must use the signed URL endpoint.
         const fileUrl = isSensitive ? null : publicUrl;
 
-        res.json({
+        const payload = {
             message: 'Upload successful!',
             fileUrl,
             fileKey: fileName,
             fileName: forceSubDir ? req.file.originalname : fileName,
             fileMimeType: req.file.mimetype
-        });
+        };
+
+        if (isSensitive && includeSignedUrl) {
+            payload.signedUrl = await createSecureDocumentSignedUrl(fileName);
+        }
+
+        res.json(payload);
+        return payload;
 
     } catch (err) {
         logSecurityEvent('upload.failed', req, {
@@ -90,6 +113,47 @@ const uploadToSupabase = async (req, res, { forceSubDir } = {}) => {
         console.error('Upload Error:', err);
         res.status(500).json({ message: 'Upload failed', error: err.message });
     }
+};
+
+const hasAdminPanelAccess = (user) => Boolean(
+    user && (
+        ADMIN_PANEL_ROLES.includes(user.role)
+        || user.tier?.accessAdmin
+        || (user.courseStaff && user.courseStaff.length > 0)
+    )
+);
+
+const canPreviewSignature = async (authUser, fileKey) => {
+    const user = await prisma.user.findUnique({
+        where: { id: authUser.userId },
+        select: {
+            signatureImageUrl: true,
+            role: true,
+            tier: true,
+            courseStaff: { take: 1, select: { id: true } }
+        }
+    });
+
+    if (user?.signatureImageUrl === fileKey) {
+        return true;
+    }
+
+    if (!hasAdminPanelAccess(user)) {
+        return false;
+    }
+
+    const [instructorPreset, organizationPreset] = await Promise.all([
+        prisma.instructorPreset.findFirst({
+            where: { signatureImageUrl: fileKey },
+            select: { id: true }
+        }),
+        prisma.organizationPreset.findFirst({
+            where: { signatureImageUrl: fileKey },
+            select: { id: true }
+        })
+    ]);
+
+    return Boolean(instructorPreset || organizationPreset);
 };
 
 const readPngMetadata = (buffer) => {
@@ -177,6 +241,28 @@ router.post('/assessment', verifyToken, uploadRateLimiter, upload.single('file')
     await uploadToSupabase(req, res, { forceSubDir: 'assessments' });
 });
 
+// GET /api/upload/signature-url - Temporary preview URL for a signature the user can access
+router.get('/signature-url', verifyToken, async (req, res) => {
+    try {
+        const fileKey = String(req.query.key || '').trim();
+
+        if (!fileKey || !fileKey.startsWith('signatures/')) {
+            return res.status(400).json({ message: 'Invalid signature key.' });
+        }
+
+        const allowed = await canPreviewSignature(req.user, fileKey);
+        if (!allowed) {
+            return res.status(403).json({ message: 'You do not have access to this signature.' });
+        }
+
+        const signedUrl = await createSecureDocumentSignedUrl(fileKey);
+        return res.json({ url: signedUrl });
+    } catch (error) {
+        console.error('Signature signed URL error:', error);
+        return res.status(500).json({ message: 'Unable to create signature preview URL.' });
+    }
+});
+
 // POST /api/upload/signature - Instructor signature images for certificate signing
 router.post('/signature', verifyToken, uploadRateLimiter, upload.single('file'), async (req, res) => {
     const signatureError = validateSignatureImage(req.file);
@@ -184,7 +270,7 @@ router.post('/signature', verifyToken, uploadRateLimiter, upload.single('file'),
         return res.status(400).json({ message: signatureError });
     }
 
-    await uploadToSupabase(req, res, { forceSubDir: 'signatures' });
+    await uploadToSupabase(req, res, { forceSubDir: 'signatures', includeSignedUrl: true });
 });
 
 // POST /api/upload - Upload to Supabase Storage

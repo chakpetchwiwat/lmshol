@@ -62,6 +62,29 @@ const getAssessmentPassResult = (lesson, score, maxScore) => {
   };
 };
 
+const getAssessmentNotificationCopy = ({ status, lessonTitle, courseTitle, score, maxScore }) => {
+  const scoreText = score !== null && score !== undefined ? ` (${score}/${maxScore})` : '';
+
+  if (status === ASSESSMENT_SUBMISSION_STATUS.PASSED) {
+    return {
+      title: 'ผลตรวจ Assessment ผ่านแล้ว',
+      message: `งาน ${lessonTitle} ในคอร์ส ${courseTitle} ผ่านการตรวจแล้ว${scoreText}`
+    };
+  }
+
+  if (status === ASSESSMENT_SUBMISSION_STATUS.NEEDS_REVISION) {
+    return {
+      title: 'Assessment ต้องแก้ไขเพิ่มเติม',
+      message: `งาน ${lessonTitle} ในคอร์ส ${courseTitle} มีข้อเสนอแนะให้ปรับแก้${scoreText}`
+    };
+  }
+
+  return {
+    title: 'ผลตรวจ Assessment พร้อมแล้ว',
+    message: `งาน ${lessonTitle} ในคอร์ส ${courseTitle} ได้รับการตรวจแล้ว${scoreText}`
+  };
+};
+
 const serializeSubmission = (submission) => {
   if (!submission) return null;
 
@@ -233,7 +256,14 @@ const listCourseAssessmentSubmissions = async (actor, courseId) => {
           id: true,
           title: true,
           passScore: true,
-          points: true
+          points: true,
+          courseId: true,
+          course: {
+            select: {
+              id: true,
+              title: true
+            }
+          }
         }
       },
       user: {
@@ -420,7 +450,14 @@ const gradeAssessmentSubmission = async (actor, submissionId, data = {}) => {
           id: true,
           title: true,
           passScore: true,
-          points: true
+          points: true,
+          courseId: true,
+          course: {
+            select: {
+              id: true,
+              title: true
+            }
+          }
         }
       },
       user: {
@@ -444,6 +481,26 @@ const gradeAssessmentSubmission = async (actor, submissionId, data = {}) => {
   if (result.passed) {
     completion = await completeLessonAndRefreshCourse(existing.userId, existing.lesson);
   }
+
+  const notificationCopy = getAssessmentNotificationCopy({
+    status,
+    lessonTitle: submission.lesson.title,
+    courseTitle: submission.lesson.course?.title || 'คอร์สของคุณ',
+    score: submission.score,
+    maxScore: submission.maxScore
+  });
+
+  await prisma.userNotification.create({
+    data: {
+      userId: existing.userId,
+      assessmentSubmissionId: submission.id,
+      type: 'ASSESSMENT_REVIEWED',
+      title: notificationCopy.title,
+      message: notificationCopy.message,
+      actionUrl: `/user/courses/${submission.lesson.courseId}/lesson/${submission.lesson.id}?assessmentResult=${submission.id}`,
+      scheduledFor: new Date()
+    }
+  });
 
   return {
     submission: serializeSubmission(submission),

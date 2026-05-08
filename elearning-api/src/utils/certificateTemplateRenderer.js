@@ -20,6 +20,11 @@ const escapeHtml = (unsafe) => {
  */
 function renderCertificateHtml({ template, certificate, metadata, verificationUrl }) {
   const { templateHtml, templateCss } = template;
+  const signers = Array.isArray(metadata.signers) && metadata.signers.length > 0
+    ? metadata.signers
+    : (metadata.signer ? [metadata.signer] : []);
+  const signatureOne = signers[0] || {};
+  const signatureTwo = signers[1] || {};
   
   // Prepare variables based on metadata snapshot or live data
   const variables = {
@@ -31,6 +36,14 @@ function renderCertificateHtml({ template, certificate, metadata, verificationUr
     signer_name: escapeHtml(metadata.signer?.name || ''),
     signer_title: escapeHtml(metadata.signer?.title || ''),
     signature_image_url: metadata.signer?.signatureImageUrl || '', // URLs don't need escaping in src
+    signature_1_label: escapeHtml(signatureOne.label || 'Signature 1'),
+    signature_1_name: escapeHtml(signatureOne.name || ''),
+    signature_1_title: escapeHtml(signatureOne.title || ''),
+    signature_1_image_url: signatureOne.signatureImageUrl || '',
+    signature_2_label: escapeHtml(signatureTwo.label || 'Signature 2'),
+    signature_2_name: escapeHtml(signatureTwo.name || ''),
+    signature_2_title: escapeHtml(signatureTwo.title || ''),
+    signature_2_image_url: signatureTwo.signatureImageUrl || '',
     verification_url: verificationUrl || '',
     organization_name: escapeHtml(process.env.ORGANIZATION_NAME || 'สถาบันการเรียนรู้ออนไลน์')
   };

@@ -67,21 +67,30 @@ test('assignCourseStaff assigns first owner successfully', async () => {
   assert.equal(result.isPrimary, false);
 });
 
-test('assignCourseStaff prevents a second owner', async () => {
+test('assignCourseStaff demotes previous owner', async () => {
+  const calls = [];
   const tx = createTx({
     courseStaff: {
       ...createTx().courseStaff,
-      findFirst: async () => ({ id: 'existing-owner' })
+      findFirst: async () => ({ id: 'existing-owner' }),
+      update: async (input) => {
+        if (input.where.id === 'existing-owner') {
+          calls.push(input);
+        }
+        return { id: input.where.id };
+      }
     }
   });
   const service = loadCourseStaffService({
     $transaction: async (callback) => callback(tx)
   });
 
-  await assert.rejects(
-    () => service.assignCourseStaff('course-1', { userId: 'owner-2', role: 'owner' }),
-    /Course already has an owner/
-  );
+  const result = await service.assignCourseStaff('course-1', { userId: 'owner-2', role: 'owner' });
+  
+  assert.equal(result.role, 'owner');
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].where.id, 'existing-owner');
+  assert.equal(calls[0].data.role, 'instructor');
 });
 
 test('assignCourseStaff assigns instructor successfully', async () => {

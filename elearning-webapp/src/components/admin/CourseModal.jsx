@@ -34,6 +34,7 @@ const CourseModal = ({
   setCourseForm,
   categories,
   instructorPresets,
+  organizationPresets,
   departments,
   tiers,
   lessons,
@@ -133,7 +134,7 @@ const CourseModal = ({
   return (
     <ModalPortal isOpen={isOpen}>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md lg:p-8">
-        <div className="card m-auto flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden bg-white shadow-xl" style={{ isolation: 'isolate' }}>
+        <div className="card flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden bg-white shadow-xl">
           {/* Header & Tabs */}
           <div className="flex items-center justify-between border-b border-border bg-gray-50 p-4 rounded-t-[inherit]">
             <div className="flex items-center gap-3">
@@ -205,6 +206,7 @@ const CourseModal = ({
                 lessonCount={lessons.length}
                 categories={categories}
                 instructorPresets={instructorPresets}
+                organizationPresets={organizationPresets}
                 departments={departments}
                 tiers={tiers}
                 onSaveCourse={onSaveCourse}
@@ -212,7 +214,7 @@ const CourseModal = ({
                 uploading={uploading}
                 imageInputRef={imageInputRef}
                 onClose={onClose}
-                readOnly={!permissions.canEditSettings}
+                readOnly={!permissions.canEditSettings && !permissions.canManageCertificates}
               />
             ) : activeTab === 'content' ? (
               <CourseContentEditor 

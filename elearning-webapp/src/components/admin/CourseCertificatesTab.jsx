@@ -3,6 +3,7 @@ import { Award, CheckCircle2, AlertCircle, RotateCcw, Ban, FileText, Loader2, Se
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 import { formatThaiDateTime } from '../../utils/dateUtils';
+import ModalPortal from '../common/ModalPortal';
 
 const CourseCertificatesTab = ({ courseId, readOnly }) => {
   const toast = useToast();
@@ -76,15 +77,25 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
 
   const handleReissue = async (id) => {
     if (readOnly) return;
-    if (!window.confirm('คุณต้องการออกเกียรติบัตรใหม่ (Reissue) ใช่หรือไม่? รายการเดิมจะถูกยกเลิก')) return;
+    
+    // Explicit confirmation
+    const confirmed = window.confirm('คุณต้องการออกเกียรติบัตรใหม่ (Reissue) ใช่หรือไม่? \nระบบจะอัปเดตข้อมูลผู้ลงนามและรูปแบบตามการตั้งค่าปัจจุบัน');
+    if (!confirmed) return;
 
     try {
+      console.log(`[Certificate] Starting reissue for id=${id}`);
       setProcessing(id);
-      await adminAPI.reissueCertificate(id);
+      const response = await adminAPI.reissueCertificate(id);
+      console.log(`[Certificate] Reissue API response:`, response);
+      
       toast.success('กำลังดำเนินการออกเกียรติบัตรใหม่...');
-      fetchCertificates();
+      
+      // Delay fetch slightly to allow backend async process to start/show PENDING
+      setTimeout(fetchCertificates, 500);
     } catch (error) {
+      console.error(`[Certificate] Reissue failed for id=${id}:`, error);
       toast.error(error.response?.data?.message || 'ไม่สามารถออกเกียรติบัตรใหม่ได้');
+      fetchCertificates();
     } finally {
       setProcessing(null);
     }
@@ -389,111 +400,120 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
       </div>
 
       {/* Manual Issue Modal */}
-      {isManualModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-3xl animate-in zoom-in-95 duration-200 rounded-[2.5rem] bg-white shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="border-b border-slate-100 p-6">
+      <ModalPortal isOpen={isManualModalOpen}>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
+          <div className="w-full max-w-4xl animate-in fade-in zoom-in-95 duration-300 rounded-[2.5rem] bg-white shadow-2xl overflow-hidden flex flex-col h-[85vh] max-h-[900px]">
+            <div className="border-b border-slate-100 p-8">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                    <Award size={20} />
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-sm">
+                    <Award size={24} />
                   </div>
                   <div>
-                    <h3 className="font-black text-slate-900 text-lg">ออกเกียรติบัตรด้วยมือ</h3>
-                    <p className="text-xs font-bold text-slate-400">เลือกผู้เรียนที่ต้องการออกใบรับรองให้ทันที</p>
+                    <h3 className="font-black text-slate-900 text-xl tracking-tight">ออกเกียรติบัตรด้วยมือ</h3>
+                    <p className="text-sm font-bold text-slate-400">เลือกผู้เรียนที่ต้องการมอบใบรับรองให้ทันที</p>
                   </div>
                 </div>
                 <button 
                   onClick={() => setIsManualModalOpen(false)}
-                  className="text-slate-400 hover:text-slate-600 transition-colors"
+                  className="group flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-500"
                 >
-                  <RotateCcw size={20} className="rotate-45" />
+                  <RotateCcw size={20} className="transition-transform group-hover:rotate-90" />
                 </button>
               </div>
             </div>
 
-            <div className="p-6">
+            <div className="flex-1 flex flex-col overflow-hidden p-8 gap-6">
               {eligibleLoading ? (
-                <div className="flex h-48 flex-col items-center justify-center gap-3">
-                  <Loader2 className="animate-spin text-indigo-500" size={32} />
-                  <p className="text-xs font-bold text-slate-400">กำลังโหลดรายชื่อผู้เรียน...</p>
+                <div className="flex flex-1 flex-col items-center justify-center gap-4">
+                  <Loader2 className="animate-spin text-indigo-500" size={40} />
+                  <p className="text-sm font-black text-slate-400">กำลังโหลดรายชื่อผู้เรียน...</p>
                 </div>
               ) : eligibleUsers.length === 0 ? (
-                <div className="flex h-48 flex-col items-center justify-center text-center">
-                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-300">
-                    <Search size={24} />
+                <div className="flex flex-1 flex-col items-center justify-center text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-50 text-slate-200">
+                    <Search size={32} />
                   </div>
-                  <p className="text-sm font-bold text-slate-500">ไม่พบรายชื่อผู้เรียนที่ยังไม่มีเกียรติบัตร</p>
-                  <p className="mt-1 text-xs font-bold text-slate-400">ผู้เรียนทุกคนในคอร์สนี้ได้รับเกียรติบัตรหมดแล้ว</p>
+                  <h4 className="font-black text-slate-900 text-lg">ไม่พบรายชื่อผู้เรียน</h4>
+                  <p className="mt-1 text-sm font-bold text-slate-400 max-w-xs mx-auto">ผู้เรียนทุกคนในคอร์สนี้ได้รับเกียรติบัตรครบถ้วนแล้ว</p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-4">
+                <>
                   {/* Search box for manual modal */}
                   <div className="relative group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
                     <input
                       type="text"
                       placeholder="ค้นหาชื่อผู้เรียนที่ต้องการมอบใบเซอร์..."
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-3.5 pl-12 pr-4 text-sm font-bold text-slate-900 transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 py-4 pl-14 pr-6 text-base font-bold text-slate-900 transition-all focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none"
                       value={manualSearchQuery}
                       onChange={(e) => setManualSearchQuery(e.target.value)}
                     />
                   </div>
 
-                  <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar pb-4">
+                  <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3 pb-4">
                     {eligibleUsers
                       .filter(u => u.user?.name?.toLowerCase().includes(manualSearchQuery.toLowerCase()))
                       .map((record) => (
                     <div 
                       key={record.user?.id}
-                      className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 transition-all hover:border-indigo-200 hover:bg-white hover:shadow-md"
+                      className="group flex items-center justify-between rounded-3xl border border-slate-100 bg-slate-50/30 p-5 transition-all hover:border-indigo-200 hover:bg-white hover:shadow-lg hover:-translate-y-0.5"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 font-black text-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 font-black text-base shadow-sm">
                           {record.user?.name?.charAt(0) || '?'}
                         </div>
                         <div>
-                          <p className="font-black text-slate-900 text-sm">{record.user?.name}</p>
-                          <p className="text-[10px] font-bold text-slate-400">
+                          <p className="font-black text-slate-900 text-base">{record.user?.name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
                             {record.status === 'COMPLETED' ? (
-                              <span className="text-emerald-500">สถานะ: สำเร็จการเรียน</span>
+                              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-600 border border-emerald-100">
+                                <CheckCircle2 size={10} /> สำเร็จการเรียน
+                              </span>
                             ) : (
-                              <span className="text-amber-500">สถานะ: กำลังเรียน ({record.progressPercent}%)</span>
+                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-black text-amber-600 border border-amber-100">
+                                <RotateCcw size={10} className="animate-spin" /> กำลังเรียน ({record.progressPercent}%)
+                              </span>
                             )}
-                          </p>
+                            <span className="text-[10px] font-bold text-slate-300">|</span>
+                            <span className="text-[10px] font-bold text-slate-400">{record.user?.email}</span>
+                          </div>
                         </div>
                       </div>
                       <button
                         onClick={() => handleManualIssue(record.user?.id)}
                         disabled={manualIssueLoading}
-                        className="rounded-xl bg-white px-4 py-2 text-xs font-black text-indigo-600 border border-indigo-100 shadow-sm transition-all hover:bg-indigo-600 hover:text-white disabled:opacity-50"
+                        className="rounded-2xl bg-indigo-600 px-6 py-2.5 text-sm font-black text-white shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700 hover:shadow-lg active:scale-95 disabled:opacity-50"
                       >
-                        {manualIssueLoading ? <Loader2 size={14} className="animate-spin" /> : 'ออกบัตร'}
+                        {manualIssueLoading ? <Loader2 size={16} className="animate-spin" /> : 'มอบเกียรติบัตร'}
                       </button>
                     </div>
                     ))}
                     
                     {eligibleUsers.filter(u => u.user?.name?.toLowerCase().includes(manualSearchQuery.toLowerCase())).length === 0 && (
-                      <div className="py-10 text-center text-slate-400">
-                        <p className="text-sm font-bold">ไม่พบรายชื่อผู้เรียนที่ตรงกับการค้นหา</p>
+                      <div className="py-20 text-center">
+                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-300 mb-2">
+                          <Search size={20} />
+                        </div>
+                        <p className="text-sm font-bold text-slate-400">ไม่พบรายชื่อผู้เรียนที่ตรงกับการค้นหา</p>
                       </div>
                     )}
                   </div>
-                </div>
+                </>
               )}
             </div>
 
-            <div className="border-t border-slate-100 p-6 bg-slate-50/50 rounded-b-3xl">
+            <div className="border-t border-slate-100 p-8 bg-slate-50/50">
               <button 
                 onClick={() => setIsManualModalOpen(false)}
-                className="w-full rounded-xl bg-white border border-slate-200 py-3 text-sm font-black text-slate-600 shadow-sm transition-all hover:bg-slate-50"
+                className="w-full rounded-2xl bg-white border border-slate-200 py-4 text-sm font-black text-slate-600 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-300"
               >
                 ปิดหน้าต่าง
               </button>
             </div>
           </div>
         </div>
-      )}
+      </ModalPortal>
     </div>
   );
 };

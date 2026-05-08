@@ -13,7 +13,9 @@ const createInstructorPreset = async (input) => prisma.instructorPreset.create({
         name: sanitizeName(input.name, 'Instructor preset'),
         role: input.role || null,
         avatar: input.avatar || null,
-        bio: input.bio || null
+        bio: input.bio || null,
+        signatureTitle: input.signatureTitle || input.role || null,
+        signatureImageUrl: input.signatureImageUrl || null
     }
 });
 
@@ -23,7 +25,9 @@ const updateInstructorPreset = async (id, input) => prisma.instructorPreset.upda
         name: sanitizeName(input.name, 'Instructor preset'),
         role: input.role || null,
         avatar: input.avatar || null,
-        bio: input.bio || null
+        bio: input.bio || null,
+        signatureTitle: input.signatureTitle || input.role || null,
+        signatureImageUrl: input.signatureImageUrl || null
     }
 });
 

@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Gift, User, BookMarked, LogOut, Settings, Bell, Target } from 'lucide-react';
+import { Home, BookOpen, Gift, User, BookMarked, Bookmark, LogOut, Settings, Bell, Target, ClipboardCheck } from 'lucide-react';
 import { userAPI } from '../../utils/api';
 import { canAccessAdminPanel } from '../../utils/roles';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -114,15 +114,23 @@ const UserLayout = () => {
   };
 
   const displayNotifications = React.useMemo(() => {
-    // Basic de-duplication: show only the latest notification per goalId + type
+    // Basic de-duplication: show only the latest notification per target + type
     const seen = new Set();
     return notifications.filter(n => {
-      const key = `${n.goalId || n.id}-${n.type}`;
+      const key = `${n.assessmentSubmissionId || n.goalId || n.id}-${n.type}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
   }, [notifications]);
+
+  const getNotificationIcon = (notification) => {
+    if (notification.type === 'ASSESSMENT_REVIEWED') {
+      return <ClipboardCheck size={18} />;
+    }
+
+    return <Target size={18} />;
+  };
 
   const renderNotificationPanel = (positionClasses = "right-0") => (
     <div className={`absolute ${positionClasses} top-full z-50 mt-3 w-[min(24rem,88vw)] overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-2xl animate-fade-in`}>
@@ -171,7 +179,7 @@ const UserLayout = () => {
             <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
               notification.readAt ? 'bg-slate-100 text-slate-400' : 'bg-primary/10 text-primary'
             }`}>
-              <Target size={18} />
+              {getNotificationIcon(notification)}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-3">
@@ -244,7 +252,11 @@ const UserLayout = () => {
           </NavLink>
 
           <NavLink to="/user/courses" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
-            <BookOpen size={20} /> <span className="font-bold">คอร์สเรียน</span>
+            <BookOpen size={20} /> <span className="font-bold">คอร์สทั้งหมด</span>
+          </NavLink>
+
+          <NavLink to="/user/bookmarks" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
+            <Bookmark size={20} /> <span className="font-bold">คอร์สที่บันทึก</span>
           </NavLink>
 
           <NavLink to="/user/rewards" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
@@ -317,7 +329,12 @@ const UserLayout = () => {
 
             <NavLink to="/user/courses" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               <div className="nav-icon-wrapper"><BookOpen size={22} /></div>
-              <span>คอร์สเรียน</span>
+              <span>คอร์สทั้งหมด</span>
+            </NavLink>
+
+            <NavLink to="/user/bookmarks" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              <div className="nav-icon-wrapper"><Bookmark size={22} /></div>
+              <span>คอร์สที่บันทึก</span>
             </NavLink>
 
             <NavLink to="/user/rewards" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
@@ -329,13 +346,6 @@ const UserLayout = () => {
               <div className="nav-icon-wrapper"><User size={22} /></div>
               <span>โปรไฟล์</span>
             </NavLink>
-
-            {canAccessAdminPanel(user) && (
-              <NavLink to="/admin/dashboard" className={({ isActive }) => `nav-item text-rose-500 ${isActive ? 'active' : ''}`}>
-                <div className="nav-icon-wrapper"><Settings size={22} /></div>
-                <span>จัดการ</span>
-              </NavLink>
-            )}
           </div>
         </nav>
       </div>

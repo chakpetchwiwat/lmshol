@@ -31,9 +31,15 @@ const calculateGoalCompliance = (targetUsers, activeGoals, completions, now = ne
     const atRisk = [];
 
     activeGoals.forEach(goal => {
-        const targetUserIdsForGoal = goal.scope === GOAL_SCOPES.GLOBAL
-            ? allUserIds
-            : (usersByDept[goal.departmentId] || []);
+        const explicitUserIds = goal.targetUsers?.map((target) => target.userId) || [];
+        const targetDepartmentIds = goal.targetDepartments?.map((target) => target.departmentId) || [];
+        const targetUserIdsForGoal = explicitUserIds.length > 0
+            ? explicitUserIds.filter((userId) => allUserIds.includes(userId))
+            : targetDepartmentIds.length > 0
+                ? targetDepartmentIds.flatMap((departmentId) => usersByDept[departmentId] || [])
+                : goal.scope === GOAL_SCOPES.GLOBAL
+                    ? allUserIds
+                    : (usersByDept[goal.departmentId] || []);
 
         if (targetUserIdsForGoal.length === 0) return;
 

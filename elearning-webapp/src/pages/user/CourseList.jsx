@@ -90,6 +90,14 @@ const CourseList = () => {
     setSortBy(DEFAULT_SORT);
   };
 
+  const handleBookmarkChange = (courseId, isBookmarked) => {
+    setCourses((currentCourses) => (
+      currentCourses.map((course) => (
+        course.id === courseId ? { ...course, isBookmarked } : course
+      ))
+    ));
+  };
+
   return (
     <div ref={scrollRef} className="relative flex flex-col gap-6 animate-fade-in pb-10 pt-2">
       <div className="sticky top-0 z-40 -mx-5 mb-2 space-y-3 border-b border-gray-100 bg-[#f8fafc]/95 px-5 pb-2 pt-5 shadow-sm backdrop-blur-md sm:space-y-4 sm:shadow-none md:top-[-1px] md:-mx-0 md:border-none md:px-0 md:pb-4 md:pt-3">
@@ -150,6 +158,7 @@ const CourseList = () => {
               key={course.id}
               course={course}
               onClick={() => navigate(`/user/courses/${course.id}`)}
+              onBookmarkChange={handleBookmarkChange}
               className="h-full w-full"
             />
           ))

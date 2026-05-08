@@ -9,10 +9,13 @@ router.get('/announcements/:id/document-stream', userController.getAnnouncementD
 router.use(verifyToken); // All user routes require authentication
 
 router.get('/courses', userController.getCourses);
+router.get('/course-bookmarks', userController.getBookmarkedCourses);
 router.get('/announcements', userController.getAnnouncements);
 router.get('/courses/:id', userController.getCourseDetails);
 router.get('/announcements/:id', userController.getAnnouncementDetails);
 router.post('/courses/:id/enroll', userController.enrollCourse);
+router.post('/courses/:id/bookmark', userController.bookmarkCourse);
+router.delete('/courses/:id/bookmark', userController.unbookmarkCourse);
 
 router.put('/lessons/:id/progress', userController.updateLessonProgress);
 router.post('/lessons/:id/quiz', userController.submitQuiz);

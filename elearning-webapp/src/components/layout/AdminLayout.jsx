@@ -89,12 +89,8 @@ const AdminLayout = () => {
     // Users: Admin and Managers (Backend will filter the data)
     ...(!isCourseStaffOnly ? [{ path: '/admin/users', icon: <Users size={20} />, label: 'ผู้ใช้งาน' }] : []),
     
-    // Health: SuperAdmin/Admin Only
-    ...(isFullAdmin
-      ? [{ path: '/admin/health', icon: <Activity size={20} />, label: 'Health Monitoring' }]
-      : []),
-    
     // Certificates: SuperAdmin/Admin Only
+
     ...(isFullAdmin
       ? [{ path: '/admin/certificates', icon: <Award size={20} />, label: 'ภาพรวมเกียรติบัตร' }]
       : []),

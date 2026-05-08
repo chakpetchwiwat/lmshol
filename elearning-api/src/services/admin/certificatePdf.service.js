@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
+const sharp = require('sharp');
 const supabase = require('../../utils/supabase');
 const { getTemplateById } = require('../../config/certificateTemplates');
 
@@ -27,14 +28,84 @@ async function loadThaiFont() {
   }
 }
 
+/**
+ * Standardizes relative storage paths into absolute URLs
+ */
+const getFullUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  
+  const supabaseUrl = process.env.SUPABASE_URL;
+  if (!supabaseUrl) return url;
+  
+  // Case 1: Already has storage prefix
+  if (url.startsWith('/storage/v1/object/public/')) {
+    return `${supabaseUrl}${url}`;
+  }
+
+  // Case 2: Starts with /uploads (common in our DB)
+  if (url.startsWith('/uploads/')) {
+    return `${supabaseUrl}/storage/v1/object/public${url}`;
+  }
+
+  // Case 3: Starts with uploads/ (no leading slash)
+  if (url.startsWith('uploads/')) {
+    return `${supabaseUrl}/storage/v1/object/public/${url}`;
+  }
+  
+  // Case 4: Just a relative path or filename
+  const cleanPath = url.startsWith('/') ? url.slice(1) : url;
+  return `${supabaseUrl}/storage/v1/object/public/uploads/${cleanPath}`;
+};
+
 async function loadImageBuffer(imageUrl) {
-  if (!imageUrl) return null;
+  if (imageUrl && !imageUrl.startsWith('http') && imageUrl.startsWith('signatures/')) {
+    try {
+      const { data, error } = await supabase.storage
+        .from('secure-documents')
+        .download(imageUrl);
+
+      if (error || !data) {
+        throw error || new Error('No signature data returned from storage');
+      }
+
+      const arrayBuffer = await data.arrayBuffer();
+      const imageBuffer = Buffer.from(arrayBuffer);
+      return /\.(png|jpe?g)$/i.test(imageUrl)
+        ? imageBuffer
+        : await sharp(imageBuffer).png().toBuffer();
+    } catch (error) {
+      console.warn(`[CertificatePdf] Failed to load private signature: ${imageUrl} | Error: ${error.message}`);
+      return null;
+    }
+  }
+
+  const absoluteUrl = getFullUrl(imageUrl);
+  if (!absoluteUrl) return null;
 
   try {
-    const response = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 10000 });
-    return Buffer.from(response.data);
+    const response = await axios.get(absoluteUrl, { 
+      responseType: 'arraybuffer', 
+      timeout: 15000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+      }
+    });
+    const imageBuffer = Buffer.from(response.data);
+    const contentType = String(response.headers?.['content-type'] || '').toLowerCase();
+    const isPdfKitNativeImage = contentType.includes('image/png')
+      || contentType.includes('image/jpeg')
+      || contentType.includes('image/jpg')
+      || /\.(png|jpe?g)(\?|$)/i.test(absoluteUrl);
+
+    if (isPdfKitNativeImage) {
+      return imageBuffer;
+    }
+
+    return await sharp(imageBuffer).png().toBuffer();
   } catch (error) {
-    console.warn('[CertificatePdf] Failed to load signature image:', error.message);
+    console.warn(`[CertificatePdf] Failed to load image: ${absoluteUrl} | Error: ${error.message}`);
     return null;
   }
 }
@@ -52,8 +123,10 @@ const drawSignature = (doc, data, x, y, width, align = 'center') => {
   const signerName = data.signerName || '';
   const signerTitle = data.signerTitle || '';
   const signatureBuffer = data.signatureImageBuffer;
+  const stampBuffer = data.stampImageBuffer;
   const signatureHeight = 58;
 
+  // Draw signature image first
   if (signatureBuffer) {
     try {
       doc.image(signatureBuffer, x, y, {
@@ -69,6 +142,21 @@ const drawSignature = (doc, data, x, y, width, align = 'center') => {
     doc.moveTo(x + width * 0.18, y + signatureHeight).lineTo(x + width * 0.82, y + signatureHeight).lineWidth(0.7).stroke('#9ca3af');
   }
 
+  // Draw stamp overlapping the signature area
+  if (stampBuffer) {
+    try {
+      // Position stamp to the right of the signature center
+      const stampX = align === 'center' ? x + (width / 2) + 10 : x + width - 55;
+      doc.image(stampBuffer, stampX, y + 5, {
+        fit: [55, 55],
+        align: 'center',
+        valign: 'center'
+      });
+    } catch (error) {
+      console.warn('[CertificatePdf] Failed to draw stamp image:', error.message);
+    }
+  }
+
   doc.fillColor('#111827')
      .fontSize(12)
      .text(signerName || 'LMS Administrator', x, y + signatureHeight + 8, { width, align });
@@ -76,6 +164,33 @@ const drawSignature = (doc, data, x, y, width, align = 'center') => {
   doc.fillColor('#6b7280')
      .fontSize(9)
      .text(signerTitle || 'Authorized Signer', x, y + signatureHeight + 24, { width, align });
+};
+
+const drawSignatureGroup = (doc, data, y, width, height, mode = 'right') => {
+  const signers = Array.isArray(data.signers) && data.signers.length > 0
+    ? data.signers.slice(0, 2)
+    : [{
+        name: data.signerName,
+        title: data.signerTitle,
+        signatureImageBuffer: data.signatureImageBuffer,
+        stampImageBuffer: data.stampImageBuffer
+      }];
+
+  if (signers.length === 1) {
+    const x = mode === 'center' ? (width - 240) / 2 : width - 300;
+    drawSignature(doc, { ...data, ...signers[0] }, x, y, mode === 'center' ? 240 : 200, 'center');
+    return;
+  }
+
+  const signatureWidth = mode === 'center' ? 220 : 180;
+  const gap = mode === 'center' ? 40 : 35;
+  const groupWidth = (signatureWidth * 2) + gap;
+  const startX = mode === 'center'
+    ? (width - groupWidth) / 2
+    : Math.max(width - groupWidth - 40, width * 0.55);
+
+  drawSignature(doc, { ...data, ...signers[0] }, startX, y, signatureWidth, 'center');
+  drawSignature(doc, { ...data, ...signers[1] }, startX + signatureWidth + gap, y, signatureWidth, 'center');
 };
 
 /**
@@ -109,52 +224,79 @@ const drawClassic = (doc, data, width, height) => {
      .fontSize(28)
      .text(data.courseTitle || 'Course Title', 0, 340, { align: 'center', width });
 
-  drawSignature(doc, data, width - 280, height - 165, 180, 'center');
+  drawSignatureGroup(doc, data, height - 165, width, height);
 };
 
 /**
- * Template: MODERN
+ * Template: MODERN (Template 2)
  */
 const drawModern = (doc, data, width, height) => {
-  // Side bar
-  doc.rect(0, 0, 150, height).fill('#1f2937');
-  doc.rect(150, 0, 10, height).fill('#3b82f6');
+  // 1. Background
+  doc.rect(0, 0, width, height).fill('#ffffff');
   
-  const contentX = 200;
-  const contentWidth = width - contentX - 50;
+  // 2. Top-left accent line
+  doc.rect(80, 80, 120, 5).fill('#3b82f6');
+  
+  const contentX = 80;
+  const contentWidth = width - 160;
 
+  // 3. Title Section
   doc.fillColor('#3b82f6')
-     .fontSize(38)
-     .text('CERTIFICATE', contentX, 100);
+     .fontSize(42)
+     .text('CERTIFICATE', contentX, 140, { characterSpacing: 1 });
   
-  doc.fillColor('#1f2937')
+  doc.fillColor('#3b82f6')
      .fontSize(18)
-     .text('OF COMPLETION', contentX, 140);
+     .text('OF COMPLETION', contentX, 185, { characterSpacing: 2 });
 
-  doc.fillColor('#666666')
+  // 4. Body Section
+  doc.fillColor('#6b7280')
      .fontSize(14)
-     .text('This is to certify that', contentX, 200);
+     .text('This is to certify that', contentX, 260);
 
-  doc.fillColor('#000000')
-     .fontSize(48)
-     .text(data.learnerName || 'Learner Name', contentX, 230);
+  doc.fillColor('#111827')
+     .fontSize(52)
+     .text(data.learnerName || 'Learner Name', contentX, 290);
+  
+  // Underline for name
+  doc.moveTo(contentX, 350).lineTo(contentX + 300, 350).lineWidth(0.5).stroke('#e5e7eb');
 
-  doc.fillColor('#666666')
+  doc.fillColor('#6b7280')
      .fontSize(14)
-     .text('has successfully completed the course', contentX, 310);
+     .text('has successfully completed the course', contentX, 400);
 
-  doc.fillColor('#1f2937')
-     .fontSize(24)
-     .text(data.courseTitle || 'Course Title', contentX, 340, { width: contentWidth });
+  doc.fillColor('#111827')
+     .fontSize(28)
+     .text(data.courseTitle || 'Course Title', contentX, 430, { width: contentWidth * 0.6 });
 
-  drawSignature(doc, data, width - 280, height - 165, 190, 'center');
+  // 5. Metadata Box (Bottom Left)
+  const boxWidth = 380;
+  const boxHeight = 110;
+  const boxY = height - 160;
+  
+  // Box background
+  doc.rect(80, boxY, boxWidth, boxHeight).fill('#f8fafc');
+  // Left accent border
+  doc.rect(80, boxY, 4, boxHeight).fill('#3b82f6');
+  
+  doc.fillColor('#94a3b8').fontSize(8);
+  doc.text('Certificate No', 100, boxY + 15);
+  doc.text('Issue Date', 100, boxY + 45);
+  doc.text('Verify', 100, boxY + 75);
+
+  doc.fillColor('#1e293b').fontSize(11);
+  doc.text(data.certificateNo || '-', 200, boxY + 15);
+  doc.text(data.issuedAt || '-', 200, boxY + 45);
+  doc.fontSize(8).text(data.verificationUrl || '-', 200, boxY + 75);
+
+  // 6. Signatures (Bottom Right)
+  drawSignatureGroup(doc, data, height - 200, width, height, 'right');
 };
 
 /**
  * Template: MINIMAL
  */
 const drawMinimal = (doc, data, width, height) => {
-  // Soft background
   doc.rect(0, 0, width, height).fill('#ffffff');
 
   doc.fillColor('#4b5563')
@@ -177,10 +319,9 @@ const drawMinimal = (doc, data, width, height) => {
      .fontSize(22)
      .text(data.courseTitle || 'Course Title', 0, 330, { align: 'center', width });
   
-  // Thin decorative line
   doc.moveTo(width / 4, 380).lineTo(width * 3 / 4, 380).lineWidth(0.5).stroke('#e5e7eb');
 
-  drawSignature(doc, data, (width - 220) / 2, height - 165, 220, 'center');
+  drawSignatureGroup(doc, data, height - 165, width, height, 'center');
 };
 
 /**
@@ -191,9 +332,19 @@ async function generatePdfBuffer(_html, options = {}) {
   const fontBuffer = await loadThaiFont();
   const template = getTemplateById(data.templateId);
   const signatureImageBuffer = await loadImageBuffer(data.signatureImageUrl);
+  const signers = Array.isArray(data.signers)
+    ? await Promise.all(data.signers.slice(0, 2).map(async (signer) => ({
+        ...signer,
+        signerName: signer.name,
+        signerTitle: signer.title,
+        signatureImageBuffer: await loadImageBuffer(signer.signatureImageUrl),
+        stampImageBuffer: await loadImageBuffer(signer.stampImageUrl)
+      })))
+    : [];
   const renderData = {
     ...data,
-    signatureImageBuffer
+    signatureImageBuffer,
+    signers
   };
 
   return new Promise((resolve, reject) => {
@@ -221,17 +372,18 @@ async function generatePdfBuffer(_html, options = {}) {
         default: drawClassic(doc, renderData, width, height); break;
       }
 
-      // Shared Footer Details
-      const footerY = height - 120;
-      const leftMargin = 80;
-      
-      doc.fillColor('#333333').fontSize(11);
-      doc.text(`เลขที่เกียรติบัตร: ${data.certificateNo || '-'}`, leftMargin, footerY);
-      doc.text(`วันที่ออก: ${data.issuedAt || '-'}`, leftMargin, footerY + 18);
-      
-      doc.fontSize(9);
-      doc.text('ตรวจสอบความถูกต้องได้ที่:', leftMargin, footerY + 45);
-      doc.fillColor('#666666').text(data.verificationUrl || '-', leftMargin, footerY + 58);
+      if (template.layout !== 'modern') {
+        const footerY = height - 120;
+        const leftMargin = 80;
+
+        doc.fillColor('#333333').fontSize(11);
+        doc.text(`เลขที่เกียรติบัตร: ${data.certificateNo || '-'}`, leftMargin, footerY);
+        doc.text(`วันที่ออก: ${data.issuedAt || '-'}`, leftMargin, footerY + 18);
+
+        doc.fontSize(9);
+        doc.text('ตรวจสอบความถูกต้องได้ที่:', leftMargin, footerY + 45);
+        doc.fillColor('#666666').text(data.verificationUrl || '-', leftMargin, footerY + 58);
+      }
 
       // Branding
       doc.fillColor('#999999')

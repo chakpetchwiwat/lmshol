@@ -75,13 +75,15 @@ const getGoalReport = async (goalId, authUser) => {
                         }
                     }
                 }
-            }
+            },
+            targetDepartments: true,
+            targetUsers: true
         }
     });
 
     if (!goal) throw new ErrorResponse('Goal not found', 404);
 
-    if (!actor.isAdmin && goal.scope === GOAL_SCOPES.DEPARTMENT && goal.departmentId !== actor.departmentId) {
+    if (!authHelpers.canAccessGoal(actor, goal, { includeExpired: actor.canAccessAdminPanel, includeAllScopes: actor.isAdmin })) {
         throw new ErrorResponse('Goal not found', 404);
     }
 
@@ -90,7 +92,11 @@ const getGoalReport = async (goalId, authUser) => {
     return resolveGoalReportCache(cacheKey, async () => {
         let userWhere = { status: USER_STATUS.ACTIVE };
 
-        if (goal.scope === GOAL_SCOPES.DEPARTMENT) {
+        if (goal.targetUsers.length > 0) {
+            userWhere.id = { in: goal.targetUsers.map((target) => target.userId) };
+        } else if (goal.targetDepartments.length > 0) {
+            userWhere.departmentId = { in: goal.targetDepartments.map((target) => target.departmentId) };
+        } else if (goal.scope === GOAL_SCOPES.DEPARTMENT) {
             userWhere.departmentId = goal.departmentId;
         }
 

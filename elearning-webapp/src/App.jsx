@@ -1,7 +1,6 @@
 import React from 'react';
 import { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { canAccessAdminPanel } from './utils/roles';
 
 // Layouts
 const UserLayout = React.lazy(() => import('./components/layout/UserLayout'));
@@ -13,6 +12,7 @@ const Login = React.lazy(() => import('./pages/auth/Login'));
 // User Pages
 const Home = React.lazy(() => import('./pages/user/Home'));
 const CourseList = React.lazy(() => import('./pages/user/CourseList'));
+const BookmarkedCourses = React.lazy(() => import('./pages/user/BookmarkedCourses'));
 const CompletedCourses = React.lazy(() => import('./pages/user/CompletedCourses'));
 const CourseDetail = React.lazy(() => import('./pages/user/CourseDetail'));
 const LessonPlayer = React.lazy(() => import('./pages/user/LessonPlayer'));
@@ -54,19 +54,7 @@ const LoadingFallback = () => (
 import { ToastProvider } from './context/ToastContext';
 import { LanguageProvider } from './context/LanguageContext';
 
-const readStoredUser = () => {
-  if (typeof window === 'undefined') return null;
-
-  try {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
-  } catch {
-    return null;
-  }
-};
-
 function App() {
-  const currentUser = readStoredUser();
   const hasToken = typeof window !== 'undefined' && !!localStorage.getItem('token');
 
   return (
@@ -92,6 +80,7 @@ function App() {
             <Route index element={<Navigate to="home" replace />} />
             <Route path="home" element={<Home />} />
             <Route path="courses" element={<CourseList />} />
+            <Route path="bookmarks" element={<BookmarkedCourses />} />
             <Route path="announcements/:id" element={<AnnouncementPlayer />} />
             <Route path="ongoing" element={<OngoingCourses />} />
             <Route path="completed" element={<CompletedCourses />} />

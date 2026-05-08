@@ -1,10 +1,14 @@
 import React from 'react';
-import { ArrowUpRight, CheckCircle2, Clock, Layers3 } from 'lucide-react';
-import { DEFAULT_COURSE_IMAGE, getFullUrl } from '../../utils/api';
+import { ArrowUpRight, Bookmark, CheckCircle2, Clock, Layers3 } from 'lucide-react';
+import { DEFAULT_COURSE_IMAGE, getFullUrl, userAPI } from '../../utils/api';
+import { useToast } from '../../context/useToast';
 import { formatThaiFullDate } from '../../utils/dateUtils';
 import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
-const CourseCard = ({ course, onClick, className = '', variant = 'default' }) => {
+const CourseCard = ({ course, onClick, className = '', variant = 'default', onBookmarkChange }) => {
+  const toast = useToast();
+  const [isBookmarked, setIsBookmarked] = React.useState(!!course.isBookmarked);
+  const [bookmarking, setBookmarking] = React.useState(false);
   const isCompleted = variant === 'completed' || course.enrollmentStatus === ENROLLMENT_STATUS.COMPLETED;
   const isInProgress = course.isEnrolled && !isCompleted;
   const categoryLabel = course.category?.name || 'หมวดทั่วไป';
@@ -30,11 +34,50 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
     ? `เข้าดูได้ถึง${course.expiredAt ? ` · ${formatThaiFullDate(course.expiredAt)}` : ''}`
     : '';
 
+  React.useEffect(() => {
+    setIsBookmarked(!!course.isBookmarked);
+  }, [course.isBookmarked]);
+
+  const handleBookmarkClick = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (bookmarking) return;
+
+    const nextValue = !isBookmarked;
+    setIsBookmarked(nextValue);
+    setBookmarking(true);
+    onBookmarkChange?.(course.id, nextValue);
+
+    try {
+      if (nextValue) {
+        await userAPI.bookmarkCourse(course.id);
+        toast.success('บันทึกคอร์สแล้ว');
+      } else {
+        await userAPI.unbookmarkCourse(course.id);
+        toast.success('นำออกจากคอร์สที่บันทึกแล้ว');
+      }
+    } catch (error) {
+      console.error('Bookmark course error:', error);
+      setIsBookmarked(!nextValue);
+      onBookmarkChange?.(course.id, !nextValue);
+      toast.error('อัปเดตคอร์สที่บันทึกไม่สำเร็จ');
+    } finally {
+      setBookmarking(false);
+    }
+  };
+
   return (
     <div className={`group h-full self-stretch ${className}`}>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onClick}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick?.(event);
+          }
+        }}
         aria-label={`เปิดคอร์ส ${course.title}`}
         className="flex h-full w-full flex-col overflow-hidden rounded-[1.8rem] border border-slate-200/80 bg-white text-left transition-all duration-300 hover:-translate-y-1.5 hover:border-slate-300 hover:shadow-[0_26px_55px_-34px_rgba(15,23,42,0.28)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         style={{
@@ -60,18 +103,34 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
             <span className="inline-flex max-w-[65%] shrink-0 whitespace-nowrap rounded-full bg-white/92 px-3 py-1 text-[11px] font-black tracking-[0.04em] text-slate-700 shadow-sm">
               {categoryLabel}
             </span>
-  
-            {course.isEnrolled && (
-              <span
-                className={`inline-flex shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-black tracking-[0.04em] shadow-sm ${
-                  isCompleted
-                    ? 'bg-success-bg text-success-text'
-                    : 'bg-blue-600 text-white shadow-md'
-                }`}
+
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              {course.isEnrolled && (
+                <span
+                  className={`inline-flex shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-black tracking-[0.04em] shadow-sm ${
+                    isCompleted
+                      ? 'bg-success-bg text-success-text'
+                      : 'bg-blue-600 text-white shadow-md'
+                  }`}
+                >
+                  {statusLabel}
+                </span>
+              )}
+
+              <button
+                type="button"
+                aria-label={isBookmarked ? `นำ ${course.title} ออกจากคอร์สที่บันทึก` : `บันทึกคอร์ส ${course.title}`}
+                aria-pressed={isBookmarked}
+                onClick={handleBookmarkClick}
+                className={`hidden h-10 w-10 items-center justify-center rounded-full border text-white shadow-lg transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 md:flex ${
+                  isBookmarked
+                    ? 'border-amber-200 bg-amber-400 text-slate-950 opacity-100'
+                    : 'border-white/25 bg-slate-950/30 opacity-0 backdrop-blur-md group-hover:opacity-100'
+                } ${bookmarking ? 'pointer-events-none opacity-60' : 'hover:-translate-y-0.5 hover:bg-amber-400 hover:text-slate-950'}`}
               >
-                {statusLabel}
-              </span>
-            )}
+                <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} strokeWidth={2.4} />
+              </button>
+            </div>
           </div>
   
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 text-white">
@@ -142,7 +201,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default' }) =>
             </div>
           </div>
         </div>
-      </button>
+      </div>
     </div>
   );
 };

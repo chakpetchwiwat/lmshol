@@ -35,6 +35,11 @@ router.post('/instructor-presets', verifySuperAdmin, adminController.createInstr
 router.put('/instructor-presets/:id', verifySuperAdmin, adminController.updateInstructorPreset);
 router.delete('/instructor-presets/:id', verifySuperAdmin, adminController.deleteInstructorPreset);
 
+router.get('/organization-presets', adminController.getOrganizationPresets);
+router.post('/organization-presets', verifySuperAdmin, adminController.createOrganizationPreset);
+router.put('/organization-presets/:id', verifySuperAdmin, adminController.updateOrganizationPreset);
+router.delete('/organization-presets/:id', verifySuperAdmin, adminController.deleteOrganizationPreset);
+
 router.get('/courses', adminController.getAdminCourses);
 router.post('/courses', verifyAdmin, adminController.createCourse);
 router.put('/courses/:id/republish', verifySuperAdmin, adminController.republishCourse);

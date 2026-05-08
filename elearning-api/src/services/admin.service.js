@@ -19,6 +19,7 @@ const { getTiers, createTier, updateTier, deleteTier, reorderTiers } = require('
 const { getDashboardStats, getAdvancedAnalytics } = require('./admin/admin.analytics');
 const { getAdminAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, archiveAnnouncement, republishAnnouncement, getAnnouncementHistory } = require('./admin/admin.announcements');
 const { getInstructorPresets, createInstructorPreset, updateInstructorPreset, deleteInstructorPreset } = require('./admin/admin.instructors');
+const { getOrganizationPresets, createOrganizationPreset, updateOrganizationPreset, deleteOrganizationPreset } = require('./admin/admin.organizations');
 
 const {
     courseInclude,
@@ -62,6 +63,10 @@ module.exports = {
     createInstructorPreset,
     updateInstructorPreset,
     deleteInstructorPreset,
+    getOrganizationPresets,
+    createOrganizationPreset,
+    updateOrganizationPreset,
+    deleteOrganizationPreset,
     getAdminCourses: (user) => getAdminCourses(user),
     createCourse,
     updateCourse,

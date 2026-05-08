@@ -1,13 +1,14 @@
 import React from 'react';
-import { Book, Trophy, Clock, Plus, ImageIcon, Upload, Trash2, FileText, Layers, Users, GraduationCap, Video, Award, CheckCircle2 } from 'lucide-react';
+import { Book, Trophy, Clock, Plus, ImageIcon, Upload, Trash2, FileText, Layers, Users, GraduationCap, Video, Award, CheckCircle2, Building2, PenLine } from 'lucide-react';
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import InstructorPresetPicker from './InstructorPresetPicker';
 import CertificateTemplateSelector from './CertificateTemplateSelector';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
-import { getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
+import { adminAPI, getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
 import CourseBuilderFooter from './course-builder/CourseBuilderFooter';
+import SignatureImage from '../common/SignatureImage';
 
 const CourseBasicInfoForm = ({
   isPersisted,
@@ -16,6 +17,7 @@ const CourseBasicInfoForm = ({
   setCourseForm,
   categories,
   instructorPresets,
+  organizationPresets = [],
   departments,
   tiers,
   onSaveCourse,
@@ -25,6 +27,38 @@ const CourseBasicInfoForm = ({
   onClose,
   readOnly
 }) => {
+  const signatureUploadRefs = React.useRef({});
+
+  const signatureSlots = Array.isArray(courseForm.certificateSignatureSlots) && courseForm.certificateSignatureSlots.length > 0
+    ? courseForm.certificateSignatureSlots
+    : [
+        { id: 'organization', label: 'Signature 1', type: 'ORGANIZATION', enabled: true, organizationPresetId: '', name: '', title: '', signatureImageUrl: '', stampImageUrl: '' },
+        { id: 'instructor', label: 'Signature 2', type: 'INSTRUCTOR', enabled: true, name: '', title: '', signatureImageUrl: '' },
+      ];
+
+  const updateSignatureSlot = (index, changes) => {
+    const nextSlots = signatureSlots.map((slot, slotIndex) => (
+      slotIndex === index ? { ...slot, ...changes } : slot
+    ));
+    setCourseForm({ ...courseForm, certificateSignatureSlots: nextSlots });
+  };
+
+  const handleSignatureUpload = async (index, file) => {
+    if (!file) return;
+
+    try {
+      const response = await adminAPI.uploadSignatureFile(file);
+      updateSignatureSlot(index, { signatureImageUrl: response.data.fileUrl || response.data.fileKey });
+    } catch (error) {
+      console.error('Upload certificate signature error:', error);
+      window.alert(error.response?.data?.message || 'Unable to upload signature image.');
+    } finally {
+      if (signatureUploadRefs.current[index]) {
+        signatureUploadRefs.current[index].value = '';
+      }
+    }
+  };
+
   return (
     <form onSubmit={onSaveCourse} className="flex flex-col gap-4">
       <fieldset disabled={readOnly} className="contents">
@@ -499,9 +533,159 @@ const CourseBasicInfoForm = ({
                   </div>
 
                   <div className="mt-8 border-t border-indigo-100 pt-8">
+                    <div className="mb-8">
+                      <div className="mb-4 flex items-center justify-between gap-4">
+                        <div>
+                          <h5 className="text-sm font-black text-indigo-900">Certificate Signatures</h5>
+                          <p className="mt-1 text-xs font-medium text-slate-500">กำหนดผู้ลงนามได้สูงสุด 2 ช่อง เช่น องค์กร + วิทยากร</p>
+                        </div>
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase text-slate-500">
+                          2 slots
+                        </span>
+                      </div>
+
+                      <div className="grid gap-4 lg:grid-cols-2">
+                        {signatureSlots.slice(0, 2).map((slot, index) => {
+                          const selectedPreset = instructorPresets.find((preset) => preset.id === slot.instructorPresetId);
+                          return (
+                            <div key={slot.id || index} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                              <div className="mb-4 flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${slot.type === 'INSTRUCTOR' ? 'bg-indigo-100 text-indigo-600' : 'bg-emerald-100 text-emerald-700'}`}>
+                                    {slot.type === 'INSTRUCTOR' ? <GraduationCap size={18} /> : <Building2 size={18} />}
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-black text-slate-900">{slot.label || `Signature ${index + 1}`}</p>
+                                    <p className="text-[11px] font-bold uppercase text-slate-400">{slot.type === 'INSTRUCTOR' ? 'Instructor' : 'Organization'}</p>
+                                  </div>
+                                </div>
+                                <label className="relative inline-flex cursor-pointer items-center">
+                                  <input
+                                    type="checkbox"
+                                    className="peer sr-only"
+                                    checked={slot.enabled !== false}
+                                    onChange={(event) => updateSignatureSlot(index, { enabled: event.target.checked })}
+                                  />
+                                  <div className="h-6 w-11 rounded-full bg-slate-200 transition-all after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-5"></div>
+                                </label>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateSignatureSlot(index, { type: 'ORGANIZATION', instructorPresetId: '' })}
+                                    className={`rounded-xl border px-3 py-2 text-xs font-black transition-all ${slot.type === 'ORGANIZATION' ? 'border-emerald-300 bg-white text-emerald-700 shadow-sm' : 'border-slate-200 bg-white/60 text-slate-500 hover:bg-white'}`}
+                                  >
+                                    Org. Signature
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      updateSignatureSlot(index, {
+                                        type: 'INSTRUCTOR',
+                                        instructorPresetId: '',
+                                        name: '',
+                                        title: 'Instructor',
+                                        signatureImageUrl: '',
+                                      });
+                                    }}
+                                    className={`rounded-xl border px-3 py-2 text-xs font-black transition-all ${slot.type === 'INSTRUCTOR' ? 'border-indigo-300 bg-white text-indigo-700 shadow-sm' : 'border-slate-200 bg-white/60 text-slate-500 hover:bg-white'}`}
+                                  >
+                                    Instructor
+                                  </button>
+                                </div>
+
+                                {slot.type === 'ORGANIZATION' && (
+                                  <div>
+                                    <label className="mb-1.5 block text-xs font-black text-slate-500">เลือกพรีเซ็ตหน่วยงาน</label>
+                                    <select
+                                      className="form-input w-full bg-white text-sm"
+                                      value={slot.organizationPresetId || ''}
+                                      onChange={(event) => {
+                                        const preset = organizationPresets.find((item) => item.id === event.target.value);
+                                        updateSignatureSlot(index, {
+                                          organizationPresetId: event.target.value,
+                                          name: preset?.name || '',
+                                          title: preset?.signatureTitle || '',
+                                          signatureImageUrl: preset?.signatureImageUrl || '',
+                                          stampImageUrl: preset?.stampImageUrl || '',
+                                        });
+                                      }}
+                                    >
+                                      <option value="">-- ไม่ใช้พรีเซ็ต (ระบุเอง) --</option>
+                                      {organizationPresets.map((p) => (
+                                        <option key={p.id} value={p.id}>{p.name}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )}
+
+                                <div>
+                                  <label className="mb-1.5 block text-xs font-black text-slate-500">ชื่อผู้ลงนาม</label>
+                                  <input
+                                    type="text"
+                                    className="form-input w-full bg-white"
+                                    value={slot.name || ''}
+                                    onChange={(event) => updateSignatureSlot(index, { name: event.target.value })}
+                                    placeholder={slot.type === 'INSTRUCTOR' ? 'เว้นว่างเพื่อใช้ชื่อวิทยากร' : 'เช่น ScaleUp Academy'}
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="mb-1.5 block text-xs font-black text-slate-500">ตำแหน่ง / คำอธิบาย</label>
+                                  <input
+                                    type="text"
+                                    className="form-input w-full bg-white"
+                                    value={slot.title || ''}
+                                    onChange={(event) => updateSignatureSlot(index, { title: event.target.value })}
+                                    placeholder={slot.type === 'INSTRUCTOR' ? 'Instructor' : 'Organization Signature'}
+                                  />
+                                </div>
+
+                                <div>
+                                  <label className="mb-1.5 block text-xs font-black text-slate-500">ลายเซ็น</label>
+                                  <input
+                                    ref={(node) => { signatureUploadRefs.current[index] = node; }}
+                                    type="file"
+                                    accept="image/png,image/webp"
+                                    className="hidden"
+                                    onChange={(event) => handleSignatureUpload(index, event.target.files?.[0])}
+                                  />
+                                  <div className="flex gap-2">
+                                    <input
+                                      type="text"
+                                      className="form-input flex-1 bg-white"
+                                      value={slot.signatureImageUrl || ''}
+                                      onChange={(event) => updateSignatureSlot(index, { signatureImageUrl: event.target.value })}
+                                      placeholder="URL หรือ PNG/WebP 1000 x 300"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => signatureUploadRefs.current[index]?.click()}
+                                      className="btn btn-outline btn-sm gap-1"
+                                    >
+                                      <PenLine size={14} />
+                                      อัปโหลด
+                                    </button>
+                                  </div>
+                                  {slot.signatureImageUrl && (
+                                    <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
+                                      <SignatureImage src={slot.signatureImageUrl} alt={`${slot.label || 'Signature'} preview`} className="h-14 max-w-full object-contain" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     <CertificateTemplateSelector 
                       selectedId={courseForm.certificateTemplateId || 'CLASSIC_001'}
                       onSelect={(id) => setCourseForm({ ...courseForm, certificateTemplateId: id })}
+                      signatureSlots={signatureSlots}
                     />
                   </div>
                 </div>

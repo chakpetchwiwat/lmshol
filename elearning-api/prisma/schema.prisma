@@ -39,6 +39,8 @@ model User {
   enrollments           UserCourse[]
   progress              UserLessonProgress[]
   notifications         UserNotification[]
+  targetedGoals         GoalTargetUser[]
+  courseBookmarks       UserCourseBookmark[]
 
   @@index([status, departmentId, tierId])
   @@index([departmentId, status])
@@ -101,6 +103,7 @@ model Course {
   learningGoals      GoalCourse[]
   lessons            Lesson[]
   enrollments        UserCourse[]
+  bookmarks          UserCourseBookmark[]
 }
 
 model CourseStaff {
@@ -122,14 +125,26 @@ model CourseStaff {
 }
 
 model InstructorPreset {
-  id        String   @id @default(uuid())
-  name      String
-  role      String?
-  avatar    String?
-  bio       String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  courses   Course[]
+  id                String   @id @default(uuid())
+  name              String
+  role              String?
+  avatar            String?
+  bio               String?
+  signatureTitle    String?
+  signatureImageUrl String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  courses           Course[]
+}
+
+model OrganizationPreset {
+  id                String   @id @default(uuid())
+  name              String
+  signatureTitle    String?
+  signatureImageUrl String?
+  stampImageUrl     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Announcement {
@@ -179,6 +194,7 @@ model Department {
   categoryAccess CategoryDepartmentAccess[]
   courseAccess   CourseDepartmentAccess[]
   learningGoals  LearningGoal[]
+  goalTargets    GoalTargetDepartment[]
   users          User[]                     @relation("DepartmentUsers")
 }
 
@@ -308,6 +324,7 @@ model AssessmentSubmission {
   updatedAt    DateTime  @updatedAt
   gradedBy     User?     @relation("AssessmentGrader", fields: [gradedById], references: [id])
   lesson       Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  notifications UserNotification[]
   user         User      @relation("AssessmentLearner", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([lessonId, status, submittedAt])
@@ -349,6 +366,19 @@ model UserCourse {
   @@index([courseId, status, completedAt])
   @@index([userId, status, completedAt])
   @@index([userId, completedAt])
+}
+
+model UserCourseBookmark {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId, createdAt])
+  @@index([courseId])
 }
 
 model UserLessonProgress {
@@ -418,10 +448,34 @@ model LearningGoal {
   preDeadlineReminderTime    String?
   courses                    GoalCourse[]
   department                 Department?        @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  targetDepartments          GoalTargetDepartment[]
+  targetUsers                GoalTargetUser[]
   notifications              UserNotification[]
 
   @@index([status, expiryDate, departmentId])
   @@index([scope, departmentId, status])
+}
+
+model GoalTargetDepartment {
+  goalId       String
+  departmentId String
+  createdAt    DateTime     @default(now())
+  department   Department   @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  goal         LearningGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@id([goalId, departmentId])
+  @@index([departmentId, goalId])
+}
+
+model GoalTargetUser {
+  goalId    String
+  userId    String
+  createdAt DateTime     @default(now())
+  goal      LearningGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([goalId, userId])
+  @@index([userId, goalId])
 }
 
 model GoalCourse {
@@ -441,21 +495,25 @@ model SystemSetting {
 }
 
 model UserNotification {
-  id           String        @id @default(uuid())
-  userId       String
-  goalId       String?
-  type         String
-  title        String
-  message      String
-  scheduledFor DateTime
-  readAt       DateTime?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  goal         LearningGoal? @relation(fields: [goalId], references: [id], onDelete: Cascade)
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                     String                @id @default(uuid())
+  userId                 String
+  goalId                 String?
+  assessmentSubmissionId String?
+  type                   String
+  title                  String
+  message                String
+  actionUrl              String?
+  scheduledFor           DateTime
+  readAt                 DateTime?
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  assessmentSubmission   AssessmentSubmission? @relation(fields: [assessmentSubmissionId], references: [id], onDelete: Cascade)
+  goal                   LearningGoal?         @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  user                   User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, scheduledFor, readAt])
   @@index([goalId, scheduledFor])
+  @@index([assessmentSubmissionId, scheduledFor])
 }
 
 model AnnouncementView {
@@ -498,6 +556,7 @@ model CourseCertificateSetting {
   signerNameOverride  String?
   signerTitleOverride String?
   signatureImageUrl   String?
+  signatureSlots      Json?
   passingScore        Int?
   expiryMonths        Int?
   createdAt           DateTime                 @default(now())

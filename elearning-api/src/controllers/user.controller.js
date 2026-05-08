@@ -10,6 +10,11 @@ const getCourses = asyncHandler(async (req, res) => {
   res.json({ success: true, data: courses });
 });
 
+const getBookmarkedCourses = asyncHandler(async (req, res) => {
+  const courses = await UserService.getBookmarkedCourses(req.user.userId);
+  res.json({ success: true, data: courses });
+});
+
 const getAnnouncements = asyncHandler(async (req, res) => {
   const announcements = await UserService.getAnnouncements(req.user.userId);
   res.json({ success: true, data: announcements });
@@ -62,6 +67,16 @@ const getAnnouncementDetails = asyncHandler(async (req, res) => {
 const enrollCourse = asyncHandler(async (req, res) => {
   const enrollment = await UserService.enrollCourse(req.user.userId, req.params.id);
   res.status(201).json({ success: true, message: 'Successfully enrolled', data: enrollment });
+});
+
+const bookmarkCourse = asyncHandler(async (req, res) => {
+  const bookmark = await UserService.bookmarkCourse(req.user.userId, req.params.id);
+  res.status(201).json({ success: true, data: bookmark });
+});
+
+const unbookmarkCourse = asyncHandler(async (req, res) => {
+  const bookmark = await UserService.unbookmarkCourse(req.user.userId, req.params.id);
+  res.json({ success: true, data: bookmark });
 });
 
 // Update lesson progress and handle points
@@ -204,10 +219,13 @@ const clearAllNotifications = asyncHandler(async (req, res) => {
 
 module.exports = {
   getCourses,
+  getBookmarkedCourses,
   getAnnouncements,
   getCourseDetails,
   getAnnouncementDetails,
   enrollCourse,
+  bookmarkCourse,
+  unbookmarkCourse,
   updateLessonProgress,
   getPointsHistory,
   getRewards,

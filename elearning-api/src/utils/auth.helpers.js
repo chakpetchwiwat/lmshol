@@ -264,6 +264,20 @@ const buildGoalVisibilityWhere = (
                 scope: GOAL_SCOPES.DEPARTMENT,
                 departmentId: actor.departmentId
             });
+            scopeClauses.push({
+                targetDepartments: {
+                    some: { departmentId: actor.departmentId }
+                }
+            });
+        }
+
+        const actorUserId = actor.id || actor.userId;
+        if (actorUserId) {
+            scopeClauses.push({
+                targetUsers: {
+                    some: { userId: actorUserId }
+                }
+            });
         }
 
         filters.push({
@@ -295,8 +309,22 @@ const canAccessGoal = (
         return false;
     }
 
-    if (!(includeAllScopes && actor.isAdmin) && goal.scope === GOAL_SCOPES.DEPARTMENT && goal.departmentId !== actor.departmentId) {
-        return false;
+    if (!(includeAllScopes && actor.isAdmin)) {
+        const actorUserId = actor.id || actor.userId;
+        const targetUsers = goal.targetUsers || [];
+        const targetDepartments = goal.targetDepartments || [];
+
+        if (targetUsers.length > 0) {
+            return targetUsers.some((target) => target.userId === actorUserId);
+        }
+
+        if (targetDepartments.length > 0) {
+            return targetDepartments.some((target) => target.departmentId === actor.departmentId);
+        }
+
+        if (goal.scope === GOAL_SCOPES.DEPARTMENT && goal.departmentId !== actor.departmentId) {
+            return false;
+        }
     }
 
     return true;

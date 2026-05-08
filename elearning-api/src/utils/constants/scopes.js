@@ -1,6 +1,7 @@
 const GOAL_SCOPES = Object.freeze({
     GLOBAL: 'GLOBAL',
-    DEPARTMENT: 'DEPARTMENT'
+    DEPARTMENT: 'DEPARTMENT',
+    USER: 'USER'
 });
 
 const ANNOUNCEMENT_SCOPES = Object.freeze({
