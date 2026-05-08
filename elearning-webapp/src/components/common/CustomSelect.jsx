@@ -21,10 +21,14 @@ const CustomSelect = ({
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+      const isInsideContainer = containerRef.current && containerRef.current.contains(event.target);
+      const isInsideDropdown = event.target.closest('.custom-select-dropdown');
+      
+      if (!isInsideContainer && !isInsideDropdown) {
         setIsOpen(false);
       }
     };
+
     
     const handleScroll = (event) => {
       // Don't close if scrolling inside the dropdown itself
