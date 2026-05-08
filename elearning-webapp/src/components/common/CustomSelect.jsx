@@ -52,8 +52,8 @@ const CustomSelect = ({
     if (!isOpen && containerRef.current) {
       const rect = containerRef.current.querySelector('button').getBoundingClientRect();
       setCoords({
-        top: rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX,
+        top: rect.bottom,
+        left: rect.left,
         width: rect.width
       });
     }
@@ -69,12 +69,13 @@ const CustomSelect = ({
   const dropdownList = (
     <div 
       style={{
-        position: 'absolute',
+        position: 'fixed',
         top: `${coords.top}px`,
         left: `${coords.left}px`,
         width: `${coords.width}px`,
         zIndex: 9999
       }}
+
       className="custom-select-dropdown mt-2 max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_10px_40px_-10px_rgba(15,23,42,0.15)] animate-in fade-in zoom-in-95 duration-200"
     >
       {options.length === 0 ? (
