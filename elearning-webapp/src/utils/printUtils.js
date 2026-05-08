@@ -428,6 +428,7 @@ export const openPrintReport = ({
   filters = [],
   columns = [],
   rows = [],
+  sections = [],
   emptyMessage,
   dashboardData = null,
 }) => {
@@ -447,11 +448,13 @@ export const openPrintReport = ({
     filters,
     columns,
     rows,
+    sections,
     emptyMessage,
     dashboardData,
     generatedAt: formatThaiDateTime(new Date(), true),
     createdAt: Date.now(),
   };
+
 
   try {
     window.localStorage.setItem(getStorageKey(reportId), JSON.stringify(payload));
