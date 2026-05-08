@@ -26,18 +26,25 @@ const CustomSelect = ({
       }
     };
     
+    const handleScroll = (event) => {
+      // Don't close if scrolling inside the dropdown itself
+      if (event.target.closest('.custom-select-dropdown')) return;
+      setIsOpen(false);
+    };
+    
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      window.addEventListener('scroll', () => setIsOpen(false), true);
+      window.addEventListener('scroll', handleScroll, true);
       window.addEventListener('resize', () => setIsOpen(false));
     }
     
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', () => setIsOpen(false), true);
+      window.removeEventListener('scroll', handleScroll, true);
       window.removeEventListener('resize', () => setIsOpen(false));
     };
   }, [isOpen]);
+
 
   const toggleOpen = () => {
     if (disabled) return;
@@ -68,7 +75,7 @@ const CustomSelect = ({
         width: `${coords.width}px`,
         zIndex: 9999
       }}
-      className="mt-2 max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_10px_40px_-10px_rgba(15,23,42,0.15)] animate-in fade-in zoom-in-95 duration-200"
+      className="custom-select-dropdown mt-2 max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-100 bg-white p-2 shadow-[0_10px_40px_-10px_rgba(15,23,42,0.15)] animate-in fade-in zoom-in-95 duration-200"
     >
       {options.length === 0 ? (
         <div className="px-4 py-3 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
