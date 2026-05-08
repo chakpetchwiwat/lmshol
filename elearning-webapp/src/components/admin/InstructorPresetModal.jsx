@@ -120,7 +120,7 @@ const InstructorPresetModal = ({
     try {
       setUploading(true);
       const response = await adminAPI.uploadSignatureFile(file);
-      setForm((current) => ({ ...current, signatureImageUrl: response.data.fileUrl }));
+      setForm((c) => ({ ...c, signatureImageUrl: response.data.fileUrl }));
       toast.success('บันทึกลายเซ็นเข้าแบบฟอร์มแล้ว');
     } catch (error) {
       console.error('Upload instructor signature error:', error);
@@ -180,7 +180,7 @@ const InstructorPresetModal = ({
               <div className="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
                 {loading ? (
                   <div className="py-20 text-center">
-                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                    <div className="h-8 w-8 mx-auto animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
                   </div>
                 ) : filteredPresets.length === 0 ? (
                   <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white/50 px-4 py-12 text-center text-sm font-bold text-slate-400">
@@ -248,7 +248,7 @@ const InstructorPresetModal = ({
                       {editingPreset ? 'Edit Instructor' : 'New Instructor'}
                     </span>
                     <h4 className="mt-1 text-xl font-black text-slate-900">
-                      {editingPreset ? 'แก้ไขข้อมูลวิทยากร' : 'เพิ่มวิทยากรใหม่'}
+                      {editingPreset ? 'ข้อมูลวิทยากรที่กำลังแก้ไข' : 'เพิ่มวิทยากรใหม่'}
                     </h4>
                   </div>
                   {editingPreset && (
@@ -258,8 +258,8 @@ const InstructorPresetModal = ({
                   )}
                 </div>
 
-                <div className="flex-1 space-y-6 overflow-y-auto pr-1">
-                   <div className="flex items-start gap-6">
+                <div className="flex-1 space-y-6 overflow-y-auto pr-1 custom-scrollbar">
+                   <div className="flex flex-col sm:flex-row items-start gap-6">
                         <div className="group relative h-28 w-28 shrink-0 overflow-hidden rounded-[2rem] border-4 border-slate-50 bg-slate-100 shadow-lg">
                             {form.avatar ? (
                                 <img src={getFullUrl(form.avatar)} alt="Avatar" className="h-full w-full object-cover" />
@@ -278,7 +278,7 @@ const InstructorPresetModal = ({
                             </button>
                             <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                         </div>
-                        <div className="flex-1 space-y-4">
+                        <div className="flex-1 space-y-4 w-full">
                             <div className="space-y-1">
                                 <label className="ml-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">ชื่อวิทยากร</label>
                                 <input
@@ -287,7 +287,7 @@ const InstructorPresetModal = ({
                                     className="form-input w-full rounded-2xl border-slate-200"
                                     value={form.name}
                                     onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-                                    placeholder="เช่น อาจารย์สมชาย ใจดี"
+                                    placeholder="อาจารย์สมชาย ใจดี"
                                 />
                             </div>
                             <div className="space-y-1">
@@ -297,20 +297,20 @@ const InstructorPresetModal = ({
                                     className="form-input w-full rounded-2xl border-slate-200"
                                     value={form.role}
                                     onChange={(event) => setForm((current) => ({ ...current, role: event.target.value }))}
-                                    placeholder="เช่น Head of Education"
+                                    placeholder="Head of Education"
                                 />
                             </div>
                         </div>
                    </div>
 
                    <div className="space-y-1">
-                        <label className="ml-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">ประวัติ / คำอธิบาย (Bio)</label>
+                        <label className="ml-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">ประวัติย่อ (Bio)</label>
                         <textarea
                             rows={3}
-                            className="form-input w-full rounded-2xl border-slate-200 resize-none"
+                            className="form-input w-full rounded-2xl border-slate-200 resize-none shadow-sm"
                             value={form.bio}
                             onChange={(event) => setForm((current) => ({ ...current, bio: event.target.value }))}
-                            placeholder="ระบุประวัติย่อของวิทยากร..."
+                            placeholder="ระบุประวัติสั้น ๆ ของวิทยากร..."
                         />
                    </div>
 
@@ -318,8 +318,8 @@ const InstructorPresetModal = ({
                    <div className="rounded-[2rem] border-2 border-slate-100 bg-slate-50/50 p-6 shadow-sm">
                       <div className="mb-4 flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-black text-slate-900">ลายเซ็นวิทยากร</p>
-                          <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">สำหรับคอร์สที่วิทยากรลงนาม</p>
+                          <p className="text-sm font-black text-slate-900">ลายเซ็นดิจิทัล</p>
+                          <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">ใช้สำหรับลงนามในเกียรติบัตร</p>
                         </div>
                         <div className="flex rounded-xl bg-slate-200/60 p-1">
                           <button
@@ -348,61 +348,55 @@ const InstructorPresetModal = ({
                             <label className="ml-1 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">ตำแหน่งใต้ลายเซ็น</label>
                             <input
                                 type="text"
-                                className="form-input w-full rounded-xl bg-white text-xs border-slate-200"
+                                className="form-input w-full rounded-xl bg-white text-xs border-slate-200 shadow-sm"
                                 value={form.signatureTitle}
-                                onChange={(event) => setForm((c) => ({ ...c, signatureTitle: event.target.value }))}
-                                placeholder="เช่น Instructor, Specialist"
+                                onChange={(c) => setForm((prev) => ({ ...prev, signatureTitle: c.target.value }))}
+                                placeholder="Instructor, Lead Facilitator"
                             />
                         </div>
 
-                        {signatureMode === 'upload' ? (
-                            <div className="group relative flex aspect-[10/3] w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white transition-all hover:border-primary/50 hover:bg-primary/5">
+                        <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
+                            <div className="relative aspect-[10/3] w-full overflow-hidden rounded-2xl border-2 border-white bg-white shadow-inner flex items-center justify-center">
                             {form.signatureImageUrl ? (
-                                <img src={getFullUrl(form.signatureImageUrl)} alt="Preview" className="h-full w-full object-contain p-4" />
+                                <img src={getFullUrl(form.signatureImageUrl)} alt="Preview" className="h-full w-full object-contain p-2" />
                             ) : (
-                                <div className="flex flex-col items-center gap-2 text-slate-300">
-                                <PenLine size={32} />
-                                <span className="text-[10px] font-black tracking-widest uppercase">No Signature</span>
+                                <div className="flex flex-col items-center gap-2 text-slate-100">
+                                    <PenLine size={48} />
                                 </div>
                             )}
-                            <button
-                                type="button"
-                                onClick={() => signatureFileInputRef.current?.click()}
-                                className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100 rounded-2xl"
-                            >
-                                <Upload className="text-white mb-2" size={24} />
-                                <span className="text-[10px] font-black text-white tracking-widest">CHANGE FILE</span>
-                            </button>
+                            </div>
+                            
+                            <div className="flex flex-col gap-2">
+                                {signatureMode === 'upload' ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => signatureFileInputRef.current?.click()}
+                                        className="flex flex-1 flex-col items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 text-slate-400 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all shadow-sm"
+                                    >
+                                        <Upload size={20} />
+                                        <span className="text-[9px] font-black uppercase tracking-wider text-center">Change<br/>File</span>
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSignaturePad(true)}
+                                        className="flex flex-1 flex-col items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 text-slate-400 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all shadow-sm"
+                                    >
+                                        <PencilLine size={20} />
+                                        <span className="text-[9px] font-black uppercase tracking-wider text-center">Redraw<br/>Sign</span>
+                                    </button>
+                                )}
+                            </div>
                             <input ref={signatureFileInputRef} type="file" accept="image/png,image/webp" className="hidden" onChange={handleSignatureUpload} />
-                            </div>
-                        ) : (
-                            <div className="flex aspect-[10/3] w-full flex-col items-center justify-center rounded-2xl border-2 border-slate-200 bg-white shadow-sm overflow-hidden">
-                            {form.signatureImageUrl ? (
-                                <div className="relative h-full w-full group">
-                                    <img src={getFullUrl(form.signatureImageUrl)} alt="Preview" className="h-full w-full object-contain p-4" />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowSignaturePad(true)}
-                                        className="absolute inset-0 flex flex-col items-center justify-center bg-primary/80 opacity-0 transition-opacity group-hover:opacity-100"
-                                    >
-                                        <PencilLine className="text-white mb-2" size={24} />
-                                        <span className="text-[10px] font-black text-white tracking-widest uppercase">Redraw Signature</span>
-                                    </button>
-                                </div>
-                            ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowSignaturePad(true)}
-                                        className="flex h-full w-full flex-col items-center justify-center gap-3 transition-colors hover:bg-slate-50"
-                                    >
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                            <PenLine size={20} />
-                                        </div>
-                                        <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Start Drawing</span>
-                                    </button>
-                            )}
-                            </div>
-                        )}
+                        </div>
+                        
+                        <input
+                            type="text"
+                            className="form-input w-full rounded-xl bg-white text-[10px] font-medium border-slate-200 shadow-sm"
+                            value={form.signatureImageUrl}
+                            onChange={(e) => setForm(c => ({ ...c, signatureImageUrl: e.target.value }))}
+                            placeholder="URL ลายเซ็น..."
+                        />
                       </div>
                    </div>
                 </div>
@@ -414,9 +408,9 @@ const InstructorPresetModal = ({
                     className="flex h-14 flex-1 items-center justify-center gap-3 rounded-2xl bg-primary font-black text-white shadow-xl shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-2xl active:scale-[0.98] disabled:opacity-50"
                   >
                     {uploading ? (
-                       <Loader2 className="animate-spin" size={20} />
+                       <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     ) : editingPreset ? <Save size={20} /> : <Plus size={20} />}
-                    {editingPreset ? 'บันทึกการเปลี่ยนแปลงวิทยากร' : 'เพิ่มข้อมูลวิทยากรใหม่'}
+                    {editingPreset ? 'บันทึกข้อมูลวิทยากร' : 'สร้างวิทยากรใหม่'}
                   </button>
                 </div>
               </form>
@@ -429,7 +423,6 @@ const InstructorPresetModal = ({
         isOpen={showSignaturePad}
         onClose={() => setShowSignaturePad(false)}
         onSave={handleDrawnSignature}
-        initialImageUrl={form.signatureImageUrl ? getFullUrl(form.signatureImageUrl) : null}
         title={`เซ็นชื่อสำหรับวิทยากร: ${form.name || 'วิทยากรใหม่'}`}
       />
     </ModalPortal>
