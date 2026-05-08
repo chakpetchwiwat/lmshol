@@ -73,7 +73,12 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
     ctx.lineTo(nextPoint.x, nextPoint.y);
     ctx.stroke();
     lastPointRef.current = nextPoint;
-    setDrawn(true);
+    
+    // Only update React state if it wasn't already marked as drawn
+    // This prevents thousands of unnecessary re-renders during a single stroke
+    if (!drawn) {
+      setDrawn(true);
+    }
   };
 
   const stopDrawing = () => {
