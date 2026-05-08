@@ -546,7 +546,6 @@ const CourseBasicInfoForm = ({
 
                       <div className="grid gap-4 lg:grid-cols-2">
                         {signatureSlots.slice(0, 2).map((slot, index) => {
-                          const selectedPreset = instructorPresets.find((preset) => preset.id === slot.instructorPresetId);
                           return (
                             <div key={slot.id || index} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
                               <div className="mb-4 flex items-center justify-between gap-3">
@@ -585,9 +584,11 @@ const CourseBasicInfoForm = ({
                                       updateSignatureSlot(index, {
                                         type: 'INSTRUCTOR',
                                         instructorPresetId: '',
+                                        organizationPresetId: '',
                                         name: '',
                                         title: 'Instructor',
                                         signatureImageUrl: '',
+                                        stampImageUrl: '',
                                       });
                                     }}
                                     className={`rounded-xl border px-3 py-2 text-xs font-black transition-all ${slot.type === 'INSTRUCTOR' ? 'border-indigo-300 bg-white text-indigo-700 shadow-sm' : 'border-slate-200 bg-white/60 text-slate-500 hover:bg-white'}`}
@@ -616,6 +617,33 @@ const CourseBasicInfoForm = ({
                                       <option value="">-- ไม่ใช้พรีเซ็ต (ระบุเอง) --</option>
                                       {organizationPresets.map((p) => (
                                         <option key={p.id} value={p.id}>{p.name}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )}
+
+                                {slot.type === 'INSTRUCTOR' && (
+                                  <div>
+                                    <label className="mb-1.5 block text-xs font-black text-slate-500">เลือกวิทยากร preset</label>
+                                    <select
+                                      className="form-input w-full bg-white text-sm"
+                                      value={slot.instructorPresetId || ''}
+                                      onChange={(event) => {
+                                        const preset = instructorPresets.find((item) => item.id === event.target.value);
+                                        updateSignatureSlot(index, {
+                                          instructorPresetId: event.target.value,
+                                          name: preset?.name || '',
+                                          title: preset?.signatureTitle || preset?.role || 'Instructor',
+                                          signatureImageUrl: preset?.signatureImageUrl || '',
+                                          stampImageUrl: '',
+                                        });
+                                      }}
+                                    >
+                                      <option value="">-- ไม่ใช้ preset (ระบุเอง) --</option>
+                                      {instructorPresets.map((preset) => (
+                                        <option key={preset.id} value={preset.id}>
+                                          {preset.name}{preset.role ? ` - ${preset.role}` : ''}
+                                        </option>
                                       ))}
                                     </select>
                                   </div>

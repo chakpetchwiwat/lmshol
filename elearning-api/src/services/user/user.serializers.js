@@ -56,14 +56,6 @@ const serializeCourseStaff = (staff) => ({
     isPrimary: staff.isPrimary
 });
 
-const getPrimaryInstructorName = (course) => {
-    const primaryInstructor = Array.isArray(course.staff)
-        ? course.staff.find((staff) => staff.role === 'instructor' && staff.isPrimary)
-        : null;
-
-    return primaryInstructor?.user?.name || course.instructorName;
-};
-
 const serializeCourseDetail = (course) => {
     const enrollment = course.enrollments[0];
     const rewardSummary = getCourseRewardSummary(course);
@@ -74,7 +66,6 @@ const serializeCourseDetail = (course) => {
         departmentAccess: undefined,
         tierAccess: undefined,
         category: serializeCourseCategory(course.category),
-        instructorName: getPrimaryInstructorName(course),
         isEnrolled: !!enrollment,
         enrollmentStatus: enrollment ? enrollment.status : null,
         progressPercent: enrollment ? enrollment.progressPercent : 0,

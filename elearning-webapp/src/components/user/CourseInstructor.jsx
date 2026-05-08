@@ -2,10 +2,7 @@ import React from 'react';
 import { getFullUrl } from '../../utils/api';
 
 const CourseInstructor = ({ course }) => {
-  const primaryInstructor = Array.isArray(course.staff)
-    ? course.staff.find((staff) => staff.role === 'instructor' && staff.isPrimary)
-    : null;
-  const instructorName = primaryInstructor?.name || course.instructorName;
+  const instructorName = course.instructorName || 'ทีมวิทยากรผู้เชี่ยวชาญ';
 
   return (
     <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:p-8">
@@ -22,7 +19,7 @@ const CourseInstructor = ({ course }) => {
         </div>
 
         <div className="min-w-0">
-          <h3 className="text-lg font-black text-slate-900">{course.instructorName || 'ทีมวิทยากรผู้เชี่ยวชาญ'}</h3>
+          <h3 className="text-lg font-black text-slate-900">{instructorName}</h3>
           <p className="mt-1 text-sm font-bold text-primary">{course.instructorRole || 'วิทยากรประจำหลักสูตร'}</p>
           {course.instructorBio && (
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600">{course.instructorBio}</p>
