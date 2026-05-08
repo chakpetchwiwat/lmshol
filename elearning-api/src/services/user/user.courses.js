@@ -93,11 +93,8 @@ const getBookmarkedCourses = async (userId) => {
 const getCourseDetails = async (courseId, userId) => {
     const userContext = await getVisibleCourseQuery(userId);
     const referenceDate = new Date();
-    const course = await prisma.course.findFirst({
-        where: {
-            id: courseId,
-            ...buildCourseVisibilityWhere(userContext, referenceDate)
-        },
+    const course = await prisma.course.findUnique({
+        where: { id: courseId },
         include: {
             category: {
                 include: {
@@ -173,7 +170,15 @@ const getCourseDetails = async (courseId, userId) => {
         }
     });
 
-    if (!course || !canAccessCourse(course, userContext, referenceDate)) {
+    if (!course) {
+        return null;
+    }
+
+    const isEnrolled = course.enrollments && course.enrollments.length > 0;
+    const canSeeInDiscovery = canAccessCourse(course, userContext, referenceDate);
+
+    // If not enrolled and cannot see in discovery (not published or out of scope), deny access
+    if (!isEnrolled && !canSeeInDiscovery) {
         return null;
     }
 

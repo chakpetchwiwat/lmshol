@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Play, CheckCircle, Clock, FileText, BookOpen, ClipboardCheck } from 'lucide-react';
 import { userAPI, getFullUrl } from '../../utils/api';
@@ -299,8 +299,23 @@ const LessonPlayer = () => {
     if (accessUrl) setShowDocViewer(true);
   };
 
-  if (!lesson && loading) {
-    return <Skeleton.LessonPlayer />;
+  if (!lesson) {
+    if (loading) return <Skeleton.LessonPlayer />;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+        <div className="w-20 h-20 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-300 mb-6 border border-slate-100">
+          <BookOpen size={40} />
+        </div>
+        <h2 className="text-2xl font-black text-slate-900 mb-2">ไม่พบข้อมูลบทเรียน</h2>
+        <p className="text-slate-500 font-bold max-w-sm mb-8">บทเรียนนี้อาจถูกลบหรือย้ายไปแล้ว หรือคุณอาจไม่มีสิทธิ์เข้าถึงในขณะนี้</p>
+        <button 
+          onClick={handleReturnToCourse}
+          className="px-8 py-3 bg-primary text-white rounded-2xl font-black shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all active:scale-95"
+        >
+          กลับไปยังหน้ารายละเอียดคอร์ส
+        </button>
+      </div>
+    );
   }
 
   const currentLessonIndex = course?.lessons?.findIndex((item) => item.id === lessonId) ?? -1;
@@ -308,14 +323,16 @@ const LessonPlayer = () => {
   const nextLessonId = nextLesson?.id;
   const totalLessons = course?.lessons?.length || 0;
   const completedLessonsCount = course?.lessons?.filter((item) => item.isCompleted).length || 0;
-  const lessonMediaUrl = getFullUrl(lesson.contentUrl?.trim());
-  const hasResources = Array.isArray(lesson.resources) && lesson.resources.length > 0;
+  
+  // Safe URL retrieval
+  const lessonMediaUrl = lesson?.contentUrl ? getFullUrl(lesson.contentUrl.trim()) : '';
+  const hasResources = Array.isArray(lesson?.resources) && lesson.resources.length > 0;
   const showAchievementCard = course?.showAchievementCard === true;
   const quizRewardPoints = Number(lesson?.points) || 0;
   const canEarnQuizPoints = lesson?.type === 'quiz' && quizRewardPoints > 0;
   const hasProtectedDocument = lesson?.hasDocument === true;
-  const lessonContentHtml = sanitizeLessonContent(lesson.content);
-  const hasLessonContent = hasRenderableLessonContent(lesson.content);
+  const lessonContentHtml = lesson?.content ? sanitizeLessonContent(lesson.content) : '';
+  const hasLessonContent = lesson?.content ? hasRenderableLessonContent(lesson.content) : false;
 
   return (
     <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col bg-white pb-12 md:bg-transparent md:px-4 md:py-6">
