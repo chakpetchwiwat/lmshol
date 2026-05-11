@@ -2,6 +2,18 @@ import React from 'react';
 import { GraduationCap, X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
+import CustomSelect from '../common/CustomSelect';
+
+const DEGREE_OPTIONS = [
+  { value: 'มัธยมศึกษาตอนต้น', label: 'มัธยมศึกษาตอนต้น' },
+  { value: 'มัธยมศึกษาตอนปลาย', label: 'มัธยมศึกษาตอนปลาย' },
+  { value: 'ประกาศนียบัตรวิชาชีพ (ปวช.)', label: 'ประกาศนียบัตรวิชาชีพ (ปวช.)' },
+  { value: 'ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)', label: 'ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)' },
+  { value: 'ปริญญาตรี', label: 'ปริญญาตรี' },
+  { value: 'ปริญญาโท', label: 'ปริญญาโท' },
+  { value: 'ปริญญาเอก', label: 'ปริญญาเอก' },
+  { value: 'อื่นๆ', label: 'อื่นๆ' },
+];
 
 const ProfileEducationModal = ({
   isOpen,
@@ -86,26 +98,15 @@ const ProfileEducationModal = ({
             </label>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <label htmlFor={degreeId}>
+              <div className="space-y-1.5">
                 <span className="mb-2 block text-sm font-bold text-slate-700">ระดับการศึกษา</span>
-                <select
-                  id={degreeId}
+                <CustomSelect
+                  options={DEGREE_OPTIONS}
                   value={form.degree}
                   onChange={(event) => onFormChange('degree', event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white appearance-none cursor-pointer"
-                  required
-                >
-                  <option value="" disabled>เลือกระดับการศึกษา</option>
-                  <option value="มัธยมศึกษาตอนต้น">มัธยมศึกษาตอนต้น</option>
-                  <option value="มัธยมศึกษาตอนปลาย">มัธยมศึกษาตอนปลาย</option>
-                  <option value="ประกาศนียบัตรวิชาชีพ (ปวช.)">ประกาศนียบัตรวิชาชีพ (ปวช.)</option>
-                  <option value="ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)">ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)</option>
-                  <option value="ปริญญาตรี">ปริญญาตรี</option>
-                  <option value="ปริญญาโท">ปริญญาโท</option>
-                  <option value="ปริญญาเอก">ปริญญาเอก</option>
-                  <option value="อื่นๆ">อื่นๆ</option>
-                </select>
-              </label>
+                  placeholder="เลือกระดับการศึกษา"
+                />
+              </div>
 
               <label htmlFor={yearId}>
                 <span className="mb-2 block text-sm font-bold text-slate-700">ปีที่สำเร็จการศึกษา</span>
