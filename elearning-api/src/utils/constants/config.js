@@ -4,8 +4,8 @@ const SERVER_DEFAULTS = Object.freeze({
 
 const SECURITY_DEFAULTS = Object.freeze({
     TRUST_PROXY: false,
-    API_BODY_LIMIT: '50mb',
-    URLENCODED_BODY_LIMIT: '50mb',
+    API_BODY_LIMIT: '100mb',
+    URLENCODED_BODY_LIMIT: '100mb',
     DEFAULT_RATE_LIMIT_WINDOW_MS: 15 * 60 * 1000,
     DEFAULT_RATE_LIMIT_MAX: 100000, // Temporarily increased to allow recovery from loop
     ENABLE_DEFAULT_RATE_LIMIT: false, // Temporarily disabled to unblock
@@ -20,7 +20,7 @@ const SECURITY_DEFAULTS = Object.freeze({
     ADMIN_ANALYTICS_RATE_LIMIT_MAX: 100,
     GOAL_REPORT_RATE_LIMIT_WINDOW_MS: 5 * 60 * 1000,
     GOAL_REPORT_RATE_LIMIT_MAX: 100,
-    UPLOAD_MAX_FILE_SIZE_MB: 25,
+    UPLOAD_MAX_FILE_SIZE_MB: 50,
     ALLOWED_METHODS: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     ALLOWED_HEADERS: ['Content-Type', 'Authorization'],
     LOCAL_ALLOWED_ORIGINS: ['http://localhost:5173', 'http://localhost:3000']
