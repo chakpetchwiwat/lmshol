@@ -4,6 +4,29 @@ const authHelpers = require('../../utils/auth.helpers');
 
 const mapPublicUser = authHelpers.mapUserRecord;
 
+const normalizeString = (value) => {
+    const normalized = value ? String(value).trim() : '';
+    return normalized || null;
+};
+
+const normalizeProfileItems = (items, fields) => {
+    if (!Array.isArray(items)) return [];
+
+    return items
+        .map((item) => {
+            const normalized = {
+                id: normalizeString(item?.id) || `${Date.now()}-${Math.random().toString(36).slice(2)}`
+            };
+
+            fields.forEach((field) => {
+                normalized[field] = normalizeString(item?.[field]) || '';
+            });
+
+            return normalized;
+        })
+        .filter((item) => fields.some((field) => item[field]));
+};
+
 const updateProfile = async (userId, data) => {
     const { currentPassword, newPassword } = data;
     const dataToUpdate = {};
@@ -20,13 +43,36 @@ const updateProfile = async (userId, data) => {
     }
 
     if (Object.prototype.hasOwnProperty.call(data, 'signatureImageUrl')) {
-        const signatureImageUrl = data.signatureImageUrl ? String(data.signatureImageUrl).trim() : null;
-        dataToUpdate.signatureImageUrl = signatureImageUrl || null;
+        dataToUpdate.signatureImageUrl = normalizeString(data.signatureImageUrl);
     }
 
     if (Object.prototype.hasOwnProperty.call(data, 'signatureTitle')) {
-        const signatureTitle = data.signatureTitle ? String(data.signatureTitle).trim() : null;
-        dataToUpdate.signatureTitle = signatureTitle || null;
+        dataToUpdate.signatureTitle = normalizeString(data.signatureTitle);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'profileImageUrl')) {
+        dataToUpdate.profileImageUrl = normalizeString(data.profileImageUrl);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'educationHistory')) {
+        dataToUpdate.educationHistory = normalizeProfileItems(data.educationHistory, [
+            'institution',
+            'degree',
+            'faculty',
+            'major',
+            'graduationYear'
+        ]);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'profileFiles')) {
+        dataToUpdate.profileFiles = normalizeProfileItems(data.profileFiles, [
+            'title',
+            'fileName',
+            'fileKey',
+            'fileUrl',
+            'fileMimeType',
+            'uploadedAt'
+        ]);
     }
 
     if (Object.keys(dataToUpdate).length > 0) {

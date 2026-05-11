@@ -22,6 +22,9 @@ model User {
   departmentId          String?
   employmentDate        DateTime?
   tierId                String?
+  profileImageUrl       String?
+  educationHistory      Json?
+  profileFiles          Json?
   signatureImageUrl     String?
   signatureTitle        String?
   createdAnnouncements  Announcement[]         @relation("AnnouncementCreator")

@@ -167,6 +167,21 @@ export const userAPI = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
+  uploadProfileImage: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/profile-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadProfileFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/profile-file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  getProfileFileDownloadUrl: (fileKey) => api.get('/upload/profile-file-url', { params: { key: fileKey } }),
   uploadAssessmentFile: (file) => {
     const formData = new FormData();
     formData.append('file', file);

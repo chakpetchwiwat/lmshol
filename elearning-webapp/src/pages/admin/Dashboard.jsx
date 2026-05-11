@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { Building2, FileDown, SlidersHorizontal } from 'lucide-react';
+import { FileDown, SlidersHorizontal } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { canEditAdminUsers } from '../../utils/roles';
@@ -17,7 +17,6 @@ import CategoryDistributionChart from '../../components/admin/CategoryDistributi
 import PopularCoursesTable from '../../components/admin/PopularCoursesTable';
 import SkillGapRadarChart from '../../components/admin/SkillGapRadarChart';
 import DepartmentLeaderboard from '../../components/admin/DepartmentLeaderboard';
-import IncentiveROITrend from '../../components/admin/IncentiveROITrend';
 import RiskIdentificationWidget from '../../components/admin/RiskIdentificationWidget';
 import GoalTrackingWidget from '../../components/admin/GoalTrackingWidget';
 import DashboardInsightModal from '../../components/admin/DashboardInsightModal';
@@ -183,7 +182,6 @@ const Dashboard = () => {
       dashboardData: {
         weeklyActivity: stats?.weeklyActivity || [],
         typeDistribution: stats?.typeDistribution || [],
-        roiTrend: advancedStats?.roiTrend || [],
         skillGap: (advancedStats?.skillGap || []).map((item) => ({
           ...item,
           label: SKILL_LABELS[item.type] || item.type,
@@ -329,11 +327,6 @@ const Dashboard = () => {
     setInsight(InsightConfigs.getDepartmentInsightConfig(department, periodLabel, renderUserLink));
   };
 
-  const openRoiInsight = (bucket) => {
-    if (!bucket) return;
-    setInsight(InsightConfigs.getRoiInsightConfig(bucket, selectedDepartmentName, renderUserLink));
-  };
-
   const openRiskInsight = (riskRows, singleRisk = null) => {
     const rows = Array.isArray(riskRows) ? riskRows : singleRisk ? [singleRisk] : [];
     if (!rows.length) return;
@@ -414,6 +407,19 @@ const Dashboard = () => {
 
       <StatCards stats={stats} isFullAdmin={isFullAdmin} />
 
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <MajorGroupChart
+          data={stats?.typeDistribution}
+          onSelectGroup={openTypeInsight}
+        />
+
+        <CategoryDistributionChart
+          data={stats?.categoryDistribution}
+          totalCourses={stats?.activeCourses}
+          onSelectCategory={openCategoryInsight}
+        />
+      </div>
+
       <GoalTrackingWidget
         goals={goalTrackingItems}
         loading={goalTrackingLoading}
@@ -441,11 +447,6 @@ const Dashboard = () => {
               onSelectBucket={openWeeklyInsight}
             />
           </div>
-
-          <IncentiveROITrend
-            data={advancedStats?.roiTrend}
-            onSelectBucket={openRoiInsight}
-          />
         </>
       ) : (
         <>
@@ -458,10 +459,6 @@ const Dashboard = () => {
               <SkillGapRadarChart
                 data={advancedStats?.skillGap}
                 onSelectSkillGap={openSkillGapInsight}
-              />
-              <IncentiveROITrend
-                data={advancedStats?.roiTrend}
-                onSelectBucket={openRoiInsight}
               />
             </div>
           </section>
@@ -484,25 +481,14 @@ const Dashboard = () => {
 
           <div className="my-2 h-px bg-slate-100" />
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6">
             <WeeklyActivityChart
               data={stats?.weeklyActivity}
               onSelectBucket={openWeeklyInsight}
             />
-
-            <MajorGroupChart
-              data={stats?.typeDistribution}
-              onSelectGroup={openTypeInsight}
-            />
           </div>
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <CategoryDistributionChart
-              data={stats?.categoryDistribution}
-              totalCourses={stats?.activeCourses}
-              onSelectCategory={openCategoryInsight}
-            />
-
+          <div className="grid grid-cols-1 gap-6">
             <PopularCoursesTable
               courses={stats?.popularCourses}
               onSelectCourse={openCourseInsight}

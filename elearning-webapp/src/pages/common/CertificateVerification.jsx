@@ -4,6 +4,7 @@ import { BadgeCheck, ShieldAlert, ShieldCheck, FileText, Calendar, Building2, Us
 import { userAPI } from '../../utils/api';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import Skeleton from '../../components/common/Skeleton';
+import AppLogo from '../../components/common/AppLogo';
 
 const CertificateVerification = () => {
   const { token } = useParams();
@@ -118,7 +119,7 @@ const CertificateVerification = () => {
                 </div>
                 <div>
                   <p className="text-[15px] font-black text-slate-900 leading-tight">{course.title || certificate.courseTitle || 'หลักสูตรทั่วไป'}</p>
-                  <p className="mt-1 text-xs font-bold text-slate-500">ScaleUp LMS Connect</p>
+                  <AppLogo compact className="mt-2" imageClassName="h-6 max-w-[96px]" />
                 </div>
               </div>
             </div>
@@ -171,7 +172,7 @@ const CertificateVerification = () => {
       </div>
 
       <div className="mt-12 text-center">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">ScaleUp LMS Platform</p>
+        <AppLogo className="mb-6 justify-center" imageClassName="h-9 max-w-[140px]" />
         <Link 
           to="/" 
           className="text-sm font-black text-slate-900 hover:text-primary transition-colors flex items-center gap-2 justify-center"

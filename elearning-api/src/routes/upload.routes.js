@@ -156,6 +156,16 @@ const canPreviewSignature = async (authUser, fileKey) => {
     return Boolean(instructorPreset || organizationPreset);
 };
 
+const canPreviewProfileFile = async (authUser, fileKey) => {
+    const user = await prisma.user.findUnique({
+        where: { id: authUser.userId },
+        select: { profileFiles: true }
+    });
+
+    const files = Array.isArray(user?.profileFiles) ? user.profileFiles : [];
+    return files.some((file) => file?.fileKey === fileKey);
+};
+
 const readPngMetadata = (buffer) => {
     if (!buffer || buffer.length < 33 || !buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
         return null;
@@ -236,6 +246,20 @@ router.post('/certificate', verifyToken, uploadRateLimiter, upload.single('file'
     await uploadToSupabase(req, res, { forceSubDir: 'certificates' });
 });
 
+// POST /api/upload/profile-image - Current user's public profile image
+router.post('/profile-image', verifyToken, uploadRateLimiter, upload.single('file'), async (req, res) => {
+    if (!req.file?.mimetype?.startsWith('image/')) {
+        return res.status(400).json({ message: 'Profile image must be an image file.' });
+    }
+
+    await uploadToSupabase(req, res, { forceSubDir: 'profile-images' });
+});
+
+// POST /api/upload/profile-file - Current user's private profile attachments
+router.post('/profile-file', verifyToken, uploadRateLimiter, upload.single('file'), async (req, res) => {
+    await uploadToSupabase(req, res, { forceSubDir: 'certificates', includeSignedUrl: true });
+});
+
 // POST /api/upload/assessment - Learner assessment submissions
 router.post('/assessment', verifyToken, uploadRateLimiter, upload.single('file'), async (req, res) => {
     await uploadToSupabase(req, res, { forceSubDir: 'assessments' });
@@ -260,6 +284,28 @@ router.get('/signature-url', verifyToken, async (req, res) => {
     } catch (error) {
         console.error('Signature signed URL error:', error);
         return res.status(500).json({ message: 'Unable to create signature preview URL.' });
+    }
+});
+
+// GET /api/upload/profile-file-url - Temporary URL for current user's profile attachment
+router.get('/profile-file-url', verifyToken, async (req, res) => {
+    try {
+        const fileKey = String(req.query.key || '').trim();
+
+        if (!fileKey || !fileKey.startsWith('certificates/')) {
+            return res.status(400).json({ message: 'Invalid profile file key.' });
+        }
+
+        const allowed = await canPreviewProfileFile(req.user, fileKey);
+        if (!allowed) {
+            return res.status(403).json({ message: 'You do not have access to this file.' });
+        }
+
+        const signedUrl = await createSecureDocumentSignedUrl(fileKey);
+        return res.json({ url: signedUrl });
+    } catch (error) {
+        console.error('Profile file signed URL error:', error);
+        return res.status(500).json({ message: 'Unable to create file preview URL.' });
     }
 });
 

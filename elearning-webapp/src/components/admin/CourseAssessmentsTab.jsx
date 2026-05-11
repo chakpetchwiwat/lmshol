@@ -244,7 +244,7 @@ const CourseAssessmentsTab = ({ courseId, readOnly }) => {
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setGradingSubmission(null)} />
           
-          <div className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+          <div className="relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2.5rem] bg-white shadow-2xl animate-in fade-in zoom-in duration-200">
             <div className="px-6 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
@@ -263,7 +263,7 @@ const CourseAssessmentsTab = ({ courseId, readOnly }) => {
               </button>
             </div>
 
-            <div className="p-6 space-y-5 max-h-[60vh] overflow-y-auto custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar">
               <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">ไฟล์ที่ส่งมา</p>
                 <div className="flex items-center justify-between gap-4">

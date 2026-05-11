@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
-import { canAccessAdminPanel } from '../../utils/roles';
+import AppLogo from '../../components/common/AppLogo';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -50,15 +49,9 @@ const Login = () => {
 
       <div className="relative z-10 flex w-full max-w-sm flex-col items-center overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 p-8 shadow-[0_28px_70px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl">
         <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[1.75rem] bg-gradient-primary text-white shadow-[0_22px_40px_-20px_rgba(79,70,229,0.6)] transition-transform duration-300 hover:-translate-y-0.5">
-          <BookOpen size={40} strokeWidth={1.5} />
-        </div>
-
-        <h1 className="mb-1 text-center text-3xl font-black tracking-tight text-gray-900">
-          LMS Connect
-        </h1>
+        <AppLogo className="mb-4 justify-center" imageClassName="h-16 max-w-[240px]" />
         <p className="mb-8 text-center text-sm font-medium text-slate-600">
-          e-Learning ระบบพัฒนาบุคลากร
+          เชื่อมโยงความรู้และสร้างวัฒนธรรมการเรียนรู้ในองค์กร
         </p>
 
         <form onSubmit={handleLogin} className="flex w-full flex-col gap-5">

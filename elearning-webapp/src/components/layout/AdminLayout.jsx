@@ -19,6 +19,7 @@ import {
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
 import { USER_ROLES } from '../../utils/constants/roles';
+import AppLogo from '../common/AppLogo';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
@@ -95,7 +96,7 @@ const AdminLayout = () => {
       ? [{ path: '/admin/certificates', icon: <Award size={20} />, label: 'ภาพรวมเกียรติบัตร' }]
       : []),
 
-    { path: '/admin/assessments', icon: <ClipboardCheck size={20} />, label: 'ตรวจงาน' },
+    { path: '/admin/assessments', icon: <ClipboardCheck size={20} />, label: 'Assessment Center' },
   ];
 
   return (
@@ -137,12 +138,10 @@ const AdminLayout = () => {
         className={`admin-sidebar ${isDrawerOpen ? 'open' : ''}`}
       >
         <div className="sidebar-header">
-          <div className="flex items-center gap-2 text-primary">
-            <LayoutDashboard size={24} />
-            <h2 id={drawerTitleId} className="font-bold text-xl">
-              {isFullAdmin ? 'LMS Admin' : isManager ? 'LMS Manager' : 'LMS Staff'}
-            </h2>
-          </div>
+          <AppLogo className="min-w-0" imageClassName="h-10 max-w-[180px]" />
+          <h2 id={drawerTitleId} className="sr-only">
+            Looma
+          </h2>
           <button
             ref={closeButtonRef}
             type="button"

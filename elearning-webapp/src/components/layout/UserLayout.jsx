@@ -1,9 +1,10 @@
 ﻿import React from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Gift, User, BookMarked, Bookmark, LogOut, Settings, Bell, Target, ClipboardCheck } from 'lucide-react';
+import { Home, BookOpen, Gift, User, Bookmark, LogOut, Settings, Bell, Target, ClipboardCheck } from 'lucide-react';
 import { userAPI } from '../../utils/api';
 import { canAccessAdminPanel } from '../../utils/roles';
 import { formatThaiDateTime } from '../../utils/dateUtils';
+import AppLogo from '../common/AppLogo';
 import './UserLayout.css';
 
 const UserLayout = () => {
@@ -214,11 +215,8 @@ const UserLayout = () => {
   return (
     <div className="user-layout flex flex-col md:flex-row bg-transparent">
       <aside className="hidden md:flex w-[260px] xl:w-[280px] 2xl:w-[300px] flex-col bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] ring-1 ring-gray-100/80 my-5 ml-5 h-[calc(100vh-2.5rem)] z-[40] shrink-0">
-        <div className="p-6 flex items-center gap-3 border-b border-gray-100 shrink-0">
-          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm">
-            <BookMarked size={20} strokeWidth={2.5} />
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-gray-900 leading-none">LMS Connect</h1>
+        <div className="p-6 flex items-center border-b border-gray-100 shrink-0">
+          <AppLogo imageClassName="h-10 max-w-[180px]" />
         </div>
 
         <div className="p-4 border-b border-gray-100 shrink-0">
@@ -285,11 +283,8 @@ const UserLayout = () => {
         <header className="user-header md:hidden">
           <div className="header-content pt-1">
             <div className="flex items-center gap-2 max-w-[65%]">
-              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-md shadow-primary/20 shrink-0">
-                <BookMarked size={20} strokeWidth={2.5} />
-              </div>
+              <AppLogo compact imageClassName="h-8 max-w-[120px]" />
               <div className="flex flex-col overflow-hidden">
-                <h1 className="text-lg font-bold tracking-tight text-gray-900 leading-none truncate">LMS Connect</h1>
                 {location.pathname !== '/user/home' && (
                   <span className="text-[10px] text-gray-500 font-medium truncate mt-0.5">
                     สวัสดีคุณ {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'}

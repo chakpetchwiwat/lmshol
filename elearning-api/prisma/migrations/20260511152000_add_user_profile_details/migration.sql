@@ -1,0 +1,4 @@
+ALTER TABLE "User"
+ADD COLUMN IF NOT EXISTS "profileImageUrl" TEXT,
+ADD COLUMN IF NOT EXISTS "educationHistory" JSONB,
+ADD COLUMN IF NOT EXISTS "profileFiles" JSONB;

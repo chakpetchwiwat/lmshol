@@ -84,12 +84,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
 
       ctx.beginPath();
       ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
-      ctx.quadraticCurveTo(
-        lastPointRef.current.x,
-        lastPointRef.current.y,
-        (lastPointRef.current.x + nextPoint.x) / 2,
-        (lastPointRef.current.y + nextPoint.y) / 2,
-      );
+      ctx.lineTo(nextPoint.x, nextPoint.y);
       ctx.stroke();
 
       lastPointRef.current = nextPoint;

@@ -37,10 +37,23 @@ const GoalTrackingWidget = ({
   onOpenGoalReport,
 }) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
-  const displayedGoals = isExpanded ? goals : goals.slice(0, 5);
+  const sectionRef = React.useRef(null);
+  const displayedGoals = isExpanded ? goals : goals.slice(0, 1);
+
+  const handleToggleExpanded = () => {
+    if (isExpanded) {
+      setIsExpanded(false);
+      window.requestAnimationFrame(() => {
+        sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      return;
+    }
+
+    setIsExpanded(true);
+  };
 
   return (
-    <section className="rounded-[2rem] border border-slate-200 bg-white/95 p-6 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.35)]">
+    <section ref={sectionRef} className="scroll-mt-6 rounded-[2rem] border border-slate-200 bg-white/95 p-6 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.35)]">
       <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-2">
           <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-primary">
@@ -136,11 +149,11 @@ const GoalTrackingWidget = ({
             ))}
           </div>
 
-          {goals.length > 5 && (
+          {goals.length > 1 && (
             <div className="mt-8 flex justify-center">
               <button
                 type="button"
-                onClick={() => setIsExpanded(!isExpanded)}
+                onClick={handleToggleExpanded}
                 className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-10 py-4 text-sm font-black text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:text-primary active:scale-[0.98]"
               >
                 {isExpanded ? (
