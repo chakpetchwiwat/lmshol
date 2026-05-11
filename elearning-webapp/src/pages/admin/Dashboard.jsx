@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { FileDown, SlidersHorizontal } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -407,12 +407,20 @@ const Dashboard = () => {
 
       <StatCards stats={stats} isFullAdmin={isFullAdmin} />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className={isManagerView ? "grid grid-cols-1 gap-6" : "grid grid-cols-1 gap-6 xl:grid-cols-2"}>
         <MajorGroupChart
           data={stats?.typeDistribution}
           onSelectGroup={openTypeInsight}
         />
+        {!isManagerView && (
+          <DepartmentLeaderboard
+            data={advancedStats?.benchmarking}
+            onSelectDepartment={openDepartmentInsight}
+          />
+        )}
+      </div>
 
+      <div className="grid grid-cols-1 gap-6">
         <CategoryDistributionChart
           data={stats?.categoryDistribution}
           totalCourses={stats?.activeCourses}
@@ -460,24 +468,15 @@ const Dashboard = () => {
                 data={advancedStats?.skillGap}
                 onSelectSkillGap={openSkillGapInsight}
               />
-            </div>
-          </section>
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <DepartmentLeaderboard
-                data={advancedStats?.benchmarking}
-                onSelectDepartment={openDepartmentInsight}
-              />
-            </div>
-            <div className="lg:col-span-1">
               <RiskIdentificationWidget
                 data={advancedStats?.atRisk}
                 onSelectRisk={(risk) => openRiskInsight(null, risk)}
                 onViewAll={(rows) => openRiskInsight(rows)}
               />
             </div>
-          </div>
+          </section>
+
+
 
           <div className="my-2 h-px bg-slate-100" />
 
