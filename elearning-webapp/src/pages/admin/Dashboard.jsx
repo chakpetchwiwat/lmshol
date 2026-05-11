@@ -420,13 +420,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        <CategoryDistributionChart
-          data={stats?.categoryDistribution}
-          totalCourses={stats?.activeCourses}
-          onSelectCategory={openCategoryInsight}
-        />
-      </div>
+
 
       <GoalTrackingWidget
         goals={goalTrackingItems}
@@ -455,6 +449,14 @@ const Dashboard = () => {
               onSelectBucket={openWeeklyInsight}
             />
           </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            <CategoryDistributionChart
+              data={stats?.categoryDistribution}
+              totalCourses={stats?.activeCourses}
+              onSelectCategory={openCategoryInsight}
+            />
+          </div>
         </>
       ) : (
         <>
@@ -475,6 +477,14 @@ const Dashboard = () => {
               />
             </div>
           </section>
+
+          <div className="grid grid-cols-1 gap-6">
+            <CategoryDistributionChart
+              data={stats?.categoryDistribution}
+              totalCourses={stats?.activeCourses}
+              onSelectCategory={openCategoryInsight}
+            />
+          </div>
 
 
 
