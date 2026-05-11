@@ -88,15 +88,23 @@ const ProfileEducationModal = ({
             <div className="grid gap-4 sm:grid-cols-2">
               <label htmlFor={degreeId}>
                 <span className="mb-2 block text-sm font-bold text-slate-700">ระดับการศึกษา</span>
-                <input
+                <select
                   id={degreeId}
-                  type="text"
                   value={form.degree}
                   onChange={(event) => onFormChange('degree', event.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white"
-                  placeholder="เช่น ปริญญาตรี"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white appearance-none cursor-pointer"
                   required
-                />
+                >
+                  <option value="" disabled>เลือกระดับการศึกษา</option>
+                  <option value="มัธยมศึกษาตอนต้น">มัธยมศึกษาตอนต้น</option>
+                  <option value="มัธยมศึกษาตอนปลาย">มัธยมศึกษาตอนปลาย</option>
+                  <option value="ประกาศนียบัตรวิชาชีพ (ปวช.)">ประกาศนียบัตรวิชาชีพ (ปวช.)</option>
+                  <option value="ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)">ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.)</option>
+                  <option value="ปริญญาตรี">ปริญญาตรี</option>
+                  <option value="ปริญญาโท">ปริญญาโท</option>
+                  <option value="ปริญญาเอก">ปริญญาเอก</option>
+                  <option value="อื่นๆ">อื่นๆ</option>
+                </select>
               </label>
 
               <label htmlFor={yearId}>
