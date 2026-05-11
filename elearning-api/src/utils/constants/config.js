@@ -4,8 +4,8 @@ const SERVER_DEFAULTS = Object.freeze({
 
 const SECURITY_DEFAULTS = Object.freeze({
     TRUST_PROXY: false,
-    API_BODY_LIMIT: '1mb',
-    URLENCODED_BODY_LIMIT: '1mb',
+    API_BODY_LIMIT: '50mb',
+    URLENCODED_BODY_LIMIT: '50mb',
     DEFAULT_RATE_LIMIT_WINDOW_MS: 15 * 60 * 1000,
     DEFAULT_RATE_LIMIT_MAX: 100000, // Temporarily increased to allow recovery from loop
     ENABLE_DEFAULT_RATE_LIMIT: false, // Temporarily disabled to unblock
