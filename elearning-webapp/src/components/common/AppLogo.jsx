@@ -6,7 +6,7 @@ const AppLogo = ({ className = '', imageClassName = '', compact = false }) => (
     <img
       src={loomaLogo}
       alt="Looma"
-      className={`block object-contain ${compact ? 'h-9 w-auto' : 'h-12 w-auto'} ${imageClassName}`}
+      className={`block object-contain ${compact ? 'h-10 w-auto' : 'h-16 w-auto'} ${imageClassName}`}
     />
   </div>
 );

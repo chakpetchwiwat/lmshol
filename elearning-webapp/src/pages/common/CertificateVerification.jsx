@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { BadgeCheck, ShieldAlert, ShieldCheck, FileText, Calendar, Building2, User, Globe } from 'lucide-react';
 import { userAPI } from '../../utils/api';
@@ -119,7 +119,7 @@ const CertificateVerification = () => {
                 </div>
                 <div>
                   <p className="text-[15px] font-black text-slate-900 leading-tight">{course.title || certificate.courseTitle || 'หลักสูตรทั่วไป'}</p>
-                  <AppLogo compact className="mt-2" imageClassName="h-6 max-w-[96px]" />
+                  <AppLogo compact className="mt-2" imageClassName="h-8 max-w-[120px]" />
                 </div>
               </div>
             </div>
@@ -172,7 +172,7 @@ const CertificateVerification = () => {
       </div>
 
       <div className="mt-12 text-center">
-        <AppLogo className="mb-6 justify-center" imageClassName="h-9 max-w-[140px]" />
+        <AppLogo className="mb-6 justify-center" imageClassName="h-12 max-w-[180px]" />
         <Link 
           to="/" 
           className="text-sm font-black text-slate-900 hover:text-primary transition-colors flex items-center gap-2 justify-center"

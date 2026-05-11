@@ -138,7 +138,7 @@ const AdminLayout = () => {
         className={`admin-sidebar ${isDrawerOpen ? 'open' : ''}`}
       >
         <div className="sidebar-header">
-          <AppLogo className="min-w-0" imageClassName="h-10 max-w-[180px]" />
+          <AppLogo className="min-w-0" imageClassName="h-12 max-w-[200px]" />
           <h2 id={drawerTitleId} className="sr-only">
             Looma
           </h2>
