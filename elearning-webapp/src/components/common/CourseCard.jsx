@@ -128,7 +128,7 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default', onBo
                 className={`flex h-10 w-10 items-center justify-center rounded-full border text-white shadow-lg transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
                   isBookmarked
                     ? 'border-amber-200 bg-amber-400 text-slate-950 opacity-100'
-                    : 'border-white/25 bg-slate-950/30 opacity-100 backdrop-blur-md'
+                    : 'border-white/25 bg-slate-950/30 opacity-100 backdrop-blur-md xl:opacity-0 xl:group-hover:opacity-100'
                 } ${bookmarking ? 'pointer-events-none opacity-60' : 'hover:-translate-y-0.5 hover:bg-amber-400 hover:text-slate-950'}`}
               >
                 <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} strokeWidth={2.4} />
