@@ -99,15 +99,18 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default', onBo
   
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/72 via-slate-900/12 to-transparent" />
   
-          <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
-            <span className="inline-flex max-w-[65%] shrink-0 whitespace-nowrap rounded-full bg-white/92 px-3 py-1 text-[11px] font-black tracking-[0.04em] text-slate-700 shadow-sm">
+          <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3.5">
+            <span 
+              title={categoryLabel}
+              className="inline-flex max-w-[55%] shrink-0 truncate rounded-full bg-white/92 px-3 py-1 text-[11px] font-black tracking-[0.04em] text-slate-700 shadow-sm"
+            >
               {categoryLabel}
             </span>
-
+  
             <div className="flex shrink-0 flex-col items-end gap-2">
               {course.isEnrolled && (
                 <span
-                  className={`inline-flex shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-black tracking-[0.04em] shadow-sm ${
+                  className={`inline-flex shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-black tracking-[0.04em] shadow-sm ${
                     isCompleted
                       ? 'bg-success-bg text-success-text'
                       : 'bg-blue-600 text-white shadow-md'
@@ -116,19 +119,19 @@ const CourseCard = ({ course, onClick, className = '', variant = 'default', onBo
                   {statusLabel}
                 </span>
               )}
-
+  
               <button
                 type="button"
                 aria-label={isBookmarked ? `นำ ${course.title} ออกจากคอร์สที่บันทึก` : `บันทึกคอร์ส ${course.title}`}
                 aria-pressed={isBookmarked}
                 onClick={handleBookmarkClick}
-                className={`hidden h-10 w-10 items-center justify-center rounded-full border text-white shadow-lg transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 md:flex ${
+                className={`flex h-9 w-9 items-center justify-center rounded-full border text-white shadow-lg transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 ${
                   isBookmarked
                     ? 'border-amber-200 bg-amber-400 text-slate-950 opacity-100'
-                    : 'border-white/25 bg-slate-950/30 opacity-0 backdrop-blur-md group-hover:opacity-100'
+                    : 'border-white/25 bg-slate-950/30 opacity-100 backdrop-blur-md md:opacity-0 md:group-hover:opacity-100'
                 } ${bookmarking ? 'pointer-events-none opacity-60' : 'hover:-translate-y-0.5 hover:bg-amber-400 hover:text-slate-950'}`}
               >
-                <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} strokeWidth={2.4} />
+                <Bookmark size={16} fill={isBookmarked ? 'currentColor' : 'none'} strokeWidth={2.4} />
               </button>
             </div>
           </div>
