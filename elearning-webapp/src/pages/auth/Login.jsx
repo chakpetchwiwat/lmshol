@@ -49,7 +49,7 @@ const Login = () => {
 
       <div className="relative z-10 flex w-full max-w-sm flex-col items-center overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 p-8 shadow-[0_28px_70px_-32px_rgba(15,23,42,0.28)] backdrop-blur-xl">
         <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-        <AppLogo className="mb-6 justify-center" imageClassName="h-20 max-w-[280px]" />
+        <AppLogo className="mb-6 justify-center" height="h-28" imageClassName="max-w-[320px]" />
         <p className="mb-8 text-center text-sm font-medium text-slate-600">
           เชื่อมโยงความรู้และสร้างวัฒนธรรมการเรียนรู้ในองค์กร
         </p>
