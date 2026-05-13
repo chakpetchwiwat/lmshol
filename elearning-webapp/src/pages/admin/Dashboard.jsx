@@ -10,7 +10,6 @@ import { openPrintReport } from '../../utils/printUtils';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import useDashboardData from '../../hooks/useDashboardData';
 
-import StatCards from '../../components/admin/StatCards';
 import WeeklyActivityChart from '../../components/admin/WeeklyActivityChart';
 import MajorGroupChart from '../../components/admin/MajorGroupChart';
 import CategoryDistributionChart from '../../components/admin/CategoryDistributionChart';
@@ -405,7 +404,6 @@ const Dashboard = () => {
         </div>
       ) : null}
 
-      <StatCards stats={stats} isFullAdmin={isFullAdmin} />
 
       <div className={isManagerView ? "grid grid-cols-1 gap-6" : "grid grid-cols-1 gap-6 xl:grid-cols-2"}>
         <MajorGroupChart

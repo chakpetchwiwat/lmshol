@@ -223,19 +223,33 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
     <ModalPortal isOpen>
       <div className="fixed inset-0 z-[95] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
         <div className="card flex max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
-          <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 rounded-t-[inherit]">
-            <div>
-              <h3 className="text-xl font-black text-slate-900">ประวัติผู้ใช้งานรายบุคคล</h3>
-              <p className="mt-1 text-sm text-slate-500">ดูทั้งประวัติการเรียนและประวัติการได้ใช้แต้มในหน้าต่างเดียว</p>
+          <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-6 py-5 rounded-t-[inherit]">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-xl font-black text-slate-900 truncate">ประวัติผู้ใช้งานรายบุคคล</h3>
+              <p className="mt-1 text-sm text-slate-500 truncate">ดูทั้งประวัติการเรียนและประวัติการได้ใช้แต้มในหน้าต่างเดียว</p>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-              aria-label="ปิดหน้าต่างประวัติผู้ใช้งาน"
-            >
-              <X size={18} />
-            </button>
+            
+            <div className="flex items-center gap-3">
+              {detail && !loading && (
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 text-sm font-black text-white transition-all hover:bg-primary-dark active:scale-95 shadow-lg shadow-primary/20"
+                >
+                  <Printer size={16} />
+                  <span className="hidden sm:inline">Print to PDF</span>
+                </button>
+              )}
+              
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                aria-label="ปิดหน้าต่างประวัติผู้ใช้งาน"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 py-6">
@@ -510,15 +524,6 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                         >
                           <FileDown size={18} />
                           <span>Export Excel</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={handlePrint}
-                          className="flex items-center gap-2 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 px-4 py-2 text-sm font-black text-primary transition-all hover:from-primary/15 hover:to-primary/10 active:scale-95 shadow-sm shadow-primary/5"
-                        >
-                          <Printer size={18} />
-                          <span>Print to PDF</span>
                         </button>
                       </div>
                     </div>
