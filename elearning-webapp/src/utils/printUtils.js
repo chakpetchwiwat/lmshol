@@ -51,6 +51,33 @@ const renderMetaRow = (items = []) => {
   `;
 };
 
+const renderProfileBlock = (profile) => {
+  if (!profile) return '';
+
+  const imageUrl = profile.imageUrl ? escapeHtml(profile.imageUrl) : '';
+  const initials = escapeHtml((profile.name || '-').trim().slice(0, 1).toUpperCase() || '-');
+
+  return `
+    <section class="section">
+      <h2 class="section-title">${escapeHtml(profile.title || 'Profile')}</h2>
+      <div class="profile-card">
+        <div class="profile-avatar">
+          ${
+            imageUrl
+              ? `<img src="${imageUrl}" alt="${escapeHtml(profile.name || 'Profile image')}" />`
+              : `<div class="profile-avatar-fallback">${initials}</div>`
+          }
+        </div>
+        <div class="profile-content">
+          <div class="profile-name">${escapeHtml(profile.name || '-')}</div>
+          ${profile.subtitle ? `<div class="profile-subtitle">${escapeHtml(profile.subtitle)}</div>` : ''}
+          ${renderMetaRow(profile.items || [])}
+        </div>
+      </div>
+    </section>
+  `;
+};
+
 const renderTable = ({ columns = [], rows = [], emptyMessage = 'ไม่พบข้อมูล' }) => `
   <div class="table-shell">
     <table>
@@ -92,6 +119,7 @@ const normalizeReportData = (report = {}) => ({
   columns: Array.isArray(report.columns) ? report.columns : [],
   rows: Array.isArray(report.rows) ? report.rows : [],
   sections: Array.isArray(report.sections) ? report.sections : [],
+  profile: report.profile || null,
   emptyMessage: report.emptyMessage || 'ไม่พบข้อมูล',
   dashboardData: report.dashboardData || null,
   generatedAt: report.generatedAt || formatThaiDateTime(new Date(), true),
@@ -192,6 +220,69 @@ export const getPrintReportStyles = () => `
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
+  }
+
+  .profile-card {
+    display: grid;
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--surface);
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .profile-avatar {
+    width: 132px;
+    height: 132px;
+    border-radius: 22px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--surface-alt);
+  }
+
+  .profile-avatar img,
+  .profile-avatar-fallback {
+    width: 100%;
+    height: 100%;
+  }
+
+  .profile-avatar img {
+    display: block;
+    object-fit: cover;
+  }
+
+  .profile-avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand);
+    font-size: 42px;
+    font-weight: 800;
+  }
+
+  .profile-content {
+    min-width: 0;
+  }
+
+  .profile-name {
+    font-size: 22px;
+    line-height: 1.25;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .profile-subtitle {
+    margin-top: 4px;
+    margin-bottom: 14px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .profile-card .meta-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 
   .meta-grid {
@@ -306,6 +397,12 @@ export const getPrintReportStyles = () => `
       overflow: visible;
     }
   }
+
+  @media screen and (max-width: 640px) {
+    .profile-card {
+      grid-template-columns: 1fr;
+    }
+  }
 `;
 
 export const renderPrintReportMarkup = (report) => {
@@ -326,6 +423,8 @@ export const renderPrintReportMarkup = (report) => {
         <h2 class="section-title">สรุปข้อมูล</h2>
         ${renderMetaRow(data.summary)}
       </section>
+
+      ${renderProfileBlock(data.profile)}
 
       ${
         data.filters.length
@@ -429,6 +528,7 @@ export const openPrintReport = ({
   columns = [],
   rows = [],
   sections = [],
+  profile = null,
   emptyMessage,
   dashboardData = null,
 }) => {
@@ -449,6 +549,7 @@ export const openPrintReport = ({
     columns,
     rows,
     sections,
+    profile,
     emptyMessage,
     dashboardData,
     generatedAt: formatThaiDateTime(new Date(), true),

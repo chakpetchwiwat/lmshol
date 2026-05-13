@@ -6,8 +6,11 @@ import {
   Clock3,
   Coins,
   FileDown,
+  FileText,
   Gift,
+  GraduationCap,
   ExternalLink,
+  Paperclip,
   Printer,
   TrendingDown,
   TrendingUp,
@@ -21,6 +24,7 @@ import { useToast } from '../../context/useToast';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 import { openPrintReport } from '../../utils/printUtils';
+import { getFullUrl } from '../../utils/api';
 
 const UserDetailModalContent = ({ loading, detail, onClose }) => {
   const toast = useToast();
@@ -37,6 +41,9 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
 
   const enrollments = detail?.enrollments || [];
   const pointsHistory = detail?.pointsHistory || [];
+  const educationHistory = Array.isArray(detail?.educationHistory) ? detail.educationHistory : [];
+  const profileFiles = Array.isArray(detail?.profileFiles) ? detail.profileFiles : [];
+  const profileImageUrl = detail?.profileImageUrl ? getFullUrl(detail.profileImageUrl) : '';
 
   const filteredEnrollments = enrollments.filter((enrollment) => {
     const date = new Date(enrollment.startedAt);
@@ -109,6 +116,28 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
     const data = activeTab === 'learning' ? filteredEnrollments : filteredPointsHistory;
 
     const sections = [
+      {
+        title: 'ประวัติการศึกษา',
+        columns: ['สถาบัน', 'วุฒิ / ระดับ', 'คณะ', 'สาขา', 'ปีที่จบ'],
+        rows: educationHistory.map((item) => [
+          item.institution || '-',
+          item.degree || '-',
+          item.faculty || '-',
+          item.major || '-',
+          item.graduationYear || '-'
+        ]),
+        emptyMessage: 'ยังไม่มีประวัติการศึกษา'
+      },
+      {
+        title: 'ข้อมูลอื่นๆ จากโปรไฟล์',
+        columns: ['ชื่อไฟล์', 'ประเภทไฟล์', 'วันที่อัปโหลด'],
+        rows: profileFiles.map((file) => [
+          file.title || file.fileName || '-',
+          file.fileMimeType || '-',
+          file.uploadedAt ? formatThaiDateTime(file.uploadedAt) : '-'
+        ]),
+        emptyMessage: 'ยังไม่มีไฟล์ข้อมูลอื่นๆ'
+      },
       // Always include certificates
       {
         title: 'เกียรติบัตรจากระบบ',
@@ -174,6 +203,18 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
         { label: 'เดือน', value: filterMonth === FILTER_VALUES.ALL ? 'ทุกเดือน' : months[parseInt(filterMonth, 10)] || 'ทุกเดือน' },
         { label: 'ปี', value: filterYear === FILTER_VALUES.ALL ? 'ทุกปี' : String(parseInt(filterYear, 10) + 543) },
       ],
+      profile: {
+        title: 'ข้อมูลโปรไฟล์ผู้ใช้',
+        name: detail?.name || '-',
+        subtitle: detail?.email || '',
+        imageUrl: profileImageUrl,
+        items: [
+          { label: 'แผนก', value: detail?.department || '-' },
+          { label: 'ระดับ', value: detail?.tier?.name || detail?.tier || '-' },
+          { label: 'ประวัติการศึกษา', value: `${educationHistory.length} รายการ` },
+          { label: 'ไฟล์ข้อมูลอื่นๆ', value: `${profileFiles.length} ไฟล์` },
+        ],
+      },
       sections
     });
   };
@@ -243,6 +284,86 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                     <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Point Balance</div>
                     <div className="mt-2 text-lg font-black text-slate-900">{detail.pointsBalance?.toLocaleString?.() || 0}</div>
                     <div className="mt-1 text-sm text-slate-500">แต้มคงเหลือล่าสุดของผู้ใช้งาน</div>
+                  </div>
+                </div>
+
+                <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+                  <div className="grid gap-0 lg:grid-cols-[14rem_1fr]">
+                    <div className="flex flex-col items-center justify-center border-b border-slate-100 bg-slate-50/70 px-5 py-6 lg:border-b-0 lg:border-r">
+                      <div className="h-32 w-32 overflow-hidden rounded-3xl border border-white bg-white shadow-lg shadow-slate-200/70">
+                        {profileImageUrl ? (
+                          <img src={profileImageUrl} alt={detail.name || 'Profile'} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-indigo-50 text-slate-400">
+                            <User2 size={48} strokeWidth={1.6} />
+                          </div>
+                        )}
+                      </div>
+                      <p className="mt-4 text-center text-sm font-black text-slate-900">{detail.name}</p>
+                      <p className="mt-1 max-w-[11rem] truncate text-center text-xs font-bold text-slate-500">{detail.email}</p>
+                    </div>
+
+                    <div className="p-5">
+                      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <h4 className="text-base font-black text-slate-900">ข้อมูลโปรไฟล์จากผู้ใช้</h4>
+                          <p className="mt-1 text-xs font-bold text-slate-500">แสดงข้อมูลเดียวกับหน้า Profile ที่ผู้ใช้แก้ไขล่าสุด</p>
+                        </div>
+                        <div className="rounded-2xl bg-indigo-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-primary">
+                          Profile Sync
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 xl:grid-cols-2">
+                        <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                          <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+                            <GraduationCap size={15} className="text-primary" />
+                            Education
+                          </div>
+                          {educationHistory.length === 0 ? (
+                            <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-xs font-bold text-slate-400">
+                              ยังไม่มีประวัติการศึกษา
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              {educationHistory.map((item) => (
+                                <div key={item.id} className="rounded-2xl border border-slate-100 bg-white p-3">
+                                  <p className="text-sm font-black text-slate-900">{item.institution || '-'}</p>
+                                  <p className="mt-1 text-xs font-bold text-slate-600">{item.degree || '-'} · {item.faculty || '-'}</p>
+                                  <p className="mt-1 text-xs font-bold text-slate-400">{item.major || '-'} · {item.graduationYear || '-'}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                          <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+                            <Paperclip size={15} className="text-emerald-600" />
+                            Other Information
+                          </div>
+                          {profileFiles.length === 0 ? (
+                            <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-xs font-bold text-slate-400">
+                              ยังไม่มีไฟล์ข้อมูลอื่นๆ
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              {profileFiles.map((file) => (
+                                <div key={file.id} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3">
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                                    <FileText size={18} />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-black text-slate-900">{file.title || file.fileName || '-'}</p>
+                                    <p className="mt-1 truncate text-xs font-bold text-slate-400">{file.fileName || file.fileMimeType || '-'}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
