@@ -10,6 +10,9 @@ const { logSecurityEvent } = require('../utils/securityEvents');
 const { validateUploadedFile, ALLOWED_UPLOAD_TYPES } = require('../utils/uploadValidation');
 const { ADMIN_PANEL_ROLES } = require('../utils/constants/roles');
 const prisma = require('../utils/prisma');
+const { getActorContext } = require('../services/admin/admin.helpers');
+const { buildScopedUserWhere } = require('../services/admin/admin.queries');
+const { writeAuditLog } = require('../services/audit.service');
 
 const router = express.Router();
 const securityConfig = getSecurityConfig();
@@ -33,7 +36,7 @@ const upload = multer({
     limits: { fileSize: securityConfig.uploadMaxFileSizeBytes }
 });
 
-const createSecureDocumentSignedUrl = async (fileKey, expiresIn = 3600) => {
+const createSecureDocumentSignedUrl = async (fileKey, expiresIn = 900) => {
     const { data, error } = await supabase.storage
         .from('secure-documents')
         .createSignedUrl(fileKey, expiresIn);
@@ -163,7 +166,41 @@ const canPreviewProfileFile = async (authUser, fileKey) => {
     });
 
     const files = Array.isArray(user?.profileFiles) ? user.profileFiles : [];
-    return files.some((file) => file?.fileKey === fileKey);
+    if (files.some((file) => file?.fileKey === fileKey)) {
+        return { allowed: true, ownerUserId: authUser.userId, accessType: 'owner' };
+    }
+
+    const actor = await getActorContext(authUser);
+    if (!actor.canAccessAdminPanel) {
+        return { allowed: false };
+    }
+
+    const usersWithProfileFiles = await prisma.user.findMany({
+        select: {
+            id: true,
+            profileFiles: true
+        }
+    });
+
+    const matchedUser = usersWithProfileFiles.find((candidate) => (
+        Array.isArray(candidate.profileFiles)
+        && candidate.profileFiles.some((file) => file?.fileKey === fileKey)
+    ));
+
+    if (!matchedUser) {
+        return { allowed: false };
+    }
+
+    const scopedUser = await prisma.user.findFirst({
+        where: await buildScopedUserWhere(actor, matchedUser.id),
+        select: { id: true }
+    });
+
+    return {
+        allowed: Boolean(scopedUser),
+        ownerUserId: matchedUser.id,
+        accessType: 'admin-scoped'
+    };
 };
 
 const readPngMetadata = (buffer) => {
@@ -296,12 +333,31 @@ router.get('/profile-file-url', verifyToken, async (req, res) => {
             return res.status(400).json({ message: 'Invalid profile file key.' });
         }
 
-        const allowed = await canPreviewProfileFile(req.user, fileKey);
-        if (!allowed) {
+        const access = await canPreviewProfileFile(req.user, fileKey);
+        if (!access.allowed) {
+            await writeAuditLog({
+                req,
+                action: 'profile_file.access_denied',
+                entityType: 'profileFile',
+                entityId: fileKey,
+                statusCode: 403,
+                metadata: { fileKey }
+            });
             return res.status(403).json({ message: 'You do not have access to this file.' });
         }
 
         const signedUrl = await createSecureDocumentSignedUrl(fileKey);
+        await writeAuditLog({
+            req,
+            action: 'profile_file.signed_url.created',
+            entityType: 'user',
+            entityId: access.ownerUserId,
+            statusCode: 200,
+            metadata: {
+                fileKey,
+                accessType: access.accessType
+            }
+        });
         return res.json({ url: signedUrl });
     } catch (error) {
         console.error('Profile file signed URL error:', error);

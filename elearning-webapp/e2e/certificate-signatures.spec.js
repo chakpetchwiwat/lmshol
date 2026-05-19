@@ -29,7 +29,6 @@ test.describe('Certification System - Multi-Signature Support', () => {
     await expect(signatureSection).toBeVisible();
 
     // Verify Signature 1 is toggleable
-    const sig1Toggle = page.locator('input[name="sig1-enabled"]');
     // Note: The actual selector might vary, using logical description for plan
     // I'll use placeholders if I'm not 100% sure of the exact selector from the subagent log
     

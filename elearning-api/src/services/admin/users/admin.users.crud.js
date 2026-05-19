@@ -12,8 +12,23 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
     const data = {};
     const { password, pointsBalance, ...baseData } = inputData;
 
-    if (baseData.name !== undefined) data.name = baseData.name;
-    if (baseData.email !== undefined) data.email = baseData.email;
+    if (baseData.name !== undefined) {
+        const name = String(baseData.name || '').trim();
+        if (!name) throw new Error('Name is required');
+        data.name = name.slice(0, 200);
+    } else if (isCreate) {
+        throw new Error('Name is required');
+    }
+
+    if (baseData.email !== undefined) {
+        const email = String(baseData.email || '').trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            throw new Error('Invalid email');
+        }
+        data.email = email;
+    } else if (isCreate) {
+        throw new Error('Email is required');
+    }
     if (baseData.role !== undefined) {
         if (![USER_ROLES.USER, USER_ROLES.MANAGER, USER_ROLES.ADMIN].includes(baseData.role)) {
             throw new Error('Invalid role');
@@ -22,6 +37,9 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
     }
 
     if (password) {
+        if (String(password).length < 8) {
+            throw new Error('Password must be at least 8 characters');
+        }
         data.password = await bcrypt.hash(password, 10);
     } else if (isCreate) {
         data.password = await bcrypt.hash('password123', 10);
@@ -29,6 +47,9 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
 
     if (pointsBalance !== undefined) {
         data.pointsBalance = parseInteger(pointsBalance, 0);
+        if (data.pointsBalance < 0) {
+            throw new Error('Points balance cannot be negative');
+        }
     } else if (isCreate) {
         data.pointsBalance = 0;
     }
@@ -58,6 +79,9 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
 
     if (baseData.employmentDate !== undefined) {
         data.employmentDate = baseData.employmentDate ? new Date(baseData.employmentDate) : null;
+        if (data.employmentDate && Number.isNaN(data.employmentDate.getTime())) {
+            throw new Error('Employment date is invalid');
+        }
     } else if (isCreate) {
         data.employmentDate = new Date();
     }

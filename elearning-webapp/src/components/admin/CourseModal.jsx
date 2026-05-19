@@ -20,8 +20,7 @@ import CourseStaffEditor from './CourseStaffEditor';
 import CourseCertificatesTab from './CourseCertificatesTab';
 import CourseAssessmentsTab from './CourseAssessmentsTab';
 import { getCourseAccess, canUserEditCourse, canUserManageContent } from '../../utils/coursePermissions';
-import { adminAPI, courseStaffAPI } from '../../utils/api';
-import { useToast } from '../../context/useToast';
+import { courseStaffAPI } from '../../utils/api';
 
 const CourseModal = ({
   isOpen,
@@ -53,7 +52,6 @@ const CourseModal = ({
   currentUser,
   onStaffChanged
 }) => {
-  const toast = useToast();
   const [staff, setStaff] = React.useState([]);
   const [loadingPermissions, setLoadingPermissions] = React.useState(false);
   const [permissions, setPermissions] = React.useState({

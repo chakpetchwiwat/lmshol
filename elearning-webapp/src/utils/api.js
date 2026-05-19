@@ -82,7 +82,7 @@ api.interceptors.response.use(
     // This maintains compatibility with standard Axios usage (res.data)
     // CRITICAL: We must preserve sibling fields like 'summary', 'pagination', 'hasCertificate'
     if (response.data && response.data.success === true) {
-      const { data, success, ...metadata } = response.data;
+      const { data, success: _success, ...metadata } = response.data;
       if (data !== undefined) {
         return { 
           ...response, 
@@ -208,6 +208,7 @@ export const adminAPI = {
 
   getUsers: () => api.get('/admin/users'),
   getUserDetails: (id) => api.get(`/admin/users/${id}/details`),
+  getProfileFileDownloadUrl: (fileKey) => api.get('/upload/profile-file-url', { params: { key: fileKey } }),
   createUser: (data) => api.post('/admin/users', data),
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),

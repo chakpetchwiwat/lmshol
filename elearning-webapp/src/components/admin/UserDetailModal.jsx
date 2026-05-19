@@ -24,7 +24,7 @@ import { useToast } from '../../context/useToast';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 import { openPrintReport } from '../../utils/printUtils';
-import { getFullUrl } from '../../utils/api';
+import { adminAPI, getFullUrl } from '../../utils/api';
 
 const UserDetailModalContent = ({ loading, detail, onClose }) => {
   const toast = useToast();
@@ -64,6 +64,32 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
       ? formatThaiDateTime(enrollment.completedAt)
       : '-'
   );
+
+  const handleOpenProfileFile = async (file) => {
+    try {
+      if (file?.fileUrl) {
+        window.open(getFullUrl(file.fileUrl), '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      if (!file?.fileKey) {
+        toast.warning('ไม่พบลิงก์ไฟล์นี้');
+        return;
+      }
+
+      const response = await adminAPI.getProfileFileDownloadUrl(file.fileKey);
+      const url = response?.data?.url || response?.url;
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      toast.warning('ไม่พบลิงก์ไฟล์นี้');
+    } catch (error) {
+      console.error('Open profile file error', error);
+      toast.error('เปิดไฟล์ไม่สำเร็จ');
+    }
+  };
 
   const handleExport = () => {
     const data = activeTab === 'learning' ? filteredEnrollments : filteredPointsHistory;
@@ -363,15 +389,21 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                           ) : (
                             <div className="space-y-3">
                               {profileFiles.map((file) => (
-                                <div key={file.id} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3">
+                                <button
+                                  key={file.id}
+                                  type="button"
+                                  onClick={() => handleOpenProfileFile(file)}
+                                  className="group flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 text-left transition-all hover:border-emerald-200 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
+                                >
                                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
                                     <FileText size={18} />
                                   </div>
-                                  <div className="min-w-0">
+                                  <div className="min-w-0 flex-1">
                                     <p className="truncate text-sm font-black text-slate-900">{file.title || file.fileName || '-'}</p>
                                     <p className="mt-1 truncate text-xs font-bold text-slate-400">{file.fileName || file.fileMimeType || '-'}</p>
                                   </div>
-                                </div>
+                                  <ExternalLink size={14} className="shrink-0 text-slate-300 transition-colors group-hover:text-emerald-600" />
+                                </button>
                               ))}
                             </div>
                           )}

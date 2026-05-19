@@ -22,9 +22,11 @@ const CreateGoalModal = ({
   toggleCourse
 }) => {
   const isAdmin = currentUser?.role === 'admin';
-  const selectedDepartmentIds = Array.isArray(formData.departmentIds)
-    ? formData.departmentIds
-    : (formData.departmentId ? [formData.departmentId] : []);
+  const selectedDepartmentIds = React.useMemo(() => (
+    Array.isArray(formData.departmentIds)
+      ? formData.departmentIds
+      : (formData.departmentId ? [formData.departmentId] : [])
+  ), [formData.departmentId, formData.departmentIds]);
   const selectedUserIds = Array.isArray(formData.userIds) ? formData.userIds : [];
   const [userSearch, setUserSearch] = React.useState('');
   const isPostAssignmentImmediate = formData.postAssignmentReminderDays === '0';

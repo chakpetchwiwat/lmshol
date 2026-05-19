@@ -57,7 +57,7 @@ const CertificateApprovals = () => {
       await adminAPI.revokeCertificate(id, { reason });
       toast.success('ปฏิเสธรายการเรียบร้อยแล้ว');
       setCertificates(prev => prev.filter(c => c.id !== id));
-    } catch (error) {
+    } catch {
       toast.error('ไม่สามารถดำเนินการได้');
     } finally {
       setApproving(null);

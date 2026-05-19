@@ -28,7 +28,6 @@ const ProfileEducationModal = ({
   const institutionInputRef = React.useRef(null);
   const titleId = React.useId();
   const institutionId = React.useId();
-  const degreeId = React.useId();
   const facultyId = React.useId();
   const majorId = React.useId();
   const yearId = React.useId();

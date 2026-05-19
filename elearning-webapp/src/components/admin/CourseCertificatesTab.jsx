@@ -19,7 +19,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
   const [manualIssueLoading, setManualIssueLoading] = React.useState(false);
   const [manualSearchQuery, setManualSearchQuery] = React.useState('');
 
-  const fetchCertificates = async () => {
+  const fetchCertificates = React.useCallback(async () => {
     try {
       setLoading(true);
       const response = await adminAPI.getCourseCertificates(courseId);
@@ -32,11 +32,11 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId, toast]);
 
   React.useEffect(() => {
     if (courseId) fetchCertificates();
-  }, [courseId]);
+  }, [courseId, fetchCertificates]);
 
   const filteredCertificates = React.useMemo(() => {
     if (!searchQuery) return certificates;
@@ -54,7 +54,7 @@ const CourseCertificatesTab = ({ courseId, readOnly }) => {
       if (response.data?.url) {
         window.open(response.data.url, '_blank');
       }
-    } catch (error) {
+    } catch {
       toast.error('ไม่สามารถดึงลิงก์ดาวน์โหลดได้');
     } finally {
       setProcessing(null);

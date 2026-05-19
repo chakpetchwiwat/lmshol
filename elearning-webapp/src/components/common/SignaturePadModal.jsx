@@ -37,7 +37,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
     return undefined;
   }, [isOpen]);
 
-  const getCanvasPoint = (event) => {
+  const getCanvasPoint = React.useCallback((event) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvasRectRef.current || canvas.getBoundingClientRect();
@@ -49,9 +49,9 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
       x: (clientX - rect.left) * scaleRef.current.x,
       y: (clientY - rect.top) * scaleRef.current.y,
     };
-  };
+  }, []);
 
-  const startDrawing = (event) => {
+  const startDrawing = React.useCallback((event) => {
     event.preventDefault();
     isDrawingRef.current = true;
     canvasRectRef.current = canvasRef.current?.getBoundingClientRect() || null;
@@ -65,9 +65,9 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
     if (canvasRef.current?.setPointerCapture) {
       canvasRef.current.setPointerCapture(event.pointerId);
     }
-  };
+  }, [getCanvasPoint]);
 
-  const continueDrawing = (event) => {
+  const continueDrawing = React.useCallback((event) => {
     if (!isDrawingRef.current || !lastPointRef.current) return;
     event.preventDefault();
 
@@ -94,7 +94,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
       hasNewDrawingRef.current = true;
       setHasNewDrawing(true);
     }
-  };
+  }, [getCanvasPoint]);
 
   const stopDrawing = () => {
     isDrawingRef.current = false;
@@ -158,7 +158,7 @@ const SignaturePadModal = ({ isOpen, onClose, onSave, title = 'เซ็นช�
       canvas.removeEventListener('lostpointercapture', stopDrawing);
       canvas.removeEventListener('pointerleave', stopDrawing);
     };
-  }, [isOpen]);
+  }, [continueDrawing, isOpen, startDrawing]);
 
   return (
     <ModalPortal isOpen={isOpen}>

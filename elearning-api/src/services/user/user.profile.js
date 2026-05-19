@@ -3,23 +3,60 @@ const prisma = require('../../utils/prisma');
 const authHelpers = require('../../utils/auth.helpers');
 
 const mapPublicUser = authHelpers.mapUserRecord;
+const MAX_PROFILE_ITEMS = 50;
+const MAX_PROFILE_TEXT_LENGTH = 300;
+const PROFILE_FILE_KEY_PREFIX = 'certificates/';
 
 const normalizeString = (value) => {
     const normalized = value ? String(value).trim() : '';
     return normalized || null;
 };
 
+const truncateString = (value, maxLength = MAX_PROFILE_TEXT_LENGTH) => {
+    const normalized = normalizeString(value);
+    if (!normalized) return '';
+    return normalized.slice(0, maxLength);
+};
+
+const normalizeProfileFileKey = (value) => {
+    const fileKey = normalizeString(value);
+    if (!fileKey) return '';
+    if (!fileKey.startsWith(PROFILE_FILE_KEY_PREFIX) || fileKey.includes('..')) {
+        throw new Error('Invalid profile file key');
+    }
+    return fileKey;
+};
+
+const normalizeUploadedAt = (value) => {
+    const normalized = normalizeString(value);
+    if (!normalized) return '';
+
+    const parsed = new Date(normalized);
+    if (Number.isNaN(parsed.getTime())) {
+        return '';
+    }
+
+    return parsed.toISOString();
+};
+
 const normalizeProfileItems = (items, fields) => {
     if (!Array.isArray(items)) return [];
 
     return items
+        .slice(0, MAX_PROFILE_ITEMS)
         .map((item) => {
             const normalized = {
                 id: normalizeString(item?.id) || `${Date.now()}-${Math.random().toString(36).slice(2)}`
             };
 
             fields.forEach((field) => {
-                normalized[field] = normalizeString(item?.[field]) || '';
+                if (field === 'fileKey') {
+                    normalized[field] = normalizeProfileFileKey(item?.[field]);
+                } else if (field === 'uploadedAt') {
+                    normalized[field] = normalizeUploadedAt(item?.[field]);
+                } else {
+                    normalized[field] = truncateString(item?.[field]);
+                }
             });
 
             return normalized;

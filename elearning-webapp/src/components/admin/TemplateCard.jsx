@@ -3,6 +3,34 @@ import { Check, Eye } from 'lucide-react';
 import { getFullUrl } from '../../utils/api';
 import SignatureImage from '../common/SignatureImage';
 
+const SignatureArea = ({ activeSlots, alignment = 'right' }) => {
+  if (activeSlots.length === 0) return null;
+  return (
+    <div className={`absolute bottom-[10%] ${
+      alignment === 'right' ? 'right-[8%] justify-end' :
+      alignment === 'center' ? 'left-0 right-0 justify-center' :
+      'left-[10%] justify-start'
+    } flex w-[36%] items-end gap-[1.8em]`}>
+      {activeSlots.map((slot, i) => (
+        <div key={slot.id || i} className="relative flex min-w-0 flex-1 flex-col items-center text-center">
+          {slot.stampImageUrl ? (
+            <img src={getFullUrl(slot.stampImageUrl)} alt="" className="absolute bottom-[1.8em] right-[8%] h-[2.6em] w-[2.6em] object-contain opacity-80" />
+          ) : null}
+          <div className="relative mb-[0.2em] flex h-[2.5em] w-full items-end justify-center border-b border-slate-300 pb-1">
+            {slot.signatureImageUrl ? (
+              <SignatureImage src={slot.signatureImageUrl} alt="" className="max-h-full max-w-full object-contain" />
+            ) : (
+              <span className="text-[0.5em] font-black uppercase italic tracking-widest text-slate-200">Signature</span>
+            )}
+          </div>
+          <p className="max-w-full truncate text-[0.65em] font-black text-slate-800">{slot.name || `Signature ${i + 1}`}</p>
+          <p className="max-w-full truncate text-[0.5em] font-bold text-slate-400">{slot.title || 'Title'}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) => {
   const isFull = size === 'full';
   const activeSlots = (signatureSlots || []).filter(s => s && s.enabled !== false).slice(0, 2);
@@ -12,34 +40,6 @@ const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) =>
     courseTitle: 'Advanced Workplace Learning',
     certificateNo: 'CERT-2026-0427',
     issuedAt: '03 May 2026'
-  };
-
-  const SignatureArea = ({ alignment = 'right' }) => {
-    if (activeSlots.length === 0) return null;
-    return (
-      <div className={`absolute bottom-[10%] ${
-        alignment === 'right' ? 'right-[8%] justify-end' : 
-        alignment === 'center' ? 'left-0 right-0 justify-center' : 
-        'left-[10%] justify-start'
-      } flex w-[36%] items-end gap-[1.8em]`}>
-        {activeSlots.map((slot, i) => (
-          <div key={slot.id || i} className="relative flex min-w-0 flex-1 flex-col items-center text-center">
-            {slot.stampImageUrl ? (
-              <img src={getFullUrl(slot.stampImageUrl)} alt="" className="absolute bottom-[1.8em] right-[8%] h-[2.6em] w-[2.6em] object-contain opacity-80" />
-            ) : null}
-            <div className="relative mb-[0.2em] flex h-[2.5em] w-full items-end justify-center border-b border-slate-300 pb-1">
-              {slot.signatureImageUrl ? (
-                <SignatureImage src={slot.signatureImageUrl} alt="" className="max-h-full max-w-full object-contain" />
-              ) : (
-                <span className="text-[0.5em] font-black uppercase italic tracking-widest text-slate-200">Signature</span>
-              )}
-            </div>
-            <p className="max-w-full truncate text-[0.65em] font-black text-slate-800">{slot.name || `Signature ${i + 1}`}</p>
-            <p className="max-w-full truncate text-[0.5em] font-bold text-slate-400">{slot.title || 'Title'}</p>
-          </div>
-        ))}
-      </div>
-    );
   };
 
   const scaleClass = isFull
@@ -78,7 +78,7 @@ const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) =>
           </div>
         </div>
 
-        <SignatureArea alignment="right" />
+        <SignatureArea activeSlots={activeSlots} alignment="right" />
       </div>
     );
   }
@@ -100,7 +100,7 @@ const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) =>
           <span>{demo.issuedAt}</span>
         </div>
 
-        <SignatureArea alignment="center" />
+        <SignatureArea activeSlots={activeSlots} alignment="center" />
       </div>
     );
   }
@@ -121,7 +121,7 @@ const CertificateArtwork = ({ template, size = 'card', signatureSlots = [] }) =>
         <p>วันที่ออก: {demo.issuedAt}</p>
       </div>
       
-      <SignatureArea alignment="right" />
+      <SignatureArea activeSlots={activeSlots} alignment="right" />
       
       <p className="absolute bottom-[4%] left-0 right-0 text-center text-[0.55em] font-bold text-slate-300">ScaleUp Learning Management System</p>
     </div>

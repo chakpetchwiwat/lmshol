@@ -72,8 +72,6 @@ const CertificateVerification = () => {
   const signer = snapshot.signer || {};
 
   const isValid = certificate.status === 'VALID';
-  const isRevoked = certificate.status === 'REVOKED';
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4 sm:p-8">
       <div className="w-full max-w-2xl overflow-hidden rounded-[2.5rem] bg-white shadow-[0_32px_80px_-20px_rgba(15,23,42,0.08)] ring-1 ring-slate-200/50">

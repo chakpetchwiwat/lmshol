@@ -70,7 +70,7 @@ const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged, initialStaff
     } finally {
       setLoading(false);
     }
-  }, [courseId, toast, onStaffChanged]);
+  }, [courseId, staff.length, toast, onStaffChanged]);
 
   const fetchAllUsers = React.useCallback(async () => {
     try {
