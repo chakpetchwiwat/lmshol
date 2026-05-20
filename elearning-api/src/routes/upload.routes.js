@@ -8,7 +8,7 @@ const { verifyToken, verifyAdminPanelAccess } = require('../middleware/auth');
 const { uploadRateLimiter } = require('../middleware/rateLimiters');
 const { logSecurityEvent } = require('../utils/securityEvents');
 const { validateUploadedFile, ALLOWED_UPLOAD_TYPES } = require('../utils/uploadValidation');
-const { ADMIN_PANEL_ROLES } = require('../utils/constants/roles');
+const { ADMIN_PANEL_PERMISSIONS, ADMIN_PANEL_ROLES } = require('../utils/constants/roles');
 const prisma = require('../utils/prisma');
 const { getActorContext } = require('../services/admin/admin.helpers');
 const { buildScopedUserWhere } = require('../services/admin/admin.queries');
@@ -120,7 +120,8 @@ const uploadToSupabase = async (req, res, { forceSubDir, includeSignedUrl = fals
 
 const hasAdminPanelAccess = (user) => Boolean(
     user && (
-        ADMIN_PANEL_ROLES.includes(user.role)
+        ADMIN_PANEL_PERMISSIONS.includes(user.permission)
+        || ADMIN_PANEL_ROLES.includes(user.role)
         || user.tier?.accessAdmin
         || (user.courseStaff && user.courseStaff.length > 0)
     )
@@ -131,6 +132,7 @@ const canPreviewSignature = async (authUser, fileKey) => {
         where: { id: authUser.userId },
         select: {
             signatureImageUrl: true,
+            permission: true,
             role: true,
             tier: true,
             courseStaff: { take: 1, select: { id: true } }

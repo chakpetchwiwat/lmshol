@@ -1,7 +1,7 @@
 const prisma = require('../../../utils/prisma');
 const bcrypt = require('bcryptjs');
 const authHelpers = require('../../../utils/auth.helpers');
-const { USER_ROLES } = require('../../../utils/constants/roles');
+const { USER_PERMISSIONS } = require('../../../utils/constants/roles');
 const { POINT_SOURCE_TYPES } = require('../../../utils/constants/ledger');
 const { TRANSACTION_TIMEOUTS } = require('../../../utils/constants/config');
 const { mapUserRecord } = require('../admin.serializers');
@@ -29,11 +29,23 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
     } else if (isCreate) {
         throw new Error('Email is required');
     }
-    if (baseData.role !== undefined) {
-        if (![USER_ROLES.USER, USER_ROLES.MANAGER, USER_ROLES.ADMIN].includes(baseData.role)) {
-            throw new Error('Invalid role');
+    if (baseData.permission !== undefined) {
+        if (![USER_PERMISSIONS.USER, USER_PERMISSIONS.MANAGER, USER_PERMISSIONS.ADMIN].includes(baseData.permission)) {
+            throw new Error('Invalid permission');
         }
-        data.role = baseData.role;
+        data.permission = baseData.permission;
+    }
+
+    if (baseData.roles !== undefined) {
+        if (!Array.isArray(baseData.roles)) {
+            throw new Error('Roles must be an array');
+        }
+        const allowedCohortRoles = ['trainee', 'inspector', 'observer'];
+        const invalidRole = baseData.roles.find(r => !allowedCohortRoles.includes(r));
+        if (invalidRole) {
+            throw new Error(`Invalid cohort role: ${invalidRole}`);
+        }
+        data.roles = baseData.roles;
     }
 
     if (password) {
@@ -70,8 +82,8 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
             });
             if (!tier) throw new Error('Tier not found');
             data.tierId = tier.id;
-            const targetRole = tier.accessAdmin ? USER_ROLES.MANAGER : USER_ROLES.USER;
-            if (data.role !== USER_ROLES.ADMIN) data.role = targetRole;
+            const targetPermission = tier.accessAdmin ? USER_PERMISSIONS.MANAGER : USER_PERMISSIONS.USER;
+            if (data.permission !== USER_PERMISSIONS.ADMIN) data.permission = targetPermission;
         } else {
             data.tierId = null;
         }
@@ -94,7 +106,7 @@ const getUsers = async (authUser) => {
     const users = await prisma.user.findMany({
         where: authHelpers.buildUserManagementWhere(actor),
         include: userInclude,
-        orderBy: [{ tier: { order: 'asc' } }, { role: 'asc' }, { name: 'asc' }]
+        orderBy: [{ tier: { order: 'asc' } }, { permission: 'asc' }, { name: 'asc' }]
     });
 
     const balances = await prisma.pointsLedger.groupBy({
@@ -114,7 +126,7 @@ const getUsers = async (authUser) => {
 const createUser = async (inputData) => prisma.$transaction(async (tx) => {
     const data = await buildUserMutationData(tx, inputData, { isCreate: true });
     const user = await tx.user.create({
-        data: { ...data, role: inputData.role || USER_ROLES.USER },
+        data: { ...data, permission: inputData.permission || USER_PERMISSIONS.USER, roles: inputData.roles || [] },
         include: { departmentRef: true, tier: true }
     });
 

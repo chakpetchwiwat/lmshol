@@ -1,6 +1,6 @@
 const prisma = require('./prisma');
 const authHelpers = require('./auth.helpers');
-const { USER_ROLES } = require('./constants/roles');
+const { USER_PERMISSIONS, USER_ROLES } = require('./constants/roles');
 
 const COURSE_MANAGEMENT_ACCESS = Object.freeze({
   NONE: 'none',
@@ -12,16 +12,22 @@ const COURSE_MANAGEMENT_ACCESS = Object.freeze({
 const getUserId = (user) => user?.userId || user?.id || null;
 
 const isAdmin = (user) => (
+  user?.permission === USER_PERMISSIONS.SUPERADMIN ||
+  user?.permission === USER_PERMISSIONS.ADMIN ||
   user?.role === USER_ROLES.SUPERADMIN ||
   user?.role === USER_ROLES.ADMIN ||
   user?.effectiveRole === USER_ROLES.SUPERADMIN ||
   user?.effectiveRole === USER_ROLES.ADMIN ||
+  user?.effectivePermission === USER_PERMISSIONS.SUPERADMIN ||
+  user?.effectivePermission === USER_PERMISSIONS.ADMIN ||
   user?.isAdmin === true
 );
 
 const isManager = (user) => (
+  user?.permission === USER_PERMISSIONS.MANAGER ||
   user?.role === USER_ROLES.MANAGER ||
   user?.effectiveRole === USER_ROLES.MANAGER ||
+  user?.effectivePermission === USER_PERMISSIONS.MANAGER ||
   user?.isManager === true
 );
 

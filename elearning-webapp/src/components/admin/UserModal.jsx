@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
@@ -102,7 +102,7 @@ const UserModal = ({
             {canEditRole && (
               <div className="relative">
                 <CustomSelect
-                  label="สิทธิ์ระบบ"
+                  label="สิทธิ์ระบบ (Permission)"
                   value={formData.role}
                   disabled={!!formData.tierId && formData.role !== 'admin'}
                   onChange={(event) => setFormData({ ...formData, role: event.target.value })}
@@ -119,6 +119,33 @@ const UserModal = ({
                 )}
               </div>
             )}
+
+            <div>
+              <label className="mb-1.5 block text-sm font-bold text-slate-700">บทบาทผู้ใช้งาน (Cohort Roles)</label>
+              <div className="flex flex-wrap gap-4 rounded-xl border border-slate-200 p-3 bg-slate-50/50">
+                {['trainee', 'inspector', 'observer'].map((r) => {
+                  const label = r === 'trainee' ? 'Trainee' : r === 'inspector' ? 'Inspector' : 'Observer';
+                  const isChecked = (formData.roles || []).includes(r);
+                  return (
+                    <label key={r} className="flex items-center gap-2 text-sm font-semibold text-slate-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          const currentRoles = formData.roles || [];
+                          const nextRoles = e.target.checked
+                            ? [...currentRoles, r]
+                            : currentRoles.filter((item) => item !== r);
+                          setFormData((prev) => ({ ...prev, roles: nextRoles }));
+                        }}
+                        className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary/20"
+                      />
+                      {label}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
 
             <div className="grid gap-5 md:grid-cols-2">
               <CustomSelect

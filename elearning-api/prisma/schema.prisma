@@ -13,7 +13,8 @@ model User {
   name                  String
   email                 String                 @unique
   password              String
-  role                  String                 @default("user")
+  permission            String                 @default("user")
+  roles                 String[]               @default([])
   department            String?
   pointsBalance         Int                    @default(0)
   status                String                 @default("ACTIVE")

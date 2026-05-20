@@ -341,6 +341,18 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                       </div>
                       <p className="mt-4 text-center text-sm font-black text-slate-900">{detail.name}</p>
                       <p className="mt-1 max-w-[11rem] truncate text-center text-xs font-bold text-slate-500">{detail.email}</p>
+                      {Array.isArray(detail.roles) && detail.roles.length > 0 && (
+                        <div className="mt-3 flex flex-wrap justify-center gap-1">
+                          {detail.roles.map((r) => {
+                            const label = r === 'trainee' ? 'Trainee' : r === 'inspector' ? 'Inspector' : r === 'observer' ? 'Observer' : r;
+                            return (
+                              <span key={r} className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-200 text-slate-800">
+                                {label}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     <div className="p-5">

@@ -155,7 +155,7 @@ const GoalDetail = () => {
                                 <h3 className="text-xl font-bold flex items-center gap-2 mb-4">
                                     <BookOpen size={24} className="text-primary" /> คอร์สที่ยังต้องเรียน
                                 </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                                     {uncompletedSpecificCourses.map(course => (
                                         <CourseCard 
                                             key={course.id} 
@@ -173,7 +173,7 @@ const GoalDetail = () => {
                                 <h3 className="text-xl font-bold flex items-center gap-2 mb-4 text-emerald-600">
                                     <CheckCircle2 size={24} /> เรียนจบแล้ว ({progress.completedCourses.length})
                                 </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 opacity-75">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 opacity-75">
                                     {progress.completedCourses.map(course => (
                                         <CourseCard 
                                             key={course.id} 

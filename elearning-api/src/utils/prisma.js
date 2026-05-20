@@ -20,11 +20,11 @@ const prisma = prismaInstance.$extends({
   query: {
     $allModels: {
       async $allOperations({ args, query }) {
-        const { userId, role } = getContext();
+        const { userId, role, permission } = getContext();
         if (userId) {
           return prismaInstance.$transaction(async (tx) => {
             await tx.$executeRawUnsafe(`SET LOCAL app.current_user_id = '${userId}'`);
-            await tx.$executeRawUnsafe(`SET LOCAL app.current_user_role = '${role || 'user'}'`);
+            await tx.$executeRawUnsafe(`SET LOCAL app.current_user_role = '${permission || role || 'user'}'`);
             return query(args);
           });
         }

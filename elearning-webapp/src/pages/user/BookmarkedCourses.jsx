@@ -64,14 +64,14 @@ const BookmarkedCourses = () => {
       </div>
 
       {loading ? (
-        <div className="relative z-10 mb-10 mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="relative z-10 mb-10 mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <Skeleton.CourseCard key={i} />
           ))}
         </div>
       ) : null}
 
-      <div className="relative z-10 mb-10 mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="relative z-10 mb-10 mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {!loading && filteredCourses.length > 0 ? (
           filteredCourses.map((course) => (
             <CourseCard

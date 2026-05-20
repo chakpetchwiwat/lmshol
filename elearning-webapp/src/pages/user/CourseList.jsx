@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Filter, Grid, Search } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import CategorySearchModal from '../../components/common/CategorySearchModal';
@@ -144,14 +144,14 @@ const CourseList = () => {
       </div>
 
       {loading ? (
-        <div className="relative z-10 mb-10 mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="relative z-10 mb-10 mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {[...Array(8)].map((_, i) => (
             <Skeleton.CourseCard key={i} />
           ))}
         </div>
       ) : null}
 
-      <div className="relative z-10 mb-10 mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="relative z-10 mb-10 mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {!loading && filtered.length > 0 ? (
           filtered.map((course) => (
             <CourseCard

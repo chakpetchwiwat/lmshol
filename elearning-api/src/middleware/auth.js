@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { USER_ROLES, ADMIN_PANEL_ROLES } = require('../utils/constants/roles');
+const { USER_PERMISSIONS, ADMIN_PANEL_PERMISSIONS, USER_ROLES, ADMIN_PANEL_ROLES } = require('../utils/constants/roles');
 const { runWithContext } = require('../utils/context');
 
 const verifyToken = (req, res, next) => {
@@ -13,10 +13,17 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    
+    // Normalize decoded token payload
+    const permission = decoded.permission || decoded.role || 'user';
+    req.user = {
+      ...decoded,
+      permission,
+      role: permission // Compatibility alias
+    };
 
     // Set context for RLS
-    runWithContext({ userId: decoded.userId, role: decoded.role }, () => {
+    runWithContext({ userId: decoded.userId, role: permission }, () => {
       next();
     });
   } catch (error) {
@@ -25,7 +32,7 @@ const verifyToken = (req, res, next) => {
 };
 
 const verifyAdmin = (req, res, next) => {
-  if (req.user && (req.user.role === USER_ROLES.SUPERADMIN || req.user.role === USER_ROLES.ADMIN)) {
+  if (req.user && (req.user.permission === USER_PERMISSIONS.SUPERADMIN || req.user.permission === USER_PERMISSIONS.ADMIN)) {
     next();
   } else {
     res.status(403).json({ message: 'สิทธิ์ระดับผู้ดูแลระบบเท่านั้น (Admin access required)' });
@@ -33,7 +40,7 @@ const verifyAdmin = (req, res, next) => {
 };
 
 const verifySuperAdmin = (req, res, next) => {
-  if (req.user && (req.user.role === USER_ROLES.SUPERADMIN || req.user.role === USER_ROLES.ADMIN)) {
+  if (req.user && (req.user.permission === USER_PERMISSIONS.SUPERADMIN || req.user.permission === USER_PERMISSIONS.ADMIN)) {
     next();
   } else {
     res.status(403).json({ message: 'สิทธิ์ระดับผู้ดูแลระบบสูงสุดเท่านั้น (Superadmin access required)' });
@@ -41,7 +48,7 @@ const verifySuperAdmin = (req, res, next) => {
 };
 
 const verifyAdminOrManager = (req, res, next) => {
-  if (req.user && (req.user.role === USER_ROLES.SUPERADMIN || req.user.role === USER_ROLES.ADMIN || req.user.role === USER_ROLES.MANAGER || req.user.tier?.accessAdmin)) {
+  if (req.user && (req.user.permission === USER_PERMISSIONS.SUPERADMIN || req.user.permission === USER_PERMISSIONS.ADMIN || req.user.permission === USER_PERMISSIONS.MANAGER || req.user.tier?.accessAdmin)) {
     next();
   } else {
     res.status(403).json({ message: 'สิทธิ์ระดับผู้ดูแลแผนกหรือแอดมินเท่านั้น (Manager or Admin access required)' });
@@ -64,9 +71,10 @@ const verifyAdminPanelAccess = async (req, res, next) => {
       }
     });
 
-    if (user && (ADMIN_PANEL_ROLES.includes(user.role) || user.tier?.accessAdmin || (user.courseStaff && user.courseStaff.length > 0))) {
+    if (user && (ADMIN_PANEL_PERMISSIONS.includes(user.permission) || user.tier?.accessAdmin || (user.courseStaff && user.courseStaff.length > 0))) {
       // Update req.user with latest data for downstream use
-      req.user.role = user.role;
+      req.user.permission = user.permission;
+      req.user.role = user.permission; // Compatibility alias
       req.user.tier = user.tier;
       req.user.isCourseStaff = (user.courseStaff && user.courseStaff.length > 0);
       next();
@@ -93,7 +101,7 @@ const verifyCourseAccess = async (req, res, next) => {
       next();
     } else {
       // If it's a superadmin/admin, they should ALWAYS have access even if not in CourseStaff
-      if (req.user && (req.user.role === USER_ROLES.SUPERADMIN || req.user.role === USER_ROLES.ADMIN)) {
+      if (req.user && (req.user.permission === USER_PERMISSIONS.SUPERADMIN || req.user.permission === USER_PERMISSIONS.ADMIN)) {
         return next();
       }
       res.status(403).json({ message: 'คุณไม่มีสิทธิ์จัดการคอร์สนี้ (You do not have permission to manage this course)' });

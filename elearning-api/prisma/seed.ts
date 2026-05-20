@@ -34,7 +34,7 @@ async function main() {
       email: 'admin@company.com',
       name: 'System Admin',
       password: adminPassword,
-      role: 'admin',
+      permission: 'admin',
       department: 'IT'
     }
   });
@@ -48,7 +48,7 @@ async function main() {
       email: 'user@company.com',
       name: 'อเล็กซ์ หวัง',
       password: userPassword,
-      role: 'user',
+      permission: 'user',
       department: 'HRD'
     }
   });

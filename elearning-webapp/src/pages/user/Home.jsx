@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { PlayCircle, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
@@ -198,7 +198,7 @@ const Home = () => {
               badgeText={category.isTemporary ? `เข้าดูได้ถึง · ${formatThaiFullDate(category.expiredAt)}` : ''}
               onViewAll={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)}
             />
-            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
+            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
               {category.courses.map(course => (
                 <CourseCard
                   key={course.id}
@@ -214,7 +214,7 @@ const Home = () => {
         {uncategorized.length > 0 && (
           <section className="animate-slide-up" style={{ animationDelay: '800ms' }}>
             <SectionHeader title="คอร์สแนะนำสำหรับคุณ" showViewAll={false} />
-            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
+            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
               {uncategorized.map(course => (
                 <CourseCard
                   key={course.id}

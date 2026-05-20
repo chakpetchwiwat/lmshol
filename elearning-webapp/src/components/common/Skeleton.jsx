@@ -118,7 +118,7 @@ const Home = () => (
     <section className="space-y-8">
       <div className="space-y-4">
         <Base className="h-8 w-56" />
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <CourseCard key={i} />
           ))}

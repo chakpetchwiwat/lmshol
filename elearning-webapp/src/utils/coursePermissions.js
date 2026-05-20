@@ -15,7 +15,7 @@
  * @param {Array} params.staff - List of staff assigned to the course
  * @returns {'full' | 'limited' | 'read-only' | 'none'}
  */
-import { USER_ROLES } from './constants/roles';
+import { USER_PERMISSIONS } from './constants/roles';
 
 export const getCourseAccess = ({ currentUser, staff }) => {
   if (!currentUser) return 'none';
@@ -24,11 +24,13 @@ export const getCourseAccess = ({ currentUser, staff }) => {
   const currentUserId = currentUser.userId || currentUser.id;
 
   // Admin check
+  const permission = currentUser.permission || currentUser.role;
+  const effectivePermission = currentUser.effectivePermission || currentUser.effectiveRole;
   const isAdmin = 
-    currentUser.role === USER_ROLES.ADMIN || 
-    currentUser.role === USER_ROLES.SUPERADMIN ||
-    currentUser.effectiveRole === USER_ROLES.ADMIN || 
-    currentUser.effectiveRole === USER_ROLES.SUPERADMIN ||
+    permission === USER_PERMISSIONS.ADMIN || 
+    permission === USER_PERMISSIONS.SUPERADMIN ||
+    effectivePermission === USER_PERMISSIONS.ADMIN || 
+    effectivePermission === USER_PERMISSIONS.SUPERADMIN ||
     currentUser.isAdmin === true;
 
   if (isAdmin) return 'full';

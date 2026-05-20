@@ -21,6 +21,7 @@ const getDefaultFormData = () => ({
   email: '',
   password: '',
   role: USER_ROLES.USER,
+  roles: [],
   departmentId: '',
   tierId: '',
   employmentDate: '',
@@ -104,6 +105,8 @@ const UserManagement = () => {
     try {
       const payload = {
         ...formData,
+        permission: formData.role,
+        roles: formData.roles || [],
         employmentDate: formData.employmentDate || null,
       };
 
@@ -171,7 +174,8 @@ const UserManagement = () => {
       name: user.name,
       email: user.email,
       password: '',
-      role: user.role || USER_ROLES.USER,
+      role: user.permission || user.role || USER_ROLES.USER,
+      roles: user.roles || [],
       departmentId: user.departmentId || '',
       tierId: user.tierId || '',
       employmentDate: formatDateForInput(user.employmentDate),
@@ -264,7 +268,8 @@ const UserManagement = () => {
 
   const columns = React.useMemo(() => [
     { label: 'ผู้ใช้งาน' },
-    { label: 'Role ระบบ' },
+    { label: 'Permission ระบบ' },
+    { label: 'บทบาท (Role)' },
     { label: 'แผนก' },
     { label: 'ระดับ' },
     { label: 'เริ่มงาน' },

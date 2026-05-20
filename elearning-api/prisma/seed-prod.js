@@ -10,12 +10,12 @@ async function seedProduction() {
     const adminHash = await bcrypt.hash('Genjironan.1', 10);
     await prisma.user.upsert({
       where: { email: 'chakpetch@scaleup.co.th' },
-      update: { password: adminHash, name: 'Chakpetch', role: 'admin' },
+      update: { password: adminHash, name: 'Chakpetch', permission: 'admin' },
       create: {
         name: 'Chakpetch',
         email: 'chakpetch@scaleup.co.th',
         password: adminHash,
-        role: 'admin',
+        permission: 'admin',
         status: 'ACTIVE'
       }
     });
@@ -29,7 +29,7 @@ async function seedProduction() {
         name: 'Test User',
         email: 'user@company.com',
         password: userHash,
-        role: 'user',
+        permission: 'user',
         department: 'HRD',
         status: 'ACTIVE'
       }
