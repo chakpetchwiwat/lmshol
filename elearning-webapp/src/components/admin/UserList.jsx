@@ -12,7 +12,13 @@ const UserList = ({
   onEditUser,
   onDeleteUser,
   canEditUsers,
+  cohortRoles = [],
 }) => {
+  const cohortRoleLabelMap = React.useMemo(
+    () => Object.fromEntries(cohortRoles.map((role) => [role.key, role.name || role.key])),
+    [cohortRoles]
+  );
+
   return (
     <AdminTable
       columns={columns}
@@ -30,7 +36,7 @@ const UserList = ({
             {Array.isArray(user.roles) && user.roles.length > 0 ? (
               <div className="flex flex-wrap gap-1">
                 {user.roles.map((r) => {
-                  const label = r === 'trainee' ? 'Trainee' : r === 'inspector' ? 'Inspector' : r === 'observer' ? 'Observer' : r;
+                  const label = cohortRoleLabelMap[r] || r;
                   return (
                     <span
                       key={r}

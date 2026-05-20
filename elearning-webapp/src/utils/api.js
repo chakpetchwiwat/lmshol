@@ -218,6 +218,12 @@ export const adminAPI = {
   updateDepartment: (id, data) => api.put(`/admin/departments/${id}`, data),
   deleteDepartment: (id) => api.delete(`/admin/departments/${id}`),
 
+  getCohortRoles: () => api.get('/admin/cohort-roles'),
+  createCohortRole: (data) => api.post('/admin/cohort-roles', data),
+  updateCohortRole: (id, data) => api.put(`/admin/cohort-roles/${id}`, data),
+  deleteCohortRole: (id) => api.delete(`/admin/cohort-roles/${id}`),
+  reorderCohortRoles: (roleIds) => api.put('/admin/cohort-roles/reorder', { roleIds }),
+
   getTiers: () => api.get('/admin/tiers'),
   createTier: (data) => api.post('/admin/tiers', data),
   updateTier: (id, data) => api.put(`/admin/tiers/${id}`, data),

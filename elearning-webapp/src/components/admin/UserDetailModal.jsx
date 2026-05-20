@@ -26,7 +26,7 @@ import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 import { openPrintReport } from '../../utils/printUtils';
 import { adminAPI, getFullUrl } from '../../utils/api';
 
-const UserDetailModalContent = ({ loading, detail, onClose }) => {
+const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) => {
   const toast = useToast();
   const [activeTab, setActiveTab] = React.useState('learning');
   const [filterMonth, setFilterMonth] = React.useState(FILTER_VALUES.ALL);
@@ -44,6 +44,10 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
   const educationHistory = Array.isArray(detail?.educationHistory) ? detail.educationHistory : [];
   const profileFiles = Array.isArray(detail?.profileFiles) ? detail.profileFiles : [];
   const profileImageUrl = detail?.profileImageUrl ? getFullUrl(detail.profileImageUrl) : '';
+  const cohortRoleLabelMap = React.useMemo(
+    () => Object.fromEntries(cohortRoles.map((role) => [role.key, role.name || role.key])),
+    [cohortRoles]
+  );
 
   const filteredEnrollments = enrollments.filter((enrollment) => {
     const date = new Date(enrollment.startedAt);
@@ -344,7 +348,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
                       {Array.isArray(detail.roles) && detail.roles.length > 0 && (
                         <div className="mt-3 flex flex-wrap justify-center gap-1">
                           {detail.roles.map((r) => {
-                            const label = r === 'trainee' ? 'Trainee' : r === 'inspector' ? 'Inspector' : r === 'observer' ? 'Observer' : r;
+                            const label = cohortRoleLabelMap[r] || r;
                             return (
                               <span key={r} className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-200 text-slate-800">
                                 {label}
@@ -701,7 +705,7 @@ const UserDetailModalContent = ({ loading, detail, onClose }) => {
   );
 };
 
-const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
+const UserDetailModal = ({ isOpen, loading, detail, onClose, cohortRoles = [] }) => {
   if (!isOpen) {
     return null;
   }
@@ -712,6 +716,7 @@ const UserDetailModal = ({ isOpen, loading, detail, onClose }) => {
       loading={loading}
       detail={detail}
       onClose={onClose}
+      cohortRoles={cohortRoles}
     />
   );
 };

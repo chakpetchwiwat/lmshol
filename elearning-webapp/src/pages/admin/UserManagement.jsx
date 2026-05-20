@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Settings2, Sparkles } from 'lucide-react';
+import { Plus, Settings2, Sparkles, Users } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import UserModal from '../../components/admin/UserModal';
@@ -42,6 +42,7 @@ const UserManagement = () => {
   const [users, setUsers] = React.useState([]);
   const [departments, setDepartments] = React.useState([]);
   const [tiers, setTiers] = React.useState([]);
+  const [cohortRoles, setCohortRoles] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [referenceLoading, setReferenceLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
@@ -54,6 +55,7 @@ const UserManagement = () => {
 
   const [showDepartmentModal, setShowDepartmentModal] = React.useState(false);
   const [showTierModal, setShowTierModal] = React.useState(false);
+  const [showCohortRoleModal, setShowCohortRoleModal] = React.useState(false);
 
   const [showDetailModal, setShowDetailModal] = React.useState(false);
   const [detailLoading, setDetailLoading] = React.useState(false);
@@ -80,10 +82,12 @@ const UserManagement = () => {
       const requests = [
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
+        adminAPI.getCohortRoles(),
       ];
-      const [departmentResponse, tierResponse] = await Promise.all(requests);
+      const [departmentResponse, tierResponse, cohortRoleResponse] = await Promise.all(requests);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
+      setCohortRoles(cohortRoleResponse.data);
     } catch (error) {
       console.error('Fetch reference data error:', error);
     } finally {
@@ -222,6 +226,25 @@ const UserManagement = () => {
     }
   };
 
+  const handleCohortRoleDelete = async (id, name) => {
+    const ok = await confirm({
+      title: 'ยืนยันการลบ Cohort Role',
+      message: `ต้องการลบ role "${name}" ใช่หรือไม่? Role นี้จะถูกถอดออกจากผู้ใช้งานที่เลือกไว้ด้วย`,
+      confirmLabel: 'ลบ',
+      variant: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      await adminAPI.deleteCohortRole(id);
+      toast.success('ลบ Cohort Role เรียบร้อย');
+      await Promise.all([fetchReferenceData(), fetchUsers()]);
+    } catch (error) {
+      console.error('Delete cohort role error:', error);
+      toast.error(error.response?.data?.message || 'ลบ Cohort Role ไม่สำเร็จ');
+    }
+  };
+
   const handleTierReorder = async (reorderedItems) => {
     try {
       const tierIds = reorderedItems.map(item => item.id);
@@ -232,6 +255,19 @@ const UserManagement = () => {
       console.error('Reorder tiers error:', error);
       toast.error('ไม่สามารถบันทึกลำดับได้');
       fetchReferenceData(); // Rollback
+    }
+  };
+
+  const handleCohortRoleReorder = async (reorderedItems) => {
+    try {
+      const roleIds = reorderedItems.map(item => item.id);
+      setCohortRoles(reorderedItems);
+      await adminAPI.reorderCohortRoles(roleIds);
+      toast.success('บันทึกลำดับ Cohort Role เรียบร้อย');
+    } catch (error) {
+      console.error('Reorder cohort roles error:', error);
+      toast.error('ไม่สามารถบันทึกลำดับ Cohort Role ได้');
+      fetchReferenceData();
     }
   };
 
@@ -297,6 +333,10 @@ const UserManagement = () => {
                   <Sparkles size={18} />
                   จัดการระดับ
                 </button>
+                <button type="button" onClick={() => setShowCohortRoleModal(true)} className="btn btn-outline">
+                  <Users size={18} />
+                  จัดการ Role
+                </button>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
                   เพิ่มผู้ใช้งาน
@@ -316,6 +356,7 @@ const UserManagement = () => {
         setFormData={setFormData}
         departments={departments}
         tiers={tiers}
+        cohortRoles={cohortRoles}
         canEditRole={canEditUsers}
       />
 
@@ -365,6 +406,28 @@ const UserManagement = () => {
             showAccessToggle={true}
           />
 
+          <ReferenceDataModal
+            isOpen={showCohortRoleModal}
+            title="จัดการ Cohort Role"
+            description="เพิ่ม แก้ไข ลบ และเรียงลำดับ role ที่ใช้ assign ผู้ใช้งาน เช่น Trainee G1, Trainee G2, Trainee G3"
+            itemLabel="Cohort Role"
+            items={cohortRoles}
+            loading={referenceLoading}
+            onClose={() => setShowCohortRoleModal(false)}
+            onCreate={async (payload) => {
+              await adminAPI.createCohortRole(payload);
+              toast.success('สร้าง Cohort Role เรียบร้อย');
+              await fetchReferenceData();
+            }}
+            onUpdate={async (id, payload) => {
+              await adminAPI.updateCohortRole(id, payload);
+              toast.success('อัปเดต Cohort Role เรียบร้อย');
+              await fetchReferenceData();
+            }}
+            onDelete={handleCohortRoleDelete}
+            onReorder={handleCohortRoleReorder}
+          />
+
         </>
       )}
 
@@ -372,6 +435,7 @@ const UserManagement = () => {
         isOpen={showDetailModal}
         loading={detailLoading}
         detail={selectedUserDetail}
+        cohortRoles={cohortRoles}
         onClose={() => {
           setShowDetailModal(false);
           setSelectedUserDetail(null);
@@ -398,6 +462,7 @@ const UserManagement = () => {
           onEditUser={openEditUser}
           onDeleteUser={handleDeleteUser}
           canEditUsers={canEditUsers}
+          cohortRoles={cohortRoles}
         />
       </div>
       <ConfirmDialog {...ConfirmDialogProps} />

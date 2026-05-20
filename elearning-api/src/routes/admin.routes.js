@@ -25,6 +25,12 @@ router.post('/departments', verifySuperAdmin, auditRequest('admin.department.cre
 router.put('/departments/:id', verifySuperAdmin, auditRequest('admin.department.updated', { entityType: 'department' }), adminController.updateDepartment);
 router.delete('/departments/:id', verifySuperAdmin, auditRequest('admin.department.deleted', { entityType: 'department', includeBody: false }), adminController.deleteDepartment);
 
+router.get('/cohort-roles', adminController.getCohortRoles);
+router.post('/cohort-roles', verifySuperAdmin, auditRequest('admin.cohort_role.created', { entityType: 'cohortRole' }), adminController.createCohortRole);
+router.put('/cohort-roles/reorder', verifySuperAdmin, auditRequest('admin.cohort_role.reordered', { entityType: 'cohortRole' }), adminController.reorderCohortRoles);
+router.put('/cohort-roles/:id', verifySuperAdmin, auditRequest('admin.cohort_role.updated', { entityType: 'cohortRole' }), adminController.updateCohortRole);
+router.delete('/cohort-roles/:id', verifySuperAdmin, auditRequest('admin.cohort_role.deleted', { entityType: 'cohortRole', includeBody: false }), adminController.deleteCohortRole);
+
 router.get('/tiers', adminController.getTiers);
 router.post('/tiers', verifySuperAdmin, auditRequest('admin.tier.created', { entityType: 'tier' }), adminController.createTier);
 router.put('/tiers/reorder', verifySuperAdmin, auditRequest('admin.tier.reordered', { entityType: 'tier' }), adminController.reorderTiers);

@@ -7,6 +7,7 @@ const { TRANSACTION_TIMEOUTS } = require('../../../utils/constants/config');
 const { mapUserRecord } = require('../admin.serializers');
 const { userInclude, buildScopedUserWhere } = require('../admin.queries');
 const { getActorContext, normalizeNullableId, parseInteger, ensureReferenceName } = require('../admin.helpers');
+const { ensureCohortRoleKeysExist } = require('../admin.cohortRoles');
 
 const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) => {
     const data = {};
@@ -40,12 +41,13 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
         if (!Array.isArray(baseData.roles)) {
             throw new Error('Roles must be an array');
         }
-        const allowedCohortRoles = ['trainee', 'inspector', 'observer'];
-        const invalidRole = baseData.roles.find(r => !allowedCohortRoles.includes(r));
-        if (invalidRole) {
-            throw new Error(`Invalid cohort role: ${invalidRole}`);
-        }
-        data.roles = baseData.roles;
+        const roleKeys = [...new Set(
+            baseData.roles
+                .filter(Boolean)
+                .map((roleKey) => String(roleKey))
+        )];
+        await ensureCohortRoleKeysExist(tx, roleKeys);
+        data.roles = roleKeys;
     }
 
     if (password) {
@@ -126,7 +128,11 @@ const getUsers = async (authUser) => {
 const createUser = async (inputData) => prisma.$transaction(async (tx) => {
     const data = await buildUserMutationData(tx, inputData, { isCreate: true });
     const user = await tx.user.create({
-        data: { ...data, permission: inputData.permission || USER_PERMISSIONS.USER, roles: inputData.roles || [] },
+        data: {
+            ...data,
+            permission: data.permission || inputData.permission || USER_PERMISSIONS.USER,
+            roles: data.roles || []
+        },
         include: { departmentRef: true, tier: true }
     });
 

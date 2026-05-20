@@ -235,6 +235,15 @@ model Tier {
   users          User[]
 }
 
+model CohortRole {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  name      String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model CategoryDepartmentAccess {
   categoryId   String
   departmentId String

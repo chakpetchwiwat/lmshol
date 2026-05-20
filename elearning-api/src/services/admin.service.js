@@ -15,6 +15,7 @@ const { getAdminCourses, createCourse, updateCourse, republishCourse, archiveCou
 const { getUsers, getUserDetails, createUser, updateUser, deleteUser } = require('./admin/admin.users');
 const { getDepartments, createDepartment, updateDepartment, deleteDepartment } = require('./admin/admin.departments');
 const { getTiers, createTier, updateTier, deleteTier, reorderTiers } = require('./admin/admin.tiers');
+const { getCohortRoles, createCohortRole, updateCohortRole, deleteCohortRole, reorderCohortRoles } = require('./admin/admin.cohortRoles');
 
 const { getDashboardStats, getAdvancedAnalytics } = require('./admin/admin.analytics');
 const { getAdminAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, archiveAnnouncement, republishAnnouncement, getAnnouncementHistory } = require('./admin/admin.announcements');
@@ -54,6 +55,11 @@ module.exports = {
     createDepartment,
     updateDepartment,
     deleteDepartment,
+    getCohortRoles,
+    createCohortRole,
+    updateCohortRole,
+    deleteCohortRole,
+    reorderCohortRoles,
     getTiers,
     createTier,
     updateTier,

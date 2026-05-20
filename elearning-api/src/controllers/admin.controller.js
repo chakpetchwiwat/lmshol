@@ -106,6 +106,33 @@ const deleteDepartment = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Department deleted successfully' });
 });
 
+// COHORT ROLES
+const getCohortRoles = asyncHandler(async (req, res) => {
+  const roles = await AdminService.getCohortRoles();
+  res.json({ success: true, data: roles });
+});
+
+const createCohortRole = asyncHandler(async (req, res) => {
+  const role = await AdminService.createCohortRole(req.body);
+  res.status(201).json({ success: true, data: role });
+});
+
+const updateCohortRole = asyncHandler(async (req, res) => {
+  const role = await AdminService.updateCohortRole(req.params.id, req.body);
+  res.json({ success: true, data: role });
+});
+
+const deleteCohortRole = asyncHandler(async (req, res) => {
+  await AdminService.deleteCohortRole(req.params.id);
+  res.json({ success: true, message: 'Cohort role deleted successfully' });
+});
+
+const reorderCohortRoles = asyncHandler(async (req, res) => {
+  const { roleIds } = req.body;
+  await AdminService.reorderCohortRoles(roleIds);
+  res.json({ success: true, message: 'Cohort roles reordered successfully' });
+});
+
 // TIERS
 const getTiers = asyncHandler(async (req, res) => {
   const tiers = await AdminService.getTiers(req.user);
@@ -431,6 +458,11 @@ module.exports = {
   createDepartment,
   updateDepartment,
   deleteDepartment,
+  getCohortRoles,
+  createCohortRole,
+  updateCohortRole,
+  deleteCohortRole,
+  reorderCohortRoles,
   getTiers,
   createTier,
   updateTier,
