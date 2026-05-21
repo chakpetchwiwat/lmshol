@@ -122,6 +122,7 @@ const ProfileCertificates = ({
 
           <div className="flex px-4 pb-2 gap-1">
             <button
+              type="button"
               onClick={() => setActiveTab('LMS')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'LMS' 
@@ -132,6 +133,7 @@ const ProfileCertificates = ({
               หนังสือรับรองจากระบบ ({sortedLms.length})
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('EXTERNAL')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'EXTERNAL' 
