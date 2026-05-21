@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   Activity, 
   Server, 
@@ -8,8 +8,13 @@ import {
   CheckCircle2, 
   AlertCircle, 
   Clock,
-  HardDrive
+  HardDrive,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  UserX
 } from 'lucide-react';
+import { useToast } from '../../context/useToast';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import api from '../../utils/api';
 import './SystemHealth.css';
@@ -60,10 +65,13 @@ const StatCard = ({ title, status, icon, metrics, error, loading }) => {
 };
 
 const SystemHealth = () => {
-  const [healthData, setHealthData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const toast = useToast();
+  const [healthData, setHealthData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
+  const [lastUpdated, setLastUpdated] = React.useState(null);
+  const [resetIdentifier, setResetIdentifier] = React.useState('');
+  const [isResetting, setIsResetting] = React.useState(false);
 
   const fetchHealth = async (isManual = false) => {
     if (isManual) setRefreshing(true);
@@ -82,7 +90,31 @@ const SystemHealth = () => {
     }
   };
 
-  useEffect(() => {
+  const handleResetRateLimit = async (e) => {
+    e.preventDefault();
+    if (!resetIdentifier.trim()) return;
+
+    setIsResetting(true);
+    try {
+      const response = await api.post('/admin/system/security/reset', { 
+        identifier: resetIdentifier.trim() 
+      });
+      
+      if (response.data.success) {
+        toast.success(response.data.message || 'Rate limit reset successfully');
+        setResetIdentifier('');
+      } else {
+        toast.error(response.data.message || 'Failed to reset rate limit');
+      }
+    } catch (error) {
+      console.error('Reset error:', error);
+      toast.error(error.response?.data?.message || 'Error connecting to security service');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  React.useEffect(() => {
     fetchHealth();
     const interval = setInterval(() => fetchHealth(), 30000); // Auto refresh every 30s
     return () => clearInterval(interval);
@@ -183,6 +215,93 @@ const SystemHealth = () => {
             'Total Memory': formatBytes(healthData?.system?.memory?.total)
           }}
         />
+      </div>
+
+      <div className="security-section mt-8">
+        <div className="section-header flex items-center gap-2 mb-4">
+          <Shield className="text-primary" size={24} />
+          <h2 className="text-xl font-bold">Security & Access Control</h2>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Security Status */}
+          <div className="health-card security-status">
+            <div className="card-header">
+              <div className="header-left">
+                <div className="icon-wrapper">
+                  <ShieldCheck size={24} className="text-success" />
+                </div>
+                <h3>Rate Limiting Status</h3>
+              </div>
+              <div className={`status-badge ${healthData?.security?.rateLimiting?.enabled ? 'up' : 'disabled'}`}>
+                {healthData?.security?.rateLimiting?.enabled ? <ShieldCheck size={14} /> : <ShieldAlert size={14} />}
+                <span>{healthData?.security?.rateLimiting?.enabled ? 'ACTIVE' : 'DISABLED'}</span>
+              </div>
+            </div>
+            <div className="card-content">
+              <div className="metrics-grid">
+                <div className="metric-item">
+                  <span className="metric-label">Storage Engine</span>
+                  <span className="metric-value">{healthData?.security?.rateLimiting?.store || 'Memory'}</span>
+                </div>
+                <div className="metric-item">
+                  <span className="metric-label">Global Limit</span>
+                  <span className="metric-value">{healthData?.security?.rateLimiting?.maxRequests} req / 15m</span>
+                </div>
+                <div className="metric-item">
+                  <span className="metric-label">Login Limit</span>
+                  <span className="metric-value">{healthData?.security?.auth?.loginLimit} attempts</span>
+                </div>
+                <div className="metric-item">
+                  <span className="metric-label">Lockout Window</span>
+                  <span className="metric-value">{(healthData?.security?.auth?.lockoutDuration / 60000).toFixed(0)} mins</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Manual Unblock Tool */}
+          <div className="health-card unblock-tool">
+            <div className="card-header">
+              <div className="header-left">
+                <div className="icon-wrapper">
+                  <UserX size={24} className="text-warning" />
+                </div>
+                <h3>Manual Unblock Tool</h3>
+              </div>
+            </div>
+            <div className="card-content">
+              <p className="text-sm text-gray-500 mb-4">
+                Enter an IP address or User ID to manually clear all active rate limit blocks.
+              </p>
+              <form onSubmit={handleResetRateLimit} className="flex flex-col gap-4">
+                <div className="input-group">
+                  <input 
+                    type="text" 
+                    placeholder="e.g. 192.168.1.1 or user-uuid"
+                    className="w-full p-2 border rounded bg-background"
+                    value={resetIdentifier}
+                    onChange={(e) => setResetIdentifier(e.target.value)}
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary flex items-center justify-center gap-2"
+                  disabled={isResetting || !resetIdentifier.trim()}
+                >
+                  {isResetting ? <RefreshCw size={18} className="spinning" /> : <Shield size={18} />}
+                  <span>{isResetting ? 'Resetting...' : 'Unblock / Reset Rate Limit'}</span>
+                </button>
+              </form>
+              {!healthData?.security?.rateLimiting?.store || healthData?.security?.rateLimiting?.store === 'Memory' ? (
+                <div className="warning-note mt-4 p-2 bg-warning/10 text-warning text-xs rounded flex gap-2">
+                  <AlertCircle size={14} className="shrink-0" />
+                  <span>Manual unblock requires <strong>Redis</strong> storage. Memory-based blocks cannot be cleared without a server restart.</span>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="health-footer">

@@ -62,7 +62,7 @@ const CategoryListItem = ({
 
             {category.visibleToAll ? (
               <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-emerald-700">
-                เธ—เธธเธเธเธ
+                ทุกคน
               </span>
             ) : (
               <>
@@ -91,7 +91,7 @@ const CategoryListItem = ({
                 disabled={index === 0}
                 onClick={() => onMove(index, -1)}
                 className="rounded-xl p-2.5 text-slate-400 transition-all hover:bg-white hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
-                title="เน€เธฅเธทเนเธญเธเธเธถเนเธ"
+                title="เลื่อนขึ้น"
               >
                 <ArrowUp size={16} />
               </button>
@@ -100,7 +100,7 @@ const CategoryListItem = ({
                 disabled={isLast}
                 onClick={() => onMove(index, 1)}
                 className="rounded-xl p-2.5 text-slate-400 transition-all hover:bg-white hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
-                title="เน€เธฅเธทเนเธญเธเธฅเธ"
+                title="เลื่อนลง"
               >
                 <ArrowDown size={16} />
               </button>
@@ -120,7 +120,7 @@ const CategoryListItem = ({
                 expiredAt: toLocalInputValue(category.expiredAt),
               })}
               className="inline-flex h-11 items-center justify-center rounded-2xl bg-slate-50 px-3 text-primary transition-all hover:bg-primary hover:text-white"
-              title="เนเธเนเนเธเธซเธกเธงเธ”เธซเธกเธนเน"
+              title="แก้ไขหมวดหมู่"
             >
               <Edit2 size={17} />
             </button>
@@ -129,7 +129,7 @@ const CategoryListItem = ({
               type="button"
               onClick={() => onArchive(category.id)}
               className="inline-flex h-11 items-center justify-center rounded-2xl bg-amber-50 px-3 text-amber-500 transition-all hover:bg-amber-500 hover:text-white"
-              title="เน€เธเนเธเน€เธเนเธฒเธเธฅเธฑเธ (Archive)"
+              title="เก็บเข้าคลัง (Archive)"
             >
               <Archive size={17} />
             </button>
@@ -142,7 +142,7 @@ const CategoryListItem = ({
               type="button"
               onClick={() => onRepublish(category.id)}
               className="inline-flex h-11 items-center justify-center rounded-2xl bg-emerald-50 px-3 text-emerald-600 transition-all hover:bg-emerald-500 hover:text-white"
-              title="เธเธนเนเธเธทเธเธซเธกเธงเธ”เธซเธกเธนเน"
+              title="กู้คืนหมวดหมู่"
             >
               <RotateCcw size={17} />
             </button>
@@ -151,7 +151,7 @@ const CategoryListItem = ({
               type="button"
               onClick={() => onDelete(category.id)}
               className="inline-flex h-11 items-center justify-center rounded-2xl bg-rose-50 px-3 text-rose-500 transition-all hover:bg-rose-500 hover:text-white"
-              title="เธฅเธเธ–เธฒเธงเธฃ"
+              title="ลบถาวร"
             >
               <Trash2 size={17} />
             </button>

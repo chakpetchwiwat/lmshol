@@ -2,10 +2,16 @@ const UserService = require('../services/user.service');
 const { Readable } = require('stream');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
+const AssessmentService = require('../services/assessment.service');
 
 // Get all courses (with enrollment status if applicable)
 const getCourses = asyncHandler(async (req, res) => {
   const courses = await UserService.getCourses(req.user.userId);
+  res.json({ success: true, data: courses });
+});
+
+const getBookmarkedCourses = asyncHandler(async (req, res) => {
+  const courses = await UserService.getBookmarkedCourses(req.user.userId);
   res.json({ success: true, data: courses });
 });
 
@@ -63,6 +69,16 @@ const enrollCourse = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, message: 'Successfully enrolled', data: enrollment });
 });
 
+const bookmarkCourse = asyncHandler(async (req, res) => {
+  const bookmark = await UserService.bookmarkCourse(req.user.userId, req.params.id);
+  res.status(201).json({ success: true, data: bookmark });
+});
+
+const unbookmarkCourse = asyncHandler(async (req, res) => {
+  const bookmark = await UserService.unbookmarkCourse(req.user.userId, req.params.id);
+  res.json({ success: true, data: bookmark });
+});
+
 // Update lesson progress and handle points
 const updateLessonProgress = asyncHandler(async (req, res) => {
   const progress = await UserService.updateLessonProgress(req.user.userId, req.params.id, req.body.progress);
@@ -72,6 +88,16 @@ const updateLessonProgress = asyncHandler(async (req, res) => {
 // Submit Quiz Answers
 const submitQuiz = asyncHandler(async (req, res) => {
   const result = await UserService.submitQuiz(req.user.userId, req.params.id, req.body.answers);
+  res.json({ success: true, data: result });
+});
+
+const submitAssessment = asyncHandler(async (req, res) => {
+  const result = await AssessmentService.submitAssessment(req.user.userId, req.params.id, req.body);
+  res.status(201).json({ success: true, data: result });
+});
+
+const getMyAssessmentSubmission = asyncHandler(async (req, res) => {
+  const result = await AssessmentService.getMyAssessmentSubmission(req.user.userId, req.params.id);
   res.json({ success: true, data: result });
 });
 
@@ -123,6 +149,16 @@ const getLessonDocumentAccess = asyncHandler(async (req, res) => {
 const getAnnouncementDocumentAccess = asyncHandler(async (req, res) => {
   const documentAccess = await UserService.getAnnouncementDocumentAccess(req.user.userId, req.params.id);
   res.json({ success: true, data: documentAccess });
+});
+
+const getCertificateDownloadUrl = asyncHandler(async (req, res) => {
+  const result = await UserService.getCertificateSignedUrl(req.user.userId, req.params.id);
+  res.json({ success: true, data: result });
+});
+
+const getAssessmentSubmissionDownloadUrl = asyncHandler(async (req, res) => {
+  const result = await AssessmentService.getSubmissionDownloadUrl(req.user, req.params.id);
+  res.json({ success: true, data: result });
 });
 
 const getLessonDocumentStream = asyncHandler(async (req, res) => {
@@ -183,19 +219,26 @@ const clearAllNotifications = asyncHandler(async (req, res) => {
 
 module.exports = {
   getCourses,
+  getBookmarkedCourses,
   getAnnouncements,
   getCourseDetails,
   getAnnouncementDetails,
   enrollCourse,
+  bookmarkCourse,
+  unbookmarkCourse,
   updateLessonProgress,
   getPointsHistory,
   getRewards,
   requestRedeem,
   getCategories,
   submitQuiz,
+  submitAssessment,
+  getMyAssessmentSubmission,
   submitAnnouncementQuiz,
   updateProfile,
   getCertificates,
+  getCertificateDownloadUrl,
+  getAssessmentSubmissionDownloadUrl,
   createCertificate,
   updateCertificate,
   deleteCertificate,

@@ -13,7 +13,8 @@ const login = async (email, password) => {
         where: { email },
         include: {
             departmentRef: true,
-            tier: true
+            tier: true,
+            courseStaff: { take: 1 }
         }
     });
 
@@ -31,7 +32,7 @@ const login = async (email, password) => {
     }
 
     const token = jwt.sign(
-        { userId: user.id, email: user.email, role: user.role },
+        { userId: user.id, email: user.email, permission: user.permission, role: user.permission },
         process.env.JWT_SECRET,
         { expiresIn: '1d' }
     );
@@ -47,7 +48,8 @@ const getCurrentUser = async (userId) => {
         where: { id: userId },
         include: {
             departmentRef: true,
-            tier: true
+            tier: true,
+            courseStaff: { take: 1 }
         }
     });
 

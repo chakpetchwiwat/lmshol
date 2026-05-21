@@ -151,7 +151,7 @@ async function main() {
     const users: any[] = [];
     
     // We won't delete users to avoid breaking other logic, but we'll create up to 100 users.
-    const existingUsers = await prisma.user.count({ where: { role: 'user' }});
+    const existingUsers = await prisma.user.count({ where: { permission: 'user' }});
     const usersToCreate = Math.max(0, 100 - existingUsers);
     
     for (let i = 0; i < usersToCreate; i++) {
@@ -165,7 +165,7 @@ async function main() {
                 name: `${firstName} ${lastName}`,
                 email,
                 password: password,
-                role: 'user',
+                permission: 'user',
                 departmentId: deptRefs[dept],
                 department: dept,
                 employmentDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000)
@@ -173,7 +173,7 @@ async function main() {
         });
     }
 
-    const allUsers = await prisma.user.findMany({ where: { role: 'user' } });
+    const allUsers = await prisma.user.findMany({ where: { permission: 'user' } });
 
     // 5. Create Enrollments and QuizAttempts
     console.log('Assigning varied learning progress and quiz scores...');

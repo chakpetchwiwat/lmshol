@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+﻿import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   MonitorPlay,
@@ -6,6 +6,7 @@ import {
   Infinity as InfinityIcon,
   Award,
   BookOpen,
+  Bookmark,
 } from 'lucide-react';
 import { userAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
@@ -34,13 +35,14 @@ const CourseDetail = () => {
   const navigate = useNavigate();
   const toast = useToast();
   
-  const [course, setCourse] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [enrolling, setEnrolling] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
+  const [course, setCourse] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [enrolling, setEnrolling] = React.useState(false);
+  const [isScrolled, setIsScrolled] = React.useState(false);
+  const [showVideo, setShowVideo] = React.useState(false);
+  const [bookmarking, setBookmarking] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchDetail = async () => {
       try {
         const response = await userAPI.getCourseDetails(id);
@@ -89,13 +91,13 @@ const CourseDetail = () => {
     }
   };
 
-  const durationMinutes = useMemo(
+  const durationMinutes = React.useMemo(
     () => course?.lessons?.reduce((acc, lesson) => acc + (parseInt(lesson.duration, 10) || 0), 0) || 0,
     [course],
   );
   const durationHours = durationMinutes > 0 ? Math.max(1, Math.round((durationMinutes / 60) * 10) / 10) : 2;
 
-  const learningPoints = useMemo(
+  const learningPoints = React.useMemo(
     () =>
       tryParse(course?.whatYouWillLearn, [
         'เข้าใจภาพรวมของเนื้อหาและนำไปใช้ต่อยอดในการทำงานได้จริง',
@@ -106,7 +108,7 @@ const CourseDetail = () => {
     [course],
   );
 
-  const whatYouGet = useMemo(
+  const whatYouGet = React.useMemo(
     () =>
       tryParse(course?.whatYouWillGet, [
         { icon: 'video', text: `วิดีโอคุณภาพสูง ความยาวรวมประมาณ ${durationHours} ชั่วโมง` },
@@ -125,7 +127,7 @@ const CourseDetail = () => {
     lesson: BookOpen,
   };
 
-  const documentLessons = useMemo(
+  const documentLessons = React.useMemo(
     () =>
       course?.lessons?.filter(
         (lesson) => lesson.type === 'pdf' || lesson.type === 'document',
@@ -145,12 +147,51 @@ const CourseDetail = () => {
     navigate('/user/courses');
   };
 
+  const handleBookmarkToggle = async () => {
+    if (!course || bookmarking) return;
+
+    const nextValue = !course.isBookmarked;
+    setCourse((currentCourse) => ({ ...currentCourse, isBookmarked: nextValue }));
+    setBookmarking(true);
+
+    try {
+      if (nextValue) {
+        await userAPI.bookmarkCourse(course.id);
+        toast.success('บันทึกคอร์สแล้ว');
+      } else {
+        await userAPI.unbookmarkCourse(course.id);
+        toast.success('นำออกจากคอร์สที่บันทึกแล้ว');
+      }
+    } catch (error) {
+      console.error('Bookmark course error:', error);
+      setCourse((currentCourse) => ({ ...currentCourse, isBookmarked: !nextValue }));
+      toast.error('อัปเดตคอร์สที่บันทึกไม่สำเร็จ');
+    } finally {
+      setBookmarking(false);
+    }
+  };
+
   if (loading || !course) {
     return <Skeleton.CourseDetail />;
   }
 
   return (
     <div className="relative -mx-6 -mt-6 flex min-h-full flex-col bg-slate-50 pb-20 md:mx-0 md:mt-0 md:pb-32">
+      <button
+        type="button"
+        onClick={handleBookmarkToggle}
+        disabled={bookmarking}
+        aria-label={course.isBookmarked ? 'นำออกจากคอร์สที่บันทึก' : 'บันทึกคอร์สนี้'}
+        aria-pressed={!!course.isBookmarked}
+        className={`absolute right-4 top-6 z-30 flex h-11 w-11 items-center justify-center rounded-full border shadow-lg transition-all active:scale-95 disabled:opacity-60 md:hidden ${
+          course.isBookmarked
+            ? 'border-amber-200 bg-amber-400 text-slate-950'
+            : 'border-white/25 bg-slate-950/35 text-white backdrop-blur-md'
+        }`}
+      >
+        <Bookmark size={19} fill={course.isBookmarked ? 'currentColor' : 'none'} strokeWidth={2.4} />
+      </button>
+
       <CourseHero 
         course={course}
         totalRewardPoints={totalRewardPoints}

@@ -15,7 +15,10 @@ const buildAtRiskLearners = async ({ learnerWhere, scopeFilters, now, warningWin
             ...(scopeFilters.departmentId ? {
                 OR: [
                     { scope: GOAL_SCOPES.GLOBAL },
-                    { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId }
+                    { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId },
+                    { targetDepartments: { some: { departmentId: scopeFilters.departmentId } } },
+                    { targetCohortRoles: { some: {} } },
+                    { targetUsers: { some: { user: { departmentId: scopeFilters.departmentId } } } }
                 ]
             } : {})
         },
@@ -28,6 +31,15 @@ const buildAtRiskLearners = async ({ learnerWhere, scopeFilters, now, warningWin
             createdAt: true,
             scope: true,
             departmentId: true,
+            targetDepartments: true,
+            targetCohortRoles: {
+                include: {
+                    cohortRole: {
+                        select: { key: true, name: true }
+                    }
+                }
+            },
+            targetUsers: true,
             courses: {
                 select: {
                     courseId: true
@@ -50,6 +62,7 @@ const buildAtRiskLearners = async ({ learnerWhere, scopeFilters, now, warningWin
             id: true,
             name: true,
             email: true,
+            roles: true,
             departmentId: true,
             department: true,
             departmentRef: {

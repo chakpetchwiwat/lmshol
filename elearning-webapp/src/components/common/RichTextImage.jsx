@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+﻿import React from 'react';
 import { AlignCenter, AlignLeft, AlignRight } from 'lucide-react';
 import Image from '@tiptap/extension-image';
 import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
@@ -14,13 +14,13 @@ const RichTextImageView = ({
   selected,
   updateAttributes,
 }) => {
-  const imageRef = useRef(null);
-  const [isResizing, setIsResizing] = useState(false);
+  const imageRef = React.useRef(null);
+  const [isResizing, setIsResizing] = React.useState(false);
 
   const alignment = node.attrs.dataAlign || 'center';
   const width = Number.parseInt(node.attrs.width, 10) || null;
 
-  const imageStyle = useMemo(() => (
+  const imageStyle = React.useMemo(() => (
     width
       ? { width: `${width}px` }
       : { width: 'min(100%, 720px)' }

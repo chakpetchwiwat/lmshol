@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
 import Skeleton from '../../components/common/Skeleton';
@@ -16,13 +16,13 @@ const Rewards = () => {
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
   
-  const [points, setPoints] = useState(0);
-  const [history, setHistory] = useState([]);
-  const [rewards, setRewards] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [redeeming, setRedeeming] = useState(false);
+  const [points, setPoints] = React.useState(0);
+  const [history, setHistory] = React.useState([]);
+  const [rewards, setRewards] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [redeeming, setRedeeming] = React.useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       const [pointsRes, rewardsRes] = await Promise.allSettled([
         userAPI.getPoints(),
@@ -47,7 +47,7 @@ const Rewards = () => {
     }
   }, [toast]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchData();
   }, [fetchData]);
 

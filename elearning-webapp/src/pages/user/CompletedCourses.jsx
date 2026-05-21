@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Search, CheckCircle2, ArrowRight, Trophy } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
@@ -8,11 +8,11 @@ import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const CompletedCourses = () => {
   const navigate = useNavigate();
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [courses, setCourses] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [searchQuery, setSearchQuery] = React.useState('');
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await userAPI.getCourses();
@@ -28,7 +28,7 @@ const CompletedCourses = () => {
     fetchData();
   }, []);
 
-  const filteredCourses = useMemo(() => {
+  const filteredCourses = React.useMemo(() => {
     if (!Array.isArray(courses)) return [];
     return courses.filter((course) =>
       course.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -113,7 +113,7 @@ const CompletedCourses = () => {
             <p className="mt-2 text-sm font-medium text-slate-500">ลองค้นหาด้วยชื่อคอร์สหรือคำที่สั้นลงอีกนิด</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 pb-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 pb-4 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {filteredCourses.map((course) => (
               <CourseCard
                 key={course.id}

@@ -1,6 +1,8 @@
 const GOAL_SCOPES = Object.freeze({
     GLOBAL: 'GLOBAL',
-    DEPARTMENT: 'DEPARTMENT'
+    DEPARTMENT: 'DEPARTMENT',
+    COHORT_ROLE: 'COHORT_ROLE',
+    USER: 'USER'
 });
 
 const ANNOUNCEMENT_SCOPES = Object.freeze({

@@ -1,41 +1,6 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
 import { adminAPI } from '../utils/api';
 import { FILTER_VALUES } from '../utils/constants/filters';
-
-// --- Goal helpers used only inside this hook ---
-const isGoalCurrentlyActive = (goal) => {
-    if (!goal || goal.status !== 'ACTIVE') return false;
-    if (!goal.expiryDate) return true;
-    return new Date(goal.expiryDate).getTime() >= Date.now();
-};
-
-const getGoalScopeLabel = (goal) => {
-    if (goal?.scope === 'DEPARTMENT') {
-        return goal?.department?.name || 'Department';
-    }
-    return 'ทั้งองค์กร';
-};
-
-const buildGoalTargetLabel = (goal) => {
-    if (!goal) return '-';
-    if (goal.type === 'ANY') {
-        return `${goal.targetCount || 0} คอร์ส`;
-    }
-    const totalCourses = goal.courses?.length || goal.targetCount || 0;
-    return `${totalCourses} คอร์สที่กำหนด`;
-};
-
-const countGoalStatuses = (rows = []) => rows.reduce((accumulator, row) => {
-    const status = row.userStatus || 'NOT_STARTED';
-    accumulator.ALL += 1;
-    accumulator[status] = (accumulator[status] || 0) + 1;
-    return accumulator;
-}, {
-    ALL: 0,
-    COMPLETED: 0,
-    IN_PROGRESS: 0,
-    NOT_STARTED: 0,
-});
 
 /**
  * useDashboardData
@@ -55,13 +20,13 @@ const useDashboardData = ({
     setAdvancedStats,
     setDepartments,
 }) => {
-    const [loading, setLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [goalTrackingItems, setGoalTrackingItems] = useState([]);
-    const [goalTrackingLoading, setGoalTrackingLoading] = useState(false);
+    const [loading, setLoading] = React.useState(true);
+    const [errorMessage, setErrorMessage] = React.useState('');
+    const [goalTrackingItems, setGoalTrackingItems] = React.useState([]);
+    const [goalTrackingLoading, setGoalTrackingLoading] = React.useState(false);
 
     // --- Fetch departments (admin only, once) ---
-    useEffect(() => {
+    React.useEffect(() => {
         if (!isFullAdmin) return undefined;
 
         let isMounted = true;
@@ -85,7 +50,7 @@ const useDashboardData = ({
     }, [isFullAdmin, setDepartments]);
 
     // --- Fetch dashboard stats + advanced analytics ---
-    useEffect(() => {
+    React.useEffect(() => {
         let isMounted = true;
 
         const fetchAllStats = async () => {
@@ -147,7 +112,7 @@ const useDashboardData = ({
     }, [filters, isFullAdmin, setStats, setAdvancedStats]);
 
     // --- Fetch goal tracking ---
-    useEffect(() => {
+    React.useEffect(() => {
         let isMounted = true;
 
         const fetchGoalTracking = async () => {
@@ -170,12 +135,15 @@ const useDashboardData = ({
                 });
                 
                 const reports = summaryResponse.data || [];
+                
+                if (Array.isArray(reports)) {
+                    reports.sort((left, right) => {
+                        const leftDate = new Date(left.expiryDate || '9999-12-31').getTime();
+                        const rightDate = new Date(right.expiryDate || '9999-12-31').getTime();
+                        return leftDate - rightDate;
+                    });
+                }
 
-                reports.sort((left, right) => {
-                    const leftDate = new Date(left.expiryDate || '9999-12-31').getTime();
-                    const rightDate = new Date(right.expiryDate || '9999-12-31').getTime();
-                    return leftDate - rightDate;
-                });
 
                 if (isMounted) {
                     setGoalTrackingItems(reports.map(report => ({

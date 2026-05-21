@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { Shield, X } from 'lucide-react';
 import ModalPortal from '../../components/common/ModalPortal';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
@@ -8,8 +8,8 @@ const PrivacyPolicyModal = ({
   onClose,
   policyDialogTitleId
 }) => {
-  const policyDialogRef = useRef(null);
-  const policyCloseButtonRef = useRef(null);
+  const policyDialogRef = React.useRef(null);
+  const policyCloseButtonRef = React.useRef(null);
 
   useAccessibleOverlay({
     isOpen,

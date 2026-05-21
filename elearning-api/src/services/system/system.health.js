@@ -1,5 +1,6 @@
 const prisma = require('../../utils/prisma');
-const { getRedisClient } = require('../../config/security');
+const { getRedisClient, getSecurityConfig } = require('../../config/security');
+const { getSecurityStatus } = require('./system.security');
 const os = require('os');
 
 /**
@@ -24,7 +25,8 @@ const checkSystemHealth = async () => {
             cpu: os.loadavg(),
             nodeVersion: process.version,
             platform: process.platform
-        }
+        },
+        security: await getSecurityStatus()
     };
 
     // 1. Database Check (Prisma)

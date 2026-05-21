@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React from 'react';
 import { Search, UserRound, X } from 'lucide-react';
 import { getFullUrl } from '../../utils/api';
 
@@ -8,15 +8,15 @@ const InstructorPresetPicker = ({
   onSelect,
   disabled = false,
 }) => {
-  const [query, setQuery] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = React.useState('');
+  const [isOpen, setIsOpen] = React.useState(false);
 
-  const selectedPreset = useMemo(
+  const selectedPreset = React.useMemo(
     () => presets.find((preset) => preset.id === selectedPresetId) || null,
     [presets, selectedPresetId]
   );
 
-  const filteredPresets = useMemo(() => {
+  const filteredPresets = React.useMemo(() => {
     const keyword = query.trim().toLowerCase();
     if (!keyword) {
       return presets.slice(0, 8);

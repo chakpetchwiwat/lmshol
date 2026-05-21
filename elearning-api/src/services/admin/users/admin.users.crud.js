@@ -1,27 +1,59 @@
 const prisma = require('../../../utils/prisma');
 const bcrypt = require('bcryptjs');
 const authHelpers = require('../../../utils/auth.helpers');
-const { USER_ROLES } = require('../../../utils/constants/roles');
+const { USER_PERMISSIONS } = require('../../../utils/constants/roles');
 const { POINT_SOURCE_TYPES } = require('../../../utils/constants/ledger');
 const { TRANSACTION_TIMEOUTS } = require('../../../utils/constants/config');
 const { mapUserRecord } = require('../admin.serializers');
 const { userInclude, buildScopedUserWhere } = require('../admin.queries');
 const { getActorContext, normalizeNullableId, parseInteger, ensureReferenceName } = require('../admin.helpers');
+const { ensureCohortRoleKeysExist } = require('../admin.cohortRoles');
 
 const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) => {
     const data = {};
     const { password, pointsBalance, ...baseData } = inputData;
 
-    if (baseData.name !== undefined) data.name = baseData.name;
-    if (baseData.email !== undefined) data.email = baseData.email;
-    if (baseData.role !== undefined) {
-        if (![USER_ROLES.USER, USER_ROLES.MANAGER, USER_ROLES.ADMIN].includes(baseData.role)) {
-            throw new Error('Invalid role');
+    if (baseData.name !== undefined) {
+        const name = String(baseData.name || '').trim();
+        if (!name) throw new Error('Name is required');
+        data.name = name.slice(0, 200);
+    } else if (isCreate) {
+        throw new Error('Name is required');
+    }
+
+    if (baseData.email !== undefined) {
+        const email = String(baseData.email || '').trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            throw new Error('Invalid email');
         }
-        data.role = baseData.role;
+        data.email = email;
+    } else if (isCreate) {
+        throw new Error('Email is required');
+    }
+    if (baseData.permission !== undefined) {
+        if (![USER_PERMISSIONS.USER, USER_PERMISSIONS.MANAGER, USER_PERMISSIONS.ADMIN].includes(baseData.permission)) {
+            throw new Error('Invalid permission');
+        }
+        data.permission = baseData.permission;
+    }
+
+    if (baseData.roles !== undefined) {
+        if (!Array.isArray(baseData.roles)) {
+            throw new Error('Roles must be an array');
+        }
+        const roleKeys = [...new Set(
+            baseData.roles
+                .filter(Boolean)
+                .map((roleKey) => String(roleKey))
+        )];
+        await ensureCohortRoleKeysExist(tx, roleKeys);
+        data.roles = roleKeys;
     }
 
     if (password) {
+        if (String(password).length < 8) {
+            throw new Error('Password must be at least 8 characters');
+        }
         data.password = await bcrypt.hash(password, 10);
     } else if (isCreate) {
         data.password = await bcrypt.hash('password123', 10);
@@ -29,6 +61,9 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
 
     if (pointsBalance !== undefined) {
         data.pointsBalance = parseInteger(pointsBalance, 0);
+        if (data.pointsBalance < 0) {
+            throw new Error('Points balance cannot be negative');
+        }
     } else if (isCreate) {
         data.pointsBalance = 0;
     }
@@ -49,8 +84,8 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
             });
             if (!tier) throw new Error('Tier not found');
             data.tierId = tier.id;
-            const targetRole = tier.accessAdmin ? USER_ROLES.MANAGER : USER_ROLES.USER;
-            if (data.role !== USER_ROLES.ADMIN) data.role = targetRole;
+            const targetPermission = tier.accessAdmin ? USER_PERMISSIONS.MANAGER : USER_PERMISSIONS.USER;
+            if (data.permission !== USER_PERMISSIONS.ADMIN) data.permission = targetPermission;
         } else {
             data.tierId = null;
         }
@@ -58,8 +93,42 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
 
     if (baseData.employmentDate !== undefined) {
         data.employmentDate = baseData.employmentDate ? new Date(baseData.employmentDate) : null;
+        if (data.employmentDate && Number.isNaN(data.employmentDate.getTime())) {
+            throw new Error('Employment date is invalid');
+        }
     } else if (isCreate) {
         data.employmentDate = new Date();
+    }
+
+    if (baseData.profileImageUrl !== undefined) {
+        data.profileImageUrl = baseData.profileImageUrl ? String(baseData.profileImageUrl).trim() : null;
+    }
+
+    if (baseData.educationHistory !== undefined) {
+        data.educationHistory = Array.isArray(baseData.educationHistory)
+            ? baseData.educationHistory.slice(0, 50).map((item) => ({
+                id: String(item?.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`),
+                institution: String(item?.institution || '').trim().slice(0, 300),
+                degree: String(item?.degree || '').trim().slice(0, 300),
+                faculty: String(item?.faculty || '').trim().slice(0, 300),
+                major: String(item?.major || '').trim().slice(0, 300),
+                graduationYear: String(item?.graduationYear || '').trim().slice(0, 300)
+            })).filter((item) => item.institution || item.degree || item.faculty || item.major || item.graduationYear)
+            : [];
+    }
+
+    if (baseData.profileFiles !== undefined) {
+        data.profileFiles = Array.isArray(baseData.profileFiles)
+            ? baseData.profileFiles.slice(0, 50).map((file) => ({
+                id: String(file?.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`),
+                title: String(file?.title || '').trim().slice(0, 300),
+                fileName: String(file?.fileName || '').trim().slice(0, 300),
+                fileKey: String(file?.fileKey || '').trim(),
+                fileUrl: String(file?.fileUrl || '').trim(),
+                fileMimeType: String(file?.fileMimeType || '').trim().slice(0, 300),
+                uploadedAt: file?.uploadedAt ? new Date(file.uploadedAt).toISOString() : ''
+            })).filter((file) => file.title || file.fileName || file.fileKey || file.fileUrl)
+            : [];
     }
 
     return data;
@@ -70,7 +139,7 @@ const getUsers = async (authUser) => {
     const users = await prisma.user.findMany({
         where: authHelpers.buildUserManagementWhere(actor),
         include: userInclude,
-        orderBy: [{ tier: { order: 'asc' } }, { role: 'asc' }, { name: 'asc' }]
+        orderBy: [{ tier: { order: 'asc' } }, { permission: 'asc' }, { name: 'asc' }]
     });
 
     const balances = await prisma.pointsLedger.groupBy({
@@ -90,7 +159,11 @@ const getUsers = async (authUser) => {
 const createUser = async (inputData) => prisma.$transaction(async (tx) => {
     const data = await buildUserMutationData(tx, inputData, { isCreate: true });
     const user = await tx.user.create({
-        data: { ...data, role: inputData.role || USER_ROLES.USER },
+        data: {
+            ...data,
+            permission: data.permission || inputData.permission || USER_PERMISSIONS.USER,
+            roles: data.roles || []
+        },
         include: { departmentRef: true, tier: true }
     });
 

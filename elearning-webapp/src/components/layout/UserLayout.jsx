@@ -1,25 +1,26 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Gift, User, BookMarked, LogOut, Settings, Bell, Target } from 'lucide-react';
+import { Home, BookOpen, Gift, User, Bookmark, LogOut, Settings, Bell, Target, ClipboardCheck } from 'lucide-react';
 import { userAPI } from '../../utils/api';
 import { canAccessAdminPanel } from '../../utils/roles';
 import { formatThaiDateTime } from '../../utils/dateUtils';
+import AppLogo from '../common/AppLogo';
 import './UserLayout.css';
 
 const UserLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const mainRef = useRef(null);
-  const desktopNotificationRef = useRef(null);
-  const mobileNotificationRef = useRef(null);
-  const [user, setUser] = useState(null);
-  const [points, setPoints] = useState(0);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const mainRef = React.useRef(null);
+  const desktopNotificationRef = React.useRef(null);
+  const mobileNotificationRef = React.useRef(null);
+  const [user, setUser] = React.useState(null);
+  const [points, setPoints] = React.useState(0);
+  const [notifications, setNotifications] = React.useState([]);
+  const [unreadNotificationCount, setUnreadNotificationCount] = React.useState(0);
+  const [isNotificationOpen, setIsNotificationOpen] = React.useState(false);
+  const [showClearConfirm, setShowClearConfirm] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchUser = async () => {
       try {
         const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -44,7 +45,7 @@ const UserLayout = () => {
     return () => window.clearInterval(intervalId);
   }, [location.pathname]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleClickOutside = (event) => {
       const clickedDesktop = desktopNotificationRef.current?.contains(event.target);
       const clickedMobile = mobileNotificationRef.current?.contains(event.target);
@@ -58,7 +59,7 @@ const UserLayout = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
@@ -113,16 +114,24 @@ const UserLayout = () => {
     }
   };
 
-  const displayNotifications = useMemo(() => {
-    // Basic de-duplication: show only the latest notification per goalId + type
+  const displayNotifications = React.useMemo(() => {
+    // Basic de-duplication: show only the latest notification per target + type
     const seen = new Set();
     return notifications.filter(n => {
-      const key = `${n.goalId || n.id}-${n.type}`;
+      const key = `${n.assessmentSubmissionId || n.goalId || n.id}-${n.type}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
   }, [notifications]);
+
+  const getNotificationIcon = (notification) => {
+    if (notification.type === 'ASSESSMENT_REVIEWED') {
+      return <ClipboardCheck size={18} />;
+    }
+
+    return <Target size={18} />;
+  };
 
   const renderNotificationPanel = (positionClasses = "right-0") => (
     <div className={`absolute ${positionClasses} top-full z-50 mt-3 w-[min(24rem,88vw)] overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-2xl animate-fade-in`}>
@@ -171,7 +180,7 @@ const UserLayout = () => {
             <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
               notification.readAt ? 'bg-slate-100 text-slate-400' : 'bg-primary/10 text-primary'
             }`}>
-              <Target size={18} />
+              {getNotificationIcon(notification)}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-3">
@@ -206,11 +215,8 @@ const UserLayout = () => {
   return (
     <div className="user-layout flex flex-col md:flex-row bg-transparent">
       <aside className="hidden md:flex w-[260px] xl:w-[280px] 2xl:w-[300px] flex-col bg-white rounded-[2rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] ring-1 ring-gray-100/80 my-5 ml-5 h-[calc(100vh-2.5rem)] z-[40] shrink-0">
-        <div className="p-6 flex items-center gap-3 border-b border-gray-100 shrink-0">
-          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm">
-            <BookMarked size={20} strokeWidth={2.5} />
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-gray-900 leading-none">LMS Connect</h1>
+        <div className="px-6 py-3 flex items-center border-b border-gray-100 shrink-0">
+          <AppLogo height="h-16" imageClassName="max-w-[200px]" />
         </div>
 
         <div className="p-4 border-b border-gray-100 shrink-0">
@@ -244,7 +250,11 @@ const UserLayout = () => {
           </NavLink>
 
           <NavLink to="/user/courses" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
-            <BookOpen size={20} /> <span className="font-bold">คอร์สเรียน</span>
+            <BookOpen size={20} /> <span className="font-bold">คอร์สทั้งหมด</span>
+          </NavLink>
+
+          <NavLink to="/user/bookmarks" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
+            <Bookmark size={20} /> <span className="font-bold">คอร์สที่บันทึก</span>
           </NavLink>
 
           <NavLink to="/user/rewards" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
@@ -273,11 +283,8 @@ const UserLayout = () => {
         <header className="user-header md:hidden">
           <div className="header-content pt-1">
             <div className="flex items-center gap-2 max-w-[65%]">
-              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-md shadow-primary/20 shrink-0">
-                <BookMarked size={20} strokeWidth={2.5} />
-              </div>
+              <AppLogo height="h-12" imageClassName="max-w-[140px]" />
               <div className="flex flex-col overflow-hidden">
-                <h1 className="text-lg font-bold tracking-tight text-gray-900 leading-none truncate">LMS Connect</h1>
                 {location.pathname !== '/user/home' && (
                   <span className="text-[10px] text-gray-500 font-medium truncate mt-0.5">
                     สวัสดีคุณ {user?.name ? (user.name.split(' ')[0] === 'คุณ' ? user.name.split(' ')[1] : user.name.split(' ')[0]) : 'ผู้ใช้งาน'}
@@ -317,7 +324,12 @@ const UserLayout = () => {
 
             <NavLink to="/user/courses" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               <div className="nav-icon-wrapper"><BookOpen size={22} /></div>
-              <span>คอร์สเรียน</span>
+              <span>คอร์สทั้งหมด</span>
+            </NavLink>
+
+            <NavLink to="/user/bookmarks" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              <div className="nav-icon-wrapper"><Bookmark size={22} /></div>
+              <span>คอร์สที่บันทึก</span>
             </NavLink>
 
             <NavLink to="/user/rewards" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
@@ -329,13 +341,6 @@ const UserLayout = () => {
               <div className="nav-icon-wrapper"><User size={22} /></div>
               <span>โปรไฟล์</span>
             </NavLink>
-
-            {canAccessAdminPanel(user) && (
-              <NavLink to="/admin/dashboard" className={({ isActive }) => `nav-item text-rose-500 ${isActive ? 'active' : ''}`}>
-                <div className="nav-icon-wrapper"><Settings size={22} /></div>
-                <span>จัดการ</span>
-              </NavLink>
-            )}
           </div>
         </nav>
       </div>
@@ -346,7 +351,7 @@ const UserLayout = () => {
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
             onClick={() => setShowClearConfirm(false)}
           />
-          <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] bg-white p-8 shadow-2xl animate-scale-in">
+          <div className="relative w-full max-sm overflow-hidden rounded-[2rem] bg-white p-8 shadow-2xl animate-scale-in">
             <div className="flex flex-col items-center text-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-50 text-rose-500 mb-6">
                 <Bell size={32} />

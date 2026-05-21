@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+﻿import React from 'react';
 import { ExternalLink, Printer } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import {
@@ -6,9 +6,6 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  ComposedChart,
-  Legend,
-  Line,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -31,7 +28,6 @@ const DashboardPrintContent = ({ report }) => {
   const {
     weeklyActivity = [],
     typeDistribution = [],
-    roiTrend = [],
     skillGap = [],
     performanceRows = [],
     goals = [],
@@ -164,24 +160,6 @@ const DashboardPrintContent = ({ report }) => {
           </div>
 
           <div className="dashboard-chart-card">
-            <div className="dashboard-chart-title">Incentive ROI Trend</div>
-            <div className="dashboard-chart-shell">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={roiTrend} margin={{ top: 10, right: 16, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} />
-                  <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} allowDecimals={false} />
-                  <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11 }} allowDecimals={false} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="completions" fill="#4f46e5" radius={[8, 8, 0, 0]} isAnimationActive={false} />
-                  <Line yAxisId="right" type="monotone" dataKey="points" stroke="#059669" strokeWidth={3} dot={{ r: 3 }} isAnimationActive={false} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="dashboard-chart-card">
             <div className="dashboard-chart-title">Skill Gap</div>
             <div className="dashboard-chart-shell">
               <ResponsiveContainer width="100%" height="100%">
@@ -241,9 +219,9 @@ const DashboardPrintContent = ({ report }) => {
 
 const PrintReportPage = () => {
   const { reportId } = useParams();
-  const report = useMemo(() => getStoredPrintReport(reportId), [reportId]);
+  const report = React.useMemo(() => getStoredPrintReport(reportId), [reportId]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!report) {
       document.title = 'Print Report';
       return undefined;

@@ -11,6 +11,119 @@ const {
 } = require('./goal.notifications');
 const { clearGoalReportCache } = require('./goal.reports');
 
+const normalizeIdList = (value) => (
+    Array.isArray(value)
+        ? [...new Set(value.map((item) => String(item || '').trim()).filter(Boolean))]
+        : []
+);
+
+const resolveGoalAudience = async (tx, data, actor, existingGoal = null) => {
+    const requestedScope = data.scope || existingGoal?.scope || GOAL_SCOPES.GLOBAL;
+    let departmentIds = normalizeIdList(data.departmentIds);
+    let cohortRoleIds = normalizeIdList(data.cohortRoleIds);
+    let userIds = normalizeIdList(data.userIds);
+
+    if (data.departmentId && departmentIds.length === 0) {
+        departmentIds = [data.departmentId];
+    }
+
+    if (!actor.isAdmin) {
+        departmentIds = actor.departmentId ? [actor.departmentId] : [];
+        cohortRoleIds = [];
+        if (userIds.length > 0 && actor.departmentId) {
+            const scopedUsers = await tx.user.findMany({
+                where: {
+                    id: { in: userIds },
+                    departmentId: actor.departmentId
+                },
+                select: { id: true }
+            });
+            userIds = scopedUsers.map((user) => user.id);
+        } else {
+            userIds = [];
+        }
+    }
+
+    if (userIds.length > 0) {
+        return {
+            scope: GOAL_SCOPES.USER,
+            departmentId: departmentIds[0] || actor.departmentId || existingGoal?.departmentId || null,
+            departmentIds,
+            cohortRoleIds: [],
+            userIds
+        };
+    }
+
+    if (cohortRoleIds.length > 0 && actor.isAdmin) {
+        const matchedCount = await tx.cohortRole.count({
+            where: {
+                id: { in: cohortRoleIds }
+            }
+        });
+
+        if (matchedCount !== cohortRoleIds.length) {
+            throw new ErrorResponse('Invalid cohort role selection', 400);
+        }
+
+        return {
+            scope: GOAL_SCOPES.COHORT_ROLE,
+            departmentId: null,
+            departmentIds: [],
+            cohortRoleIds,
+            userIds: []
+        };
+    }
+
+    if (requestedScope === GOAL_SCOPES.GLOBAL && actor.isAdmin && departmentIds.length === 0) {
+        return {
+            scope: GOAL_SCOPES.GLOBAL,
+            departmentId: null,
+            departmentIds: [],
+            cohortRoleIds: [],
+            userIds: []
+        };
+    }
+
+    if (departmentIds.length === 0 && (data.scope === undefined || requestedScope === GOAL_SCOPES.DEPARTMENT)) {
+        departmentIds = actor.departmentId ? [actor.departmentId] : [];
+    }
+
+    return {
+        scope: GOAL_SCOPES.DEPARTMENT,
+        departmentId: departmentIds[0] || existingGoal?.departmentId || null,
+        departmentIds,
+        cohortRoleIds: [],
+        userIds: []
+    };
+};
+
+const saveGoalAudience = async (tx, goalId, audience) => {
+    await tx.goalTargetDepartment.deleteMany({ where: { goalId } });
+    await tx.goalTargetCohortRole.deleteMany({ where: { goalId } });
+    await tx.goalTargetUser.deleteMany({ where: { goalId } });
+
+    if (audience.departmentIds.length > 0) {
+        await tx.goalTargetDepartment.createMany({
+            data: audience.departmentIds.map((departmentId) => ({ goalId, departmentId })),
+            skipDuplicates: true
+        });
+    }
+
+    if (audience.userIds.length > 0) {
+        await tx.goalTargetUser.createMany({
+            data: audience.userIds.map((userId) => ({ goalId, userId })),
+            skipDuplicates: true
+        });
+    }
+
+    if (audience.cohortRoleIds.length > 0) {
+        await tx.goalTargetCohortRole.createMany({
+            data: audience.cohortRoleIds.map((cohortRoleId) => ({ goalId, cohortRoleId })),
+            skipDuplicates: true
+        });
+    }
+};
+
 const createGoal = async (data, authUser) => {
     const {
         title,
@@ -19,6 +132,9 @@ const createGoal = async (data, authUser) => {
         expiryDate,
         scope,
         departmentId,
+        departmentIds,
+        cohortRoleIds,
+        userIds,
         courseIds,
         postAssignmentReminderDays,
         preDeadlineReminderDays,
@@ -26,8 +142,6 @@ const createGoal = async (data, authUser) => {
         preDeadlineReminderTime
     } = data;
 
-    let finalScope = scope || GOAL_SCOPES.GLOBAL;
-    let finalDeptId = departmentId || null;
     const finalPostAssignmentReminderDays = normalizeReminderDays(postAssignmentReminderDays, 'Post-assignment reminder');
     const normalizedPreDeadlineReminderDays = normalizeReminderDays(preDeadlineReminderDays, 'Pre-deadline reminder');
     const finalPreDeadlineReminderDays = expiryDate ? normalizedPreDeadlineReminderDays : null;
@@ -40,20 +154,15 @@ const createGoal = async (data, authUser) => {
 
     const actor = await authHelpers.getActorContext(prisma, authUser);
 
-    if (actor.isAdmin) {
-        finalScope = scope || (actor?.departmentId ? GOAL_SCOPES.DEPARTMENT : GOAL_SCOPES.GLOBAL);
-        finalDeptId = finalScope === GOAL_SCOPES.GLOBAL ? null : (departmentId || actor?.departmentId);
-    } else {
-        if (actor.departmentId) {
-            finalScope = GOAL_SCOPES.DEPARTMENT;
-            finalDeptId = actor.departmentId;
-        } else {
-            finalScope = GOAL_SCOPES.GLOBAL;
-            finalDeptId = null;
-        }
-    }
-
     return await prisma.$transaction(async (tx) => {
+        const audience = await resolveGoalAudience(tx, {
+            scope,
+            departmentId,
+            departmentIds,
+            cohortRoleIds,
+            userIds
+        }, actor);
+
         const goal = await tx.learningGoal.create({
             data: {
                 title,
@@ -64,11 +173,13 @@ const createGoal = async (data, authUser) => {
                 preDeadlineReminderDays: finalPreDeadlineReminderDays,
                 postAssignmentReminderTime: finalPostAssignmentReminderTime,
                 preDeadlineReminderTime: finalPreDeadlineReminderTime,
-                scope: finalScope,
-                departmentId: finalDeptId,
+                scope: audience.scope,
+                departmentId: audience.departmentId,
                 status: GOAL_STATUS.ACTIVE
             }
         });
+
+        await saveGoalAudience(tx, goal.id, audience);
 
         if (type === 'SPECIFIC' && courseIds && courseIds.length > 0) {
             await tx.goalCourse.createMany({
@@ -79,7 +190,19 @@ const createGoal = async (data, authUser) => {
             });
         }
 
-        await createGoalReminderNotifications(tx, goal, goal.createdAt);
+        const targetCohortRoles = audience.cohortRoleIds.length > 0
+            ? await tx.cohortRole.findMany({
+                where: { id: { in: audience.cohortRoleIds } },
+                select: { id: true, key: true }
+            })
+            : [];
+
+        await createGoalReminderNotifications(tx, {
+            ...goal,
+            targetDepartments: audience.departmentIds.map((departmentId) => ({ departmentId })),
+            targetCohortRoles: targetCohortRoles.map((cohortRole) => ({ cohortRoleId: cohortRole.id, cohortRole })),
+            targetUsers: audience.userIds.map((userId) => ({ userId }))
+        }, goal.createdAt);
 
         return goal;
     });
@@ -110,6 +233,29 @@ const getGoals = async (authUser, options = {}) => {
             },
             department: {
                 select: { name: true }
+            },
+            targetDepartments: {
+                include: {
+                    department: { select: { id: true, name: true } }
+                }
+            },
+            targetCohortRoles: {
+                include: {
+                    cohortRole: { select: { id: true, key: true, name: true } }
+                }
+            },
+            targetUsers: {
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            departmentId: true,
+                            departmentRef: { select: { id: true, name: true } }
+                        }
+                    }
+                }
             }
         },
         orderBy: { createdAt: 'desc' }
@@ -134,6 +280,29 @@ const getGoalDetails = async (id, authUser) => {
             },
             department: {
                 select: { name: true }
+            },
+            targetDepartments: {
+                include: {
+                    department: { select: { id: true, name: true } }
+                }
+            },
+            targetCohortRoles: {
+                include: {
+                    cohortRole: { select: { id: true, key: true, name: true } }
+                }
+            },
+            targetUsers: {
+                include: {
+                    user: {
+                        select: {
+                            id: true,
+                            name: true,
+                            email: true,
+                            departmentId: true,
+                            departmentRef: { select: { id: true, name: true } }
+                        }
+                    }
+                }
             }
         }
     });
@@ -210,6 +379,9 @@ const updateGoal = async (id, data, authUser) => {
         expiryDate,
         scope,
         departmentId,
+        departmentIds,
+        cohortRoleIds,
+        userIds,
         courseIds,
         postAssignmentReminderDays,
         preDeadlineReminderDays,
@@ -225,8 +397,6 @@ const updateGoal = async (id, data, authUser) => {
         throw new ErrorResponse('Not authorized to update this goal', 403);
     }
 
-    let finalScope = goal.scope;
-    let finalDeptId = goal.departmentId;
     const finalPostAssignmentReminderDays = postAssignmentReminderDays !== undefined
         ? normalizeReminderDays(postAssignmentReminderDays, 'Post-assignment reminder')
         : goal.postAssignmentReminderDays;
@@ -243,14 +413,15 @@ const updateGoal = async (id, data, authUser) => {
         ? (finalPreDeadlineReminderDays !== null ? normalizeGoalReminderTime(preDeadlineReminderTime, 'Pre-deadline reminder time') : null)
         : (finalPreDeadlineReminderDays !== null ? (goal.preDeadlineReminderTime || DEFAULT_REMINDER_TIME) : null);
 
-    if (actor.isAdmin) {
-        if (scope) {
-            finalScope = scope;
-            finalDeptId = scope === GOAL_SCOPES.GLOBAL ? null : (departmentId || goal.departmentId);
-        }
-    }
-
     return await prisma.$transaction(async (tx) => {
+        const audience = await resolveGoalAudience(tx, {
+            scope,
+            departmentId,
+            departmentIds,
+            cohortRoleIds,
+            userIds
+        }, actor, goal);
+
         const updatedGoal = await tx.learningGoal.update({
             where: { id },
             data: {
@@ -262,10 +433,12 @@ const updateGoal = async (id, data, authUser) => {
                 preDeadlineReminderDays: finalPreDeadlineReminderDays,
                 postAssignmentReminderTime: finalPostAssignmentReminderTime,
                 preDeadlineReminderTime: finalPreDeadlineReminderTime,
-                scope: finalScope,
-                departmentId: finalDeptId
+                scope: audience.scope,
+                departmentId: audience.departmentId
             }
         });
+
+        await saveGoalAudience(tx, id, audience);
 
         if (courseIds && (type === 'SPECIFIC' || (type === undefined && goal.type === 'SPECIFIC'))) {
             await tx.goalCourse.deleteMany({ where: { goalId: id } });
@@ -284,7 +457,19 @@ const updateGoal = async (id, data, authUser) => {
             }
         });
 
-        await createGoalReminderNotifications(tx, updatedGoal, updatedGoal.updatedAt);
+        const targetCohortRoles = audience.cohortRoleIds.length > 0
+            ? await tx.cohortRole.findMany({
+                where: { id: { in: audience.cohortRoleIds } },
+                select: { id: true, key: true }
+            })
+            : [];
+
+        await createGoalReminderNotifications(tx, {
+            ...updatedGoal,
+            targetDepartments: audience.departmentIds.map((departmentId) => ({ departmentId })),
+            targetCohortRoles: targetCohortRoles.map((cohortRole) => ({ cohortRoleId: cohortRole.id, cohortRole })),
+            targetUsers: audience.userIds.map((userId) => ({ userId }))
+        }, updatedGoal.updatedAt);
 
         clearGoalReportCache(id);
         return updatedGoal;

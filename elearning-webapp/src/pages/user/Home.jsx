@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { PlayCircle, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { userAPI } from '../../utils/api';
@@ -19,17 +19,17 @@ import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
 const Home = () => {
   const navigate = useNavigate();
-  const [courses, setCourses] = useState([]);
-  const [announcements, setAnnouncements] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const [points, setPoints] = useState(0);
-  const [activeGoals, setActiveGoals] = useState([]);
-  const [pointsLoading, setPointsLoading] = useState(true);
-  const [isCatModalOpen, setIsCatModalOpen] = useState(false);
+  const [courses, setCourses] = React.useState([]);
+  const [announcements, setAnnouncements] = React.useState([]);
+  const [categories, setCategories] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [user, setUser] = React.useState(null);
+  const [points, setPoints] = React.useState(0);
+  const [activeGoals, setActiveGoals] = React.useState([]);
+  const [pointsLoading, setPointsLoading] = React.useState(true);
+  const [isCatModalOpen, setIsCatModalOpen] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchData = async () => {
       try {
         const userData = JSON.parse(localStorage.getItem('user'));
@@ -63,12 +63,12 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const continueCourse = useMemo(() => {
+  const continueCourse = React.useMemo(() => {
     if (!Array.isArray(courses)) return null;
     return courses.find(c => c.isEnrolled && c.enrollmentStatus === ENROLLMENT_STATUS.IN_PROGRESS);
   }, [courses]);
 
-  const categorizedCourses = useMemo(() => {
+  const categorizedCourses = React.useMemo(() => {
     if (!Array.isArray(categories) || !Array.isArray(courses)) return [];
     return categories.map(cat => ({
       ...cat,
@@ -76,12 +76,12 @@ const Home = () => {
     })).filter(cat => cat.courses.length > 0);
   }, [categories, courses]);
 
-  const uncategorized = useMemo(() => {
+  const uncategorized = React.useMemo(() => {
     if (!Array.isArray(courses)) return [];
     return courses.filter(c => !c.categoryId);
   }, [courses]);
 
-  const goalsProgress = useMemo(() => {
+  const goalsProgress = React.useMemo(() => {
     if (!Array.isArray(activeGoals) || !Array.isArray(courses)) return [];
 
     return activeGoals.map(goal => {
@@ -198,7 +198,7 @@ const Home = () => {
               badgeText={category.isTemporary ? `เข้าดูได้ถึง · ${formatThaiFullDate(category.expiredAt)}` : ''}
               onViewAll={() => navigate(`/user/courses?category=${encodeURIComponent(category.name)}`)}
             />
-            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
+            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
               {category.courses.map(course => (
                 <CourseCard
                   key={course.id}
@@ -214,7 +214,7 @@ const Home = () => {
         {uncategorized.length > 0 && (
           <section className="animate-slide-up" style={{ animationDelay: '800ms' }}>
             <SectionHeader title="คอร์สแนะนำสำหรับคุณ" showViewAll={false} />
-            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
+            <div className="grid grid-flow-col auto-cols-[minmax(300px,1fr)] md:grid-flow-row md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8 overflow-x-auto md:overflow-visible pb-10 md:pb-4 no-scrollbar -mx-5 px-5 md:mx-0 md:px-0 snap-x md:snap-none items-stretch">
               {uncategorized.map(course => (
                 <CourseCard
                   key={course.id}

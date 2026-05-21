@@ -13,12 +13,15 @@ const { getAdminRewards, createReward, updateReward, deleteReward, getRedeemRequ
 const { getAdminCourses, createCourse, updateCourse, republishCourse, archiveCourse, getCourseHistory, deleteCourse, getCourseLessons, createLesson, updateLesson, deleteLesson, reorderLessons, getCourseQuizAttempts } = require('./admin/admin.courses');
 
 const { getUsers, getUserDetails, createUser, updateUser, deleteUser } = require('./admin/admin.users');
+const userCertificates = require('./user/user.certificates');
 const { getDepartments, createDepartment, updateDepartment, deleteDepartment } = require('./admin/admin.departments');
 const { getTiers, createTier, updateTier, deleteTier, reorderTiers } = require('./admin/admin.tiers');
+const { getCohortRoles, createCohortRole, updateCohortRole, deleteCohortRole, reorderCohortRoles, updateCohortRoleMembers } = require('./admin/admin.cohortRoles');
 
 const { getDashboardStats, getAdvancedAnalytics } = require('./admin/admin.analytics');
 const { getAdminAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, archiveAnnouncement, republishAnnouncement, getAnnouncementHistory } = require('./admin/admin.announcements');
 const { getInstructorPresets, createInstructorPreset, updateInstructorPreset, deleteInstructorPreset } = require('./admin/admin.instructors');
+const { getOrganizationPresets, createOrganizationPreset, updateOrganizationPreset, deleteOrganizationPreset } = require('./admin/admin.organizations');
 
 const {
     courseInclude,
@@ -49,10 +52,20 @@ module.exports = {
     createUser,
     updateUser,
     deleteUser,
+    getUserCertificates: userCertificates.getCertificates,
+    createUserCertificate: userCertificates.createCertificate,
+    updateUserCertificate: userCertificates.updateCertificate,
+    deleteUserCertificate: userCertificates.deleteCertificate,
     getDepartments,
     createDepartment,
     updateDepartment,
     deleteDepartment,
+    getCohortRoles,
+    createCohortRole,
+    updateCohortRole,
+    deleteCohortRole,
+    reorderCohortRoles,
+    updateCohortRoleMembers,
     getTiers,
     createTier,
     updateTier,
@@ -62,7 +75,11 @@ module.exports = {
     createInstructorPreset,
     updateInstructorPreset,
     deleteInstructorPreset,
-    getAdminCourses,
+    getOrganizationPresets,
+    createOrganizationPreset,
+    updateOrganizationPreset,
+    deleteOrganizationPreset,
+    getAdminCourses: (user) => getAdminCourses(user),
     createCourse,
     updateCourse,
     republishCourse,

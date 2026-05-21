@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { X, Upload, FileText, Play } from 'lucide-react';
+import React from 'react';
+import { X, Upload, FileText, Play, ClipboardCheck } from 'lucide-react';
 import QuizBuilder from './QuizBuilder';
 import ModalPortal from '../common/ModalPortal';
 import RichTextEditor from '../common/RichTextEditor';
@@ -17,9 +17,20 @@ const LessonModal = ({
   onEditorImageUpload,
   isEditing = false,
 }) => {
-  const docInputRef = useRef(null);
+  const docInputRef = React.useRef(null);
 
   if (!isOpen) return null;
+
+  const handleTypeChange = (event) => {
+    const nextType = event.target.value;
+    setLessonForm({
+      ...lessonForm,
+      type: nextType,
+      points: nextType === 'assessment' && !lessonForm.points ? 10 : lessonForm.points,
+      passScore: ['quiz', 'assessment'].includes(nextType) && !lessonForm.passScore ? 60 : lessonForm.passScore,
+      questions: nextType === 'quiz' ? lessonForm.questions : [],
+    });
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -133,12 +144,13 @@ const LessonModal = ({
                 <CustomSelect
                   label="ประเภทเนื้อหา"
                   value={lessonForm.type}
-                  onChange={(event) => setLessonForm({ ...lessonForm, type: event.target.value })}
+                  onChange={handleTypeChange}
                   options={[
                     { value: 'video', label: 'วิดีโอ (YouTube / Vimeo)' },
                     { value: 'pdf', label: 'เอกสาร (PDF/Link)' },
                     { value: 'article', label: 'บทความเนื้อหา' },
-                    { value: 'quiz', label: 'แบบทดสอบ (Quiz)' }
+                    { value: 'quiz', label: 'แบบทดสอบ (Quiz)' },
+                    { value: 'assessment', label: 'Assessment Upload' }
                   ]}
                 />
 
@@ -161,7 +173,78 @@ const LessonModal = ({
                   </div>
                 </div>
 
-                {lessonForm.type !== 'quiz' ? (
+                {lessonForm.type === 'assessment' ? (
+                  <div className="md:col-span-2 space-y-6">
+                    <div className="relative p-6 rounded-[2rem] border border-slate-200 bg-slate-50/50">
+                      <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                        <div className="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm">
+                          <ClipboardCheck size={20} />
+                        </div>
+                        <div>
+                          <h5 className="text-base font-black text-slate-900">การตั้งค่าการส่งงาน (Assessment)</h5>
+                          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">กำหนดเกณฑ์การประเมินและคำแนะนำ</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-black text-slate-600 uppercase tracking-wider ml-1">
+                            คะแนนเต็ม (Max Score)
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              className="w-full bg-white border-slate-200 rounded-xl px-4 py-3 text-sm font-black focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                              value={lessonForm.points}
+                              min="1"
+                              onChange={(event) => setLessonForm({
+                                ...lessonForm,
+                                points: parseInt(event.target.value, 10) || 10,
+                              })}
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">POINTS</div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-black text-slate-600 uppercase tracking-wider ml-1">
+                            เกณฑ์ผ่าน (Pass Score %)
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              className="w-full bg-white border-slate-200 rounded-xl px-4 py-3 text-sm font-black focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+                              value={lessonForm.passScore}
+                              min="0"
+                              max="100"
+                              onChange={(event) => setLessonForm({
+                                ...lessonForm,
+                                passScore: parseInt(event.target.value, 10) || 0,
+                              })}
+                            />
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">%</div>
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2 space-y-1.5">
+                          <label className="text-[11px] font-black text-slate-600 uppercase tracking-wider ml-1">
+                            คำอธิบายและโจทย์ (Instructions)
+                          </label>
+                          <div className="rounded-[1.5rem] border border-slate-200 bg-white overflow-hidden focus-within:ring-4 focus-within:ring-primary/10 focus-within:border-primary transition-all">
+                            <RichTextEditor
+                              label="Assessment instruction editor"
+                              value={lessonForm.content || ''}
+                              onChange={(content) => setLessonForm({ ...lessonForm, content })}
+                              onImageUpload={onEditorImageUpload}
+                              imageUploading={editorImageUploading}
+                              minHeight={260}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : lessonForm.type !== 'quiz' ? (
                   <>
                     {renderLessonSourceField()}
 

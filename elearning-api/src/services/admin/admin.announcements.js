@@ -16,7 +16,7 @@ const announcementHistoryCache = new Map();
 const getAnnouncementHistoryCacheKey = (announcementId, actor) => JSON.stringify({
     namespace: 'announcement-history',
     announcementId,
-    role: actor.effectiveRole || actor.role || null,
+    permission: actor.effectivePermission || actor.permission || null,
     departmentId: actor.departmentId || null
 });
 

@@ -35,10 +35,14 @@ export const buildFormFromCertificate = (certificate) => ({
   fileMimeType: certificate?.fileMimeType || ''
 });
 
-export const formatCertificateDateRange = (certificate) => {
-  const issued = certificate.issueDate ? formatThaiDateTime(certificate.issueDate) : 'ไม่ระบุวันที่ออก';
-  if (certificate.noExpiration) return `${issued} - ไม่มีวันหมดอายุ`;
-  if (certificate.expirationDate) return `${issued} - ${formatThaiDateTime(certificate.expirationDate)}`;
+export const formatCertificateDateRange = (certificate, isLms = false) => {
+  const issueDate = isLms ? certificate.issuedAt : certificate.issueDate;
+  const expirationDate = isLms ? certificate.expiresAt : certificate.expirationDate;
+  const noExpiration = isLms ? !certificate.expiresAt : certificate.noExpiration;
+
+  const issued = issueDate ? formatThaiDateTime(issueDate) : 'ไม่ระบุวันที่ออก';
+  if (noExpiration) return `${issued} - ไม่มีวันหมดอายุ`;
+  if (expirationDate) return `${issued} - ${formatThaiDateTime(expirationDate)}`;
   return issued;
 };
 

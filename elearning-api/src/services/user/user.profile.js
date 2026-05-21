@@ -3,6 +3,66 @@ const prisma = require('../../utils/prisma');
 const authHelpers = require('../../utils/auth.helpers');
 
 const mapPublicUser = authHelpers.mapUserRecord;
+const MAX_PROFILE_ITEMS = 50;
+const MAX_PROFILE_TEXT_LENGTH = 300;
+const PROFILE_FILE_KEY_PREFIX = 'certificates/';
+
+const normalizeString = (value) => {
+    const normalized = value ? String(value).trim() : '';
+    return normalized || null;
+};
+
+const truncateString = (value, maxLength = MAX_PROFILE_TEXT_LENGTH) => {
+    const normalized = normalizeString(value);
+    if (!normalized) return '';
+    return normalized.slice(0, maxLength);
+};
+
+const normalizeProfileFileKey = (value) => {
+    const fileKey = normalizeString(value);
+    if (!fileKey) return '';
+    if (!fileKey.startsWith(PROFILE_FILE_KEY_PREFIX) || fileKey.includes('..')) {
+        throw new Error('Invalid profile file key');
+    }
+    return fileKey;
+};
+
+const normalizeUploadedAt = (value) => {
+    const normalized = normalizeString(value);
+    if (!normalized) return '';
+
+    const parsed = new Date(normalized);
+    if (Number.isNaN(parsed.getTime())) {
+        return '';
+    }
+
+    return parsed.toISOString();
+};
+
+const normalizeProfileItems = (items, fields) => {
+    if (!Array.isArray(items)) return [];
+
+    return items
+        .slice(0, MAX_PROFILE_ITEMS)
+        .map((item) => {
+            const normalized = {
+                id: normalizeString(item?.id) || `${Date.now()}-${Math.random().toString(36).slice(2)}`
+            };
+
+            fields.forEach((field) => {
+                if (field === 'fileKey') {
+                    normalized[field] = normalizeProfileFileKey(item?.[field]);
+                } else if (field === 'uploadedAt') {
+                    normalized[field] = normalizeUploadedAt(item?.[field]);
+                } else {
+                    normalized[field] = truncateString(item?.[field]);
+                }
+            });
+
+            return normalized;
+        })
+        .filter((item) => fields.some((field) => item[field]));
+};
 
 const updateProfile = async (userId, data) => {
     const { currentPassword, newPassword } = data;
@@ -13,10 +73,43 @@ const updateProfile = async (userId, data) => {
         const validPassword = await bcrypt.compare(currentPassword, user.password);
 
         if (!validPassword) {
-            throw new Error('เธฃเธซเธฑเธชเธเนเธฒเธเธเธฑเธเธเธธเธเธฑเธเนเธกเนเธ–เธนเธเธ•เนเธญเธ');
+            throw new Error('รหัสผ่านปัจจุบันไม่ถูกต้อง');
         }
 
         dataToUpdate.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'signatureImageUrl')) {
+        dataToUpdate.signatureImageUrl = normalizeString(data.signatureImageUrl);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'signatureTitle')) {
+        dataToUpdate.signatureTitle = normalizeString(data.signatureTitle);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'profileImageUrl')) {
+        dataToUpdate.profileImageUrl = normalizeString(data.profileImageUrl);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'educationHistory')) {
+        dataToUpdate.educationHistory = normalizeProfileItems(data.educationHistory, [
+            'institution',
+            'degree',
+            'faculty',
+            'major',
+            'graduationYear'
+        ]);
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'profileFiles')) {
+        dataToUpdate.profileFiles = normalizeProfileItems(data.profileFiles, [
+            'title',
+            'fileName',
+            'fileKey',
+            'fileUrl',
+            'fileMimeType',
+            'uploadedAt'
+        ]);
     }
 
     if (Object.keys(dataToUpdate).length > 0) {
@@ -25,7 +118,8 @@ const updateProfile = async (userId, data) => {
             data: dataToUpdate,
             include: {
                 departmentRef: true,
-                tier: true
+                tier: true,
+                courseStaff: { take: 1 }
             }
         });
 
@@ -36,7 +130,8 @@ const updateProfile = async (userId, data) => {
         where: { id: userId },
         include: {
             departmentRef: true,
-            tier: true
+            tier: true,
+            courseStaff: { take: 1 }
         }
     });
 

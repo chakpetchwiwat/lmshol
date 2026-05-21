@@ -1,4 +1,4 @@
-const { USER_ROLES, ADMIN_PANEL_ROLES, MANAGED_USER_ROLES } = require('./constants/roles');
+const { USER_PERMISSIONS, ADMIN_PANEL_PERMISSIONS, MANAGED_USER_PERMISSIONS, USER_ROLES, ADMIN_PANEL_ROLES, MANAGED_USER_ROLES } = require('./constants/roles');
 const { ENTITY_STATUS, GOAL_STATUS } = require('./constants/statuses');
 const { GOAL_SCOPES } = require('./constants/scopes');
 
@@ -62,9 +62,12 @@ const isTimedEntityExpired = (
 const mapUserRecord = (user) => {
     if (!user) return null;
     const { departmentRef, tier, ...rest } = user;
+    const resolvedPermission = rest.permission || rest.role;
 
     return {
         ...rest,
+        permission: resolvedPermission,
+        role: resolvedPermission, // Compatibility alias
         departmentId: departmentRef?.id || rest.departmentId || null,
         department: departmentRef?.name || rest.department || null,
         tierId: tier?.id || rest.tierId || null,
@@ -74,7 +77,8 @@ const mapUserRecord = (user) => {
             accessAdmin: tier.accessAdmin,
             order: tier.order
         } : null,
-        employmentDate: rest.employmentDate || rest.createdAt
+        employmentDate: rest.employmentDate || rest.createdAt,
+        isCourseStaff: (rest.courseStaff?.length || 0) > 0
     };
 };
 
@@ -99,21 +103,23 @@ const getActorContext = async (prisma, authUser) => {
         throw new Error('User not found');
     }
 
-    // Role resolution: Admin is always Admin. 
+    // Permission resolution: Admin is always Admin. 
     // Manager stays Manager. 
     // User can become effective Manager if their Tier has accessAdmin: true.
-    const effectiveRole = actor.role === USER_ROLES.ADMIN
-        ? USER_ROLES.ADMIN
-        : (actor.role === USER_ROLES.MANAGER || actor.tier?.accessAdmin)
-            ? USER_ROLES.MANAGER
-            : USER_ROLES.USER;
+    const actorPermission = actor.permission || actor.role;
+    const effectivePermission = actorPermission === USER_PERMISSIONS.ADMIN
+        ? USER_PERMISSIONS.ADMIN
+        : (actorPermission === USER_PERMISSIONS.MANAGER || actor.tier?.accessAdmin)
+            ? USER_PERMISSIONS.MANAGER
+            : USER_PERMISSIONS.USER;
 
     const mappedActor = {
         ...mapUserRecord(actor),
-        effectiveRole,
-        isAdmin: effectiveRole === USER_ROLES.ADMIN,
-        isManager: effectiveRole === USER_ROLES.MANAGER,
-        canAccessAdminPanel: ADMIN_PANEL_ROLES.includes(effectiveRole)
+        effectivePermission,
+        effectiveRole: effectivePermission, // Compatibility alias
+        isAdmin: effectivePermission === USER_PERMISSIONS.ADMIN,
+        isManager: effectivePermission === USER_PERMISSIONS.MANAGER,
+        canAccessAdminPanel: ADMIN_PANEL_PERMISSIONS.includes(effectivePermission)
     };
 
     // Strict validation for managers
@@ -132,14 +138,14 @@ const getActorContext = async (prisma, authUser) => {
 const buildUserManagementWhere = (actor, extraWhere = {}) => {
     if (actor.isAdmin) {
         return {
-            role: { in: MANAGED_USER_ROLES },
+            permission: { in: MANAGED_USER_PERMISSIONS },
             ...extraWhere
         };
     }
 
     if (actor.isManager) {
         return {
-            role: USER_ROLES.USER,
+            permission: USER_PERMISSIONS.USER,
             departmentId: actor.departmentId,
             ...extraWhere
         };
@@ -263,6 +269,32 @@ const buildGoalVisibilityWhere = (
                 scope: GOAL_SCOPES.DEPARTMENT,
                 departmentId: actor.departmentId
             });
+            scopeClauses.push({
+                targetDepartments: {
+                    some: { departmentId: actor.departmentId }
+                }
+            });
+        }
+
+        const actorUserId = actor.id || actor.userId;
+        if (actorUserId) {
+            scopeClauses.push({
+                targetUsers: {
+                    some: { userId: actorUserId }
+                }
+            });
+        }
+
+        if (Array.isArray(actor.roles) && actor.roles.length > 0) {
+            scopeClauses.push({
+                targetCohortRoles: {
+                    some: {
+                        cohortRole: {
+                            key: { in: actor.roles }
+                        }
+                    }
+                }
+            });
         }
 
         filters.push({
@@ -294,8 +326,30 @@ const canAccessGoal = (
         return false;
     }
 
-    if (!(includeAllScopes && actor.isAdmin) && goal.scope === GOAL_SCOPES.DEPARTMENT && goal.departmentId !== actor.departmentId) {
-        return false;
+    if (!(includeAllScopes && actor.isAdmin)) {
+        const actorUserId = actor.id || actor.userId;
+        const targetUsers = goal.targetUsers || [];
+        const targetDepartments = goal.targetDepartments || [];
+        const targetCohortRoles = goal.targetCohortRoles || [];
+
+        if (targetUsers.length > 0) {
+            return targetUsers.some((target) => target.userId === actorUserId);
+        }
+
+        if (targetCohortRoles.length > 0) {
+            return targetCohortRoles.some((target) => {
+                const roleKey = target.cohortRole?.key || target.roleKey || target.key;
+                return roleKey && Array.isArray(actor.roles) && actor.roles.includes(roleKey);
+            });
+        }
+
+        if (targetDepartments.length > 0) {
+            return targetDepartments.some((target) => target.departmentId === actor.departmentId);
+        }
+
+        if (goal.scope === GOAL_SCOPES.DEPARTMENT && goal.departmentId !== actor.departmentId) {
+            return false;
+        }
     }
 
     return true;

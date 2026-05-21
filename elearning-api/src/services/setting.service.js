@@ -1,6 +1,6 @@
 const prisma = require('../utils/prisma');
 const authHelpers = require('../utils/auth.helpers');
-const { USER_ROLES, ADMIN_PANEL_ROLES } = require('../utils/constants/roles');
+const { USER_PERMISSIONS, ADMIN_PANEL_PERMISSIONS } = require('../utils/constants/roles');
 
 const getDepartmentWeeklyGoalKey = (departmentId) => `weekly_goal_department_${departmentId}`;
 
@@ -14,7 +14,7 @@ const getSettings = async (authUser) => {
     let scope = 'global';
     let departmentId = null;
 
-    if (authUser?.userId && authUser.role !== USER_ROLES.ADMIN) {
+    if (authUser?.userId && authUser.permission !== USER_PERMISSIONS.ADMIN) {
         const actor = await authHelpers.getActorContext(prisma, authUser);
         departmentId = actor?.departmentId || null;
         if (departmentId) {
@@ -38,14 +38,14 @@ const getSettings = async (authUser) => {
 const updateSetting = async (key, value, authUser) => {
     const actor = await authHelpers.getActorContext(prisma, authUser);
 
-    if (!actor || !ADMIN_PANEL_ROLES.includes(actor.role)) {
+    if (!actor || !ADMIN_PANEL_PERMISSIONS.includes(actor.permission)) {
         throw new Error('Admin panel access required');
     }
 
     let targetKey = key;
     let scope = 'global';
 
-    if (actor.role === USER_ROLES.MANAGER) {
+    if (actor.permission === USER_PERMISSIONS.MANAGER) {
         if (key !== 'weekly_goal') {
             throw new Error('Manager can only update weekly goal');
         }

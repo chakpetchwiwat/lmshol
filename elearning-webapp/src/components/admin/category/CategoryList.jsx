@@ -13,14 +13,14 @@ const CategoryList = ({
     <div className="border-b border-slate-100 bg-[linear-gradient(180deg,rgba(248,250,252,0.96),rgba(255,255,255,0.96))] px-4 py-4 sm:px-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">เธซเธกเธงเธ”เธซเธกเธนเนเธ—เธตเนเธเธฑเธ”เธเธฒเธฃเนเธ”เน</p>
-          <h4 className="mt-1 text-base font-black tracking-tight text-slate-900">เธฅเธณเธ”เธฑเธเธซเธกเธงเธ”เธซเธกเธนเนเธเธฑเธเธเธธเธเธฑเธ</h4>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">หมวดหมู่ที่จัดการได้</p>
+          <h4 className="mt-1 text-base font-black tracking-tight text-slate-900">ลำดับหมวดหมู่ปัจจุบัน</h4>
           <p className="mt-1 text-sm font-medium text-slate-500">
-            เธเธขเธฒเธขเธเธทเนเธเธ—เธตเนเนเธชเธ”เธเธฃเธฒเธขเธเธฒเธฃเน€เธเธทเนเธญเนเธซเนเน€เธซเนเธเธเธทเนเธญเธซเธกเธงเธ” เธเนเธฒเธขเธชเธ–เธฒเธเธฐ เนเธฅเธฐเธเธธเนเธกเธเธฑเธ”เธเธฒเธฃเธเธฑเธ”เธเธถเนเธเธเธเธเธญ notebook
+            ขยายพื้นที่แสดงรายการเพื่อให้เห็นชื่อหมวด ป้ายสถานะ และปุ่มจัดการชัดขึ้นบนจอ notebook
           </p>
         </div>
         <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
-          {categories.length} เธฃเธฒเธขเธเธฒเธฃ
+          {categories.length} รายการ
         </div>
       </div>
     </div>

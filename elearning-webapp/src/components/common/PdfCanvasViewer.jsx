@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React from 'react';
 import { FileText, Loader2, ZoomIn, ZoomOut, ScanSearch } from 'lucide-react';
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
@@ -13,10 +13,10 @@ const VIEWPORT_PADDING = 32;
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
 const PdfPageCanvas = ({ pdfDocument, pageNumber, scale }) => {
-  const canvasRef = useRef(null);
-  const renderTaskRef = useRef(null);
+  const canvasRef = React.useRef(null);
+  const renderTaskRef = React.useRef(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     let cancelled = false;
 
     const renderPage = async () => {
@@ -77,26 +77,26 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, scale }) => {
 };
 
 const PdfCanvasViewerContent = ({ url, onLoad, onError }) => {
-  const containerRef = useRef(null);
-  const manualZoomRef = useRef(false);
-  const onLoadRef = useRef(onLoad);
-  const onErrorRef = useRef(onError);
-  const [pdfDocument, setPdfDocument] = useState(null);
-  const [pageCount, setPageCount] = useState(0);
-  const [fitZoom, setFitZoom] = useState(1);
-  const [zoom, setZoom] = useState(null);
-  const [isLoadingDocument, setIsLoadingDocument] = useState(true);
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const containerRef = React.useRef(null);
+  const manualZoomRef = React.useRef(false);
+  const onLoadRef = React.useRef(onLoad);
+  const onErrorRef = React.useRef(onError);
+  const [pdfDocument, setPdfDocument] = React.useState(null);
+  const [pageCount, setPageCount] = React.useState(0);
+  const [fitZoom, setFitZoom] = React.useState(1);
+  const [zoom, setZoom] = React.useState(null);
+  const [isLoadingDocument, setIsLoadingDocument] = React.useState(true);
+  const [containerSize, setContainerSize] = React.useState({ width: 0, height: 0 });
 
-  useEffect(() => {
+  React.useEffect(() => {
     onLoadRef.current = onLoad;
   }, [onLoad]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     onErrorRef.current = onError;
   }, [onError]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const container = containerRef.current;
 
     if (!container) {
@@ -123,7 +123,7 @@ const PdfCanvasViewerContent = ({ url, onLoad, onError }) => {
     };
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     let cancelled = false;
     const loadingTask = getDocument({
       url,
@@ -158,7 +158,7 @@ const PdfCanvasViewerContent = ({ url, onLoad, onError }) => {
     };
   }, [url]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     let active = true;
 
     if (!pdfDocument || !containerSize.width || !containerSize.height) {

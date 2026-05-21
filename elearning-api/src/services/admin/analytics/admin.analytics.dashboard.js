@@ -137,7 +137,10 @@ const getDashboardStats = async (authUser, filters = {}) => {
                     ...(scopeFilters.departmentId ? {
                         OR: [
                             { scope: GOAL_SCOPES.GLOBAL },
-                            { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId }
+                            { scope: GOAL_SCOPES.DEPARTMENT, departmentId: scopeFilters.departmentId },
+                            { targetDepartments: { some: { departmentId: scopeFilters.departmentId } } },
+                            { targetCohortRoles: { some: {} } },
+                            { targetUsers: { some: { user: { departmentId: scopeFilters.departmentId } } } }
                         ]
                     } : {})
                 },
@@ -146,7 +149,16 @@ const getDashboardStats = async (authUser, filters = {}) => {
                         select: {
                             courseId: true
                         }
-                    }
+                    },
+                    targetDepartments: true,
+                    targetCohortRoles: {
+                        include: {
+                            cohortRole: {
+                                select: { key: true, name: true }
+                            }
+                        }
+                    },
+                    targetUsers: true
                 }
             })
         ]);
@@ -225,7 +237,7 @@ const getDashboardStats = async (authUser, filters = {}) => {
         if (activeGoals.length > 0) {
             const usersForCompliance = await prisma.user.findMany({
                 where: learnerWhere,
-                select: { id: true, name: true, email: true, departmentId: true, department: true, departmentRef: { select: { name: true } } }
+                select: { id: true, name: true, email: true, roles: true, departmentId: true, department: true, departmentRef: { select: { name: true } } }
             });
 
             const completionFilters = buildGoalCompletionFilters(activeGoals);

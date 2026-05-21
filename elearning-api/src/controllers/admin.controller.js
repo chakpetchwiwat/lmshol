@@ -1,4 +1,5 @@
 const AdminService = require('../services/admin.service');
+const AssessmentService = require('../services/assessment.service');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
 const { REDEEM_STATUS } = require('../utils/constants/statuses');
@@ -84,6 +85,26 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'User deleted successfully' });
 });
 
+const getUserCertificates = asyncHandler(async (req, res) => {
+  const certificates = await AdminService.getUserCertificates(req.params.id);
+  res.json({ success: true, data: certificates });
+});
+
+const createUserCertificate = asyncHandler(async (req, res) => {
+  const certificate = await AdminService.createUserCertificate(req.params.id, req.body);
+  res.status(201).json({ success: true, data: certificate });
+});
+
+const updateUserCertificate = asyncHandler(async (req, res) => {
+  const certificate = await AdminService.updateUserCertificate(req.params.id, req.params.certificateId, req.body);
+  res.json({ success: true, data: certificate });
+});
+
+const deleteUserCertificate = asyncHandler(async (req, res) => {
+  await AdminService.deleteUserCertificate(req.params.id, req.params.certificateId);
+  res.json({ success: true, message: 'Certificate deleted successfully' });
+});
+
 // DEPARTMENTS
 const getDepartments = asyncHandler(async (req, res) => {
   const departments = await AdminService.getDepartments(req.user);
@@ -103,6 +124,38 @@ const updateDepartment = asyncHandler(async (req, res) => {
 const deleteDepartment = asyncHandler(async (req, res) => {
   await AdminService.deleteDepartment(req.params.id);
   res.json({ success: true, message: 'Department deleted successfully' });
+});
+
+// COHORT ROLES
+const getCohortRoles = asyncHandler(async (req, res) => {
+  const roles = await AdminService.getCohortRoles();
+  res.json({ success: true, data: roles });
+});
+
+const createCohortRole = asyncHandler(async (req, res) => {
+  const role = await AdminService.createCohortRole(req.body);
+  res.status(201).json({ success: true, data: role });
+});
+
+const updateCohortRole = asyncHandler(async (req, res) => {
+  const role = await AdminService.updateCohortRole(req.params.id, req.body);
+  res.json({ success: true, data: role });
+});
+
+const deleteCohortRole = asyncHandler(async (req, res) => {
+  await AdminService.deleteCohortRole(req.params.id);
+  res.json({ success: true, message: 'Cohort role deleted successfully' });
+});
+
+const reorderCohortRoles = asyncHandler(async (req, res) => {
+  const { roleIds } = req.body;
+  await AdminService.reorderCohortRoles(roleIds);
+  res.json({ success: true, message: 'Cohort roles reordered successfully' });
+});
+
+const updateCohortRoleMembers = asyncHandler(async (req, res) => {
+  const role = await AdminService.updateCohortRoleMembers(req.params.id, req.body.userIds || []);
+  res.json({ success: true, data: role });
 });
 
 // TIERS
@@ -150,13 +203,33 @@ const updateInstructorPreset = asyncHandler(async (req, res) => {
 
 const deleteInstructorPreset = asyncHandler(async (req, res) => {
   await AdminService.deleteInstructorPreset(req.params.id);
-  res.json({ success: true, message: 'Instructor preset deleted successfully' });
+  res.status(204).end();
+});
+
+const getOrganizationPresets = asyncHandler(async (req, res) => {
+  const presets = await AdminService.getOrganizationPresets();
+  res.json({ success: true, data: presets });
+});
+
+const createOrganizationPreset = asyncHandler(async (req, res) => {
+  const preset = await AdminService.createOrganizationPreset(req.body);
+  res.status(201).json({ success: true, data: preset });
+});
+
+const updateOrganizationPreset = asyncHandler(async (req, res) => {
+  const preset = await AdminService.updateOrganizationPreset(req.params.id, req.body);
+  res.json({ success: true, data: preset });
+});
+
+const deleteOrganizationPreset = asyncHandler(async (req, res) => {
+  await AdminService.deleteOrganizationPreset(req.params.id);
+  res.status(204).end();
 });
 
 
 // COURSES
 const getAdminCourses = asyncHandler(async (req, res) => {
-  const courses = await AdminService.getAdminCourses();
+  const courses = await AdminService.getAdminCourses(req.user);
   res.json({ success: true, data: courses });
 });
 
@@ -355,6 +428,22 @@ const getCourseQuizAttempts = asyncHandler(async (req, res) => {
   res.json({ success: true, data: attempts });
 });
 
+// ASSESSMENTS
+const getAllAssessmentSubmissions = asyncHandler(async (req, res) => {
+  const startedAt = Date.now();
+  const submissions = await AssessmentService.listAllAssessmentSubmissions(req.user, req.query);
+  const durationMs = Date.now() - startedAt;
+  
+  appendServerTiming(res, 'admin-all-assessments', durationMs);
+  logAdminTiming('admin.all_assessments.completed', req, durationMs, {
+    rows: submissions?.length || 0,
+    courseId: req.query?.courseId || null,
+    status: req.query?.status || null
+  });
+  
+  res.json({ success: true, data: submissions });
+});
+
 module.exports = {
   getDashboardStats,
   getAdvancedAnalytics,
@@ -390,10 +479,20 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  getUserCertificates,
+  createUserCertificate,
+  updateUserCertificate,
+  deleteUserCertificate,
   getDepartments,
   createDepartment,
   updateDepartment,
   deleteDepartment,
+  getCohortRoles,
+  createCohortRole,
+  updateCohortRole,
+  deleteCohortRole,
+  reorderCohortRoles,
+  updateCohortRoleMembers,
   getTiers,
   createTier,
   updateTier,
@@ -403,10 +502,15 @@ module.exports = {
   createInstructorPreset,
   updateInstructorPreset,
   deleteInstructorPreset,
+  getOrganizationPresets,
+  createOrganizationPreset,
+  updateOrganizationPreset,
+  deleteOrganizationPreset,
   getCourseLessons,
   createLesson,
   updateLesson,
   deleteLesson,
   reorderLessons,
-  getCourseQuizAttempts
+  getCourseQuizAttempts,
+  getAllAssessmentSubmissions
 };

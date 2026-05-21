@@ -118,7 +118,7 @@ const Home = () => (
     <section className="space-y-8">
       <div className="space-y-4">
         <Base className="h-8 w-56" />
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <CourseCard key={i} />
           ))}
@@ -306,6 +306,25 @@ const LessonPlayer = () => (
   </div>
 );
 
+// 7. Table Skeleton
+const Table = ({ rows = 5 }) => (
+  <div className="w-full space-y-4">
+    {[...Array(rows)].map((_, i) => (
+      <div key={i} className="flex items-center gap-4 py-3 border-b border-slate-100 last:border-0">
+        <Base variant="circle" className="h-10 w-10 shrink-0" />
+        <div className="flex-1 space-y-2">
+          <Base className="h-4 w-1/4" />
+          <Base className="h-3 w-1/3" />
+        </div>
+        <div className="flex gap-2">
+          <Base className="h-8 w-8 rounded-lg" />
+          <Base className="h-8 w-8 rounded-lg" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 const Skeleton = Object.assign(Base, {
   CourseCard,
   Home,
@@ -314,6 +333,7 @@ const Skeleton = Object.assign(Base, {
   LessonPlayer,
   List,
   Page,
+  Table,
 });
 
 export default Skeleton;

@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, Sparkles } from 'lucide-react';
+import React from 'react';
+import { Plus, Sparkles, Building2 } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { toLocalInputValue } from '../../utils/dateUtils';
 import { compressImage } from '../../utils/imageUtils';
@@ -12,6 +12,7 @@ import CourseModal from '../../components/admin/CourseModal';
 import LessonModal from '../../components/admin/LessonModal';
 import CategoryManagementModal from '../../components/admin/CategoryManagementModal';
 import InstructorPresetModal from '../../components/admin/InstructorPresetModal';
+import OrganizationPresetModal from '../../components/admin/OrganizationPresetModal';
 import CourseFilters from '../../components/admin/CourseFilters';
 import CourseTable from '../../components/admin/CourseTable';
 import CourseAttendanceModal from '../../components/admin/CourseAttendanceModal';
@@ -40,6 +41,30 @@ const getDefaultCourseForm = () => ({
   isTemporary: false,
   expiredAt: '',
   status: ENTITY_STATUS.DRAFT,
+  certificateEnabled: false,
+  certificatePassingScore: 80,
+  certificateTemplateId: 'CLASSIC_001',
+  certificateSignatureSlots: [
+    {
+      id: 'organization',
+      label: 'Signature 1',
+      type: 'ORGANIZATION',
+      enabled: true,
+      organizationPresetId: '',
+      name: '',
+      title: 'Organization Signature',
+      signatureImageUrl: '',
+    },
+    {
+      id: 'instructor',
+      label: 'Signature 2',
+      type: 'INSTRUCTOR',
+      enabled: true,
+      name: '',
+      title: '',
+      signatureImageUrl: '',
+    },
+  ],
 });
 
 const getDefaultLessonForm = (order = 0) => ({
@@ -65,53 +90,58 @@ const MODULE_GROUP_LABELS = {
 
 const CourseManagement = () => {
   const toast = useToast();
+  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
   const { confirm, ConfirmDialogProps } = useConfirm();
-  const [courses, setCourses] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [tiers, setTiers] = useState([]);
-  const [instructorPresets, setInstructorPresets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(FILTER_VALUES.ALL);
-  const [selectedModuleGroup, setSelectedModuleGroup] = useState(FILTER_VALUES.ALL);
-  const [courseView, setCourseView] = useState(ENTITY_VIEW_STATUS.ACTIVE);
+  const [courses, setCourses] = React.useState([]);
+  const [categories, setCategories] = React.useState([]);
+  const [departments, setDepartments] = React.useState([]);
+  const [tiers, setTiers] = React.useState([]);
+  const [instructorPresets, setInstructorPresets] = React.useState([]);
+  const [organizationPresets, setOrganizationPresets] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [selectedCategory, setSelectedCategory] = React.useState(FILTER_VALUES.ALL);
+  const [selectedModuleGroup, setSelectedModuleGroup] = React.useState(FILTER_VALUES.ALL);
+  const [courseView, setCourseView] = React.useState(ENTITY_VIEW_STATUS.ACTIVE);
 
-  const [showModal, setShowModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [activeTab, setActiveTab] = useState('basic');
-  const [courseForm, setCourseForm] = useState(getDefaultCourseForm());
-  const [lessons, setLessons] = useState([]);
-  const [quizReports, setQuizReports] = useState([]);
-  const [loadingReports, setLoadingReports] = useState(false);
+  const [showModal, setShowModal] = React.useState(false);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editingId, setEditingId] = React.useState(null);
+  const [activeTab, setActiveTab] = React.useState('basic');
+  const [courseForm, setCourseForm] = React.useState(getDefaultCourseForm());
+  const [lessons, setLessons] = React.useState([]);
+  const [quizReports, setQuizReports] = React.useState([]);
+  const [loadingReports, setLoadingReports] = React.useState(false);
 
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [selectedHistoryCourse, setSelectedHistoryCourse] = useState(null);
+  const [showHistoryModal, setShowHistoryModal] = React.useState(false);
+  const [selectedHistoryCourse, setSelectedHistoryCourse] = React.useState(null);
 
-  const [showLessonModal, setShowLessonModal] = useState(false);
-  const [editingLesson, setEditingLesson] = useState(null);
-  const [lessonForm, setLessonForm] = useState(getDefaultLessonForm());
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [editorImageUploading, setEditorImageUploading] = useState(false);
-  const [showInstructorPresetModal, setShowInstructorPresetModal] = useState(false);
+  const [showLessonModal, setShowLessonModal] = React.useState(false);
+  const [editingLesson, setEditingLesson] = React.useState(null);
+  const [lessonForm, setLessonForm] = React.useState(getDefaultLessonForm());
+  const [showCategoryModal, setShowCategoryModal] = React.useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [editorImageUploading, setEditorImageUploading] = React.useState(false);
+  const [showInstructorPresetModal, setShowInstructorPresetModal] = React.useState(false);
+  const [showOrganizationPresetModal, setShowOrganizationPresetModal] = React.useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = React.useCallback(async () => {
     try {
-      const [courseResponse, categoryResponse, departmentResponse, tierResponse, instructorPresetResponse] = await Promise.all([
+      const [courseResponse, categoryResponse, departmentResponse, tierResponse, instructorPresetResponse, organizationPresetResponse] = await Promise.all([
         adminAPI.getCourses(),
         adminAPI.getCategories(),
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
         adminAPI.getInstructorPresets(),
+        adminAPI.getOrganizationPresets(),
       ]);
 
-      setCourses(courseResponse.data);
-      setCategories(categoryResponse.data);
-      setDepartments(departmentResponse.data);
-      setTiers(tierResponse.data);
-      setInstructorPresets(instructorPresetResponse.data);
+      setCourses(courseResponse.data || []);
+      setCategories(categoryResponse.data || []);
+      setDepartments(departmentResponse.data || []);
+      setTiers(tierResponse.data || []);
+      setInstructorPresets(instructorPresetResponse.data || []);
+      setOrganizationPresets(organizationPresetResponse.data || []);
     } catch (error) {
       console.error('Fetch course management data error:', error);
       toast.error('ไม่สามารถโหลดข้อมูลได้');
@@ -120,7 +150,7 @@ const CourseManagement = () => {
     }
   }, [toast]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchData();
   }, [fetchData]);
 
@@ -162,6 +192,10 @@ const CourseManagement = () => {
       isTemporary: Boolean(course.isTemporary),
       expiredAt: toLocalInputValue(course.expiredAt),
       status: course.status || ENTITY_STATUS.DRAFT,
+      certificateEnabled: course.certificateEnabled ?? false,
+      certificatePassingScore: course.certificatePassingScore ?? 80,
+      certificateTemplateId: course.certificateTemplateId || 'CLASSIC_001',
+      certificateSignatureSlots: course.certificateSignatureSlots || getDefaultCourseForm().certificateSignatureSlots,
     });
     setActiveTab('basic');
     setShowModal(true);
@@ -271,6 +305,25 @@ const CourseManagement = () => {
     } catch (error) {
       console.error('Delete instructor preset error:', error);
       toast.error(error.response?.data?.message || 'ลบข้อมูลวิทยากรไม่สำเร็จ');
+    }
+  };
+
+  const handleOrganizationPresetDelete = async (id, name) => {
+    const ok = await confirm({
+      title: 'ยืนยันการลบข้อมูลหน่วยงาน',
+      message: `ต้องการลบข้อมูลหน่วยงาน "${name}" ใช่หรือไม่? พรีเซ็ตนี้จะไม่สามารถนำมาใช้ในเกียรติบัตรได้อีก`,
+      confirmLabel: 'ลบ',
+      variant: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      await adminAPI.deleteOrganizationPreset(id);
+      toast.success('ลบข้อมูลหน่วยงานเรียบร้อย');
+      await fetchData();
+    } catch (error) {
+      console.error('Delete organization preset error:', error);
+      toast.error(error.response?.data?.message || 'ลบข้อมูลหน่วยงานไม่สำเร็จ');
     }
   };
 
@@ -385,8 +438,8 @@ const CourseManagement = () => {
     }
   };
 
-  const filteredCourses = useMemo(() => (
-    courses.filter((course) => {
+  const filteredCourses = React.useMemo(() => (
+    (courses || []).filter((course) => {
       const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === FILTER_VALUES.ALL || course.categoryId === selectedCategory;
       const matchesModuleGroup = selectedModuleGroup === FILTER_VALUES.ALL || course.category?.type === selectedModuleGroup;
@@ -395,10 +448,10 @@ const CourseManagement = () => {
     })
   ), [courseView, courses, searchTerm, selectedCategory, selectedModuleGroup]);
 
-  const moduleGroupOptions = useMemo(() => {
+  const moduleGroupOptions = React.useMemo(() => {
     const visibleTypes = Array.from(
       new Set(
-        categories
+        (categories || [])
           .filter((category) => !category.isArchived && category.type)
           .map((category) => category.type)
       )
@@ -413,8 +466,8 @@ const CourseManagement = () => {
     ];
   }, [categories]);
 
-  const selectableCategories = useMemo(() => (
-    categories.filter((category) => !category.isArchived || category.id === courseForm.categoryId)
+  const selectableCategories = React.useMemo(() => (
+    (categories || []).filter((category) => !category.isArchived || category.id === courseForm.categoryId)
   ), [categories, courseForm.categoryId]);
 
   return (
@@ -435,6 +488,10 @@ const CourseManagement = () => {
           <button type="button" onClick={() => setShowInstructorPresetModal(true)} className="btn btn-outline">
             <Sparkles size={18} />
             จัดการวิทยากร
+          </button>
+          <button type="button" onClick={() => setShowOrganizationPresetModal(true)} className="btn btn-outline">
+            <Building2 size={18} />
+            จัดการหน่วยงาน
           </button>
           <button type="button" onClick={openAddCourse} className="btn btn-primary shadow-lg shadow-primary/20">
             <Plus size={18} />
@@ -479,6 +536,7 @@ const CourseManagement = () => {
         setCourseForm={setCourseForm}
         categories={selectableCategories}
         instructorPresets={instructorPresets}
+        organizationPresets={organizationPresets}
         departments={departments}
         tiers={tiers}
         lessons={lessons}
@@ -487,8 +545,9 @@ const CourseManagement = () => {
         onSaveCourse={handleSaveCourse}
         onImageUpload={handleImageUpload}
         onEditLesson={(lesson) => {
+          if (!lesson) return;
           setEditingLesson(lesson);
-          setLessonForm(lesson);
+          setLessonForm({ ...lesson });
           setShowLessonModal(true);
         }}
         onDeleteLesson={handleDeleteLesson}
@@ -502,6 +561,7 @@ const CourseManagement = () => {
         onPublishCourse={handlePublishCourseFromBuilder}
         fetchQuizReports={fetchQuizReports}
         uploading={uploading}
+        currentUser={currentUser}
       />
 
       <CategoryManagementModal
@@ -551,6 +611,25 @@ const CourseManagement = () => {
         }}
         onDelete={handleInstructorPresetDelete}
       />
+
+      <OrganizationPresetModal
+        isOpen={showOrganizationPresetModal}
+        presets={organizationPresets}
+        loading={loading}
+        onClose={() => setShowOrganizationPresetModal(false)}
+        onCreate={async (payload) => {
+          await adminAPI.createOrganizationPreset(payload);
+          toast.success('สร้างพรีเซ็ตหน่วยงานเรียบร้อย');
+          await fetchData();
+        }}
+        onUpdate={async (id, payload) => {
+          await adminAPI.updateOrganizationPreset(id, payload);
+          toast.success('อัปเดตพรีเซ็ตหน่วยงานเรียบร้อย');
+          await fetchData();
+        }}
+        onDelete={handleOrganizationPresetDelete}
+      />
+
       <ConfirmDialog {...ConfirmDialogProps} />
     </div>
   );

@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Plus, Settings2, Sparkles } from 'lucide-react';
+import React from 'react';
+import { Plus, Settings2, Sparkles, Users } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import UserModal from '../../components/admin/UserModal';
@@ -21,10 +21,14 @@ const getDefaultFormData = () => ({
   email: '',
   password: '',
   role: USER_ROLES.USER,
+  roles: [],
   departmentId: '',
   tierId: '',
   employmentDate: '',
   pointsBalance: 0,
+  educationHistory: [],
+  profileFiles: [],
+  profileImageUrl: '',
 });
 
 const formatDateForInput = (value) => {
@@ -38,31 +42,39 @@ const formatDateForInput = (value) => {
 const UserManagement = () => {
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
-  const [users, setUsers] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [tiers, setTiers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [referenceLoading, setReferenceLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState(FILTER_VALUES.ALL);
-  const [selectedTier, setSelectedTier] = useState(FILTER_VALUES.ALL);
+  const [users, setUsers] = React.useState([]);
+  const [departments, setDepartments] = React.useState([]);
+  const [tiers, setTiers] = React.useState([]);
+  const [cohortRoles, setCohortRoles] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [referenceLoading, setReferenceLoading] = React.useState(true);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [selectedDepartment, setSelectedDepartment] = React.useState(FILTER_VALUES.ALL);
+  const [selectedTier, setSelectedTier] = React.useState(FILTER_VALUES.ALL);
 
-  const [showUserModal, setShowUserModal] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [formData, setFormData] = useState(getDefaultFormData());
+  const [showUserModal, setShowUserModal] = React.useState(false);
+  const [editingUser, setEditingUser] = React.useState(null);
+  const [formData, setFormData] = React.useState(getDefaultFormData());
 
-  const [showDepartmentModal, setShowDepartmentModal] = useState(false);
-  const [showTierModal, setShowTierModal] = useState(false);
+  const [showDepartmentModal, setShowDepartmentModal] = React.useState(false);
+  const [showTierModal, setShowTierModal] = React.useState(false);
+  const [showCohortRoleModal, setShowCohortRoleModal] = React.useState(false);
 
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [selectedUserDetail, setSelectedUserDetail] = useState(null);
+  const [showDetailModal, setShowDetailModal] = React.useState(false);
+  const [detailLoading, setDetailLoading] = React.useState(false);
+  const [selectedUserDetail, setSelectedUserDetail] = React.useState(null);
+  const [profileCertificates, setProfileCertificates] = React.useState([]);
+  const [lmsCertificates, setLmsCertificates] = React.useState([]);
+  const [savingProfileDetails, setSavingProfileDetails] = React.useState(false);
+  const [uploadingProfileFile, setUploadingProfileFile] = React.useState(false);
+  const [savingCertificate, setSavingCertificate] = React.useState(false);
+  const [uploadingCertificate, setUploadingCertificate] = React.useState(false);
 
-  const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
+  const currentUser = React.useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const canEditUsers = canEditAdminUsers(currentUser);
   const isManagerView = !canEditUsers;
 
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = React.useCallback(async () => {
     try {
       const response = await adminAPI.getUsers();
       setUsers(response.data);
@@ -74,15 +86,17 @@ const UserManagement = () => {
     }
   }, [toast]);
 
-  const fetchReferenceData = useCallback(async () => {
+  const fetchReferenceData = React.useCallback(async () => {
     try {
       const requests = [
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
+        adminAPI.getCohortRoles(),
       ];
-      const [departmentResponse, tierResponse] = await Promise.all(requests);
+      const [departmentResponse, tierResponse, cohortRoleResponse] = await Promise.all(requests);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
+      setCohortRoles(cohortRoleResponse.data);
     } catch (error) {
       console.error('Fetch reference data error:', error);
     } finally {
@@ -90,7 +104,7 @@ const UserManagement = () => {
     }
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const bootstrap = async () => {
       await Promise.all([fetchUsers(), fetchReferenceData()]);
     };
@@ -104,6 +118,8 @@ const UserManagement = () => {
     try {
       const payload = {
         ...formData,
+        permission: formData.role,
+        roles: formData.roles || [],
         employmentDate: formData.employmentDate || null,
       };
 
@@ -162,6 +178,8 @@ const UserManagement = () => {
   const openAddUser = () => {
     setEditingUser(null);
     setFormData(getDefaultFormData());
+    setProfileCertificates([]);
+    setLmsCertificates([]);
     setShowUserModal(true);
   };
 
@@ -171,13 +189,28 @@ const UserManagement = () => {
       name: user.name,
       email: user.email,
       password: '',
-      role: user.role || USER_ROLES.USER,
+      role: user.permission || user.role || USER_ROLES.USER,
+      roles: user.roles || [],
       departmentId: user.departmentId || '',
       tierId: user.tierId || '',
       employmentDate: formatDateForInput(user.employmentDate),
       pointsBalance: user.pointsBalance || 0,
+      educationHistory: Array.isArray(user.educationHistory) ? user.educationHistory : [],
+      profileFiles: Array.isArray(user.profileFiles) ? user.profileFiles : [],
+      profileImageUrl: user.profileImageUrl || '',
     });
     setShowUserModal(true);
+    setProfileCertificates([]);
+    setLmsCertificates([]);
+    Promise.all([
+      adminAPI.getUserCertificates(user.id),
+      adminAPI.getUserDetails(user.id)
+    ]).then(([certificatesRes, detailsRes]) => {
+      setProfileCertificates(Array.isArray(certificatesRes?.data) ? certificatesRes.data : []);
+      setLmsCertificates(Array.isArray(detailsRes?.data?.systemCertificates) ? detailsRes.data.systemCertificates : []);
+    }).catch((error) => {
+      console.error('Fetch editable profile extras error:', error);
+    });
   };
 
   const handleDepartmentDelete = async (id, name) => {
@@ -218,6 +251,25 @@ const UserManagement = () => {
     }
   };
 
+  const handleCohortRoleDelete = async (id, name) => {
+    const ok = await confirm({
+      title: 'ยืนยันการลบ Cohort Role',
+      message: `ต้องการลบ role "${name}" ใช่หรือไม่? Role นี้จะถูกถอดออกจากผู้ใช้งานที่เลือกไว้ด้วย`,
+      confirmLabel: 'ลบ',
+      variant: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      await adminAPI.deleteCohortRole(id);
+      toast.success('ลบ Cohort Role เรียบร้อย');
+      await Promise.all([fetchReferenceData(), fetchUsers()]);
+    } catch (error) {
+      console.error('Delete cohort role error:', error);
+      toast.error(error.response?.data?.message || 'ลบ Cohort Role ไม่สำเร็จ');
+    }
+  };
+
   const handleTierReorder = async (reorderedItems) => {
     try {
       const tierIds = reorderedItems.map(item => item.id);
@@ -231,7 +283,117 @@ const UserManagement = () => {
     }
   };
 
-  const filteredUsers = useMemo(() => {
+  const handleCohortRoleReorder = async (reorderedItems) => {
+    try {
+      const roleIds = reorderedItems.map(item => item.id);
+      setCohortRoles(reorderedItems);
+      await adminAPI.reorderCohortRoles(roleIds);
+      toast.success('บันทึกลำดับ Cohort Role เรียบร้อย');
+    } catch (error) {
+      console.error('Reorder cohort roles error:', error);
+      toast.error('ไม่สามารถบันทึกลำดับ Cohort Role ได้');
+      fetchReferenceData();
+    }
+  };
+
+  const handleUploadEditableProfileFile = async (file) => {
+    try {
+      setUploadingProfileFile(true);
+      const response = await adminAPI.uploadProfileFile(file);
+      toast.success('อัปโหลดไฟล์ข้อมูลอื่นๆ สำเร็จ');
+      return response?.data || response;
+    } catch (error) {
+      console.error('Upload profile file error:', error);
+      toast.error(error.response?.data?.message || 'อัปโหลดไฟล์ไม่สำเร็จ');
+      return null;
+    } finally {
+      setUploadingProfileFile(false);
+    }
+  };
+
+  const handleOpenEditableProfileFile = async (file) => {
+    try {
+      if (file.fileUrl) {
+        window.open(file.fileUrl, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      if (!file.fileKey) return;
+      const response = await adminAPI.getProfileFileDownloadUrl(file.fileKey);
+      const url = response?.data?.url || response?.url;
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Open profile file error:', error);
+      toast.error('เปิดไฟล์ไม่สำเร็จ');
+    }
+  };
+
+  const handleCreateEditableCertificate = async (payload) => {
+    if (!editingUser?.id) return null;
+    try {
+      setSavingCertificate(true);
+      const response = await adminAPI.createUserCertificate(editingUser.id, payload);
+      const certificate = response?.data || response;
+      setProfileCertificates((current) => [certificate, ...current]);
+      toast.success('เพิ่มประวัติอบรมสำเร็จ');
+      return certificate;
+    } catch (error) {
+      console.error('Create user certificate error:', error);
+      toast.error(error.response?.data?.message || 'เพิ่มประวัติอบรมไม่สำเร็จ');
+      return null;
+    } finally {
+      setSavingCertificate(false);
+    }
+  };
+
+  const handleUpdateEditableCertificate = async (certificateId, payload) => {
+    if (!editingUser?.id) return null;
+    try {
+      setSavingCertificate(true);
+      const response = await adminAPI.updateUserCertificate(editingUser.id, certificateId, payload);
+      const certificate = response?.data || response;
+      setProfileCertificates((current) => current.map((item) => (item.id === certificateId ? certificate : item)));
+      toast.success('อัปเดตประวัติอบรมสำเร็จ');
+      return certificate;
+    } catch (error) {
+      console.error('Update user certificate error:', error);
+      toast.error(error.response?.data?.message || 'อัปเดตประวัติอบรมไม่สำเร็จ');
+      return null;
+    } finally {
+      setSavingCertificate(false);
+    }
+  };
+
+  const handleDeleteEditableCertificate = async (certificateId) => {
+    if (!editingUser?.id) return;
+    const ok = window.confirm('ลบประวัติอบรมนี้ออกจากโปรไฟล์?');
+    if (!ok) return;
+
+    try {
+      await adminAPI.deleteUserCertificate(editingUser.id, certificateId);
+      setProfileCertificates((current) => current.filter((item) => item.id !== certificateId));
+      toast.success('ลบประวัติอบรมแล้ว');
+    } catch (error) {
+      console.error('Delete user certificate error:', error);
+      toast.error(error.response?.data?.message || 'ลบประวัติอบรมไม่สำเร็จ');
+    }
+  };
+
+  const handleUploadEditableCertificateFile = async (file) => {
+    try {
+      setUploadingCertificate(true);
+      const response = await adminAPI.uploadCertificateFile(file);
+      toast.success('อัปโหลดไฟล์ certificate สำเร็จ');
+      return response?.data || response;
+    } catch (error) {
+      console.error('Upload certificate file error:', error);
+      toast.error(error.response?.data?.message || 'อัปโหลดไฟล์ certificate ไม่สำเร็จ');
+      return null;
+    } finally {
+      setUploadingCertificate(false);
+    }
+  };
+
+  const filteredUsers = React.useMemo(() => {
     const tierOrderMap = Object.fromEntries(tiers.map((t) => [t.id, t.order]));
     
     return users
@@ -262,9 +424,10 @@ const UserManagement = () => {
       });
   }, [searchTerm, selectedDepartment, selectedTier, users, tiers]);
 
-  const columns = useMemo(() => [
+  const columns = React.useMemo(() => [
     { label: 'ผู้ใช้งาน' },
-    { label: 'Role ระบบ' },
+    { label: 'Permission ระบบ' },
+    { label: 'บทบาท (Role)' },
     { label: 'แผนก' },
     { label: 'ระดับ' },
     { label: 'เริ่มงาน' },
@@ -292,6 +455,10 @@ const UserManagement = () => {
                   <Sparkles size={18} />
                   จัดการระดับ
                 </button>
+                <button type="button" onClick={() => setShowCohortRoleModal(true)} className="btn btn-outline">
+                  <Users size={18} />
+                  จัดการ Role
+                </button>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
                   เพิ่มผู้ใช้งาน
@@ -311,7 +478,20 @@ const UserManagement = () => {
         setFormData={setFormData}
         departments={departments}
         tiers={tiers}
+        cohortRoles={cohortRoles}
         canEditRole={canEditUsers}
+        profileCertificates={profileCertificates}
+        lmsCertificates={lmsCertificates}
+        savingProfileDetails={savingProfileDetails}
+        uploadingProfileFile={uploadingProfileFile}
+        savingCertificate={savingCertificate}
+        uploadingCertificate={uploadingCertificate}
+        onUploadProfileFile={handleUploadEditableProfileFile}
+        onOpenProfileFile={handleOpenEditableProfileFile}
+        onCreateCertificate={handleCreateEditableCertificate}
+        onUpdateCertificate={handleUpdateEditableCertificate}
+        onDeleteCertificate={handleDeleteEditableCertificate}
+        onUploadCertificate={handleUploadEditableCertificateFile}
       />
 
       {canEditUsers && (
@@ -360,6 +540,35 @@ const UserManagement = () => {
             showAccessToggle={true}
           />
 
+          <ReferenceDataModal
+            isOpen={showCohortRoleModal}
+            title="จัดการ Cohort Role"
+            description="เพิ่ม แก้ไข ลบ และเรียงลำดับ role ที่ใช้ assign ผู้ใช้งาน เช่น Trainee G1, Trainee G2, Trainee G3"
+            itemLabel="Cohort Role"
+            items={cohortRoles}
+            loading={referenceLoading}
+            onClose={() => setShowCohortRoleModal(false)}
+            onCreate={async (payload) => {
+              await adminAPI.createCohortRole(payload);
+              toast.success('สร้าง Cohort Role เรียบร้อย');
+              await fetchReferenceData();
+            }}
+            onUpdate={async (id, payload) => {
+              await adminAPI.updateCohortRole(id, payload);
+              toast.success('อัปเดต Cohort Role เรียบร้อย');
+              await fetchReferenceData();
+            }}
+            onDelete={handleCohortRoleDelete}
+            onReorder={handleCohortRoleReorder}
+            memberUsers={users}
+            getMemberIds={(role) => users.filter((user) => (user.roles || []).includes(role.key)).map((user) => user.id)}
+            onUpdateMembers={async (id, userIds) => {
+              await adminAPI.updateCohortRoleMembers(id, userIds);
+              toast.success('บันทึกสมาชิก Cohort Role เรียบร้อย');
+              await Promise.all([fetchReferenceData(), fetchUsers()]);
+            }}
+          />
+
         </>
       )}
 
@@ -367,6 +576,7 @@ const UserManagement = () => {
         isOpen={showDetailModal}
         loading={detailLoading}
         detail={selectedUserDetail}
+        cohortRoles={cohortRoles}
         onClose={() => {
           setShowDetailModal(false);
           setSelectedUserDetail(null);
@@ -393,6 +603,7 @@ const UserManagement = () => {
           onEditUser={openEditUser}
           onDeleteUser={handleDeleteUser}
           canEditUsers={canEditUsers}
+          cohortRoles={cohortRoles}
         />
       </div>
       <ConfirmDialog {...ConfirmDialogProps} />

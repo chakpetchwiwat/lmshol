@@ -1,21 +1,67 @@
-import React, { useState } from 'react';
+﻿import React from 'react';
 import { Calendar, FileText, Trash2, Archive, RotateCcw } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminTable from './AdminTable';
 import AdminActionMenu from './AdminActionMenu';
 import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 
+const getGoalAudience = (goal) => {
+  const userTargets = goal.targetUsers || [];
+  const departmentTargets = goal.targetDepartments || [];
+  const cohortRoleTargets = goal.targetCohortRoles || [];
+
+  if (userTargets.length > 0) {
+    return {
+      label: `รายบุคคล ${userTargets.length} คน`,
+      detail: userTargets.slice(0, 2).map((target) => target.user?.name || target.user?.email).filter(Boolean).join(', '),
+      className: 'text-violet-600'
+    };
+  }
+
+  if (departmentTargets.length > 0) {
+    return {
+      label: `แผนก ${departmentTargets.length} แผนก`,
+      detail: departmentTargets.slice(0, 2).map((target) => target.department?.name).filter(Boolean).join(', '),
+      className: 'text-amber-600'
+    };
+  }
+
+  if (cohortRoleTargets.length > 0) {
+    return {
+      label: `Cohort Role ${cohortRoleTargets.length} role`,
+      detail: cohortRoleTargets.slice(0, 2).map((target) => target.cohortRole?.name).filter(Boolean).join(', '),
+      className: 'text-emerald-600'
+    };
+  }
+
+  if (goal.scope === 'GLOBAL') {
+    return {
+      label: 'ทั้งองค์กร',
+      detail: '',
+      className: 'text-blue-600'
+    };
+  }
+
+  return {
+    label: `แผนก ${goal.department?.name || 'ของคุณ'}`,
+    detail: '',
+    className: 'text-amber-600'
+  };
+};
 
 const GoalList = ({ goals, columns, viewMode, onViewReport, onEditGoal, onDeleteGoal, onArchiveGoal, onRepublishGoal }) => {
 
-  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [openDropdownId, setOpenDropdownId] = React.useState(null);
   return (
     <div className="card">
       <AdminTable 
         columns={columns}
         data={goals}
         emptyMessage="ยังไม่มีการกำหนดเป้าหมายในขณะนี้"
-        renderRow={(goal) => (
+        renderRow={(goal) => {
+          const audience = getGoalAudience(goal);
+
+          return (
           <tr key={goal.id} className="border-b border-border hover:bg-gray-50/50 transition-colors">
             <td className="p-4">
               <div className="font-bold text-slate-800">{goal.title}</div>
@@ -50,9 +96,10 @@ const GoalList = ({ goals, columns, viewMode, onViewReport, onEditGoal, onDelete
               ) : <span className="text-muted">ไม่มีกำหนด</span>}
             </td>
             <td className="p-4">
-              <span className={`text-xs font-medium ${goal.scope === 'GLOBAL' ? 'text-blue-600' : 'text-amber-600'}`}>
-                {goal.scope === 'GLOBAL' ? 'ทั้งองค์กร' : `แผนก ${goal.department?.name || 'ของคุณ'}`}
-              </span>
+              <div className="flex flex-col gap-1">
+                <span className={`text-xs font-bold ${audience.className}`}>{audience.label}</span>
+                {audience.detail && <span className="max-w-[180px] truncate text-[10px] font-medium text-slate-400">{audience.detail}</span>}
+              </div>
             </td>
             <td className="p-4 text-center">
               <div className="flex justify-center">
@@ -104,7 +151,8 @@ const GoalList = ({ goals, columns, viewMode, onViewReport, onEditGoal, onDelete
             </div>
           </td>
           </tr>
-        )}
+          );
+        }}
       />
     </div>
   );

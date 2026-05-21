@@ -15,12 +15,12 @@ const {
 
 test('getStorageObjectRefFromContentUrl parses storage paths and Supabase object URLs', () => {
     assert.deepEqual(getStorageObjectRefFromContentUrl('courses/docs/intro.pdf'), {
-        bucket: 'uploads',
+        bucket: 'secure-documents',
         path: 'courses/docs/intro.pdf'
     });
 
     assert.deepEqual(getStorageObjectRefFromContentUrl('/uploads/courses/docs/intro.pdf'), {
-        bucket: 'uploads',
+        bucket: 'secure-documents',
         path: 'courses/docs/intro.pdf'
     });
 

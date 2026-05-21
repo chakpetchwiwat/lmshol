@@ -1,4 +1,4 @@
-import React, { useId, useMemo, useRef, useState, useEffect } from 'react';
+﻿import React from 'react';
 import { createPortal } from 'react-dom';
 import {
   X,
@@ -10,16 +10,16 @@ import { ICON_LIST } from '../../utils/icons';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 
 const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const dialogRef = useRef(null);
-  const titleId = useId();
-  const searchInputId = useId();
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const dialogRef = React.useRef(null);
+  const titleId = React.useId();
+  const searchInputId = React.useId();
 
   const getCategoryIcon = (iconName) => {
     return ICON_LIST[iconName] || ICON_LIST.LayoutGrid;
   };
 
-  const filteredCategories = useMemo(() => {
+  const filteredCategories = React.useMemo(() => {
     return categories.filter((category) =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -42,7 +42,7 @@ const CategorySearchModal = ({ isOpen, onClose, categories, courses, onSelect })
   });
 
   // Lock body scroll tightly when modal is open
-  useEffect(() => {
+  React.useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none'; // Prevent pulling down to refresh

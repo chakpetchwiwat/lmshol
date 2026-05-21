@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React from 'react';
 import { Plus, Edit, Trash2, ImageIcon } from 'lucide-react';
 import { adminAPI, getFullUrl } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -19,19 +19,19 @@ const DEFAULT_REWARD_FORM = {
 };
 
 const RewardsManagement = () => {
-  const [rewards, setRewards] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [rewardForm, setRewardForm] = useState(DEFAULT_REWARD_FORM);
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [rewards, setRewards] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [showModal, setShowModal] = React.useState(false);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editingId, setEditingId] = React.useState(null);
+  const [rewardForm, setRewardForm] = React.useState(DEFAULT_REWARD_FORM);
+  const [uploadingImage, setUploadingImage] = React.useState(false);
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
 
   const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchRewards = async () => {
       try {
         const response = await adminAPI.getRewards();

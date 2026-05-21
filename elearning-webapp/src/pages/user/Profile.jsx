@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useState } from 'react';
+import React from 'react';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
@@ -7,7 +7,8 @@ import Skeleton from '../../components/common/Skeleton';
 
 // Sub-components
 import ProfileHeader from '../../components/user/ProfileHeader';
-import ProfileStats from '../../components/user/ProfileStats';
+import ProfileEducationSection from '../../components/user/ProfileEducationSection';
+import ProfileFilesSection from '../../components/user/ProfileFilesSection';
 import ProfileActivities from '../../components/user/ProfileActivities';
 import ProfileCertificates from '../../components/user/ProfileCertificates';
 import ProfileSettings from '../../components/user/ProfileSettings';
@@ -18,40 +19,45 @@ const Profile = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [user, setUser] = useState(null);
-  const [points, setPoints] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [savingPassword, setSavingPassword] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [showPolicyModal, setShowPolicyModal] = useState(false);
-  const [courses, setCourses] = useState([]);
-  const [certificates, setCertificates] = useState([]);
-  const [savingCertificate, setSavingCertificate] = useState(false);
-  const [uploadingCertificate, setUploadingCertificate] = useState(false);
+  const [user, setUser] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [showEditModal, setShowEditModal] = React.useState(false);
+  const [currentPassword, setCurrentPassword] = React.useState('');
+  const [newPassword, setNewPassword] = React.useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = React.useState('');
+  const [savingPassword, setSavingPassword] = React.useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
+  const [showPolicyModal, setShowPolicyModal] = React.useState(false);
+  const [courses, setCourses] = React.useState([]);
+  const [certificates, setCertificates] = React.useState([]);
+  const [lmsCertificates, setLmsCertificates] = React.useState([]);
+  const [savingCertificate, setSavingCertificate] = React.useState(false);
+  const [uploadingCertificate, setUploadingCertificate] = React.useState(false);
+  const [savingProfileDetails, setSavingProfileDetails] = React.useState(false);
+  const [uploadingProfileImage, setUploadingProfileImage] = React.useState(false);
+  const [uploadingProfileFile, setUploadingProfileFile] = React.useState(false);
+  const [savingSignature, setSavingSignature] = React.useState(false);
+  const [uploadingSignature, setUploadingSignature] = React.useState(false);
 
-  const passwordDialogTitleId = useId();
-  const policyDialogTitleId = useId();
-  const currentPasswordId = useId();
-  const newPasswordId = useId();
-  const confirmNewPasswordId = useId();
+  const passwordDialogTitleId = React.useId();
+  const policyDialogTitleId = React.useId();
+  const currentPasswordId = React.useId();
+  const newPasswordId = React.useId();
+  const confirmNewPasswordId = React.useId();
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const [userRes, pointsRes, coursesRes, certificatesRes] = await Promise.all([
+        const [userRes, coursesRes, certificatesRes, lmsCertificatesRes] = await Promise.all([
           authAPI.getCurrentUser(),
-          userAPI.getPoints(),
           userAPI.getCourses(),
           userAPI.getCertificates(),
+          userAPI.getLmsCertificates(),
         ]);
         setUser(userRes?.data || userRes);
-        setPoints(pointsRes?.data?.balance ?? pointsRes?.balance ?? 0);
         setCourses(Array.isArray(coursesRes?.data) ? coursesRes.data : Array.isArray(coursesRes) ? coursesRes : []);
         setCertificates(Array.isArray(certificatesRes?.data) ? certificatesRes.data : Array.isArray(certificatesRes) ? certificatesRes : []);
+        setLmsCertificates(Array.isArray(lmsCertificatesRes?.data) ? lmsCertificatesRes.data : Array.isArray(lmsCertificatesRes) ? lmsCertificatesRes : []);
       } catch (error) {
         console.error('Fetch profile error:', error);
       } finally {
@@ -103,6 +109,97 @@ const Profile = () => {
   const toggleNotifications = () => {
     setNotificationsEnabled((current) => !current);
     toast.info(notificationsEnabled ? 'ปิดการแจ้งเตือนแล้ว' : 'เปิดการแจ้งเตือนแล้ว');
+  };
+
+  const applyUpdatedUser = (updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  };
+
+  const handleSaveProfileDetails = async (payload, successMessage = 'บันทึกข้อมูลโปรไฟล์แล้ว') => {
+    try {
+      setSavingProfileDetails(true);
+      const response = await userAPI.updateProfile(payload);
+      const updatedUser = response?.data || response;
+      applyUpdatedUser(updatedUser);
+      toast.success(successMessage);
+      return updatedUser;
+    } catch (error) {
+      console.error('Save profile details error', error);
+      toast.error(error.response?.data?.message || 'บันทึกข้อมูลโปรไฟล์ไม่สำเร็จ');
+      return null;
+    } finally {
+      setSavingProfileDetails(false);
+    }
+  };
+
+  const handleUploadProfileImage = async (file) => {
+    try {
+      setUploadingProfileImage(true);
+      const response = await userAPI.uploadProfileImage(file);
+      const uploaded = response?.data || response;
+      const profileImageUrl = uploaded?.fileUrl || uploaded?.fileKey;
+      if (!profileImageUrl) throw new Error('Upload did not return a profile image URL');
+      await handleSaveProfileDetails({ profileImageUrl }, 'เปลี่ยนรูปโปรไฟล์แล้ว');
+    } catch (error) {
+      console.error('Upload profile image error', error);
+      toast.error(error.response?.data?.message || 'อัปโหลดรูปโปรไฟล์ไม่สำเร็จ');
+    } finally {
+      setUploadingProfileImage(false);
+    }
+  };
+
+  const handleSaveEducation = async (educationHistory) => {
+    await handleSaveProfileDetails({ educationHistory }, 'บันทึกประวัติการศึกษาแล้ว');
+  };
+
+  const handleUploadProfileFile = async (file) => {
+    try {
+      setUploadingProfileFile(true);
+      const response = await userAPI.uploadProfileFile(file);
+      const uploaded = response?.data || response;
+      const nextFile = {
+        id: `${Date.now()}`,
+        title: file.name,
+        fileName: uploaded?.fileName || file.name,
+        fileKey: uploaded?.fileKey || '',
+        fileUrl: uploaded?.fileUrl || '',
+        fileMimeType: uploaded?.fileMimeType || file.type,
+        uploadedAt: new Date().toISOString(),
+      };
+      await handleSaveProfileDetails({
+        profileFiles: [nextFile, ...((user?.profileFiles || []))]
+      }, 'อัปโหลดไฟล์ข้อมูลอื่นๆ แล้ว');
+    } catch (error) {
+      console.error('Upload profile file error', error);
+      toast.error(error.response?.data?.message || 'อัปโหลดไฟล์ไม่สำเร็จ');
+    } finally {
+      setUploadingProfileFile(false);
+    }
+  };
+
+  const handleDeleteProfileFile = async (fileId) => {
+    await handleSaveProfileDetails({
+      profileFiles: (user?.profileFiles || []).filter((file) => file.id !== fileId)
+    }, 'ลบไฟล์แล้ว');
+  };
+
+  const handleOpenProfileFile = async (file) => {
+    try {
+      if (file.fileUrl) {
+        window.open(file.fileUrl, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      if (!file.fileKey) return;
+      const response = await userAPI.getProfileFileDownloadUrl(file.fileKey);
+      const url = response?.data?.url || response?.url;
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    } catch (error) {
+      console.error('Open profile file error', error);
+      toast.error('เปิดไฟล์ไม่สำเร็จ');
+    }
   };
 
   const handleCreateCertificate = async (payload) => {
@@ -168,6 +265,36 @@ const Profile = () => {
     }
   };
 
+  const handleUploadSignatureFile = async (file) => {
+    try {
+      setUploadingSignature(true);
+      const response = await userAPI.uploadSignatureFile(file);
+      toast.success('Signature uploaded');
+      return response?.data || response;
+    } catch (error) {
+      console.error('Upload signature error', error);
+      toast.error(error.response?.data?.message || 'Unable to upload signature');
+      return null;
+    } finally {
+      setUploadingSignature(false);
+    }
+  };
+
+  const handleSaveSignature = async ({ signatureTitle, signatureImageUrl }) => {
+    try {
+      setSavingSignature(true);
+      const response = await userAPI.updateProfile({ signatureTitle, signatureImageUrl });
+      const updatedUser = response?.data || response;
+      applyUpdatedUser(updatedUser);
+      toast.success('Signature saved');
+    } catch (error) {
+      console.error('Save signature error', error);
+      toast.error(error.response?.data?.message || 'Unable to save signature');
+    } finally {
+      setSavingSignature(false);
+    }
+  };
+
   if (loading) {
     return <Skeleton.List count={5} />;
   }
@@ -176,12 +303,23 @@ const Profile = () => {
     <div className="flex h-full flex-col gap-6 animate-fade-in pb-8 pt-2">
       <ProfileHeader 
         user={user} 
-        onOpenSettings={() => setShowEditModal(true)} 
+        onUploadProfileImage={handleUploadProfileImage}
+        uploadingImage={uploadingProfileImage}
       />
 
-      <ProfileStats 
-        user={user} 
-        points={points} 
+      <ProfileEducationSection
+        education={Array.isArray(user?.educationHistory) ? user.educationHistory : []}
+        saving={savingProfileDetails}
+        onSave={handleSaveEducation}
+      />
+
+      <ProfileFilesSection
+        files={Array.isArray(user?.profileFiles) ? user.profileFiles : []}
+        saving={savingProfileDetails}
+        uploading={uploadingProfileFile}
+        onUpload={handleUploadProfileFile}
+        onDelete={handleDeleteProfileFile}
+        onOpen={handleOpenProfileFile}
       />
 
       <ProfileActivities 
@@ -191,6 +329,7 @@ const Profile = () => {
 
       <ProfileCertificates
         certificates={certificates}
+        lmsCertificates={lmsCertificates}
         saving={savingCertificate}
         uploading={uploadingCertificate}
         onCreate={handleCreateCertificate}
@@ -200,10 +339,15 @@ const Profile = () => {
       />
 
       <ProfileSettings 
+        user={user}
         notificationsEnabled={notificationsEnabled}
         onToggleNotifications={toggleNotifications}
         onShowPasswordModal={() => setShowEditModal(true)}
         onShowPrivacyModal={() => setShowPolicyModal(true)}
+        onSaveSignature={handleSaveSignature}
+        onUploadSignature={handleUploadSignatureFile}
+        savingSignature={savingSignature}
+        uploadingSignature={uploadingSignature}
       />
 
       <div className="mb-8 mt-4">

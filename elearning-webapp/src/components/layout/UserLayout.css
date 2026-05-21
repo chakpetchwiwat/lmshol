@@ -110,7 +110,8 @@
   justify-content: center;
   gap: 4px;
   color: var(--color-text-muted);
-  width: 25%; /* Fixed width for 4 items */
+  flex: 1 1 0;
+  min-width: 0;
   height: 100%;
   transition: all var(--transition-fast);
   text-decoration: none;
@@ -118,8 +119,12 @@
 }
 
 .nav-item span {
-  font-size: 0.65rem;
+  max-width: 100%;
+  font-size: clamp(0.56rem, 2.4vw, 0.65rem);
   font-weight: 500;
+  line-height: 1.1;
+  text-align: center;
+  white-space: normal;
 }
 
 .nav-item:hover {

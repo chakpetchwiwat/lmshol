@@ -12,7 +12,13 @@ const UserList = ({
   onEditUser,
   onDeleteUser,
   canEditUsers,
+  cohortRoles = [],
 }) => {
+  const cohortRoleLabelMap = React.useMemo(
+    () => Object.fromEntries(cohortRoles.map((role) => [role.key, role.name || role.key])),
+    [cohortRoles]
+  );
+
   return (
     <AdminTable
       columns={columns}
@@ -26,6 +32,25 @@ const UserList = ({
             <div className="mt-0.5 text-xs text-muted">{user.email}</div>
           </td>
           <td className="p-4 text-sm text-muted">{getRoleLabel(user)}</td>
+          <td className="p-4 text-sm text-muted">
+            {Array.isArray(user.roles) && user.roles.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {user.roles.map((r) => {
+                  const label = cohortRoleLabelMap[r] || r;
+                  return (
+                    <span
+                      key={r}
+                      className="inline-block px-1.5 py-0.5 text-xs font-semibold rounded bg-slate-100 text-slate-700"
+                    >
+                      {label}
+                    </span>
+                  );
+                })}
+              </div>
+            ) : (
+              '-'
+            )}
+          </td>
           <td className="p-4 text-sm text-muted">{user.department || '-'}</td>
           <td className="p-4 text-sm text-muted">{user.tier?.name || user.tier || '-'}</td>
           <td className="p-4 text-sm text-muted">

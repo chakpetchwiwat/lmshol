@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Play, CheckCircle, Clock, FileText, BookOpen } from 'lucide-react';
+import { Play, CheckCircle, Clock, FileText, BookOpen, ClipboardCheck } from 'lucide-react';
 import { userAPI, getFullUrl } from '../../utils/api';
 import Skeleton from '../../components/common/Skeleton';
 import { useToast } from '../../context/useToast';
@@ -9,11 +9,13 @@ import { hasRenderableLessonContent, sanitizeLessonContent } from '../../utils/r
 
 import LessonMedia from '../../components/user/LessonMedia';
 import QuizSection from '../../components/user/QuizSection';
+import AssessmentSection from '../../components/user/AssessmentSection';
 import LessonProgressActions from '../../components/user/LessonProgressActions';
 import LessonSidebar from '../../components/user/LessonSidebar';
 
 const getLessonTypeLabel = (type) => {
   if (type === 'quiz') return 'แบบทดสอบ';
+  if (type === 'assessment') return 'Assessment';
   if (type === 'video') return 'วิดีโอ';
   if (type === 'article') return 'บทความ';
   if (type === 'pdf' || type === 'document') return 'เอกสาร';
@@ -25,23 +27,27 @@ const LessonPlayer = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [lesson, setLesson] = useState(null);
-  const [course, setCourse] = useState(null);
-  const [completed, setCompleted] = useState(false);
-  const [updating, setUpdating] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [showDocViewer, setShowDocViewer] = useState(false);
-  const [documentAccess, setDocumentAccess] = useState(null);
-  const [openingDocument, setOpeningDocument] = useState(false);
-  const [isNavigatingAway, setIsNavigatingAway] = useState(false);
+  const [lesson, setLesson] = React.useState(null);
+  const [course, setCourse] = React.useState(null);
+  const [completed, setCompleted] = React.useState(false);
+  const [updating, setUpdating] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+  const [showDocViewer, setShowDocViewer] = React.useState(false);
+  const [documentAccess, setDocumentAccess] = React.useState(null);
+  const [openingDocument, setOpeningDocument] = React.useState(false);
+  const [isNavigatingAway, setIsNavigatingAway] = React.useState(false);
 
-  const [answers, setAnswers] = useState({});
-  const [quizResult, setQuizResult] = useState(null);
-  const [shouldScrollToQuizResult, setShouldScrollToQuizResult] = useState(false);
-  const quizResultRef = useRef(null);
-  const lessonContentRef = useRef(null);
+  const [answers, setAnswers] = React.useState({});
+  const [quizResult, setQuizResult] = React.useState(null);
+  const [assessmentSubmission, setAssessmentSubmission] = React.useState(null);
+  const [assessmentFile, setAssessmentFile] = React.useState(null);
+  const [assessmentNote, setAssessmentNote] = React.useState('');
+  const [assessmentUploading, setAssessmentUploading] = React.useState(false);
+  const [shouldScrollToQuizResult, setShouldScrollToQuizResult] = React.useState(false);
+  const quizResultRef = React.useRef(null);
+  const lessonContentRef = React.useRef(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchLessonData = async () => {
       try {
         setLoading(true);
@@ -50,6 +56,9 @@ const LessonPlayer = () => {
         setIsNavigatingAway(false);
         setAnswers({});
         setQuizResult(null);
+        setAssessmentSubmission(null);
+        setAssessmentFile(null);
+        setAssessmentNote('');
 
         const response = await userAPI.getCourseDetails(courseId);
         setCourse(response.data);
@@ -59,6 +68,10 @@ const LessonPlayer = () => {
         if (currentLesson?.type === 'quiz') {
           const questionResponse = await userAPI.getLessonQuestions(lessonId);
           currentLesson.questions = questionResponse.data;
+        }
+
+        if (currentLesson?.type === 'assessment') {
+          setAssessmentSubmission(currentLesson.assessmentSubmission || null);
         }
 
         setLesson(currentLesson);
@@ -82,7 +95,7 @@ const LessonPlayer = () => {
     fetchLessonData();
   }, [courseId, lessonId, toast]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!shouldScrollToQuizResult || !quizResult || lesson?.type !== 'quiz') return;
 
     window.requestAnimationFrame(() => {
@@ -171,6 +184,51 @@ const LessonPlayer = () => {
     }
   };
 
+  const handleAssessmentSubmit = async () => {
+    if (!assessmentFile) {
+      toast.warning('Please choose an assessment file first');
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setAssessmentUploading(true);
+      const uploadResponse = await userAPI.uploadAssessmentFile(assessmentFile);
+      const uploadData = uploadResponse.data;
+      const response = await userAPI.submitAssessment(lessonId, {
+        fileUrl: uploadData.fileUrl,
+        fileKey: uploadData.fileKey,
+        fileName: uploadData.fileName || assessmentFile.name,
+        fileMimeType: uploadData.fileMimeType || assessmentFile.type,
+        maxScore: lesson.points || 10,
+        note: assessmentNote,
+      });
+
+      setAssessmentSubmission(response.data);
+      setAssessmentFile(null);
+      setAssessmentNote('');
+      toast.success('Assessment submitted for review');
+    } catch (error) {
+      console.error('Submit assessment error:', error);
+      toast.error(error.response?.data?.message || 'Unable to submit assessment');
+    } finally {
+      setAssessmentUploading(false);
+      setUpdating(false);
+    }
+  };
+
+  const handleAssessmentDownload = async (submission) => {
+    try {
+      const response = await userAPI.getAssessmentSubmissionDownloadUrl(submission.id);
+      const url = response?.data?.url || response?.url;
+      if (!url) throw new Error('Download URL was not returned');
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Open assessment file error:', error);
+      toast.error('Unable to open assessment file');
+    }
+  };
+
   const navigateToPath = (path, options = {}) => {
     if (!path) return;
 
@@ -241,8 +299,23 @@ const LessonPlayer = () => {
     if (accessUrl) setShowDocViewer(true);
   };
 
-  if (!lesson && loading) {
-    return <Skeleton.LessonPlayer />;
+  if (!lesson) {
+    if (loading) return <Skeleton.LessonPlayer />;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+        <div className="w-20 h-20 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-300 mb-6 border border-slate-100">
+          <BookOpen size={40} />
+        </div>
+        <h2 className="text-2xl font-black text-slate-900 mb-2">ไม่พบข้อมูลบทเรียน</h2>
+        <p className="text-slate-500 font-bold max-w-sm mb-8">บทเรียนนี้อาจถูกลบหรือย้ายไปแล้ว หรือคุณอาจไม่มีสิทธิ์เข้าถึงในขณะนี้</p>
+        <button 
+          onClick={handleReturnToCourse}
+          className="px-8 py-3 bg-primary text-white rounded-2xl font-black shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all active:scale-95"
+        >
+          กลับไปยังหน้ารายละเอียดคอร์ส
+        </button>
+      </div>
+    );
   }
 
   const currentLessonIndex = course?.lessons?.findIndex((item) => item.id === lessonId) ?? -1;
@@ -250,14 +323,16 @@ const LessonPlayer = () => {
   const nextLessonId = nextLesson?.id;
   const totalLessons = course?.lessons?.length || 0;
   const completedLessonsCount = course?.lessons?.filter((item) => item.isCompleted).length || 0;
-  const lessonMediaUrl = getFullUrl(lesson.contentUrl?.trim());
-  const hasResources = Array.isArray(lesson.resources) && lesson.resources.length > 0;
+  
+  // Safe URL retrieval
+  const lessonMediaUrl = lesson?.contentUrl ? getFullUrl(lesson.contentUrl.trim()) : '';
+  const hasResources = Array.isArray(lesson?.resources) && lesson.resources.length > 0;
   const showAchievementCard = course?.showAchievementCard === true;
   const quizRewardPoints = Number(lesson?.points) || 0;
   const canEarnQuizPoints = lesson?.type === 'quiz' && quizRewardPoints > 0;
   const hasProtectedDocument = lesson?.hasDocument === true;
-  const lessonContentHtml = sanitizeLessonContent(lesson.content);
-  const hasLessonContent = hasRenderableLessonContent(lesson.content);
+  const lessonContentHtml = lesson?.content ? sanitizeLessonContent(lesson.content) : '';
+  const hasLessonContent = lesson?.content ? hasRenderableLessonContent(lesson.content) : false;
 
   return (
     <div className="relative mx-auto flex min-h-screen w-full max-w-5xl flex-col bg-white pb-12 md:bg-transparent md:px-4 md:py-6">
@@ -306,6 +381,7 @@ const LessonPlayer = () => {
                 <span className="flex items-center gap-1.5 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2 text-xs font-black tracking-[0.04em] text-primary">
                   {lesson.type === 'video' ? <Play size={14} fill="currentColor" /> :
                     lesson.type === 'quiz' ? <CheckCircle size={14} /> :
+                    lesson.type === 'assessment' ? <ClipboardCheck size={14} /> :
                     lesson.type === 'article' ? <BookOpen size={14} /> :
                     <FileText size={14} />}
                   {getLessonTypeLabel(lesson.type)}
@@ -347,6 +423,19 @@ const LessonPlayer = () => {
                   updating={updating}
                   canEarnQuizPoints={canEarnQuizPoints}
                   quizRewardPoints={quizRewardPoints}
+                />
+              ) : lesson.type === 'assessment' ? (
+                <AssessmentSection
+                  lesson={lesson}
+                  submission={assessmentSubmission}
+                  selectedFile={assessmentFile}
+                  setSelectedFile={setAssessmentFile}
+                  note={assessmentNote}
+                  setNote={setAssessmentNote}
+                  uploading={assessmentUploading}
+                  updating={updating}
+                  onSubmit={handleAssessmentSubmit}
+                  onDownload={handleAssessmentDownload}
                 />
               ) : (
                 <div className="rich-text-content rounded-[2rem] border border-slate-100 bg-slate-50/70 px-6 py-7 text-[1.05rem] text-slate-700 shadow-[0_24px_60px_-40px_rgba(15,23,42,0.2)] md:px-8 md:py-9 md:text-[1.1rem]">

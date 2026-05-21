@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React from 'react';
 import Skeleton from '../common/Skeleton';
 import { RotateCcw, Edit, Trash2, History, Archive } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -25,7 +25,7 @@ const getModuleGroupBadgeClass = (type) => {
 };
 
 const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHistory, onArchive }) => {
-  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [openDropdownId, setOpenDropdownId] = React.useState(null);
 
   if (loading) {
     return <Skeleton.List count={5} />;

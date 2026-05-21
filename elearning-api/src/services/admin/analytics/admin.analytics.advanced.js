@@ -296,20 +296,20 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
                 period.mode
             );
 
-            const now = new Date();
-            const warningWindow = new Date();
-            warningWindow.setDate(now.getDate() + 10);
+            const riskNow = period.start;
+            const riskWarningWindow = period.end;
 
             let atRisk = [];
             try {
                 atRisk = await buildAtRiskLearners({
                     learnerWhere,
                     scopeFilters,
-                    now,
-                    warningWindow
+                    now: riskNow,
+                    warningWindow: riskWarningWindow
                 });
             } catch (riskError) {
                 console.error('Error building at-risk analytics:', riskError);
+                atRisk = [];
             }
 
             return {

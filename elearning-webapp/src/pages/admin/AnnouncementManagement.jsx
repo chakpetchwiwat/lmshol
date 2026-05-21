@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import React from 'react';
 import { BellPlus, CalendarClock, Search } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
@@ -35,29 +35,29 @@ const AnnouncementManagement = () => {
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
 
-  const [user] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'));
+  const [user] = React.useState(() => JSON.parse(localStorage.getItem('user') || 'null'));
   const isFullAdmin = canEditAdminUsers(user);
 
-  const [announcements, setAnnouncements] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [editorImageUploading, setEditorImageUploading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState(ENTITY_VIEW_STATUS.ACTIVE);
-  const [form, setForm] = useState(getDefaultForm());
+  const [announcements, setAnnouncements] = React.useState([]);
+  const [departments, setDepartments] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [uploading, setUploading] = React.useState(false);
+  const [editorImageUploading, setEditorImageUploading] = React.useState(false);
+  const [showModal, setShowModal] = React.useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = React.useState(null);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [viewMode, setViewMode] = React.useState(ENTITY_VIEW_STATUS.ACTIVE);
+  const [form, setForm] = React.useState(getDefaultForm());
 
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [historyData, setHistoryData] = useState([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
-  const [currentAnnouncementTitle, setCurrentAnnouncementTitle] = useState('');
+  const [showHistoryModal, setShowHistoryModal] = React.useState(false);
+  const [historyData, setHistoryData] = React.useState([]);
+  const [historyLoading, setHistoryLoading] = React.useState(false);
+  const [currentAnnouncementTitle, setCurrentAnnouncementTitle] = React.useState('');
 
-  const announcementHistoryCacheRef = useRef(new Map());
-  const announcementHistoryRequestRef = useRef(null);
+  const announcementHistoryCacheRef = React.useRef(new Map());
+  const announcementHistoryRequestRef = React.useRef(null);
 
-  const invalidateAnnouncementHistoryCache = useCallback((announcementId) => {
+  const invalidateAnnouncementHistoryCache = React.useCallback((announcementId) => {
     if (!announcementId) {
       announcementHistoryCacheRef.current.clear();
       return;
@@ -66,14 +66,14 @@ const AnnouncementManagement = () => {
     announcementHistoryCacheRef.current.delete(announcementId);
   }, []);
 
-  const cancelAnnouncementHistoryRequest = useCallback(() => {
+  const cancelAnnouncementHistoryRequest = React.useCallback(() => {
     if (announcementHistoryRequestRef.current) {
       announcementHistoryRequestRef.current.abort();
       announcementHistoryRequestRef.current = null;
     }
   }, []);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       setLoading(true);
       const [announcementRes, departmentRes] = await Promise.all([
@@ -100,11 +100,11 @@ const AnnouncementManagement = () => {
     }
   }, [isFullAdmin, toast, user?.departmentId]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  useEffect(() => () => {
+  React.useEffect(() => () => {
     cancelAnnouncementHistoryRequest();
   }, [cancelAnnouncementHistoryRequest]);
 
@@ -296,13 +296,13 @@ const AnnouncementManagement = () => {
     }
   };
 
-  const handleCloseHistoryModal = useCallback(() => {
+  const handleCloseHistoryModal = React.useCallback(() => {
     cancelAnnouncementHistoryRequest();
     setShowHistoryModal(false);
     setHistoryLoading(false);
   }, [cancelAnnouncementHistoryRequest]);
 
-  const handleViewHistory = useCallback(async (announcement) => {
+  const handleViewHistory = React.useCallback(async (announcement) => {
     const announcementId = announcement?.id;
     if (!announcementId) return;
 
@@ -350,7 +350,7 @@ const AnnouncementManagement = () => {
     }
   }, [cancelAnnouncementHistoryRequest, toast]);
 
-  const filteredAnnouncements = useMemo(() => {
+  const filteredAnnouncements = React.useMemo(() => {
     const now = new Date();
     return announcements.filter((announcement) => {
       if (!isFullAdmin && announcement.scope !== 'GLOBAL' && announcement.departmentId !== user?.departmentId) {
@@ -366,7 +366,7 @@ const AnnouncementManagement = () => {
     });
   }, [announcements, searchTerm, viewMode, isFullAdmin, user?.departmentId]);
 
-  const activeCount = useMemo(
+  const activeCount = React.useMemo(
     () => announcements.filter((announcement) => {
       if (!isFullAdmin && announcement.scope !== 'GLOBAL' && announcement.departmentId !== user?.departmentId) return false;
       return !announcement.expiredAt || new Date(announcement.expiredAt) > new Date();
@@ -374,7 +374,7 @@ const AnnouncementManagement = () => {
     [announcements, isFullAdmin, user?.departmentId],
   );
 
-  const archivedCount = useMemo(
+  const archivedCount = React.useMemo(
     () => announcements.filter((announcement) => {
       if (!isFullAdmin && announcement.scope !== 'GLOBAL' && announcement.departmentId !== user?.departmentId) return false;
       return announcement.expiredAt && new Date(announcement.expiredAt) <= new Date();

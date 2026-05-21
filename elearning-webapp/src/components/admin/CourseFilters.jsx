@@ -59,7 +59,7 @@ const CourseFilters = ({
               onChange={(event) => setSelectedCategory(event.target.value)}
               options={[
                 { value: FILTER_VALUES.ALL, label: 'ทุกหมวดหมู่' },
-                ...categories
+                ...(categories || [])
                   .filter((category) => !category.isArchived)
                   .map((category) => ({ value: category.id, label: category.name })),
               ]}

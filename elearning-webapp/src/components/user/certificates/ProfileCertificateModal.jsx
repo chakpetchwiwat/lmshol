@@ -1,4 +1,4 @@
-import React, { useId, useRef } from 'react';
+import React from 'react';
 import { Link as LinkIcon, Upload, X } from 'lucide-react';
 import ModalPortal from '../../common/ModalPortal';
 import useAccessibleOverlay from '../../../hooks/useAccessibleOverlay';
@@ -14,17 +14,17 @@ const ProfileCertificateModal = ({
   onFileChange,
   onSubmit
 }) => {
-  const dialogRef = useRef(null);
-  const titleInputRef = useRef(null);
-  const titleId = useId();
-  const titleInputId = useId();
-  const issuerInputId = useId();
-  const issueDateId = useId();
-  const expirationDateId = useId();
-  const noExpirationId = useId();
-  const credentialIdInputId = useId();
-  const credentialUrlInputId = useId();
-  const fileInputId = useId();
+  const dialogRef = React.useRef(null);
+  const titleInputRef = React.useRef(null);
+  const titleId = React.useId();
+  const titleInputId = React.useId();
+  const issuerInputId = React.useId();
+  const issueDateId = React.useId();
+  const expirationDateId = React.useId();
+  const noExpirationId = React.useId();
+  const credentialIdInputId = React.useId();
+  const credentialUrlInputId = React.useId();
+  const fileInputId = React.useId();
 
   useAccessibleOverlay({
     isOpen,
@@ -55,9 +55,9 @@ const ProfileCertificateModal = ({
         >
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.08em] text-primary">Certificate</p>
+              <p className="text-xs font-bold uppercase tracking-[0.08em] text-primary">Training & Certification</p>
               <h3 id={titleId} className="mt-1 text-xl font-black text-slate-900">
-                {editingCertificate ? 'แก้ไข certificate' : 'เพิ่ม certificate'}
+                {editingCertificate ? 'แก้ไขประวัติการอบรม' : 'เพิ่มประวัติการอบรม'}
               </h3>
             </div>
             <button
@@ -72,7 +72,7 @@ const ProfileCertificateModal = ({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label htmlFor={titleInputId} className="sm:col-span-2">
-              <span className="mb-2 block text-sm font-bold text-slate-700">ชื่อ certificate</span>
+              <span className="mb-2 block text-sm font-bold text-slate-700">ชื่ออบรม</span>
               <input
                 ref={titleInputRef}
                 id={titleInputId}
@@ -86,7 +86,7 @@ const ProfileCertificateModal = ({
             </label>
 
             <label htmlFor={issuerInputId} className="sm:col-span-2">
-              <span className="mb-2 block text-sm font-bold text-slate-700">หน่วยงานที่ออก</span>
+              <span className="mb-2 block text-sm font-bold text-slate-700">หน่วยงาน</span>
               <input
                 id={issuerInputId}
                 type="text"
@@ -99,7 +99,7 @@ const ProfileCertificateModal = ({
             </label>
 
             <label htmlFor={issueDateId}>
-              <span className="mb-2 block text-sm font-bold text-slate-700">วันที่ออก</span>
+              <span className="mb-2 block text-sm font-bold text-slate-700">วันที่ออกเกียรติบัตร</span>
               <input
                 id={issueDateId}
                 type="date"
@@ -110,7 +110,7 @@ const ProfileCertificateModal = ({
             </label>
 
             <label htmlFor={expirationDateId} className={form.noExpiration ? 'opacity-50' : ''}>
-              <span className="mb-2 block text-sm font-bold text-slate-700">วันหมดอายุ</span>
+              <span className="mb-2 block text-sm font-bold text-slate-700">วันหมดอายุเกียรติบัตร</span>
               <input
                 id={expirationDateId}
                 type="date"

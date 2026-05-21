@@ -49,7 +49,12 @@ test('buildGoalVisibilityWhere hides expired goals for end users', () => {
             {
                 OR: [
                     { scope: 'GLOBAL' },
-                    { scope: 'DEPARTMENT', departmentId: 'dept-a' }
+                    { scope: 'DEPARTMENT', departmentId: 'dept-a' },
+                    {
+                        targetDepartments: {
+                            some: { departmentId: 'dept-a' }
+                        }
+                    }
                 ]
             }
         ]

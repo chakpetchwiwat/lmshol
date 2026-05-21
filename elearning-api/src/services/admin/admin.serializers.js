@@ -13,9 +13,13 @@ const mapCourseRecord = (course) => {
         isArchived,
         instructorPreset,
         visibleDepartments,
-        visibleDepartmentIds: visibleDepartments.map((department) => department.id),
+        visibleDepartmentIds: visibleDepartments.map((d) => d.id),
         visibleTiers,
-        visibleTierIds: visibleTiers.map((tier) => tier.id)
+        visibleTierIds: visibleTiers.map((t) => t.id),
+        certificateEnabled: rest.certificateSetting?.enabled || false,
+        certificatePassingScore: rest.certificateSetting?.passingScore || 80,
+        certificateTemplateId: rest.certificateSetting?.templateId || '',
+        certificateSignatureSlots: rest.certificateSetting?.signatureSlots || null
     };
 };
 
