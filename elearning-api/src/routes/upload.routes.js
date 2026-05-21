@@ -36,19 +36,23 @@ const upload = multer({
     limits: { fileSize: securityConfig.uploadMaxFileSizeBytes }
 });
 
-const createSecureDocumentSignedUrl = async (fileKey, expiresIn = 900) => {
-    const { data, error } = await supabase.storage
-        .from('secure-documents')
-        .createSignedUrl(fileKey, expiresIn);
+const fs = require('fs/promises');
+const jwt = require('jsonwebtoken');
 
-    if (error || !data?.signedUrl) {
-        throw error || new Error('Failed to create signed URL');
-    }
+// We need to ensure uploads directory exists
+const UPLOADS_DIR = process.env.NODE_ENV === 'production' ? '/var/www/html/uploads' : path.join(__dirname, '../../uploads');
 
-    return data.signedUrl;
+const ensureDir = async (dirPath) => {
+    try { await fs.access(dirPath); }
+    catch { await fs.mkdir(dirPath, { recursive: true }); }
 };
 
-const uploadToSupabase = async (req, res, { forceSubDir, includeSignedUrl = false } = {}) => {
+const createSecureDocumentSignedUrl = async (fileKey, expiresIn = 900) => {
+    const token = jwt.sign({ fileKey }, process.env.JWT_SECRET, { expiresIn });
+    return `/api/upload/secure/${token}`;
+};
+
+const uploadToLocalDisk = async (req, res, { forceSubDir, includeSignedUrl = false } = {}) => {
     try {
         if (req.file) {
             req.file.originalname = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
@@ -66,44 +70,29 @@ const uploadToSupabase = async (req, res, { forceSubDir, includeSignedUrl = fals
 
         const isImage = req.file.mimetype.startsWith('image/');
         const privateSubDirs = new Set(['certificates', 'assessments', 'signatures']);
-        // Use 'secure-documents' bucket for sensitive files, 'uploads' for public images
-        // We only treat it as sensitive if it's explicitly in a private subdirectory.
-        // General uploads (like lesson documents) should be public even if they are not images.
         const isSensitive = privateSubDirs.has(forceSubDir);
-        const bucketName = isSensitive ? 'secure-documents' : 'uploads';
+        const visibilityDir = isSensitive ? 'secure' : 'public';
         const subDir = forceSubDir || (isImage ? 'images' : 'documents');
         const ext = path.extname(req.file.originalname);
-        const fileName = `${subDir}/${crypto.randomUUID()}${ext.toLowerCase()}`;
+        
+        const fileKey = `${visibilityDir}/${subDir}/${crypto.randomUUID()}${ext.toLowerCase()}`;
+        const absolutePath = path.join(UPLOADS_DIR, fileKey);
 
-        const { error } = await supabase.storage
-            .from(bucketName)
-            .upload(fileName, req.file.buffer, {
-                contentType: req.file.mimetype,
-                upsert: false
-            });
+        await ensureDir(path.dirname(absolutePath));
+        await fs.writeFile(absolutePath, req.file.buffer);
 
-        if (error) {
-            throw error;
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-            .from(bucketName)
-            .getPublicUrl(fileName);
-
-        // For sensitive files, we don't return a public URL as it's private.
-        // Frontend must use the signed URL endpoint.
-        const fileUrl = isSensitive ? null : publicUrl;
+        const fileUrl = isSensitive ? null : `/uploads/${fileKey}`;
 
         const payload = {
             message: 'Upload successful!',
             fileUrl,
-            fileKey: fileName,
-            fileName: forceSubDir ? req.file.originalname : fileName,
+            fileKey,
+            fileName: forceSubDir ? req.file.originalname : fileKey,
             fileMimeType: req.file.mimetype
         };
 
         if (isSensitive && includeSignedUrl) {
-            payload.signedUrl = await createSecureDocumentSignedUrl(fileName);
+            payload.signedUrl = await createSecureDocumentSignedUrl(fileKey);
         }
 
         res.json(payload);
@@ -282,7 +271,7 @@ const validateSignatureImage = (file) => {
 
 // POST /api/upload/certificate - User-owned certificate attachments
 router.post('/certificate', verifyToken, uploadRateLimiter, upload.single('file'), async (req, res) => {
-    await uploadToSupabase(req, res, { forceSubDir: 'certificates' });
+    await uploadToLocalDisk(req, res, { forceSubDir: 'certificates' });
 });
 
 // POST /api/upload/profile-image - Current user's public profile image
@@ -291,17 +280,17 @@ router.post('/profile-image', verifyToken, uploadRateLimiter, upload.single('fil
         return res.status(400).json({ message: 'Profile image must be an image file.' });
     }
 
-    await uploadToSupabase(req, res, { forceSubDir: 'profile-images' });
+    await uploadToLocalDisk(req, res, { forceSubDir: 'profile-images' });
 });
 
 // POST /api/upload/profile-file - Current user's private profile attachments
 router.post('/profile-file', verifyToken, uploadRateLimiter, upload.single('file'), async (req, res) => {
-    await uploadToSupabase(req, res, { forceSubDir: 'certificates', includeSignedUrl: true });
+    await uploadToLocalDisk(req, res, { forceSubDir: 'certificates', includeSignedUrl: true });
 });
 
 // POST /api/upload/assessment - Learner assessment submissions
 router.post('/assessment', verifyToken, uploadRateLimiter, upload.single('file'), async (req, res) => {
-    await uploadToSupabase(req, res, { forceSubDir: 'assessments' });
+    await uploadToLocalDisk(req, res, { forceSubDir: 'assessments' });
 });
 
 // GET /api/upload/signature-url - Temporary preview URL for a signature the user can access
@@ -309,7 +298,7 @@ router.get('/signature-url', verifyToken, async (req, res) => {
     try {
         const fileKey = String(req.query.key || '').trim();
 
-        if (!fileKey || !fileKey.startsWith('signatures/')) {
+        if (!fileKey || !fileKey.includes('signatures/')) {
             return res.status(400).json({ message: 'Invalid signature key.' });
         }
 
@@ -331,7 +320,7 @@ router.get('/profile-file-url', verifyToken, async (req, res) => {
     try {
         const fileKey = String(req.query.key || '').trim();
 
-        if (!fileKey || !fileKey.startsWith('certificates/')) {
+        if (!fileKey || !fileKey.includes('certificates/')) {
             return res.status(400).json({ message: 'Invalid profile file key.' });
         }
 
@@ -374,12 +363,33 @@ router.post('/signature', verifyToken, uploadRateLimiter, upload.single('file'),
         return res.status(400).json({ message: signatureError });
     }
 
-    await uploadToSupabase(req, res, { forceSubDir: 'signatures', includeSignedUrl: true });
+    await uploadToLocalDisk(req, res, { forceSubDir: 'signatures', includeSignedUrl: true });
 });
 
-// POST /api/upload - Upload to Supabase Storage
+// POST /api/upload - Upload to local disk
 router.post('/', verifyToken, verifyAdminPanelAccess, uploadRateLimiter, upload.single('file'), async (req, res) => {
-    await uploadToSupabase(req, res);
+    await uploadToLocalDisk(req, res);
+});
+
+// GET /api/upload/secure/:token - Serve a secure file if JWT is valid
+router.get('/secure/:token', async (req, res) => {
+    try {
+        const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
+        const { fileKey } = decoded;
+        
+        // Prevent path traversal
+        const normalizedKey = path.normalize(fileKey).replace(/^(\.\.(\/|\\|$))+/, '');
+        const absolutePath = path.join(UPLOADS_DIR, normalizedKey);
+        
+        // Ensure it only serves from secure folder
+        if (!absolutePath.includes(path.join('secure', ''))) {
+            return res.status(403).send('Forbidden access to non-secure directory');
+        }
+
+        res.sendFile(absolutePath);
+    } catch (err) {
+        return res.status(403).send('Invalid or expired signed URL');
+    }
 });
 
 module.exports = router;
