@@ -65,7 +65,7 @@ const UserManagement = () => {
   const [selectedUserDetail, setSelectedUserDetail] = React.useState(null);
   const [profileCertificates, setProfileCertificates] = React.useState([]);
   const [lmsCertificates, setLmsCertificates] = React.useState([]);
-  const [savingProfileDetails, setSavingProfileDetails] = React.useState(false);
+  const [savingProfileDetails] = React.useState(false);
   const [uploadingProfileFile, setUploadingProfileFile] = React.useState(false);
   const [savingCertificate, setSavingCertificate] = React.useState(false);
   const [uploadingCertificate, setUploadingCertificate] = React.useState(false);
