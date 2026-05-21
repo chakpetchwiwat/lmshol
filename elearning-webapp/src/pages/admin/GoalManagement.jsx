@@ -26,6 +26,7 @@ const getDefaultGoalForm = (currentUser = null) => ({
     scope: currentUser?.departmentId ? 'DEPARTMENT' : 'GLOBAL',
     departmentId: currentUser?.departmentId || '',
     departmentIds: currentUser?.departmentId ? [currentUser.departmentId] : [],
+    cohortRoleIds: [],
     userIds: [],
     courseIds: [],
     postAssignmentReminderDays: '',
@@ -58,6 +59,7 @@ const GoalManagement = () => {
     const [isEditing, setIsEditing] = React.useState(false);
     const [editingId, setEditingId] = React.useState(null);
     const [departments, setDepartments] = React.useState([]);
+    const [cohortRoles, setCohortRoles] = React.useState([]);
     const [users, setUsers] = React.useState([]);
     const [currentUser, setCurrentUser] = React.useState(null);
     const [viewMode, setViewMode] = React.useState(ENTITY_VIEW_STATUS.ACTIVE);
@@ -99,17 +101,19 @@ const GoalManagement = () => {
             const user = JSON.parse(localStorage.getItem('user'));
             setCurrentUser(user);
 
-            const [goalsRes, coursesRes, deptsRes, usersRes] = await Promise.all([
+            const [goalsRes, coursesRes, deptsRes, usersRes, cohortRolesRes] = await Promise.all([
                 adminAPI.getGoals(),
                 adminAPI.getCourses(),
                 adminAPI.getDepartments(),
-                adminAPI.getUsers()
+                adminAPI.getUsers(),
+                adminAPI.getCohortRoles()
             ]);
 
             setGoals(goalsRes.data || []);
             setCourses(coursesRes.data || []);
             setDepartments(deptsRes.data || []);
             setUsers(usersRes.data || []);
+            setCohortRoles(cohortRolesRes.data || []);
 
             if (user?.departmentId) {
                 setFormData((prev) => {
@@ -171,6 +175,7 @@ const GoalManagement = () => {
             scope: goal.scope,
             departmentId: goal.departmentId || '',
             departmentIds: goal.targetDepartments?.map((target) => target.departmentId) || (goal.departmentId ? [goal.departmentId] : []),
+            cohortRoleIds: goal.targetCohortRoles?.map((target) => target.cohortRoleId) || [],
             userIds: goal.targetUsers?.map((target) => target.userId) || [],
             courseIds: goal.courses.map(c => c.courseId),
             postAssignmentReminderDays: goal.postAssignmentReminderDays !== null && goal.postAssignmentReminderDays !== undefined ? String(goal.postAssignmentReminderDays) : '',
@@ -319,17 +324,19 @@ const GoalManagement = () => {
                 if (filters.departmentId === 'GLOBAL') {
                     matchesScope = goal.scope === 'GLOBAL'
                         && (goal.targetDepartments?.length || 0) === 0
+                        && (goal.targetCohortRoles?.length || 0) === 0
                         && (goal.targetUsers?.length || 0) === 0;
                 } else {
                     matchesScope = goal.departmentId === filters.departmentId
                         || goal.targetDepartments?.some((target) => target.departmentId === filters.departmentId)
+                        || goal.targetCohortRoles?.some((target) => users.some((user) => user.departmentId === filters.departmentId && (user.roles || []).includes(target.cohortRole?.key)))
                         || goal.targetUsers?.some((target) => target.user?.departmentId === filters.departmentId);
                 }
             }
 
             return matchesYear && matchesMonth && matchesScope;
         });
-    }, [viewMode, activeGoals, archivedGoals, filters.month, filters.year, filters.departmentId, currentUser]);
+    }, [viewMode, activeGoals, archivedGoals, filters.month, filters.year, filters.departmentId, currentUser, users]);
 
     const columns = React.useMemo(() => [
         { label: 'ชื่อเป้าหมาย' },
@@ -430,6 +437,7 @@ const GoalManagement = () => {
                 setFormData={setFormData}
                 currentUser={currentUser}
                 departments={departments}
+                cohortRoles={cohortRoles}
                 users={users}
                 courses={courses}
                 onSave={handleSaveGoal}

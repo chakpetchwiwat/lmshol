@@ -1,6 +1,7 @@
 const GOAL_SCOPES = Object.freeze({
     GLOBAL: 'GLOBAL',
     DEPARTMENT: 'DEPARTMENT',
+    COHORT_ROLE: 'COHORT_ROLE',
     USER: 'USER'
 });
 

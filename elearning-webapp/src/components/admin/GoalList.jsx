@@ -8,6 +8,7 @@ import { ENTITY_VIEW_STATUS } from '../../utils/constants/statuses';
 const getGoalAudience = (goal) => {
   const userTargets = goal.targetUsers || [];
   const departmentTargets = goal.targetDepartments || [];
+  const cohortRoleTargets = goal.targetCohortRoles || [];
 
   if (userTargets.length > 0) {
     return {
@@ -22,6 +23,14 @@ const getGoalAudience = (goal) => {
       label: `แผนก ${departmentTargets.length} แผนก`,
       detail: departmentTargets.slice(0, 2).map((target) => target.department?.name).filter(Boolean).join(', '),
       className: 'text-amber-600'
+    };
+  }
+
+  if (cohortRoleTargets.length > 0) {
+    return {
+      label: `Cohort Role ${cohortRoleTargets.length} role`,
+      detail: cohortRoleTargets.slice(0, 2).map((target) => target.cohortRole?.name).filter(Boolean).join(', '),
+      className: 'text-emerald-600'
     };
   }
 

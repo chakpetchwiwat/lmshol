@@ -85,6 +85,26 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'User deleted successfully' });
 });
 
+const getUserCertificates = asyncHandler(async (req, res) => {
+  const certificates = await AdminService.getUserCertificates(req.params.id);
+  res.json({ success: true, data: certificates });
+});
+
+const createUserCertificate = asyncHandler(async (req, res) => {
+  const certificate = await AdminService.createUserCertificate(req.params.id, req.body);
+  res.status(201).json({ success: true, data: certificate });
+});
+
+const updateUserCertificate = asyncHandler(async (req, res) => {
+  const certificate = await AdminService.updateUserCertificate(req.params.id, req.params.certificateId, req.body);
+  res.json({ success: true, data: certificate });
+});
+
+const deleteUserCertificate = asyncHandler(async (req, res) => {
+  await AdminService.deleteUserCertificate(req.params.id, req.params.certificateId);
+  res.json({ success: true, message: 'Certificate deleted successfully' });
+});
+
 // DEPARTMENTS
 const getDepartments = asyncHandler(async (req, res) => {
   const departments = await AdminService.getDepartments(req.user);
@@ -131,6 +151,11 @@ const reorderCohortRoles = asyncHandler(async (req, res) => {
   const { roleIds } = req.body;
   await AdminService.reorderCohortRoles(roleIds);
   res.json({ success: true, message: 'Cohort roles reordered successfully' });
+});
+
+const updateCohortRoleMembers = asyncHandler(async (req, res) => {
+  const role = await AdminService.updateCohortRoleMembers(req.params.id, req.body.userIds || []);
+  res.json({ success: true, data: role });
 });
 
 // TIERS
@@ -454,6 +479,10 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  getUserCertificates,
+  createUserCertificate,
+  updateUserCertificate,
+  deleteUserCertificate,
   getDepartments,
   createDepartment,
   updateDepartment,
@@ -463,6 +492,7 @@ module.exports = {
   updateCohortRole,
   deleteCohortRole,
   reorderCohortRoles,
+  updateCohortRoleMembers,
   getTiers,
   createTier,
   updateTier,

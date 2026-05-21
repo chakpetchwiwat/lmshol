@@ -19,9 +19,42 @@ const buildRoleData = (data, { includeOrderDefault = false } = {}) => {
     return payload;
 };
 
-const getCohortRoles = async () => prisma.cohortRole.findMany({
-    orderBy: [{ order: 'asc' }, { name: 'asc' }]
-});
+const getCohortRoles = async () => {
+    const roles = await prisma.cohortRole.findMany({
+        orderBy: [{ order: 'asc' }, { name: 'asc' }]
+    });
+
+    if (!roles.length) {
+        return roles;
+    }
+
+    const roleKeys = roles.map((role) => role.key);
+    const users = await prisma.user.findMany({
+        where: {
+            roles: {
+                hasSome: roleKeys
+            }
+        },
+        select: {
+            id: true,
+            roles: true
+        }
+    });
+
+    const countByRoleKey = users.reduce((acc, user) => {
+        user.roles.forEach((roleKey) => {
+            if (roleKeys.includes(roleKey)) {
+                acc[roleKey] = (acc[roleKey] || 0) + 1;
+            }
+        });
+        return acc;
+    }, {});
+
+    return roles.map((role) => ({
+        ...role,
+        memberCount: countByRoleKey[role.key] || 0
+    }));
+};
 
 const createCohortRole = async (data) => {
     const payload = buildRoleData(data, { includeOrderDefault: true });
@@ -76,6 +109,61 @@ const reorderCohortRoles = async (roleIds) => {
     );
 };
 
+const updateCohortRoleMembers = async (id, userIds = []) => {
+    if (!Array.isArray(userIds)) {
+        throw new Error('User ids must be an array');
+    }
+
+    const normalizedUserIds = [...new Set(userIds.map((userId) => String(userId || '').trim()).filter(Boolean))];
+
+    return prisma.$transaction(async (tx) => {
+        const role = await tx.cohortRole.findUnique({ where: { id } });
+        if (!role) {
+            throw new Error('Cohort role not found');
+        }
+
+        if (normalizedUserIds.length > 0) {
+            const matchedCount = await tx.user.count({
+                where: {
+                    id: { in: normalizedUserIds }
+                }
+            });
+
+            if (matchedCount !== normalizedUserIds.length) {
+                throw new Error('Invalid user selection');
+            }
+        }
+
+        await tx.$executeRaw`
+            UPDATE "User"
+            SET "roles" = array_remove("roles", ${role.key}), "updatedAt" = NOW()
+            WHERE ${role.key} = ANY("roles")
+        `;
+
+        if (normalizedUserIds.length > 0) {
+            await tx.$executeRaw`
+                UPDATE "User"
+                SET "roles" = array_append("roles", ${role.key}), "updatedAt" = NOW()
+                WHERE "id" = ANY(${normalizedUserIds}::text[])
+                    AND NOT (${role.key} = ANY("roles"))
+            `;
+        }
+
+        const memberCount = await tx.user.count({
+            where: {
+                roles: {
+                    has: role.key
+                }
+            }
+        });
+
+        return {
+            ...role,
+            memberCount
+        };
+    });
+};
+
 const ensureCohortRoleKeysExist = async (tx, roleKeys) => {
     if (!roleKeys.length) {
         return;
@@ -100,5 +188,6 @@ module.exports = {
     updateCohortRole,
     deleteCohortRole,
     reorderCohortRoles,
+    updateCohortRoleMembers,
     ensureCohortRoleKeysExist
 };

@@ -26,6 +26,9 @@ const getDefaultFormData = () => ({
   tierId: '',
   employmentDate: '',
   pointsBalance: 0,
+  educationHistory: [],
+  profileFiles: [],
+  profileImageUrl: '',
 });
 
 const formatDateForInput = (value) => {
@@ -60,6 +63,12 @@ const UserManagement = () => {
   const [showDetailModal, setShowDetailModal] = React.useState(false);
   const [detailLoading, setDetailLoading] = React.useState(false);
   const [selectedUserDetail, setSelectedUserDetail] = React.useState(null);
+  const [profileCertificates, setProfileCertificates] = React.useState([]);
+  const [lmsCertificates, setLmsCertificates] = React.useState([]);
+  const [savingProfileDetails, setSavingProfileDetails] = React.useState(false);
+  const [uploadingProfileFile, setUploadingProfileFile] = React.useState(false);
+  const [savingCertificate, setSavingCertificate] = React.useState(false);
+  const [uploadingCertificate, setUploadingCertificate] = React.useState(false);
 
   const currentUser = React.useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const canEditUsers = canEditAdminUsers(currentUser);
@@ -169,6 +178,8 @@ const UserManagement = () => {
   const openAddUser = () => {
     setEditingUser(null);
     setFormData(getDefaultFormData());
+    setProfileCertificates([]);
+    setLmsCertificates([]);
     setShowUserModal(true);
   };
 
@@ -184,8 +195,22 @@ const UserManagement = () => {
       tierId: user.tierId || '',
       employmentDate: formatDateForInput(user.employmentDate),
       pointsBalance: user.pointsBalance || 0,
+      educationHistory: Array.isArray(user.educationHistory) ? user.educationHistory : [],
+      profileFiles: Array.isArray(user.profileFiles) ? user.profileFiles : [],
+      profileImageUrl: user.profileImageUrl || '',
     });
     setShowUserModal(true);
+    setProfileCertificates([]);
+    setLmsCertificates([]);
+    Promise.all([
+      adminAPI.getUserCertificates(user.id),
+      adminAPI.getUserDetails(user.id)
+    ]).then(([certificatesRes, detailsRes]) => {
+      setProfileCertificates(Array.isArray(certificatesRes?.data) ? certificatesRes.data : []);
+      setLmsCertificates(Array.isArray(detailsRes?.data?.systemCertificates) ? detailsRes.data.systemCertificates : []);
+    }).catch((error) => {
+      console.error('Fetch editable profile extras error:', error);
+    });
   };
 
   const handleDepartmentDelete = async (id, name) => {
@@ -268,6 +293,103 @@ const UserManagement = () => {
       console.error('Reorder cohort roles error:', error);
       toast.error('ไม่สามารถบันทึกลำดับ Cohort Role ได้');
       fetchReferenceData();
+    }
+  };
+
+  const handleUploadEditableProfileFile = async (file) => {
+    try {
+      setUploadingProfileFile(true);
+      const response = await adminAPI.uploadProfileFile(file);
+      toast.success('อัปโหลดไฟล์ข้อมูลอื่นๆ สำเร็จ');
+      return response?.data || response;
+    } catch (error) {
+      console.error('Upload profile file error:', error);
+      toast.error(error.response?.data?.message || 'อัปโหลดไฟล์ไม่สำเร็จ');
+      return null;
+    } finally {
+      setUploadingProfileFile(false);
+    }
+  };
+
+  const handleOpenEditableProfileFile = async (file) => {
+    try {
+      if (file.fileUrl) {
+        window.open(file.fileUrl, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      if (!file.fileKey) return;
+      const response = await adminAPI.getProfileFileDownloadUrl(file.fileKey);
+      const url = response?.data?.url || response?.url;
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Open profile file error:', error);
+      toast.error('เปิดไฟล์ไม่สำเร็จ');
+    }
+  };
+
+  const handleCreateEditableCertificate = async (payload) => {
+    if (!editingUser?.id) return null;
+    try {
+      setSavingCertificate(true);
+      const response = await adminAPI.createUserCertificate(editingUser.id, payload);
+      const certificate = response?.data || response;
+      setProfileCertificates((current) => [certificate, ...current]);
+      toast.success('เพิ่มประวัติอบรมสำเร็จ');
+      return certificate;
+    } catch (error) {
+      console.error('Create user certificate error:', error);
+      toast.error(error.response?.data?.message || 'เพิ่มประวัติอบรมไม่สำเร็จ');
+      return null;
+    } finally {
+      setSavingCertificate(false);
+    }
+  };
+
+  const handleUpdateEditableCertificate = async (certificateId, payload) => {
+    if (!editingUser?.id) return null;
+    try {
+      setSavingCertificate(true);
+      const response = await adminAPI.updateUserCertificate(editingUser.id, certificateId, payload);
+      const certificate = response?.data || response;
+      setProfileCertificates((current) => current.map((item) => (item.id === certificateId ? certificate : item)));
+      toast.success('อัปเดตประวัติอบรมสำเร็จ');
+      return certificate;
+    } catch (error) {
+      console.error('Update user certificate error:', error);
+      toast.error(error.response?.data?.message || 'อัปเดตประวัติอบรมไม่สำเร็จ');
+      return null;
+    } finally {
+      setSavingCertificate(false);
+    }
+  };
+
+  const handleDeleteEditableCertificate = async (certificateId) => {
+    if (!editingUser?.id) return;
+    const ok = window.confirm('ลบประวัติอบรมนี้ออกจากโปรไฟล์?');
+    if (!ok) return;
+
+    try {
+      await adminAPI.deleteUserCertificate(editingUser.id, certificateId);
+      setProfileCertificates((current) => current.filter((item) => item.id !== certificateId));
+      toast.success('ลบประวัติอบรมแล้ว');
+    } catch (error) {
+      console.error('Delete user certificate error:', error);
+      toast.error(error.response?.data?.message || 'ลบประวัติอบรมไม่สำเร็จ');
+    }
+  };
+
+  const handleUploadEditableCertificateFile = async (file) => {
+    try {
+      setUploadingCertificate(true);
+      const response = await adminAPI.uploadCertificateFile(file);
+      toast.success('อัปโหลดไฟล์ certificate สำเร็จ');
+      return response?.data || response;
+    } catch (error) {
+      console.error('Upload certificate file error:', error);
+      toast.error(error.response?.data?.message || 'อัปโหลดไฟล์ certificate ไม่สำเร็จ');
+      return null;
+    } finally {
+      setUploadingCertificate(false);
     }
   };
 
@@ -358,6 +480,18 @@ const UserManagement = () => {
         tiers={tiers}
         cohortRoles={cohortRoles}
         canEditRole={canEditUsers}
+        profileCertificates={profileCertificates}
+        lmsCertificates={lmsCertificates}
+        savingProfileDetails={savingProfileDetails}
+        uploadingProfileFile={uploadingProfileFile}
+        savingCertificate={savingCertificate}
+        uploadingCertificate={uploadingCertificate}
+        onUploadProfileFile={handleUploadEditableProfileFile}
+        onOpenProfileFile={handleOpenEditableProfileFile}
+        onCreateCertificate={handleCreateEditableCertificate}
+        onUpdateCertificate={handleUpdateEditableCertificate}
+        onDeleteCertificate={handleDeleteEditableCertificate}
+        onUploadCertificate={handleUploadEditableCertificateFile}
       />
 
       {canEditUsers && (
@@ -426,6 +560,13 @@ const UserManagement = () => {
             }}
             onDelete={handleCohortRoleDelete}
             onReorder={handleCohortRoleReorder}
+            memberUsers={users}
+            getMemberIds={(role) => users.filter((user) => (user.roles || []).includes(role.key)).map((user) => user.id)}
+            onUpdateMembers={async (id, userIds) => {
+              await adminAPI.updateCohortRoleMembers(id, userIds);
+              toast.success('บันทึกสมาชิก Cohort Role เรียบร้อย');
+              await Promise.all([fetchReferenceData(), fetchUsers()]);
+            }}
           />
 
         </>

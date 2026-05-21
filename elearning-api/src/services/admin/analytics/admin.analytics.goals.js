@@ -26,6 +26,13 @@ const calculateGoalCompliance = (targetUsers, activeGoals, completions, now = ne
     }, {});
 
     const allUserIds = targetUsers.map(u => u.id);
+    const usersByCohortRole = targetUsers.reduce((acc, user) => {
+        (user.roles || []).forEach((roleKey) => {
+            if (!acc[roleKey]) acc[roleKey] = [];
+            acc[roleKey].push(user.id);
+        });
+        return acc;
+    }, {});
     let totalAssignments = 0;
     let successfulAssignments = 0;
     const atRisk = [];
@@ -33,8 +40,13 @@ const calculateGoalCompliance = (targetUsers, activeGoals, completions, now = ne
     activeGoals.forEach(goal => {
         const explicitUserIds = goal.targetUsers?.map((target) => target.userId) || [];
         const targetDepartmentIds = goal.targetDepartments?.map((target) => target.departmentId) || [];
+        const targetCohortRoleKeys = goal.targetCohortRoles
+            ?.map((target) => target.cohortRole?.key)
+            .filter(Boolean) || [];
         const targetUserIdsForGoal = explicitUserIds.length > 0
             ? explicitUserIds.filter((userId) => allUserIds.includes(userId))
+            : targetCohortRoleKeys.length > 0
+                ? [...new Set(targetCohortRoleKeys.flatMap((roleKey) => usersByCohortRole[roleKey] || []))]
             : targetDepartmentIds.length > 0
                 ? targetDepartmentIds.flatMap((departmentId) => usersByDept[departmentId] || [])
                 : goal.scope === GOAL_SCOPES.GLOBAL

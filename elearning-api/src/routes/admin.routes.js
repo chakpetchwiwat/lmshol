@@ -16,6 +16,10 @@ router.post('/system/security/reset', verifySuperAdmin, systemController.resetRa
 
 router.get('/users', adminController.getUsers);
 router.get('/users/:id/details', auditRequest('admin.user_details.viewed', { entityType: 'user', includeBody: false }), adminController.getUserDetails);
+router.get('/users/:id/certificates', verifySuperAdmin, adminController.getUserCertificates);
+router.post('/users/:id/certificates', verifySuperAdmin, auditRequest('admin.user_certificate.created', { entityType: 'userCertificate' }), adminController.createUserCertificate);
+router.put('/users/:id/certificates/:certificateId', verifySuperAdmin, auditRequest('admin.user_certificate.updated', { entityType: 'userCertificate' }), adminController.updateUserCertificate);
+router.delete('/users/:id/certificates/:certificateId', verifySuperAdmin, auditRequest('admin.user_certificate.deleted', { entityType: 'userCertificate', includeBody: false }), adminController.deleteUserCertificate);
 router.post('/users', verifySuperAdmin, auditRequest('admin.user.created', { entityType: 'user' }), adminController.createUser);
 router.put('/users/:id', verifySuperAdmin, auditRequest('admin.user.updated', { entityType: 'user' }), adminController.updateUser);
 router.delete('/users/:id', verifySuperAdmin, auditRequest('admin.user.deleted', { entityType: 'user', includeBody: false }), adminController.deleteUser);
@@ -28,6 +32,7 @@ router.delete('/departments/:id', verifySuperAdmin, auditRequest('admin.departme
 router.get('/cohort-roles', adminController.getCohortRoles);
 router.post('/cohort-roles', verifySuperAdmin, auditRequest('admin.cohort_role.created', { entityType: 'cohortRole' }), adminController.createCohortRole);
 router.put('/cohort-roles/reorder', verifySuperAdmin, auditRequest('admin.cohort_role.reordered', { entityType: 'cohortRole' }), adminController.reorderCohortRoles);
+router.put('/cohort-roles/:id/members', verifySuperAdmin, auditRequest('admin.cohort_role.members_updated', { entityType: 'cohortRole' }), adminController.updateCohortRoleMembers);
 router.put('/cohort-roles/:id', verifySuperAdmin, auditRequest('admin.cohort_role.updated', { entityType: 'cohortRole' }), adminController.updateCohortRole);
 router.delete('/cohort-roles/:id', verifySuperAdmin, auditRequest('admin.cohort_role.deleted', { entityType: 'cohortRole', includeBody: false }), adminController.deleteCohortRole);
 

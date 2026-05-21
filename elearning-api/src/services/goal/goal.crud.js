@@ -20,6 +20,7 @@ const normalizeIdList = (value) => (
 const resolveGoalAudience = async (tx, data, actor, existingGoal = null) => {
     const requestedScope = data.scope || existingGoal?.scope || GOAL_SCOPES.GLOBAL;
     let departmentIds = normalizeIdList(data.departmentIds);
+    let cohortRoleIds = normalizeIdList(data.cohortRoleIds);
     let userIds = normalizeIdList(data.userIds);
 
     if (data.departmentId && departmentIds.length === 0) {
@@ -28,6 +29,7 @@ const resolveGoalAudience = async (tx, data, actor, existingGoal = null) => {
 
     if (!actor.isAdmin) {
         departmentIds = actor.departmentId ? [actor.departmentId] : [];
+        cohortRoleIds = [];
         if (userIds.length > 0 && actor.departmentId) {
             const scopedUsers = await tx.user.findMany({
                 where: {
@@ -47,7 +49,28 @@ const resolveGoalAudience = async (tx, data, actor, existingGoal = null) => {
             scope: GOAL_SCOPES.USER,
             departmentId: departmentIds[0] || actor.departmentId || existingGoal?.departmentId || null,
             departmentIds,
+            cohortRoleIds: [],
             userIds
+        };
+    }
+
+    if (cohortRoleIds.length > 0 && actor.isAdmin) {
+        const matchedCount = await tx.cohortRole.count({
+            where: {
+                id: { in: cohortRoleIds }
+            }
+        });
+
+        if (matchedCount !== cohortRoleIds.length) {
+            throw new ErrorResponse('Invalid cohort role selection', 400);
+        }
+
+        return {
+            scope: GOAL_SCOPES.COHORT_ROLE,
+            departmentId: null,
+            departmentIds: [],
+            cohortRoleIds,
+            userIds: []
         };
     }
 
@@ -56,6 +79,7 @@ const resolveGoalAudience = async (tx, data, actor, existingGoal = null) => {
             scope: GOAL_SCOPES.GLOBAL,
             departmentId: null,
             departmentIds: [],
+            cohortRoleIds: [],
             userIds: []
         };
     }
@@ -68,12 +92,14 @@ const resolveGoalAudience = async (tx, data, actor, existingGoal = null) => {
         scope: GOAL_SCOPES.DEPARTMENT,
         departmentId: departmentIds[0] || existingGoal?.departmentId || null,
         departmentIds,
+        cohortRoleIds: [],
         userIds: []
     };
 };
 
 const saveGoalAudience = async (tx, goalId, audience) => {
     await tx.goalTargetDepartment.deleteMany({ where: { goalId } });
+    await tx.goalTargetCohortRole.deleteMany({ where: { goalId } });
     await tx.goalTargetUser.deleteMany({ where: { goalId } });
 
     if (audience.departmentIds.length > 0) {
@@ -89,6 +115,13 @@ const saveGoalAudience = async (tx, goalId, audience) => {
             skipDuplicates: true
         });
     }
+
+    if (audience.cohortRoleIds.length > 0) {
+        await tx.goalTargetCohortRole.createMany({
+            data: audience.cohortRoleIds.map((cohortRoleId) => ({ goalId, cohortRoleId })),
+            skipDuplicates: true
+        });
+    }
 };
 
 const createGoal = async (data, authUser) => {
@@ -100,6 +133,7 @@ const createGoal = async (data, authUser) => {
         scope,
         departmentId,
         departmentIds,
+        cohortRoleIds,
         userIds,
         courseIds,
         postAssignmentReminderDays,
@@ -125,6 +159,7 @@ const createGoal = async (data, authUser) => {
             scope,
             departmentId,
             departmentIds,
+            cohortRoleIds,
             userIds
         }, actor);
 
@@ -155,7 +190,19 @@ const createGoal = async (data, authUser) => {
             });
         }
 
-        await createGoalReminderNotifications(tx, { ...goal, targetDepartments: audience.departmentIds.map((departmentId) => ({ departmentId })), targetUsers: audience.userIds.map((userId) => ({ userId })) }, goal.createdAt);
+        const targetCohortRoles = audience.cohortRoleIds.length > 0
+            ? await tx.cohortRole.findMany({
+                where: { id: { in: audience.cohortRoleIds } },
+                select: { id: true, key: true }
+            })
+            : [];
+
+        await createGoalReminderNotifications(tx, {
+            ...goal,
+            targetDepartments: audience.departmentIds.map((departmentId) => ({ departmentId })),
+            targetCohortRoles: targetCohortRoles.map((cohortRole) => ({ cohortRoleId: cohortRole.id, cohortRole })),
+            targetUsers: audience.userIds.map((userId) => ({ userId }))
+        }, goal.createdAt);
 
         return goal;
     });
@@ -190,6 +237,11 @@ const getGoals = async (authUser, options = {}) => {
             targetDepartments: {
                 include: {
                     department: { select: { id: true, name: true } }
+                }
+            },
+            targetCohortRoles: {
+                include: {
+                    cohortRole: { select: { id: true, key: true, name: true } }
                 }
             },
             targetUsers: {
@@ -232,6 +284,11 @@ const getGoalDetails = async (id, authUser) => {
             targetDepartments: {
                 include: {
                     department: { select: { id: true, name: true } }
+                }
+            },
+            targetCohortRoles: {
+                include: {
+                    cohortRole: { select: { id: true, key: true, name: true } }
                 }
             },
             targetUsers: {
@@ -323,6 +380,7 @@ const updateGoal = async (id, data, authUser) => {
         scope,
         departmentId,
         departmentIds,
+        cohortRoleIds,
         userIds,
         courseIds,
         postAssignmentReminderDays,
@@ -360,6 +418,7 @@ const updateGoal = async (id, data, authUser) => {
             scope,
             departmentId,
             departmentIds,
+            cohortRoleIds,
             userIds
         }, actor, goal);
 
@@ -398,7 +457,19 @@ const updateGoal = async (id, data, authUser) => {
             }
         });
 
-        await createGoalReminderNotifications(tx, { ...updatedGoal, targetDepartments: audience.departmentIds.map((departmentId) => ({ departmentId })), targetUsers: audience.userIds.map((userId) => ({ userId })) }, updatedGoal.updatedAt);
+        const targetCohortRoles = audience.cohortRoleIds.length > 0
+            ? await tx.cohortRole.findMany({
+                where: { id: { in: audience.cohortRoleIds } },
+                select: { id: true, key: true }
+            })
+            : [];
+
+        await createGoalReminderNotifications(tx, {
+            ...updatedGoal,
+            targetDepartments: audience.departmentIds.map((departmentId) => ({ departmentId })),
+            targetCohortRoles: targetCohortRoles.map((cohortRole) => ({ cohortRoleId: cohortRole.id, cohortRole })),
+            targetUsers: audience.userIds.map((userId) => ({ userId }))
+        }, updatedGoal.updatedAt);
 
         clearGoalReportCache(id);
         return updatedGoal;

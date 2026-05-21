@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, Check, ChevronRight, Search, Target, UserRound, UsersRound, X } from 'lucide-react';
+import { Building2, Check, ChevronRight, Search, Tags, Target, UserRound, UsersRound, X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
@@ -12,6 +12,7 @@ const CreateGoalModal = ({
   setFormData,
   currentUser,
   departments = [],
+  cohortRoles = [],
   users = [],
   courses,
   onSave,
@@ -28,7 +29,9 @@ const CreateGoalModal = ({
       : (formData.departmentId ? [formData.departmentId] : [])
   ), [formData.departmentId, formData.departmentIds]);
   const selectedUserIds = Array.isArray(formData.userIds) ? formData.userIds : [];
+  const selectedCohortRoleIds = Array.isArray(formData.cohortRoleIds) ? formData.cohortRoleIds : [];
   const [userSearch, setUserSearch] = React.useState('');
+  const [targetMode, setTargetMode] = React.useState('department');
   const isPostAssignmentImmediate = formData.postAssignmentReminderDays === '0';
   const hasTimedPostAssignmentReminder = Boolean(formData.postAssignmentReminderDays) && !isPostAssignmentImmediate;
 
@@ -48,12 +51,17 @@ const CreateGoalModal = ({
       });
   }, [selectedDepartmentIds, userSearch, users]);
 
+  React.useEffect(() => {
+    setTargetMode(selectedCohortRoleIds.length > 0 ? 'cohortRole' : 'department');
+  }, [isOpen, selectedCohortRoleIds.length]);
+
   const setAllOrganization = () => {
     setFormData({
       ...formData,
       scope: 'GLOBAL',
       departmentId: '',
       departmentIds: [],
+      cohortRoleIds: [],
       userIds: []
     });
   };
@@ -72,7 +80,23 @@ const CreateGoalModal = ({
       scope: nextUserIds.length > 0 ? 'USER' : (nextDepartmentIds.length > 0 ? 'DEPARTMENT' : 'GLOBAL'),
       departmentId: nextDepartmentIds[0] || '',
       departmentIds: nextDepartmentIds,
+      cohortRoleIds: [],
       userIds: nextUserIds
+    });
+  };
+
+  const toggleCohortRole = (cohortRoleId) => {
+    const nextCohortRoleIds = selectedCohortRoleIds.includes(cohortRoleId)
+      ? selectedCohortRoleIds.filter((id) => id !== cohortRoleId)
+      : [...selectedCohortRoleIds, cohortRoleId];
+
+    setFormData({
+      ...formData,
+      scope: nextCohortRoleIds.length > 0 ? 'COHORT_ROLE' : 'GLOBAL',
+      departmentId: '',
+      departmentIds: [],
+      cohortRoleIds: nextCohortRoleIds,
+      userIds: []
     });
   };
 
@@ -149,7 +173,39 @@ const CreateGoalModal = ({
                 </button>
               )}
 
-              <div className="space-y-2">
+              {isAdmin && (
+                <div className="inline-flex w-full rounded-2xl border border-slate-200 bg-white p-1 sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => setTargetMode('department')}
+                    className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-all ${
+                      targetMode === 'department'
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
+                  >
+                    <Building2 size={15} />
+                    แผนก
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTargetMode('cohortRole');
+                      setFormData({ ...formData, scope: selectedCohortRoleIds.length ? 'COHORT_ROLE' : 'GLOBAL', departmentId: '', departmentIds: [], userIds: [] });
+                    }}
+                    className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-all ${
+                      targetMode === 'cohortRole'
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
+                  >
+                    <Tags size={15} />
+                    Cohort Role
+                  </button>
+                </div>
+              )}
+
+              <div className={targetMode === 'department' ? 'space-y-2' : 'hidden'}>
                 <div className="flex items-center justify-between gap-3">
                   <label className="text-sm font-bold text-slate-700">เลือกแผนก</label>
                   {selectedDepartmentIds.length > 0 && (
@@ -182,7 +238,48 @@ const CreateGoalModal = ({
                 </div>
               </div>
 
-              {selectedDepartmentIds.length > 0 && (
+              {targetMode === 'cohortRole' && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <label className="text-sm font-bold text-slate-700">เลือก Cohort Role</label>
+                    {selectedCohortRoleIds.length > 0 && (
+                      <span className="text-xs font-bold text-primary">{selectedCohortRoleIds.length} role</span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {cohortRoles.map((role) => {
+                      const isSelected = selectedCohortRoleIds.includes(role.id);
+                      return (
+                        <button
+                          key={role.id}
+                          type="button"
+                          onClick={() => toggleCohortRole(role.id)}
+                          className={`flex items-center justify-between rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-all ${
+                            isSelected
+                              ? 'border-primary bg-white text-primary shadow-sm'
+                              : 'border-slate-200 bg-white text-slate-600 hover:border-primary/30'
+                          }`}
+                        >
+                          <span className="flex min-w-0 items-center gap-2">
+                            <Tags size={16} className="shrink-0" />
+                            <span className="truncate">{role.name}</span>
+                          </span>
+                          {isSelected && <Check size={16} className="shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {cohortRoles.length === 0 && (
+                    <div className="rounded-xl border border-dashed border-slate-200 bg-white p-4 text-center text-xs font-bold text-slate-400">
+                      ยังไม่มี Cohort Role ในระบบ
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {targetMode === 'department' && selectedDepartmentIds.length > 0 && (
                 <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-3">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <label className="text-sm font-bold text-slate-700">เลือกรายบุคคล</label>

@@ -242,6 +242,7 @@ model CohortRole {
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  goalTargets GoalTargetCohortRole[]
 }
 
 model CategoryDepartmentAccess {
@@ -483,11 +484,23 @@ model LearningGoal {
   courses                    GoalCourse[]
   department                 Department?        @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   targetDepartments          GoalTargetDepartment[]
+  targetCohortRoles          GoalTargetCohortRole[]
   targetUsers                GoalTargetUser[]
   notifications              UserNotification[]
 
   @@index([status, expiryDate, departmentId])
   @@index([scope, departmentId, status])
+}
+
+model GoalTargetCohortRole {
+  goalId       String
+  cohortRoleId String
+  createdAt    DateTime     @default(now())
+  cohortRole   CohortRole   @relation(fields: [cohortRoleId], references: [id], onDelete: Cascade)
+  goal         LearningGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@id([goalId, cohortRoleId])
+  @@index([cohortRoleId, goalId])
 }
 
 model GoalTargetDepartment {

@@ -285,6 +285,18 @@ const buildGoalVisibilityWhere = (
             });
         }
 
+        if (Array.isArray(actor.roles) && actor.roles.length > 0) {
+            scopeClauses.push({
+                targetCohortRoles: {
+                    some: {
+                        cohortRole: {
+                            key: { in: actor.roles }
+                        }
+                    }
+                }
+            });
+        }
+
         filters.push({
             OR: scopeClauses
         });
@@ -318,9 +330,17 @@ const canAccessGoal = (
         const actorUserId = actor.id || actor.userId;
         const targetUsers = goal.targetUsers || [];
         const targetDepartments = goal.targetDepartments || [];
+        const targetCohortRoles = goal.targetCohortRoles || [];
 
         if (targetUsers.length > 0) {
             return targetUsers.some((target) => target.userId === actorUserId);
+        }
+
+        if (targetCohortRoles.length > 0) {
+            return targetCohortRoles.some((target) => {
+                const roleKey = target.cohortRole?.key || target.roleKey || target.key;
+                return roleKey && Array.isArray(actor.roles) && actor.roles.includes(roleKey);
+            });
         }
 
         if (targetDepartments.length > 0) {

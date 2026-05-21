@@ -100,6 +100,37 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
         data.employmentDate = new Date();
     }
 
+    if (baseData.profileImageUrl !== undefined) {
+        data.profileImageUrl = baseData.profileImageUrl ? String(baseData.profileImageUrl).trim() : null;
+    }
+
+    if (baseData.educationHistory !== undefined) {
+        data.educationHistory = Array.isArray(baseData.educationHistory)
+            ? baseData.educationHistory.slice(0, 50).map((item) => ({
+                id: String(item?.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`),
+                institution: String(item?.institution || '').trim().slice(0, 300),
+                degree: String(item?.degree || '').trim().slice(0, 300),
+                faculty: String(item?.faculty || '').trim().slice(0, 300),
+                major: String(item?.major || '').trim().slice(0, 300),
+                graduationYear: String(item?.graduationYear || '').trim().slice(0, 300)
+            })).filter((item) => item.institution || item.degree || item.faculty || item.major || item.graduationYear)
+            : [];
+    }
+
+    if (baseData.profileFiles !== undefined) {
+        data.profileFiles = Array.isArray(baseData.profileFiles)
+            ? baseData.profileFiles.slice(0, 50).map((file) => ({
+                id: String(file?.id || `${Date.now()}-${Math.random().toString(36).slice(2)}`),
+                title: String(file?.title || '').trim().slice(0, 300),
+                fileName: String(file?.fileName || '').trim().slice(0, 300),
+                fileKey: String(file?.fileKey || '').trim(),
+                fileUrl: String(file?.fileUrl || '').trim(),
+                fileMimeType: String(file?.fileMimeType || '').trim().slice(0, 300),
+                uploadedAt: file?.uploadedAt ? new Date(file.uploadedAt).toISOString() : ''
+            })).filter((file) => file.title || file.fileName || file.fileKey || file.fileUrl)
+            : [];
+    }
+
     return data;
 };
 

@@ -77,6 +77,13 @@ const getGoalReport = async (goalId, authUser) => {
                 }
             },
             targetDepartments: true,
+            targetCohortRoles: {
+                include: {
+                    cohortRole: {
+                        select: { key: true, name: true }
+                    }
+                }
+            },
             targetUsers: true
         }
     });
@@ -94,6 +101,12 @@ const getGoalReport = async (goalId, authUser) => {
 
         if (goal.targetUsers.length > 0) {
             userWhere.id = { in: goal.targetUsers.map((target) => target.userId) };
+        } else if (goal.targetCohortRoles.length > 0) {
+            userWhere.roles = {
+                hasSome: goal.targetCohortRoles
+                    .map((target) => target.cohortRole?.key)
+                    .filter(Boolean)
+            };
         } else if (goal.targetDepartments.length > 0) {
             userWhere.departmentId = { in: goal.targetDepartments.map((target) => target.departmentId) };
         } else if (goal.scope === GOAL_SCOPES.DEPARTMENT) {

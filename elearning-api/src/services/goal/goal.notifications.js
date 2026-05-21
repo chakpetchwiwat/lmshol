@@ -31,6 +31,14 @@ const buildGoalTargetUsersWhere = (goal) => ({
     status: USER_STATUS.ACTIVE,
     ...(Array.isArray(goal.targetUsers) && goal.targetUsers.length > 0
         ? { id: { in: goal.targetUsers.map((target) => target.userId) } }
+        : Array.isArray(goal.targetCohortRoles) && goal.targetCohortRoles.length > 0
+            ? {
+                roles: {
+                    hasSome: goal.targetCohortRoles
+                        .map((target) => target.cohortRole?.key || target.roleKey || target.key)
+                        .filter(Boolean)
+                }
+            }
         : Array.isArray(goal.targetDepartments) && goal.targetDepartments.length > 0
             ? { departmentId: { in: goal.targetDepartments.map((target) => target.departmentId) } }
             : goal.scope === GOAL_SCOPES.DEPARTMENT && goal.departmentId

@@ -212,6 +212,10 @@ export const adminAPI = {
   createUser: (data) => api.post('/admin/users', data),
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
+  getUserCertificates: (id) => api.get(`/admin/users/${id}/certificates`),
+  createUserCertificate: (id, data) => api.post(`/admin/users/${id}/certificates`, data),
+  updateUserCertificate: (userId, certificateId, data) => api.put(`/admin/users/${userId}/certificates/${certificateId}`, data),
+  deleteUserCertificate: (userId, certificateId) => api.delete(`/admin/users/${userId}/certificates/${certificateId}`),
 
   getDepartments: () => api.get('/admin/departments'),
   createDepartment: (data) => api.post('/admin/departments', data),
@@ -221,6 +225,7 @@ export const adminAPI = {
   getCohortRoles: () => api.get('/admin/cohort-roles'),
   createCohortRole: (data) => api.post('/admin/cohort-roles', data),
   updateCohortRole: (id, data) => api.put(`/admin/cohort-roles/${id}`, data),
+  updateCohortRoleMembers: (id, userIds) => api.put(`/admin/cohort-roles/${id}/members`, { userIds }),
   deleteCohortRole: (id) => api.delete(`/admin/cohort-roles/${id}`),
   reorderCohortRoles: (roleIds) => api.put('/admin/cohort-roles/reorder', { roleIds }),
 
@@ -306,6 +311,20 @@ export const adminAPI = {
     const formData = new FormData();
     formData.append('file', file);
     return api.post('/upload/signature', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadProfileFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/profile-file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  uploadCertificateFile: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/upload/certificate', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },

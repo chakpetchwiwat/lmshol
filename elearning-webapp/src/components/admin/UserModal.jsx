@@ -3,6 +3,9 @@ import { Building2, Check, Tags, X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
+import ProfileEducationSection from '../user/ProfileEducationSection';
+import ProfileFilesSection from '../user/ProfileFilesSection';
+import ProfileCertificates from '../user/ProfileCertificates';
 
 const UserModal = ({
   isOpen,
@@ -13,11 +16,25 @@ const UserModal = ({
   setFormData,
   departments,
   tiers,
-  cohortRoles = [],
   canEditRole = true,
+  profileCertificates = [],
+  lmsCertificates = [],
+  savingProfileDetails = false,
+  uploadingProfileFile = false,
+  savingCertificate = false,
+  uploadingCertificate = false,
+  onUploadProfileFile,
+  onOpenProfileFile,
+  onCreateCertificate,
+  onUpdateCertificate,
+  onDeleteCertificate,
+  onUploadCertificate,
 }) => {
-  const [assignmentMode, setAssignmentMode] = React.useState('department');
-  const assignmentInitRef = React.useRef(null);
+  const assignmentMode = 'department';
+  const setAssignmentMode = () => {};
+  const roleOptions = [];
+  const selectedRoleLabels = [];
+  const toggleCohortRole = () => {};
 
   // Sync Role with Tier managerAccess
   React.useEffect(() => {
@@ -35,48 +52,41 @@ const UserModal = ({
     }
   }, [formData.tierId, tiers, formData.role, setFormData]);
 
-  React.useEffect(() => {
-    if (!isOpen) {
-      assignmentInitRef.current = null;
-      return;
-    }
-
-    const modalKey = editingUser?.id || 'new-user';
-    if (assignmentInitRef.current === modalKey) return;
-
-    const hasRoles = (formData.roles || []).length > 0;
-    assignmentInitRef.current = modalKey;
-    setAssignmentMode(hasRoles && !formData.departmentId ? 'role' : 'department');
-  }, [editingUser?.id, formData.departmentId, formData.roles, isOpen]);
-
-  const roleOptions = React.useMemo(() => {
-    const configured = cohortRoles
-      .filter((role) => role?.key)
-      .map((role) => ({ key: role.key, name: role.name || role.key }));
-    const configuredKeys = new Set(configured.map((role) => role.key));
-    const legacySelections = (formData.roles || [])
-      .filter((roleKey) => roleKey && !configuredKeys.has(roleKey))
-      .map((roleKey) => ({ key: roleKey, name: roleKey }));
-
-    return [...configured, ...legacySelections];
-  }, [cohortRoles, formData.roles]);
-
   const selectedDepartmentName = React.useMemo(
     () => departments.find((department) => department.id === formData.departmentId)?.name || 'ยังไม่ได้กำหนดแผนก',
     [departments, formData.departmentId]
   );
 
-  const selectedRoleLabels = React.useMemo(() => {
-    const labelMap = Object.fromEntries(roleOptions.map((role) => [role.key, role.name]));
-    return (formData.roles || []).map((roleKey) => labelMap[roleKey] || roleKey);
-  }, [formData.roles, roleOptions]);
+  const handleSaveEducation = async (educationHistory) => {
+    setFormData((current) => ({ ...current, educationHistory }));
+    return true;
+  };
 
-  const toggleCohortRole = (roleKey) => {
-    const currentRoles = formData.roles || [];
-    const nextRoles = currentRoles.includes(roleKey)
-      ? currentRoles.filter((item) => item !== roleKey)
-      : [...currentRoles, roleKey];
-    setFormData((prev) => ({ ...prev, roles: nextRoles }));
+  const handleUploadProfileFile = async (file) => {
+    const uploaded = await onUploadProfileFile?.(file);
+    if (!uploaded) return;
+
+    const nextFile = {
+      id: `${Date.now()}`,
+      title: file.name,
+      fileName: uploaded?.fileName || file.name,
+      fileKey: uploaded?.fileKey || '',
+      fileUrl: uploaded?.fileUrl || '',
+      fileMimeType: uploaded?.fileMimeType || file.type,
+      uploadedAt: new Date().toISOString(),
+    };
+
+    setFormData((current) => ({
+      ...current,
+      profileFiles: [nextFile, ...((current.profileFiles || []))]
+    }));
+  };
+
+  const handleDeleteProfileFile = async (fileId) => {
+    setFormData((current) => ({
+      ...current,
+      profileFiles: (current.profileFiles || []).filter((file) => file.id !== fileId)
+    }));
   };
 
   if (!isOpen) {
@@ -86,7 +96,7 @@ const UserModal = ({
   return (
     <ModalPortal isOpen={isOpen}>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
-      <div className="card flex max-h-[95vh] w-full max-w-2xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
+      <div className="card flex max-h-[95vh] w-full max-w-5xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
           <div>
             <h3 className="text-xl font-black text-slate-900">
@@ -190,7 +200,7 @@ const UserModal = ({
                   <button
                     type="button"
                     onClick={() => setAssignmentMode('role')}
-                    className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-all ${
+                    className={`hidden items-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-all ${
                       assignmentMode === 'role'
                         ? 'bg-primary text-white shadow-sm'
                         : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
@@ -279,7 +289,7 @@ const UserModal = ({
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">แผนก</p>
                   <p className="mt-1 truncate text-sm font-black text-slate-800">{selectedDepartmentName}</p>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                <div className="hidden rounded-xl border border-slate-200 bg-white px-3 py-2">
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Cohort Role</p>
                   {selectedRoleLabels.length > 0 ? (
                     <div className="mt-1 flex flex-wrap gap-1">
@@ -299,6 +309,43 @@ const UserModal = ({
             <div className="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs font-medium text-amber-700">
               การมองเห็นคอร์สแบบลำดับขั้นจะอิงจาก "ระดับ" เช่น ถ้าเปิดให้เริ่มจาก Supervisor ผู้ที่อยู่ระดับสูงกว่าอย่าง Manager และ Director จะเห็นด้วย
             </div>
+
+            {editingUser && (
+              <div className="space-y-5">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-sm font-black text-slate-900">Profile information</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    แก้ข้อมูลแทนผู้ใช้ได้จากที่นี่ แล้วกดบันทึกข้อมูลด้านล่างเพื่อบันทึกประวัติการศึกษาและไฟล์ข้อมูลอื่นๆ
+                  </p>
+                </div>
+
+                <ProfileEducationSection
+                  education={Array.isArray(formData.educationHistory) ? formData.educationHistory : []}
+                  saving={savingProfileDetails}
+                  onSave={handleSaveEducation}
+                />
+
+                <ProfileFilesSection
+                  files={Array.isArray(formData.profileFiles) ? formData.profileFiles : []}
+                  saving={savingProfileDetails}
+                  uploading={uploadingProfileFile}
+                  onUpload={handleUploadProfileFile}
+                  onDelete={handleDeleteProfileFile}
+                  onOpen={onOpenProfileFile}
+                />
+
+                <ProfileCertificates
+                  certificates={profileCertificates}
+                  lmsCertificates={lmsCertificates}
+                  saving={savingCertificate}
+                  uploading={uploadingCertificate}
+                  onCreate={onCreateCertificate}
+                  onUpdate={onUpdateCertificate}
+                  onDelete={onDeleteCertificate}
+                  onUpload={onUploadCertificate}
+                />
+              </div>
+            )}
 
             <div className="grid gap-5 md:grid-cols-2">
               <div className="flex flex-col">

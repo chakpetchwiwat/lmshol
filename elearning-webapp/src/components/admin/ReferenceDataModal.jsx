@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { Edit2, Plus, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Check, Edit2, Plus, Search, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
 import { useToast } from '../../context/useToast';
@@ -16,6 +16,9 @@ const ReferenceDataModal = ({
   onUpdate,
   onDelete,
   onReorder = null,
+  memberUsers = [],
+  getMemberIds = null,
+  onUpdateMembers = null,
   showAccessToggle = false,
   showTypeSelection = false,
   typeOptions = [
@@ -29,6 +32,11 @@ const ReferenceDataModal = ({
   const [accessAdmin, setAccessAdmin] = React.useState(false);
   const [draftType, setDraftType] = React.useState('FUNCTION');
   const [editingItem, setEditingItem] = React.useState(null);
+  const [memberEditorItem, setMemberEditorItem] = React.useState(null);
+  const [memberSearch, setMemberSearch] = React.useState('');
+  const [selectedMemberIds, setSelectedMemberIds] = React.useState([]);
+  const [savingMembers, setSavingMembers] = React.useState(false);
+  const canManageMembers = Boolean(onUpdateMembers && getMemberIds);
 
   const handleMove = async (index, direction) => {
     if (!onReorder) return;
@@ -51,15 +59,17 @@ const ReferenceDataModal = ({
     [editingItem, itemLabel]
   );
 
-  if (!isOpen) {
-    return null;
-  }
-
   const resetForm = () => {
     setDraftName('');
     setAccessAdmin(false);
     setDraftType('FUNCTION');
     setEditingItem(null);
+  };
+
+  const closeMemberEditor = () => {
+    setMemberEditorItem(null);
+    setMemberSearch('');
+    setSelectedMemberIds([]);
   };
 
   const handleSubmit = async (event) => {
@@ -101,6 +111,47 @@ const ReferenceDataModal = ({
     }
   };
 
+  const openMemberEditor = (item) => {
+    setMemberEditorItem(item);
+    setSelectedMemberIds(getMemberIds?.(item) || []);
+    setMemberSearch('');
+  };
+
+  const toggleMember = (userId) => {
+    setSelectedMemberIds((current) => (
+      current.includes(userId)
+        ? current.filter((id) => id !== userId)
+        : [...current, userId]
+    ));
+  };
+
+  const handleSaveMembers = async () => {
+    if (!memberEditorItem || !onUpdateMembers) return;
+
+    try {
+      setSavingMembers(true);
+      await onUpdateMembers(memberEditorItem.id, selectedMemberIds);
+      closeMemberEditor();
+    } catch (error) {
+      console.error(`Update ${itemLabel} members error:`, error);
+      toast.error(error.response?.data?.message || `ไม่สามารถบันทึกสมาชิก${itemLabel}ได้`);
+    } finally {
+      setSavingMembers(false);
+    }
+  };
+
+  const filteredMemberUsers = React.useMemo(() => {
+    const keyword = memberSearch.trim().toLowerCase();
+    return (memberUsers || []).filter((user) => {
+      if (!keyword) return true;
+      return `${user.name || ''} ${user.email || ''} ${user.department || user.departmentRef?.name || ''}`.toLowerCase().includes(keyword);
+    });
+  }, [memberSearch, memberUsers]);
+
+  if (!isOpen) {
+    return null;
+  }
+
   return (
     <ModalPortal isOpen={isOpen}>
       <div className="fixed inset-0 z-[90] flex items-center justify-center p-4 backdrop-blur-md">
@@ -109,6 +160,7 @@ const ReferenceDataModal = ({
           className="absolute inset-0 bg-slate-950/65"
           onClick={() => {
             resetForm();
+            closeMemberEditor();
             onClose();
           }}
           aria-label={`ปิดหน้าต่าง${title}`}
@@ -123,6 +175,7 @@ const ReferenceDataModal = ({
             type="button"
             onClick={() => {
               resetForm();
+              closeMemberEditor();
               onClose();
             }}
             className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
@@ -271,6 +324,7 @@ const ReferenceDataModal = ({
                         </div>
                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
                           #{item.id.slice(-4)} • สร้างเมื่อ {item.createdAt ? formatThaiDateTime(item.createdAt) : 'ไม่ระบุ'}
+                          {canManageMembers && <span> • สมาชิก {item.memberCount || 0} คน</span>}
                         </div>
                       </div>
                     </div>
@@ -296,6 +350,15 @@ const ReferenceDataModal = ({
                         </div>
                       )}
                       <div className="flex gap-2">
+                        {canManageMembers && (
+                          <button
+                            type="button"
+                            onClick={() => openMemberEditor(item)}
+                            className="rounded-xl bg-slate-50 px-3 py-2.5 text-xs font-black text-slate-600 transition-all hover:bg-slate-900 hover:text-white"
+                          >
+                            สมาชิก
+                          </button>
+                        )}
                         {!isEditing && (
                           <button
                             type="button"
@@ -329,6 +392,68 @@ const ReferenceDataModal = ({
               </>
             )}
           </div>
+
+          {canManageMembers && memberEditorItem && (
+            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h4 className="text-base font-black text-slate-900">สมาชิก {memberEditorItem.name}</h4>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">{selectedMemberIds.length} คนที่เลือก</p>
+                </div>
+                <button type="button" onClick={closeMemberEditor} className="rounded-xl bg-white px-3 py-2 text-xs font-black text-slate-500 hover:text-slate-900">
+                  ปิด
+                </button>
+              </div>
+
+              <div className="relative mb-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input
+                  type="text"
+                  value={memberSearch}
+                  onChange={(event) => setMemberSearch(event.target.value)}
+                  placeholder="ค้นหาชื่อ อีเมล หรือแผนก..."
+                  className="form-input w-full bg-white py-2 pl-10 pr-4 text-sm"
+                />
+              </div>
+
+              <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                {filteredMemberUsers.map((user) => {
+                  const isSelected = selectedMemberIds.includes(user.id);
+                  return (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => toggleMember(user.id)}
+                      className={`flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-all ${
+                        isSelected
+                          ? 'border-primary bg-white text-primary shadow-sm'
+                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-black">{user.name || user.email}</span>
+                        <span className="block truncate text-xs font-semibold text-slate-400">{user.email} • {user.department || user.departmentRef?.name || '-'}</span>
+                      </span>
+                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                        isSelected ? 'border-primary bg-primary text-white' : 'border-slate-300 text-transparent'
+                      }`}>
+                        <Check size={13} strokeWidth={3} />
+                      </span>
+                    </button>
+                  );
+                })}
+                {filteredMemberUsers.length === 0 && (
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-white p-5 text-center text-xs font-bold text-slate-400">
+                    ไม่พบผู้ใช้
+                  </div>
+                )}
+              </div>
+
+              <button type="button" onClick={handleSaveMembers} disabled={savingMembers} className="btn btn-primary mt-4 w-full">
+                {savingMembers ? 'กำลังบันทึก...' : 'บันทึกสมาชิก'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
       </div>
