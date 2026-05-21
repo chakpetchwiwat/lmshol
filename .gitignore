@@ -1,0 +1,9 @@
+# AI and Agent files
+.agent/
+.memory/
+.planning/
+.cursorrules
+implementation_plan.md
+refactoring_plan.reviewed.md
+refactoring_pr_checklist.md
+NEXT_EDIT.md
