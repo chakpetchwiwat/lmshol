@@ -202,7 +202,7 @@ const buildTrainingItems = (user) => {
     const formattedDate = formatDate(cert.issuedAt);
     return {
       source: 'LMS',
-      courseType: 'ระบบ LMS',
+      courseType: 'ประวัติการอบรมในระบบ',
       courseGroup: cert.course?.category?.name || '',
       courseName: cert.course?.title ? `${cert.course.title} - ${formattedDate}` : '',
       enrolmentDate: '',
@@ -226,7 +226,7 @@ const buildTrainingItems = (user) => {
     const formattedDate = formatDate(cert.issueDate);
     return {
       source: 'External',
-      courseType: 'อบรมภายนอก',
+      courseType: 'ประวัติการอบรมนอกระบบ',
       courseGroup: '',
       courseName: cert.title ? `${cert.title} - ${formattedDate}` : '',
       enrolmentDate: '',

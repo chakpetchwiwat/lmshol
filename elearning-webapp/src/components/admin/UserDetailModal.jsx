@@ -527,8 +527,8 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
                 <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                     <div>
-                      <h4 className="text-base font-black text-slate-900">เกียรติบัตรของพนักงาน</h4>
-                      <p className="mt-0.5 text-xs font-bold text-slate-500">รวบรวมทั้งเกียรติบัตรในระบบและที่เพิ่มเข้ามาเอง</p>
+                      <h4 className="text-base font-black text-slate-900">ประวัติการอบรม</h4>
+                      <p className="mt-0.5 text-xs font-bold text-slate-500">รวบรวมทั้งประวัติการอบรมในระบบและนอกระบบ</p>
                     </div>
                     <div className="rounded-2xl bg-amber-50 px-3 py-1.5 text-[10px] font-black text-amber-600 uppercase tracking-wider border border-amber-100">
                       Total { (detail.externalCertificates?.length || 0) + (detail.systemCertificates?.length || 0) } Certs
@@ -540,12 +540,12 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
                     <div>
                       <h5 className="mb-3 flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
                         <ExternalLink size={14} className="text-primary" />
-                        เกียรติบัตรภายนอก
+                        ประวัติการอบรมนอกระบบ
                       </h5>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {(!detail.externalCertificates || detail.externalCertificates.length === 0) ? (
                           <div className="col-span-2 rounded-2xl border border-dashed border-slate-200 py-6 text-center text-xs font-bold text-slate-400">
-                            ยังไม่มีเกียรติบัตรภายนอก
+                            ยังไม่มีประวัติการอบรมนอกระบบ
                           </div>
                         ) : (
                           detail.externalCertificates.map((cert) => (
@@ -576,12 +576,12 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
                     <div>
                       <h5 className="mb-3 flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
                         <Award size={14} className="text-emerald-500" />
-                        เกียรติบัตรในระบบ
+                        ประวัติการอบรมในระบบ
                       </h5>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {(!detail.systemCertificates || detail.systemCertificates.length === 0) ? (
                           <div className="col-span-2 rounded-2xl border border-dashed border-slate-200 py-6 text-center text-xs font-bold text-slate-400">
-                            ยังไม่มีเกียรติบัตรจากคอร์สเรียน
+                            ยังไม่มีประวัติการอบรมจากคอร์สเรียน
                           </div>
                         ) : (
                           detail.systemCertificates.map((cert) => (
