@@ -41,7 +41,7 @@ const UserFilters = ({
         value={selectedTier}
         onChange={(event) => onTierChange(event.target.value)}
         options={[
-          { value: FILTER_VALUES.ALL, label: 'ทุกระดับ' },
+          { value: FILTER_VALUES.ALL, label: 'ทุกตำแหน่ง' },
           ...tiers.map((t) => ({ value: t.id, label: t.name }))
         ]}
       />

@@ -170,24 +170,24 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
       },
       // Always include certificates
       {
-        title: 'เกียรติบัตรจากระบบ',
+        title: 'ประวัติการอบรมในระบบ',
         columns: ['หลักสูตร', 'เลขที่ใบเซอร์', 'วันที่ออก'],
         rows: (detail?.systemCertificates || []).map(cert => [
           cert.courseTitle || '-',
           cert.certificateNo || '-',
           cert.issuedAt ? formatThaiDateTime(cert.issuedAt) : '-'
         ]),
-        emptyMessage: 'ไม่มีประวัติเกียรติบัตรจากระบบ'
+        emptyMessage: 'ไม่มีประวัติการอบรมในระบบ'
       },
       {
-        title: 'เกียรติบัตรที่เพิ่มเอง',
+        title: 'ประวัติการอบรมนอกระบบ',
         columns: ['หัวข้อ', 'ผู้ออก', 'วันที่ได้รับ'],
         rows: (detail?.externalCertificates || []).map(cert => [
           cert.title || '-',
           cert.issuer || '-',
           cert.issueDate ? formatThaiDateTime(cert.issueDate) : '-'
         ]),
-        emptyMessage: 'ไม่มีประวัติเกียรติบัตรที่เพิ่มเอง'
+        emptyMessage: 'ไม่มีประวัติการอบรมนอกระบบ'
       },
       {
         title: mainTitle,
