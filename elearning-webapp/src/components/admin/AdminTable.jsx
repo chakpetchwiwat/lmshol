@@ -11,11 +11,11 @@ const AdminTable = ({
   return (
     <div className="card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left min-w-max">
+        <table className="w-full border-collapse text-left text-sm sm:text-base">
           <thead>
-            <tr className="border-b border-border bg-gray-50 text-sm text-muted">
+            <tr className="border-b border-border bg-gray-50 text-xs sm:text-sm text-muted">
               {columns.map((column, index) => (
-                <th key={index} className={`p-4 font-medium whitespace-nowrap ${column.className || ''}`}>
+                <th key={index} className={`p-3 sm:p-4 font-medium whitespace-nowrap ${column.className || ''}`}>
                   {column.label}
                 </th>
               ))}

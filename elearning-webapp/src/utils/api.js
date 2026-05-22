@@ -207,6 +207,7 @@ export const adminAPI = {
   getAdvancedAnalytics: (params) => api.get('/admin/analytics', { params }),
 
   getUsers: () => api.get('/admin/users'),
+  exportUserProfiles: () => api.get('/admin/users/export-profiles', { responseType: 'blob' }),
   exportUserTrainings: () => api.get('/admin/users/export-trainings', { responseType: 'blob' }),
   getUserDetails: (id) => api.get(`/admin/users/${id}/details`),
   getProfileFileDownloadUrl: (fileKey) => api.get('/upload/profile-file-url', { params: { key: fileKey } }),

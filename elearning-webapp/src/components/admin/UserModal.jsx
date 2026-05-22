@@ -143,6 +143,59 @@ const UserModal = ({
               </div>
             </div>
 
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-sm font-bold text-slate-700">กลุ่มงาน (Sub-division)</label>
+                <input
+                  type="text"
+                  className="form-input w-full"
+                  value={formData.subdivision || ''}
+                  onChange={(event) => setFormData({ ...formData, subdivision: event.target.value })}
+                  placeholder="เช่น กลุ่มงานพัฒนาระบบ"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-bold text-slate-700">ตำแหน่ง (Position)</label>
+                <input
+                  type="text"
+                  className="form-input w-full"
+                  value={formData.position || ''}
+                  onChange={(event) => setFormData({ ...formData, position: event.target.value })}
+                  placeholder="เช่น นักวิชาการคอมพิวเตอร์"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-bold text-slate-700">ระดับตำแหน่ง (Level)</label>
+                <input
+                  type="text"
+                  className="form-input w-full"
+                  value={formData.positionLevel || ''}
+                  onChange={(event) => setFormData({ ...formData, positionLevel: event.target.value })}
+                  placeholder="เช่น ชำนาญการ"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-bold text-slate-700">ประเภทตำแหน่ง (Type)</label>
+                <input
+                  type="text"
+                  className="form-input w-full"
+                  value={formData.positionType || ''}
+                  onChange={(event) => setFormData({ ...formData, positionType: event.target.value })}
+                  placeholder="เช่น ข้าราชการ"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="mb-1.5 block text-sm font-bold text-slate-700">หัวหน้างาน (Supervisor)</label>
+                <input
+                  type="text"
+                  className="form-input w-full"
+                  value={formData.supervisorName || ''}
+                  onChange={(event) => setFormData({ ...formData, supervisorName: event.target.value })}
+                  placeholder="ชื่อหัวหน้างาน"
+                />
+              </div>
+            </div>
+
             <div>
               <label className="mb-1.5 block text-sm font-bold text-slate-700">
                 รหัสผ่าน {editingUser && <span className="text-xs font-medium text-slate-400">(เว้นว่างหากไม่ต้องการเปลี่ยน)</span>}

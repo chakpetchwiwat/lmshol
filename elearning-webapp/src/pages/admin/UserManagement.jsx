@@ -434,7 +434,6 @@ const UserManagement = () => {
     { label: 'ระดับตำแหน่ง (Level)' },
     { label: 'ประเภทตำแหน่ง (Type)' },
     { label: 'หัวหน้างาน (Supervisor)' },
-    { label: 'ระดับ' },
     { label: 'เริ่มงาน' },
     { label: 'คอร์สที่จบ', className: 'text-center' },
     { label: 'แต้มสะสม', className: 'text-right' },
