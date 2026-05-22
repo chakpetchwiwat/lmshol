@@ -458,6 +458,13 @@ async function createCertificateSignedUrl({ certificateId, requester }) {
 
   if (!hasAccess) throw new ErrorResponse('Forbidden: You do not have permission to access this certificate', 403);
 
+  if (cert.pdfUrl.startsWith('/uploads/')) {
+    return {
+      url: `${process.env.API_URL || ''}${cert.pdfUrl}`,
+      expiresIn: 3600
+    };
+  }
+
   const supabase = require('../../utils/supabase');
   const { bucket, path: storagePath } = extractStoragePath(cert.pdfUrl);
   const expiresIn = parseInt(process.env.CERTIFICATE_SIGNED_URL_EXPIRES_SECONDS || '300', 10);

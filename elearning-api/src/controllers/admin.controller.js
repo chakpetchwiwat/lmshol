@@ -61,6 +61,13 @@ const getUsers = asyncHandler(async (req, res) => {
   res.json({ success: true, data: users });
 });
 
+const exportUserTrainings = asyncHandler(async (req, res) => {
+  const buffer = await AdminService.exportUserTrainings(req.user);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename="training_report.xlsx"');
+  res.send(buffer);
+});
+
 const getUserDetails = asyncHandler(async (req, res) => {
   const user = await AdminService.getUserDetails(req.params.id, req.user);
   res.json({ success: true, data: user });
@@ -475,6 +482,7 @@ module.exports = {
   getRedeemRequests,
   updateRedeemStatus,
   getUsers,
+  exportUserTrainings,
   getUserDetails,
   createUser,
   updateUser,

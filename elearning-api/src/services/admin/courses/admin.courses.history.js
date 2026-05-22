@@ -29,7 +29,7 @@ const getCourseHistory = async (courseId, filters = {}) => {
     }, null);
 
     const userWhere = {
-        role: { in: MANAGED_USER_ROLES },
+        roles: { hasSome: MANAGED_USER_ROLES },
         status: USER_STATUS.ACTIVE
     };
 

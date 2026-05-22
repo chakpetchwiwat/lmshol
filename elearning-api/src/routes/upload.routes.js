@@ -122,7 +122,7 @@ const canPreviewSignature = async (authUser, fileKey) => {
         select: {
             signatureImageUrl: true,
             permission: true,
-            role: true,
+            roles: true,
             tier: true,
             courseStaff: { take: 1, select: { id: true } }
         }
@@ -132,7 +132,7 @@ const canPreviewSignature = async (authUser, fileKey) => {
         return true;
     }
 
-    if (!hasAdminPanelAccess(user)) {
+    if (!hasAdminPanelAccess({ ...user, role: user.roles?.[0] || user.permission })) {
         return false;
     }
 

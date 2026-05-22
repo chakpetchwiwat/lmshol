@@ -15,6 +15,7 @@ router.get('/system/health', verifySuperAdmin, systemController.getSystemHealth)
 router.post('/system/security/reset', verifySuperAdmin, systemController.resetRateLimit);
 
 router.get('/users', adminController.getUsers);
+router.get('/users/export-trainings', adminController.exportUserTrainings);
 router.get('/users/:id/details', auditRequest('admin.user_details.viewed', { entityType: 'user', includeBody: false }), adminController.getUserDetails);
 router.get('/users/:id/certificates', verifySuperAdmin, adminController.getUserCertificates);
 router.post('/users/:id/certificates', verifySuperAdmin, auditRequest('admin.user_certificate.created', { entityType: 'userCertificate' }), adminController.createUserCertificate);

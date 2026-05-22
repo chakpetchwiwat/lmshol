@@ -399,24 +399,43 @@ async function generatePdfBuffer(_html, options = {}) {
 }
 
 /**
- * Uploads the certificate PDF buffer to Supabase Storage.
+ * Uploads the certificate PDF buffer to local storage (or Supabase if not production).
  */
 async function uploadCertificatePdf({ buffer, userId, certificateId }) {
-  const bucketName = 'uploads';
-  const filePath = `certificates/${userId}/${certificateId}/${Date.now()}.pdf`;
+  if (process.env.NODE_ENV === 'production') {
+    const fs = require('fs/promises');
+    const path = require('path');
+    
+    // Save to /var/www/html/uploads/certificates/...
+    const relativePath = `certificates/${userId}/${certificateId}/${Date.now()}.pdf`;
+    const fullPath = path.join('/var/www/html/uploads', relativePath);
+    
+    // Ensure directory exists
+    await fs.mkdir(path.dirname(fullPath), { recursive: true });
+    
+    // Write file
+    await fs.writeFile(fullPath, buffer);
+    
+    // Return the local URL
+    return `/uploads/${relativePath}`;
+  } else {
+    // Fallback for local development if still using Supabase
+    const bucketName = 'uploads';
+    const filePath = `certificates/${userId}/${certificateId}/${Date.now()}.pdf`;
 
-  const { error } = await supabase.storage
-    .from(bucketName)
-    .upload(filePath, buffer, {
-      contentType: 'application/pdf',
-      cacheControl: '60',
-      upsert: false
-    });
+    const { error } = await supabase.storage
+      .from(bucketName)
+      .upload(filePath, buffer, {
+        contentType: 'application/pdf',
+        cacheControl: '60',
+        upsert: false
+      });
 
-  if (error) throw new Error(`Failed to upload to Supabase Storage: ${error.message}`);
+    if (error) throw new Error(`Failed to upload to Supabase Storage: ${error.message}`);
 
-  const { data: { publicUrl } } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-  return publicUrl;
+    const { data: { publicUrl } } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+    return publicUrl;
+  }
 }
 
 module.exports = {
