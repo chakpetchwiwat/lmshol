@@ -439,7 +439,7 @@ const UserManagement = () => {
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title={isManagerView ? 'พนักงานในแผนก' : 'ผู้ใช้งานระบบ'}
+        title={`${isManagerView ? 'พนักงานในแผนก' : 'ผู้ใช้งานระบบ'} (รวม ${users.length} คน)`}
         subtitle={isManagerView
           ? `ดูข้อมูลผู้ใช้งานเฉพาะแผนก ${currentUser?.department || 'ของคุณ'} และตรวจสอบประวัติการเรียนกับ Point ได้ในที่เดียว`
           : 'เพิ่มผู้ใช้งาน จัดการแผนก/ระดับ และดูประวัติการเรียนกับ Point รายบุคคล'}
