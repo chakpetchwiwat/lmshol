@@ -56,6 +56,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
         const newLevels = [...levels, { name: newItemName.trim() }];
         await adminAPI.updateSetting('SUBDIVISIONS', newLevels.map(l => l.name));
         toast.success('เพิ่มกลุ่มงานเรียบร้อย');
+      }
       
       setNewItemName('');
       loadData();
@@ -84,6 +85,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
         const newLevels = levels.filter(l => l.name !== item.name);
         await adminAPI.updateSetting('SUBDIVISIONS', newLevels.map(l => l.name));
         toast.success('ลบกลุ่มงานเรียบร้อย');
+      }
       
       loadData();
       if (activeTab === 'position' && onPositionsChange) {
@@ -114,6 +116,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
         await adminAPI.reorderTiers(items.map(i => i.id));
       } else if (activeTab === 'level') {
         await adminAPI.updateSetting('SUBDIVISIONS', items.map(l => l.name));
+      }
       
       if (activeTab === 'position' && onPositionsChange) {
         onPositionsChange();
