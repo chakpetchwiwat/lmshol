@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Settings2, Plus, GripVertical, Trash2, Shield } from 'lucide-react';
-import { confirm } from '../common/ConfirmDialog';
+import useConfirm from '../../hooks/useConfirm';
+import ConfirmDialog from '../common/ConfirmDialog';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useToast } from '../../context/useToast';
 import api from '../../utils/api';
@@ -14,6 +15,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
   const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const { confirm, ConfirmDialogProps } = useConfirm();
 
   const [newItemName, setNewItemName] = useState('');
 
@@ -72,9 +74,9 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
   const handleDeleteItem = async (item) => {
     const ok = await confirm({
       title: 'ยืนยันการลบ',
-      description: `คุณต้องการลบ "${item.name}" ใช่หรือไม่? ข้อมูลที่ใช้งานตัวเลือกนี้อยู่จะไม่ได้รับผลกระทบ`,
-      confirmText: 'ลบข้อมูล',
-      confirmColor: 'red'
+      message: `คุณต้องการลบ "${item.name}" ใช่หรือไม่? ข้อมูลที่ใช้งานตัวเลือกนี้อยู่จะไม่ได้รับผลกระทบ`,
+      confirmLabel: 'ลบข้อมูล',
+      variant: 'danger'
     });
     if (!ok) return;
 
@@ -276,6 +278,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
         </div>
       </div>
       </div>
+      <ConfirmDialog {...ConfirmDialogProps} />
     </ModalPortal>
   );
 }
