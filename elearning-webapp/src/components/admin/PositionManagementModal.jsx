@@ -275,6 +275,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
           )}
         </div>
       </div>
+      </div>
     </ModalPortal>
   );
 }
