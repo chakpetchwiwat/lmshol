@@ -357,6 +357,45 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
                           })}
                         </div>
                       )}
+                      
+                      <div className="mt-5 w-full space-y-2 border-t border-slate-200/60 pt-4 text-xs">
+                        {detail.department && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">แผนก:</span>
+                            <span className="font-semibold text-slate-700">{detail.department}</span>
+                          </div>
+                        )}
+                        {detail.subdivision && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">กลุ่มงาน:</span>
+                            <span className="font-semibold text-slate-700">{detail.subdivision}</span>
+                          </div>
+                        )}
+                        {detail.position && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">ตำแหน่ง:</span>
+                            <span className="font-semibold text-slate-700">{detail.position}</span>
+                          </div>
+                        )}
+                        {detail.positionLevel && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">ระดับ:</span>
+                            <span className="font-semibold text-slate-700">{detail.positionLevel}</span>
+                          </div>
+                        )}
+                        {detail.positionType && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">ประเภท:</span>
+                            <span className="font-semibold text-slate-700">{detail.positionType}</span>
+                          </div>
+                        )}
+                        {detail.supervisorName && (
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">หัวหน้างาน:</span>
+                            <span className="font-semibold text-slate-700">{detail.supervisorName}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     <div className="p-5">

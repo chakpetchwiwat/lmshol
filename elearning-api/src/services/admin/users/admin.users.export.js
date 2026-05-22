@@ -10,12 +10,12 @@ const exportUserTrainings = async (actor) => {
       email: true,
       department: true,
       position: true,
-      certificates: { // internal system certificates
+      issuedCertificates: { // internal system certificates
         select: {
-          title: true,
-          issueDate: true,
+          issuedAt: true,
           course: {
             select: {
+              title: true,
               category: {
                 select: { name: true }
               }
@@ -23,7 +23,7 @@ const exportUserTrainings = async (actor) => {
           }
         }
       },
-      issuedCertificates: { // external certificates
+      certificates: { // external certificates
         select: {
           title: true,
           issuer: true,
@@ -38,24 +38,24 @@ const exportUserTrainings = async (actor) => {
 
   for (const user of users) {
     // 1. Process internal system certificates
-    if (user.certificates && user.certificates.length > 0) {
-      for (const cert of user.certificates) {
+    if (user.issuedCertificates && user.issuedCertificates.length > 0) {
+      for (const cert of user.issuedCertificates) {
         rows.push({
           'ชื่อ-นามสกุล': user.name || '-',
           'อีเมล': user.email || '-',
           'แผนก': user.department || '-',
           'ตำแหน่ง': user.position || '-',
-          'ชื่อหลักสูตรการอบรม': cert.title || '-',
+          'ชื่อหลักสูตรการอบรม': cert.course?.title || '-',
           'ประเภท': cert.course?.category?.name || 'ระบบ LMS',
           'ผู้จัด': 'LMS System',
-          'วันที่สำเร็จการศึกษา': cert.issueDate ? new Date(cert.issueDate).toLocaleDateString('th-TH') : '-'
+          'วันที่สำเร็จการศึกษา': cert.issuedAt ? new Date(cert.issuedAt).toLocaleDateString('th-TH') : '-'
         });
       }
     }
 
     // 2. Process external certificates
-    if (user.issuedCertificates && user.issuedCertificates.length > 0) {
-      for (const cert of user.issuedCertificates) {
+    if (user.certificates && user.certificates.length > 0) {
+      for (const cert of user.certificates) {
         rows.push({
           'ชื่อ-นามสกุล': user.name || '-',
           'อีเมล': user.email || '-',
@@ -69,8 +69,7 @@ const exportUserTrainings = async (actor) => {
       }
     }
 
-    // If user has no trainings, we might still want them in the report, or not.
-    // Usually training reports only list trainings. But if you want a complete list:
+    // If user has no trainings
     if ((!user.certificates || user.certificates.length === 0) && (!user.issuedCertificates || user.issuedCertificates.length === 0)) {
        rows.push({
           'ชื่อ-นามสกุล': user.name || '-',
