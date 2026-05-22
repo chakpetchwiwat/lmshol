@@ -220,7 +220,8 @@ const buildTrainingItems = (user) => {
     projectName: '',
     orderNumber: '',
     orderDate: ''
-  }));
+    };
+  });
 
   const externalItems = (user.certificates || []).map((cert) => {
     const formattedDate = formatDate(cert.issueDate);
@@ -244,7 +245,8 @@ const buildTrainingItems = (user) => {
     projectName: '',
     orderNumber: '',
     orderDate: ''
-  }));
+    };
+  });
 
   return [...systemItems, ...externalItems].filter((item) => item.courseName);
 };
