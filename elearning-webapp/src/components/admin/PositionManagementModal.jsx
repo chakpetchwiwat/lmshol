@@ -4,7 +4,7 @@ import useConfirm from '../../hooks/useConfirm';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useToast } from '../../context/useToast';
-import api from '../../utils/api';
+import { adminAPI } from '../../utils/api';
 import ModalPortal from '../common/ModalPortal';
 
 export default function PositionManagementModal({ isOpen, onClose, onPositionsChange }) {
@@ -23,9 +23,9 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
     setLoading(true);
     try {
       const [posRes, lvlRes, typeRes] = await Promise.all([
-        api.getTiers(),
-        api.getSetting('POSITION_LEVELS'),
-        api.getSetting('POSITION_TYPES')
+        adminAPI.getTiers(),
+        adminAPI.getSetting('POSITION_LEVELS'),
+        adminAPI.getSetting('POSITION_TYPES')
       ]);
       setPositions(posRes.data?.data || []);
       setLevels(lvlRes.data?.data || []);
@@ -50,15 +50,15 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
 
     try {
       if (activeTab === 'position') {
-        await api.createTier({ name: newItemName.trim() });
+        await adminAPI.createTier({ name: newItemName.trim() });
         toast.success('เพิ่มตำแหน่งเรียบร้อย');
       } else if (activeTab === 'level') {
         const newLevels = [...levels, { name: newItemName.trim() }];
-        await api.updateSetting('POSITION_LEVELS', newLevels.map(l => l.name));
+        await adminAPI.updateSetting('POSITION_LEVELS', newLevels.map(l => l.name));
         toast.success('เพิ่มระดับตำแหน่งเรียบร้อย');
       } else if (activeTab === 'type') {
         const newTypes = [...types, { name: newItemName.trim() }];
-        await api.updateSetting('POSITION_TYPES', newTypes.map(t => t.name));
+        await adminAPI.updateSetting('POSITION_TYPES', newTypes.map(t => t.name));
         toast.success('เพิ่มประเภทตำแหน่งเรียบร้อย');
       }
       setNewItemName('');
@@ -82,15 +82,15 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
 
     try {
       if (activeTab === 'position') {
-        await api.deleteTier(item.id);
+        await adminAPI.deleteTier(item.id);
         toast.success('ลบตำแหน่งเรียบร้อย');
       } else if (activeTab === 'level') {
         const newLevels = levels.filter(l => l.name !== item.name);
-        await api.updateSetting('POSITION_LEVELS', newLevels.map(l => l.name));
+        await adminAPI.updateSetting('POSITION_LEVELS', newLevels.map(l => l.name));
         toast.success('ลบระดับตำแหน่งเรียบร้อย');
       } else if (activeTab === 'type') {
         const newTypes = types.filter(t => t.name !== item.name);
-        await api.updateSetting('POSITION_TYPES', newTypes.map(t => t.name));
+        await adminAPI.updateSetting('POSITION_TYPES', newTypes.map(t => t.name));
         toast.success('ลบประเภทตำแหน่งเรียบร้อย');
       }
       loadData();
@@ -119,11 +119,11 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
 
     try {
       if (activeTab === 'position') {
-        await api.reorderTiers(items.map(i => i.id));
+        await adminAPI.reorderTiers(items.map(i => i.id));
       } else if (activeTab === 'level') {
-        await api.updateSetting('POSITION_LEVELS', items.map(l => l.name));
+        await adminAPI.updateSetting('POSITION_LEVELS', items.map(l => l.name));
       } else if (activeTab === 'type') {
-        await api.updateSetting('POSITION_TYPES', items.map(t => t.name));
+        await adminAPI.updateSetting('POSITION_TYPES', items.map(t => t.name));
       }
       if (activeTab === 'position' && onPositionsChange) {
         onPositionsChange();
@@ -137,7 +137,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
   const toggleAccessAdmin = async (item) => {
     if (activeTab !== 'position') return;
     try {
-      await api.updateTier(item.id, { accessAdmin: !item.accessAdmin });
+      await adminAPI.updateTier(item.id, { accessAdmin: !item.accessAdmin });
       toast.success('อัปเดตสิทธิ์เรียบร้อย');
       loadData();
       if (onPositionsChange) onPositionsChange();
