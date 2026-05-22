@@ -24,12 +24,12 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
     try {
       const [posRes, lvlRes, typeRes] = await Promise.all([
         adminAPI.getTiers(),
-        adminAPI.getSetting('POSITION_LEVELS'),
+        adminAPI.getSetting('SUBDIVISIONS'),
         adminAPI.getSetting('POSITION_TYPES')
       ]);
-      setPositions(posRes.data?.data || []);
-      setLevels((lvlRes.data?.data || []).map(x => (typeof x === 'string' ? { id: x, name: x } : x)));
-      setTypes((typeRes.data?.data || []).map(x => (typeof x === 'string' ? { id: x, name: x } : x)));
+      setDepartments(posRes.data?.data || []);
+      setLevels(lvlRes.data?.data || []);
+      setTypes(typeRes.data?.data || []);
     } catch (err) {
       console.error(err);
       toast.error('ไม่สามารถโหลดข้อมูลได้');
@@ -51,16 +51,12 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
     try {
       if (activeTab === 'position') {
         await adminAPI.createTier({ name: newItemName.trim() });
-        toast.success('เพิ่มตำแหน่งเรียบร้อย');
+        toast.success('เพิ่มแผนกเรียบร้อย');
       } else if (activeTab === 'level') {
         const newLevels = [...levels, { name: newItemName.trim() }];
-        await adminAPI.updateSetting('POSITION_LEVELS', newLevels.map(l => l.name));
-        toast.success('เพิ่มระดับตำแหน่งเรียบร้อย');
-      } else if (activeTab === 'type') {
-        const newTypes = [...types, { name: newItemName.trim() }];
-        await adminAPI.updateSetting('POSITION_TYPES', newTypes.map(t => t.name));
-        toast.success('เพิ่มประเภทตำแหน่งเรียบร้อย');
-      }
+        await adminAPI.updateSetting('SUBDIVISIONS', newLevels.map(l => l.name));
+        toast.success('เพิ่มกลุ่มงานเรียบร้อย');
+      
       setNewItemName('');
       loadData();
       if (activeTab === 'position' && onPositionsChange) {
@@ -83,16 +79,12 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
     try {
       if (activeTab === 'position') {
         await adminAPI.deleteTier(item.id);
-        toast.success('ลบตำแหน่งเรียบร้อย');
+        toast.success('ลบแผนกเรียบร้อย');
       } else if (activeTab === 'level') {
         const newLevels = levels.filter(l => l.name !== item.name);
-        await adminAPI.updateSetting('POSITION_LEVELS', newLevels.map(l => l.name));
-        toast.success('ลบระดับตำแหน่งเรียบร้อย');
-      } else if (activeTab === 'type') {
-        const newTypes = types.filter(t => t.name !== item.name);
-        await adminAPI.updateSetting('POSITION_TYPES', newTypes.map(t => t.name));
-        toast.success('ลบประเภทตำแหน่งเรียบร้อย');
-      }
+        await adminAPI.updateSetting('SUBDIVISIONS', newLevels.map(l => l.name));
+        toast.success('ลบกลุ่มงานเรียบร้อย');
+      
       loadData();
       if (activeTab === 'position' && onPositionsChange) {
         onPositionsChange();
@@ -121,10 +113,8 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
       if (activeTab === 'position') {
         await adminAPI.reorderTiers(items.map(i => i.id));
       } else if (activeTab === 'level') {
-        await adminAPI.updateSetting('POSITION_LEVELS', items.map(l => l.name));
-      } else if (activeTab === 'type') {
-        await adminAPI.updateSetting('POSITION_TYPES', items.map(t => t.name));
-      }
+        await adminAPI.updateSetting('SUBDIVISIONS', items.map(l => l.name));
+      
       if (activeTab === 'position' && onPositionsChange) {
         onPositionsChange();
       }
@@ -177,15 +167,15 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
             ✕
           </button>
           <div className="p-6">
-        <h2 className="text-xl font-bold text-slate-800 mb-2">จัดการตำแหน่งและระดับ</h2>
+        <h2 className="text-xl font-bold text-slate-800 mb-2">จัดการแผนกและกลุ่มงาน</h2>
         <p className="text-sm text-slate-500 mb-6">
           คุณสามารถเพิ่ม แก้ไข ลำดับ และลบข้อมูลตำแหน่ง เพื่อให้เป็นตัวเลือกในหน้าผู้ใช้งานได้
         </p>
 
         <div className="flex gap-6 border-b border-slate-200 mb-6">
-          {renderTab('position', 'ตำแหน่ง (Position)')}
-          {renderTab('level', 'ระดับตำแหน่ง (Level)')}
-          {renderTab('type', 'ประเภทตำแหน่ง (Type)')}
+          {renderTab('position', 'แผนก (Department)')}
+          {renderTab('level', 'กลุ่มงาน (Sub-division)')}
+          {renderTab('type', '')}
         </div>
 
         <form onSubmit={handleAddItem} className="flex gap-2 mb-6">

@@ -4,6 +4,7 @@ import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import UserModal from '../../components/admin/UserModal';
 import ReferenceDataModal from '../../components/admin/ReferenceDataModal';
+import DepartmentSubdivisionModal from '../../components/admin/DepartmentSubdivisionModal';
 import PositionManagementModal from '../../components/admin/PositionManagementModal';
 import UserDetailModal from '../../components/admin/UserDetailModal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
@@ -514,6 +515,14 @@ const UserManagement = () => {
                   จัดการ Role
                 </button>
                 <div className="flex gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
+                  <DepartmentSubdivisionModal
+                    isOpen={showDepartmentModal}
+                    onClose={() => setShowDepartmentModal(false)}
+                    onPositionsChange={() => {
+                      fetchReferenceData();
+                      fetchUsers();
+                    }}
+                  />
                   <button type="button" onClick={handleExportProfiles} className="btn btn-outline border-sky-200 bg-white text-sky-700 hover:bg-sky-50 hover:border-sky-300 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     Export ข้อมูลผู้ใช้งาน
