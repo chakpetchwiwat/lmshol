@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Settings2, Plus, GripVertical, Trash2, Shield } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { confirm } from '../common/ConfirmDialog';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { useToast } from '../../context/useToast';
 import api from '../../utils/api';
 import Modal from '../common/Modal';
 
@@ -13,6 +13,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
   const [levels, setLevels] = useState([]);
   const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const [newItemName, setNewItemName] = useState('');
 
