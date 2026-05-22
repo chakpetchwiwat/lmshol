@@ -4,7 +4,7 @@ import { confirm } from '../common/ConfirmDialog';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useToast } from '../../context/useToast';
 import api from '../../utils/api';
-import Modal from '../common/Modal';
+import ModalPortal from '../common/ModalPortal';
 
 export default function PositionManagementModal({ isOpen, onClose, onPositionsChange }) {
   const [activeTab, setActiveTab] = useState('position');
@@ -165,8 +165,16 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg">
-      <div className="p-6">
+    <ModalPortal isOpen={isOpen}>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
+        <div className="card flex max-h-[95vh] w-full max-w-2xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl relative">
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 z-10"
+          >
+            ✕
+          </button>
+          <div className="p-6">
         <h2 className="text-xl font-bold text-slate-800 mb-2">จัดการตำแหน่งและระดับ</h2>
         <p className="text-sm text-slate-500 mb-6">
           คุณสามารถเพิ่ม แก้ไข ลำดับ และลบข้อมูลตำแหน่ง เพื่อให้เป็นตัวเลือกในหน้าผู้ใช้งานได้
@@ -264,8 +272,9 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
               )}
             </Droppable>
           </DragDropContext>
-        )}
+          )}
+        </div>
       </div>
-    </Modal>
+    </ModalPortal>
   );
 }
