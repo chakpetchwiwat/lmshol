@@ -376,19 +376,38 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
                             <GraduationCap size={15} className="text-primary" />
                             Education
                           </div>
-                          {educationHistory.length === 0 ? (
+                          {!detail.educationHistory || Object.keys(detail.educationHistory).length === 0 ? (
                             <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-xs font-bold text-slate-400">
                               ยังไม่มีประวัติการศึกษา
                             </div>
                           ) : (
                             <div className="space-y-3">
-                              {educationHistory.map((item) => (
+                              {/* Display array format if exists */}
+                              {Array.isArray(detail.educationHistory) && detail.educationHistory.map((item) => (
                                 <div key={item.id} className="rounded-2xl border border-slate-100 bg-white p-3">
                                   <p className="text-sm font-black text-slate-900">{item.institution || '-'}</p>
                                   <p className="mt-1 text-xs font-bold text-slate-600">{item.degree || '-'} · {item.faculty || '-'}</p>
                                   <p className="mt-1 text-xs font-bold text-slate-400">{item.major || '-'} · {item.graduationYear || '-'}</p>
                                 </div>
                               ))}
+                              
+                              {/* Display object format from Excel import */}
+                              {!Array.isArray(detail.educationHistory) && (
+                                <div className="rounded-2xl border border-slate-100 bg-white p-3">
+                                  <div className="mb-3 border-b border-slate-100 pb-2">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">การศึกษา</p>
+                                    <p className="mt-1 text-sm font-black text-slate-900">{detail.educationHistory.institution || '-'}</p>
+                                    <p className="mt-0.5 text-xs font-bold text-slate-600">{detail.educationHistory.degreeName || '-'} · {detail.educationHistory.fieldOfStudy || '-'}</p>
+                                    <p className="mt-0.5 text-xs text-slate-500">ระดับ: {detail.educationHistory.level || '-'}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">การศึกษาสูงสุด</p>
+                                    <p className="mt-1 text-sm font-black text-slate-900">{detail.educationHistory.highestInstitution || '-'}</p>
+                                    <p className="mt-0.5 text-xs font-bold text-slate-600">{detail.educationHistory.highestDegreeName || '-'} · {detail.educationHistory.highestFieldOfStudy || '-'}</p>
+                                    <p className="mt-0.5 text-xs text-slate-500">ระดับ: {detail.educationHistory.highestLevel || '-'}</p>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
@@ -398,13 +417,49 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
                             <Paperclip size={15} className="text-emerald-600" />
                             Other Information
                           </div>
-                          {profileFiles.length === 0 ? (
+                          {!detail.profileFiles || Object.keys(detail.profileFiles).length === 0 ? (
                             <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-xs font-bold text-slate-400">
                               ยังไม่มีไฟล์ข้อมูลอื่นๆ
                             </div>
                           ) : (
                             <div className="space-y-3">
-                              {profileFiles.map((file) => (
+                              {/* Display object format from Excel import */}
+                              {!Array.isArray(detail.profileFiles) && detail.profileFiles.cv && (
+                                <button
+                                  type="button"
+                                  onClick={() => window.open(detail.profileFiles.cv, '_blank')}
+                                  className="group flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 text-left transition-all hover:border-emerald-200 hover:shadow-md"
+                                >
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                                    <FileText size={18} />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-black text-slate-900">CV (Curriculum Vitae)</p>
+                                    <p className="mt-1 truncate text-xs font-bold text-slate-400">ไฟล์ประวัติการทำงาน</p>
+                                  </div>
+                                  <ExternalLink size={14} className="shrink-0 text-slate-300 transition-colors group-hover:text-emerald-600" />
+                                </button>
+                              )}
+                              
+                              {!Array.isArray(detail.profileFiles) && detail.profileFiles.jobDescription && (
+                                <button
+                                  type="button"
+                                  onClick={() => window.open(detail.profileFiles.jobDescription, '_blank')}
+                                  className="group flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 text-left transition-all hover:border-emerald-200 hover:shadow-md"
+                                >
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                    <FileText size={18} />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-black text-slate-900">Job Description</p>
+                                    <p className="mt-1 truncate text-xs font-bold text-slate-400">ไฟล์คำบรรยายลักษณะงาน</p>
+                                  </div>
+                                  <ExternalLink size={14} className="shrink-0 text-slate-300 transition-colors group-hover:text-indigo-600" />
+                                </button>
+                              )}
+
+                              {/* Display array format if exists */}
+                              {Array.isArray(detail.profileFiles) && detail.profileFiles.map((file) => (
                                 <button
                                   key={file.id}
                                   type="button"

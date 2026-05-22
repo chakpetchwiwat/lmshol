@@ -52,6 +52,11 @@ const UserList = ({
             )}
           </td>
           <td className="p-4 text-sm text-muted">{user.department || '-'}</td>
+          <td className="p-4 text-sm text-muted">{user.subdivision || '-'}</td>
+          <td className="p-4 text-sm text-muted">{user.position || '-'}</td>
+          <td className="p-4 text-sm text-muted">{user.positionLevel || '-'}</td>
+          <td className="p-4 text-sm text-muted">{user.positionType || '-'}</td>
+          <td className="p-4 text-sm text-muted">{user.supervisorName || '-'}</td>
           <td className="p-4 text-sm text-muted">{user.tier?.name || user.tier || '-'}</td>
           <td className="p-4 text-sm text-muted">
             {user.employmentDate ? formatThaiDateTime(user.employmentDate) : '-'}

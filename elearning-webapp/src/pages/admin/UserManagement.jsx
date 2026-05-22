@@ -429,12 +429,39 @@ const UserManagement = () => {
     { label: 'Permission ระบบ' },
     { label: 'บทบาท (Role)' },
     { label: 'แผนก' },
+    { label: 'กลุ่มงาน (Sub-division)' },
+    { label: 'ตำแหน่ง (Position)' },
+    { label: 'ระดับตำแหน่ง (Level)' },
+    { label: 'ประเภทตำแหน่ง (Type)' },
+    { label: 'หัวหน้างาน (Supervisor)' },
     { label: 'ระดับ' },
     { label: 'เริ่มงาน' },
     { label: 'คอร์สที่จบ', className: 'text-center' },
     { label: 'แต้มสะสม', className: 'text-right' },
     { label: 'จัดการ', className: 'text-right' },
   ], []);
+
+  const handleExportTrainings = async () => {
+    try {
+      toast.info('กำลังสร้างไฟล์รายงาน กรุณารอสักครู่...');
+      const response = await adminAPI.exportUserTrainings();
+      
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'training_report.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('ดาวน์โหลดรายงานสำเร็จ');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('ไม่สามารถดาวน์โหลดรายงานได้');
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -458,6 +485,10 @@ const UserManagement = () => {
                 <button type="button" onClick={() => setShowCohortRoleModal(true)} className="btn btn-outline">
                   <Users size={18} />
                   จัดการ Role
+                </button>
+                <button type="button" onClick={handleExportTrainings} className="btn btn-outline border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  Export รายงานการอบรม
                 </button>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
