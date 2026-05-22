@@ -440,6 +440,27 @@ const UserManagement = () => {
     { label: 'จัดการ', className: 'text-right' },
   ], []);
 
+  const handleExportProfiles = async () => {
+    try {
+      toast.info('กำลังสร้างไฟล์รายงานข้อมูลผู้ใช้งาน กรุณารอสักครู่...');
+      const response = await adminAPI.exportUserProfiles();
+      
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'users_profile_report.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('ดาวน์โหลดรายงานข้อมูลผู้ใช้งานสำเร็จ');
+    } catch (error) {
+      console.error('Export profiles error:', error);
+      toast.error('ไม่สามารถดาวน์โหลดรายงานข้อมูลผู้ใช้งานได้');
+    }
+  };
+
   const handleExportTrainings = async () => {
     try {
       toast.info('กำลังสร้างไฟล์รายงาน กรุณารอสักครู่...');
@@ -485,10 +506,16 @@ const UserManagement = () => {
                   <Users size={18} />
                   จัดการ Role
                 </button>
-                <button type="button" onClick={handleExportTrainings} className="btn btn-outline border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                  Export รายงานการอบรม
-                </button>
+                <div className="flex gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
+                  <button type="button" onClick={handleExportProfiles} className="btn btn-outline border-sky-200 bg-white text-sky-700 hover:bg-sky-50 hover:border-sky-300 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Export ข้อมูลผู้ใช้งาน
+                  </button>
+                  <button type="button" onClick={handleExportTrainings} className="btn btn-outline border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Export ประวัติอบรม
+                  </button>
+                </div>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
                   เพิ่มผู้ใช้งาน
