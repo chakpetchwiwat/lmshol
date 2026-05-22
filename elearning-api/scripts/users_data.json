@@ -1,0 +1,4169 @@
+[
+  {
+    "email": "placeholder1@lmsfda.com",
+    "name": "จุฑามาศ สุพรรณชัย",
+    "password": "$2b$10$h9H8wCNfeoZ0KciYUeLw8OJkxiR50JbqpesVx1mZ9ywry6HMXtesC",
+    "department": "กองยา",
+    "position": "นักวิเคราะห์นโยบายและแผน",
+    "positionLevel": "กลุ่มงานบริหารทั่วไป",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "กลุ่มงานบริหารทั่วไป",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "nationalId": "3100203138515",
+    "retirementDateRaw": "248376",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "ป.ตรีหรือเทียบเท่า",
+      "fieldOfStudy": "การจัดการทั่วไป",
+      "institution": "มหาวิทยาลัยสุโขทัยธรรมาธิราช",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "ป.ตรีหรือเทียบเท่า",
+      "highestFieldOfStudy": "การจัดการทั่วไป",
+      "highestInstitution": "มหาวิทยาลัยสุโขทัยธรรมาธิราช"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/181/profilefield_file/files_1/0/2.%20SoE%20%E0%B8%88%E0%B8%B8%E0%B8%91%E0%B8%B2%E0%B8%A1%E0%B8%B2%E0%B8%A8.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/181/profilefield_file/files_29/0/SD10%20DPIS%209%20JD%20%E0%B8%9E%E0%B8%A3%E0%B8%81.%20%289%2B10%29Test.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "placeholder2@lmsfda.com",
+    "name": "ณฐนนพรรณ ภควัฒน์ชัยกุล",
+    "password": "$2b$10$xxBQSujwf.4I0p2cLy1DKOTXWI0naa7Xz5bWEFKmyihiLp1edyPOq",
+    "department": "กองยา",
+    "position": "นักวิเคราะห์นโยบายและแผน",
+    "positionLevel": "กลุ่มงานบริหารทั่วไป",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "กลุ่มงานบริหารทั่วไป",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "nationalId": "1659900060469",
+    "retirementDateRaw": "251298",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "ศิลปศาสตรบัณฑิต",
+      "fieldOfStudy": "สื่อสารมวลชน",
+      "institution": "มหาวิทยาลัยรามคำแหง",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "ศิลปศาสตรบัณฑิต",
+      "highestFieldOfStudy": "สื่อสารมวลชน",
+      "highestInstitution": "มหาวิทยาลัยรามคำแหง"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/182/profilefield_file/files_1/0/3.%20SoE%20%E0%B8%93%E0%B8%90%E0%B8%99%E0%B8%99%E0%B8%9E%E0%B8%A3%E0%B8%A3%E0%B8%93.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/182/profilefield_file/files_29/0/SD12%20DPIS%2010%20JD%20%E0%B8%9E%E0%B8%A3%E0%B8%81.%20%289%2B10%29.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "placeholder3@lmsfda.com",
+    "name": "ขนิษฐา อ่อนเถื่อน",
+    "password": "$2b$10$yn5Zkgdw1XS4p6pnxCE3yewhaLaKG31VEbWcW.iJ1YDoBR16APgvC",
+    "department": "กองยา",
+    "position": "นักพัฒนาระบบราชการ",
+    "positionLevel": "กลุ่มงานบริหารทั่วไป",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "กลุ่มงานบริหารทั่วไป",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "nationalId": "1549900324769",
+    "retirementDateRaw": "254220",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "บริหารธุรกิจบัณฑิต (การตลาด)",
+      "fieldOfStudy": "การตลาด",
+      "institution": "มหาวิทยาลัยธุรกิจบัณฑิตย์",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "บริหารธุรกิจบัณฑิต (การตลาด)",
+      "highestFieldOfStudy": "การตลาด",
+      "highestInstitution": "มหาวิทยาลัยธุรกิจบัณฑิตย์"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/183/profilefield_file/files_1/0/4.%20SoE%20%E0%B8%82%E0%B8%99%E0%B8%B4%E0%B8%A9%E0%B8%90%E0%B8%B2.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/183/profilefield_file/files_29/0/SD11%20DPIS%2011%20JD%20%E0%B8%9E%E0%B8%A3%E0%B8%81.%20%2811%29.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "placeholder4@lmsfda.com",
+    "name": "วรรณนิสา สุดทรวง",
+    "password": "$2b$10$qPNEXwTQGKzlLs5jXntlSO1s1sSoDtfcxBa8ldVG3kw/mz.ys9l0W",
+    "department": "กองยา",
+    "position": "เจ้าพนักงานธุรการ",
+    "positionLevel": "กลุ่มงานบริการ",
+    "subdivision": "กลุ่มกำหนดมาตรฐาน",
+    "positionType": "กลุ่มงานบริการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "nationalId": "1100500096748",
+    "retirementDateRaw": "251298",
+    "educationHistory": {
+      "level": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "degreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "fieldOfStudy": "การโรงแรม",
+      "institution": "สถาบันเทคโนโลยีราชมงคล วิทยาเขตพณิยการพระนคร",
+      "highestLevel": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestDegreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestFieldOfStudy": "การโรงแรม",
+      "highestInstitution": "สถาบันเทคโนโลยีราชมงคล วิทยาเขตพณิยการพระนคร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/184/profilefield_file/files_1/0/SoE%20Template%20%28%E0%B8%A7%E0%B8%A3%E0%B8%A3%E0%B8%93%E0%B8%99%E0%B8%B4%E0%B8%AA%E0%B8%B2%20%E0%B8%AA%E0%B8%B8%E0%B8%94%E0%B8%97%E0%B8%A3%E0%B8%A7%E0%B8%87%29.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/184/profilefield_file/files_29/0/14%20ST14%20DPIS%2078%20JD%20%E0%B8%9E%E0%B8%A3%E0%B8%81.%E0%B8%98%E0%B8%B8%E0%B8%A3%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AF%20%2878%29.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "placeholder5@lmsfda.com",
+    "name": "ปนัสดา ชื่นสกุล",
+    "password": "$2b$10$UpxHv174HURm1h4qCRp6WO4jvYcBOXIkkZBKn68vzIDgaDOfUh.1C",
+    "department": "กองยา",
+    "position": "เจ้าพนักงานธุรการ",
+    "positionLevel": "กลุ่มงานบริการ",
+    "subdivision": "ฝ่ายบริหารทั่วไป",
+    "positionType": "กลุ่มงานบริการ",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "nationalId": "3100202740572",
+    "retirementDateRaw": "248376",
+    "educationHistory": {
+      "level": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "degreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "fieldOfStudy": "การจัดการ",
+      "institution": "โรงเรียนเทคนิควิมลบริหารธุรกิจ",
+      "highestLevel": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestDegreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestFieldOfStudy": "การจัดการ",
+      "highestInstitution": "โรงเรียนเทคนิควิมลบริหารธุรกิจ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/185/profilefield_file/files_1/0/Panasda%20CV.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/185/profilefield_file/files_29/0/SD13%20DPIS%2079%20JD%20%E0%B8%9E%E0%B8%A3%E0%B8%81.%E0%B8%98%E0%B8%B8%E0%B8%A3%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%AF%20%2879%29.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Worasuda@fda.moph.go.th",
+    "name": "วรสุดา ยูงทอง",
+    "password": "$2b$10$2lqyo7IKmvl5UYFxdOfCx.k6yo5y6jVDyM6zC6Zw95/SvHo/EcU12",
+    "department": "กองยา",
+    "position": "ผู้อำนวยการเฉพาะด้าน (เภสัชกรรม)ระดับสูง",
+    "positionLevel": "อำนวยการสูง",
+    "positionType": "อำนวยการ",
+    "supervisorName": "NA",
+    "nationalId": "3100601180171",
+    "retirementDateRaw": "244359",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยสงขลานครินทร์",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยสงขลานครินทร์"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/186/profilefield_file/files_1/0/CV-Worasuda_Yoongthong_oct%202024.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/186/profilefield_file/files_29/0/MT01%20DPIS%20104-100667%20-%20Done.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Tankamol@fda.moph.go.th",
+    "name": "ธารกมล จันทร์ประภาพ",
+    "password": "$2b$10$iabtGxd20jCewwETxO0k/u9wZxyDSdZUDPTmRukOYtnStgFwOIsKG",
+    "department": "กองยา",
+    "position": "เภสัชกรเชี่ยวชาญ",
+    "positionLevel": "เชี่ยวชาญ",
+    "positionType": "วิชาการ",
+    "supervisorName": "วรสุดา ยูงทอง",
+    "nationalId": "3101401107641",
+    "retirementDateRaw": "244724",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาเอก หรือเทียบเท่า",
+      "highestDegreeName": "Doctor of philosophy",
+      "highestFieldOfStudy": "เภสัชวิทยา",
+      "highestInstitution": "University of Cambridge, UK"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/187/profilefield_file/files_1/0/Dr%20%281%29THARNKAMOL.Tharnkamol?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/187/profilefield_file/files_29/0/MT02%20DPIS%20106%20%E0%B8%8A%E0%B8%8A%20106-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Toynanon999@gmail.com",
+    "name": "เพ็ญศิริ โปราณานนท์",
+    "password": "$2b$10$.5osW8./3ny2DkZCj0vaXOZiBq7QEPQTQjzqNE0N4WaqFoy9cs/gK",
+    "department": "กองยา",
+    "position": "เจ้าพนักงานธุรการอาวุโส",
+    "positionLevel": "อาวุโส",
+    "subdivision": "ฝ่ายบริหารทั่วไป",
+    "positionType": "ทั่วไป",
+    "supervisorName": "วรสุดา ยูงทอง",
+    "nationalId": "3101402089574",
+    "retirementDateRaw": "244359",
+    "educationHistory": {
+      "level": "ประกาศนียบัตรวิชาชีพ (ปวช.) หรือเทียบเท่า",
+      "degreeName": "ปบ.วิชาชีพ (ปวช.) หรือเทียบเท่า",
+      "fieldOfStudy": "การขาย",
+      "institution": "โรงเรียนพณิชยการเจ้าพระยา",
+      "highestLevel": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestDegreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestFieldOfStudy": "การตลาด",
+      "highestInstitution": "โรงเรียนเทคนิควิมลพณิชยการ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/188/profilefield_file/files_1/0/SoE%20Template.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/188/profilefield_file/files_29/0/AG01%20DPIS%20107%20JD%20-N%E0%B8%9D%E0%B9%88%E0%B8%B2%E0%B8%A2%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Ratchaneewan534@gmail.com",
+    "name": "รัชนีวรรณ ยโสธร",
+    "password": "$2b$10$17xzCT.E92ybPpBdYA6DgOejVvZcYSatevzflJtHUmZYQmOuhiFhq",
+    "department": "กองยา",
+    "position": "เจ้าพนักงานธุรการชำนาญงาน",
+    "positionLevel": "ชำนาญงาน",
+    "subdivision": "ฝ่ายบริหารทั่วไป",
+    "positionType": "ทั่วไป",
+    "supervisorName": "เพ็ญศิริ โปราณานนท์",
+    "nationalId": "3101501436795",
+    "retirementDateRaw": "246915",
+    "educationHistory": {
+      "level": "ประกาศนียบัตรวิชาชีพ (ปวช.) หรือเทียบเท่า",
+      "degreeName": "ปบ.วิชาชีพ (ปวช.) หรือเทียบเท่า",
+      "fieldOfStudy": "บัญชี",
+      "institution": "โรงเรียนพณิชยการาชดำเนินธนบุรี",
+      "highestLevel": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestDegreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestFieldOfStudy": "การบัญชี",
+      "highestInstitution": "สถาบันเทคโนโลยีราชมงคล วิทยาเขตบพิตรพิมุข จักรวรรดิ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/189/profilefield_file/files_1/0/SoE%20Template%20%E0%B8%A3%E0%B8%B1%E0%B8%8A%E0%B8%99%E0%B8%B5%E0%B8%A7%E0%B8%A3%E0%B8%A3%E0%B8%93%20%282%29.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/189/profilefield_file/files_29/0/AG03%20DPIS%20110%20JD%20-N%E0%B8%9D%E0%B9%88%E0%B8%B2%E0%B8%A2%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pim99@fda.moph.go.th",
+    "name": "พิมพิลา ฐานนันท์สกุล",
+    "password": "$2b$10$cwBnwOdc/yI8GfhbPolqBe8u4ZhyrmKZVhfKvD7EEyPUdLtWcvaxG",
+    "department": "กองยา",
+    "position": "เจ้าพนักงานธุรการชำนาญงาน",
+    "positionLevel": "ชำนาญงาน",
+    "subdivision": "ฝ่ายบริหารทั่วไป",
+    "positionType": "ทั่วไป",
+    "supervisorName": "เพ็ญศิริ โปราณานนท์",
+    "nationalId": "3601100645577",
+    "retirementDateRaw": "249472",
+    "educationHistory": {
+      "level": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "degreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "fieldOfStudy": "คอมพิวเตอร์ธุรกิจ",
+      "institution": "สถาบันเทคโนโลยีราชมงคลวิทยาเขตพระนครศรีอยุธยา หันตรา",
+      "highestLevel": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestDegreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestFieldOfStudy": "คอมพิวเตอร์ธุรกิจ",
+      "highestInstitution": "สถาบันเทคโนโลยีราชมงคลวิทยาเขตพระนครศรีอยุธยา หันตรา"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/190/profilefield_file/files_1/0/SoE%20Template%20%20%E0%B8%9E%E0%B8%B4%E0%B8%A1%E0%B8%9E%E0%B8%B4%E0%B8%A5%E0%B8%B2%20%E0%B8%90%E0%B8%B2%E0%B8%99%E0%B8%99%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B9%8C%E0%B8%AA%E0%B8%81%E0%B8%B8%E0%B8%A5.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/190/profilefield_file/files_29/0/AG05%20DPIS%20111%20JD%20-N%E0%B8%9D%E0%B9%88%E0%B8%B2%E0%B8%A2%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nunijung_1@hotmail.com",
+    "name": "วราภรณ์ แสงตรง",
+    "password": "$2b$10$UcRFTh95RbreXY50V12Z0u30xWOzbQYlTI6r7tfekeyv0NoQJApqa",
+    "department": "กองยา",
+    "position": "เจ้าพนักงานธุรการชำนาญงาน",
+    "positionLevel": "ชำนาญงาน",
+    "subdivision": "ฝ่ายบริหารทั่วไป",
+    "positionType": "ทั่วไป",
+    "supervisorName": "เพ็ญศิริ โปราณานนท์",
+    "nationalId": "1159900096565",
+    "retirementDateRaw": "252029",
+    "educationHistory": {
+      "level": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "degreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "fieldOfStudy": "การท่องเที่ยว",
+      "institution": "มหาวิทยาลัยเทคโนโลยีราชมงคลสุวรรณภูมิ",
+      "highestLevel": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestDegreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestFieldOfStudy": "การท่องเที่ยว",
+      "highestInstitution": "มหาวิทยาลัยเทคโนโลยีราชมงคลสุวรรณภูมิ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/191/profilefield_file/files_1/0/SoE%20Template%20%20%E0%B8%A7%E0%B8%A3%E0%B8%B2%E0%B8%A0%E0%B8%A3%E0%B8%93%E0%B9%8C%20%E0%B9%81%E0%B8%AA%E0%B8%87%E0%B8%95%E0%B8%A3%E0%B8%87%20%E0%B8%81%E0%B8%AD%E0%B8%87%E0%B8%A2%E0%B8%B2.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/191/profilefield_file/files_29/0/AG06%20DPIS%20115%20JD%20-N%E0%B8%9D%E0%B9%88%E0%B8%B2%E0%B8%A2%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Veenanok2510@gmail.com",
+    "name": "วีณา นกอยู่",
+    "password": "$2b$10$zkseFHMZpanxWZfZsCFvSOvatLhMAiTDJp7yk5zdhW4EwyIHhIGTG",
+    "department": "กองยา",
+    "position": "เจ้าพนักงานธุรการชำนาญงาน",
+    "positionLevel": "ชำนาญงาน",
+    "subdivision": "ฝ่ายบริหารทั่วไป",
+    "positionType": "ทั่วไป",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "nationalId": "3101100355018",
+    "retirementDateRaw": "244724",
+    "educationHistory": {
+      "level": "ประกาศนียบัตรวิชาชีพ (ปวช.) หรือเทียบเท่า",
+      "degreeName": "ปบ.วิชาชีพ (ปวช.) หรือเทียบเท่า",
+      "fieldOfStudy": "บัญชี",
+      "institution": "วิทยาลัยพณิชยการบางนา",
+      "highestLevel": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestDegreeName": "อนุป.ศิลปศาสตร์",
+      "highestInstitution": "สถาบันราชภัฏราชนครินทร์ ฉะเชิงเทรา"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/192/profilefield_file/files_1/0/Summary%20of%20Experience%20_%20Veena%20Nokyoo.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/192/profilefield_file/files_29/0/BO13%20DPIS%20117%20JD%20-N%E0%B8%9D%E0%B9%88%E0%B8%B2%E0%B8%A2%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Kuntiw.mk@gmail.com",
+    "name": "มยุรี คงมีทรัพย์",
+    "password": "$2b$10$7.74LP6y4j/2UjynSvt9COa9CXO/VR/k6xl/KMZr.6iExqS7..Kfu",
+    "department": "กองยา",
+    "position": "เจ้าพนักงานธุรการชำนาญงาน",
+    "positionLevel": "ชำนาญงาน",
+    "subdivision": "ฝ่ายบริหารทั่วไป",
+    "positionType": "ทั่วไป",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3100202086210",
+    "retirementDateRaw": "244359",
+    "educationHistory": {
+      "level": "ประกาศนียบัตรวิชาชีพ (ปวช.) หรือเทียบเท่า",
+      "degreeName": "ปบ.วิชาชีพ (ปวช.) หรือเทียบเท่า",
+      "fieldOfStudy": "บัญชี",
+      "highestLevel": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestDegreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestFieldOfStudy": "บัญชี",
+      "highestInstitution": "พณิชยการสันติราษฎร์"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/193/profilefield_file/files_1/0/%E0%B8%A1%E0%B8%A2%E0%B8%B8%E0%B8%A3%E0%B8%B5-Mayuree%20Kongmeesab_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/193/profilefield_file/files_29/0/24%20GN24%20DPIS%20118%20JD%20-N%E0%B8%9D%E0%B9%88%E0%B8%B2%E0%B8%A2%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sirikan99474@gmail.com",
+    "name": "สิริกาญจน์ ธนากุลถาวรพัฒน์",
+    "password": "$2b$10$C/axDDWDf1YxN6QD74fXge73wx6DXxjiGiIjsViizDTqm5OtOhnHa",
+    "department": "กองยา",
+    "position": "เจ้าพนักงานธุรการชำนาญงาน",
+    "positionLevel": "ชำนาญงาน",
+    "subdivision": "ฝ่ายบริหารทั่วไป",
+    "positionType": "ทั่วไป",
+    "supervisorName": "เพ็ญศิริ โปราณานนท์",
+    "nationalId": "3120100837895",
+    "retirementDateRaw": "244724",
+    "educationHistory": {
+      "level": "ประกาศนียบัตรวิชาชีพ (ปวช.) หรือเทียบเท่า",
+      "degreeName": "ปบ.วิชาชีพ (ปวช.) หรือเทียบเท่า",
+      "fieldOfStudy": "การขาย",
+      "institution": "พณิชยการกรุงเทพ",
+      "highestLevel": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestDegreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestFieldOfStudy": "การจัดการ",
+      "highestInstitution": "สถาบันราชภัฏราชนครินทร์ ฉะเชิงเทรา"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/194/profilefield_file/files_1/0/SoE%20-%20Sirikan.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/194/profilefield_file/files_29/0/AG04%20DPIS%20122%20JD%20-N%E0%B8%9D%E0%B9%88%E0%B8%B2%E0%B8%A2%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sudavadee@fda.moph.go.th",
+    "name": "สุดาวดี เรืองสุคนธ์",
+    "password": "$2b$10$z.5Sc7vyqlinfbB01.v1/eHw1bNj73CgewTVZ.VYi/lcKtuEbjyUW",
+    "department": "กองยา",
+    "position": "เจ้าพนักงานธุรการชำนาญงาน",
+    "positionLevel": "ชำนาญงาน",
+    "subdivision": "ฝ่ายบริหารทั่วไป",
+    "positionType": "ทั่วไป",
+    "supervisorName": "เพ็ญศิริ โปราณานนท์",
+    "nationalId": "3100600293177",
+    "retirementDateRaw": "248376",
+    "educationHistory": {
+      "level": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "degreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "fieldOfStudy": "การตลาด",
+      "institution": "โรงเรียนรัตนพณิชยการ",
+      "highestLevel": "ประกาศนียบัตรวิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestDegreeName": "ปบ.วิชาชีพชั้นสูง (ปวส.) หรือเทียบเท่า",
+      "highestFieldOfStudy": "การตลาด",
+      "highestInstitution": "โรงเรียนรัตนพณิชยการ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/195/profilefield_file/files_1/0/Summary%20of%20Experience%20-%E0%B8%AA%E0%B8%B8%E0%B8%94%E0%B8%B2%E0%B8%A7%E0%B8%94%E0%B8%B5%20%E0%B9%80%E0%B8%A3%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B8%AA%E0%B8%B8%E0%B8%84%E0%B8%99%E0%B8%98%E0%B9%8C.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/195/profilefield_file/files_29/0/AG02%20DPIS%20125%20JD%20-N%E0%B8%9D%E0%B9%88%E0%B8%B2%E0%B8%A2%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2%E0%B8%A3-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Morakot@fda.moph.go.th",
+    "name": "มรกต ประภัสศิริพันธุ์",
+    "password": "$2b$10$gpckxFTk9Q.OtD22GaUFhOA9DZrG8iG75dKQ6C/rXYEMYyXp/YcPy",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "วรสุดา ยูงทอง",
+    "nationalId": "3100601178819",
+    "retirementDateRaw": "247646",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยขอนแก่น",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยขอนแก่น"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/196/profilefield_file/files_1/0/SoE_Morakot.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/196/profilefield_file/files_29/0/BO01%20DPIS%20128%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Athigift@fda.moph.go.th",
+    "name": "อธิพร ดุมแก้ว",
+    "password": "$2b$10$qq71xfpK3gOyzbWrHMCOzO5shqMJo/f2M9GelbazRuASIE4wG.Swa",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3120101005818",
+    "retirementDateRaw": "247646",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาเอก หรือเทียบเท่า",
+      "highestDegreeName": "ปรัชญาดุษฎีบัณฑิต",
+      "highestFieldOfStudy": "เภสัชเคมีและพฤกษเคมี",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/197/profilefield_file/files_1/0/%E0%B8%AD%E0%B8%98%E0%B8%B4%E0%B8%9E%E0%B8%A3-Athiporn%20Doomkaew_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/197/profilefield_file/files_29/0/3%20GN03%20DPIS%20130%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Kritsada@fda.moph.go.th",
+    "name": "กฤษดา ลิมปนานนท์",
+    "password": "$2b$10$4rW7AlzzYGthjkXYt7HDU.hp7a2nVHBbFxmU0TExt1nxOzNKB.9Mq",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "วิชาการ",
+    "supervisorName": "วรสุดา ยูงทอง",
+    "nationalId": "3830100303444",
+    "retirementDateRaw": "248742",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชเคมี",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/198/profilefield_file/files_1/0/CV_Kritsada.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/198/profilefield_file/files_29/0/1%20LI01%20DPIS%20131%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Twinstik3@gmail.com",
+    "name": "จีรัง ภมรสูต",
+    "password": "$2b$10$solhJAok.l1P7ZmUysotXOJ0vysi5MZ8TwpOikT46i3DKu6cSwrnW",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "วรสุดา ยูงทอง",
+    "nationalId": "3110401459814",
+    "retirementDateRaw": "244724",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/199/profilefield_file/files_1/0/01%20SoE-JEERUNG.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/199/profilefield_file/files_29/0/1%20SL01%20DPIS%20132%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nuntavaluckp@fda.moph.go.th",
+    "name": "นันทวลักษณ์ พูลวิวัฒน์ชัยการ",
+    "password": "$2b$10$KgAH1Wh/9x/3lR0bbFsUHOfERFPswIShrUmjwVbriefHer3Jn5MQK",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มกำหนดมาตรฐาน",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "nationalId": "3101401037252",
+    "retirementDateRaw": "246915",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/200/profilefield_file/files_1/0/SoE%20-%20%E0%B8%99%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%A7%E0%B8%A5%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%93%E0%B9%8C.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/200/profilefield_file/files_29/0/2%20ST02%20DPIS%20133%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Dpakbung@fda.moph.go.th",
+    "name": "นันทรัตน์ สุขรอด",
+    "password": "$2b$10$HrbQDN.IGBg.zDk8BImkMu2Irw/E0AgY3rpJzkOFIlwAACMBw4mI2",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มกำหนดมาตรฐาน",
+    "positionType": "วิชาการ",
+    "supervisorName": "วรสุดา ยูงทอง",
+    "nationalId": "3120100472404",
+    "retirementDateRaw": "246550",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/201/profilefield_file/files_1/0/SoE%20Nantarat%20SUKROD.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/201/profilefield_file/files_29/0/1%20ST01%20DPIS%20134%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Inthiraporn.choadee@gmail.com",
+    "name": "อินทิราภรณ์ เชาว์ดี",
+    "password": "$2b$10$brW9uoso77Z0IPOPcfOtHO9XdAtTkB4TazLUG4JO/Dug7gqnJUKAm",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "nationalId": "1104300070072",
+    "retirementDateRaw": "256046",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "institution": "มหาวิทยาลัยธรรมศาสตร์",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestInstitution": "มหาวิทยาลัยธรรมศาสตร์"
+    },
+    "profileFiles": {
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/202/profilefield_file/files_29/0/BO11%20DPIS%20136%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pitchaon.m@fda.moph.go.th",
+    "name": "พิชชาอร มั่นเมือง",
+    "password": "$2b$10$JjapEEBfCIlB8ev.K.WTHuOQbffPKgFoAdU.M/o3y0HEIK4BMO9cK",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มส่งเสริมเภสัชเคมีภัณฑ์",
+    "positionType": "วิชาการ",
+    "supervisorName": "จารุณี กฤษณพันธ์",
+    "nationalId": "1639800112556",
+    "retirementDateRaw": "253490",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "มหาวิทยาลัยนเรศวร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/203/profilefield_file/files_1/0/SoE%20Template%20of%20Pitchaon.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/203/profilefield_file/files_29/0/6%20PS06%20DPIS%20137%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B9%80%E0%B8%A0%E0%B8%AA%E0%B8%B1%E0%B8%8A-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "E_inkkajoo@hotmail.com",
+    "name": "อชิรญา ไพรสุวรรณ",
+    "password": "$2b$10$ViQhFl8fsgJOSnSEIeyCNesYYQSlWbISJV9oHCP8OlALzdMpv4rcu",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "3600600055808",
+    "retirementDateRaw": "250568",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "มหาวิทยาลัยนเรศวร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/204/profilefield_file/files_1/0/SoE%20Template%20%28Achiraya%29.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/204/profilefield_file/files_29/0/5%20LI05%20DPIS%20138%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Waranonc@fda.moph.go.th",
+    "name": "วรานนท์ ชีวาจร",
+    "password": "$2b$10$JTXMeOnb5xrvJbCKC/bhfeLb21q26ryn62bksfEJZuvJQZVMdEzAO",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1459900122261",
+    "retirementDateRaw": "252394",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "วิทยาศาสตร์เภสัชกรรม",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชอุตสาหกรรม",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/205/profilefield_file/files_1/0/CV%20%E0%B8%A7%E0%B8%A3%E0%B8%B2%E0%B8%99%E0%B8%99%E0%B8%97%E0%B9%8C.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/205/profilefield_file/files_29/0/8%20LI08%20DPIS%20140%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Piyanan.rx@fda.moph.go.th",
+    "name": "ปิยนันท์ บุญประเสริฐ",
+    "password": "$2b$10$FMgOKZ77/JIAw2as5flCSOXo9mofPK2WXzMRIgzxiXvwJ1eyxzK9u",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "nationalId": "1959900009771",
+    "retirementDateRaw": "250933",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยสงขลานครินทร์",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of Science in Pharmaceutical Biotechnology",
+      "highestInstitution": "UNIVERSITY OF GREENWICH"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/206/profilefield_file/files_1/0/SoE_Piyanan%20%281%29.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/206/profilefield_file/files_29/0/BO04%20DPIS%20141%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Jakkraphat.a@fda.moph.go.th",
+    "name": "จักรภัทร อัครกุลธร",
+    "password": "$2b$10$F4AvX.NSzrk51XhOci3zduJpDWRpearTJZLRAZO8CCp0UVmBkJO/m",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "nationalId": "1104300008156",
+    "retirementDateRaw": "256046",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "วิทยาศาสตร์เภสัชกรรม",
+      "institution": "มหาวิทยาลัยศรีนครินทรวิโรฒ",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "วิทยาศาสตร์เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยศรีนครินทรวิโรฒ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/207/profilefield_file/files_1/0/Jakkraphat%20-%20SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/207/profilefield_file/files_29/0/14%20ND14%20DPIS%20142%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "P-panitida@hotmail.com",
+    "name": "ปณิธิดา ศิลาเหลือง",
+    "password": "$2b$10$xldolUMmuftEdA6wXqDo1uZ1UprIjAoS2Lo0rw4hzl2OymcoFOtPm",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "nationalId": "1149900175210",
+    "retirementDateRaw": "253125",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/208/profilefield_file/files_1/0/SoE%20Template-%E0%B8%9B%E0%B8%93%E0%B8%B4%E0%B8%98%E0%B8%B4%E0%B8%94%E0%B8%B2%20%E0%B8%A8%E0%B8%B4%E0%B8%A5%E0%B8%B2%E0%B9%80%E0%B8%AB%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%87.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/208/profilefield_file/files_29/0/SD07%20DPIS%20143%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%20-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Jeeranun.s@fda.moph.go.th",
+    "name": "จีรนันท์ สุชีวศิลป์",
+    "password": "$2b$10$YiSXcdNaOORMtwOQ2MQsU.1n3BZSHlxlIw0h5kBRuGfy2D7BGhOGu",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "nationalId": "1102700616160",
+    "retirementDateRaw": "255316",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "มหาวิทยาลัยนเรศวร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/209/profilefield_file/files_1/0/SoE%20Jeeranun.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/209/profilefield_file/files_29/0/13%20ST13%20DPIS%20144%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Waranya.t@fda.moph.go.th",
+    "name": "วรัญญา ถาวรพล",
+    "password": "$2b$10$a4P6YqUaLwnuD5E1wyEb5.9enVKM9e3/EL3GBNoXcjuPW5vF3zuOG",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "nationalId": "1809900730560",
+    "retirementDateRaw": "255316",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "การบริบาลทางเภสัชกรรม (หลักสูตร 6 ปี)",
+      "institution": "มหาวิทยาลัยสงขลานครินทร์",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "การบริบาลทางเภสัชกรรม (หลักสูตร 6 ปี)",
+      "highestInstitution": "มหาวิทยาลัยสงขลานครินทร์"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/210/profilefield_file/files_1/0/SoE%20Waranya.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/210/profilefield_file/files_29/0/13%20ND13%20DPIS%20145%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Phusanisa.paew@gmail.com",
+    "name": "ภูษณิศา ไผ่ป้อง",
+    "password": "$2b$10$Gc6Mah689E3Iv3W9L9U5auwOqKa7NczJFQg6WA2s10xuI5zJIs8Sq",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มส่งเสริมเภสัชเคมีภัณฑ์",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3410100580158",
+    "retirementDateRaw": "250933",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหาสารคาม",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยมหาสารคาม"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/211/profilefield_file/files_1/0/%E0%B8%A0%E0%B8%B9%E0%B8%A9%E0%B8%93%E0%B8%B4%E0%B8%A8%E0%B8%B2-Phusanisa%20Phaipong_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/211/profilefield_file/files_29/0/13%20GN13%20DPIS%20146%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pratchada517@gmail.com",
+    "name": "รัชดา พัฒนสมบัติสกุล",
+    "password": "$2b$10$3PFGP5j36J0nNmCDL9dDlOdKgI2RH.WFdi0gxLwjUUCS38kYFt/VO",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3100200545977",
+    "retirementDateRaw": "246185",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชอุตสาหกรรม",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/212/profilefield_file/files_1/0/SoE%20%20Ratchada.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/212/profilefield_file/files_29/0/6%20GN06%20DPIS%20147%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Golf_fda@hotmail.com",
+    "name": "ธนานันท์ ทรัพย์เจริญ",
+    "password": "$2b$10$uvYp5ANONVx6Zb/3dZjZMe8RL2VrKwQGjj6cfFSuNed9MM2ABcVWG",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1101400345682",
+    "retirementDateRaw": "251298",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/213/profilefield_file/files_1/0/SOE%20Template_CV_Tananan2568.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/213/profilefield_file/files_29/0/7%20LI07%20DPIS%20148%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Hattaya@fda.moph.go.th",
+    "name": "หัทยา มหัทธนวัฒน์",
+    "password": "$2b$10$KST/p/auHfFaFw6z/k3uDOsseynYzEb9RriDHRppUb9.z.ntL2Ek.",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3101801393315",
+    "retirementDateRaw": "245820",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/214/profilefield_file/files_1/0/SoE%20Hattaya.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/214/profilefield_file/files_29/0/7%20GN07%20DPIS%20151%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Chaiporn@fda.moph.go.th",
+    "name": "ใจพร พุ่มคำ",
+    "password": "$2b$10$NdvWSGZXIVKfHGCHZwHRxeTTky8bEam9EWYEVPbDXzMjsBoJbe8JG",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "วรสุดา ยูงทอง",
+    "nationalId": "3100202746449",
+    "retirementDateRaw": "247281",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/215/profilefield_file/files_1/0/%E0%B9%83%E0%B8%88%E0%B8%9E%E0%B8%A3-Chaiporn%20Pumkam_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/215/profilefield_file/files_29/0/1%20GN01%20DPIS%20153%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nithima@fda.moph.go.th",
+    "name": "นิธิมา สุ่มประดิษฐ์",
+    "password": "$2b$10$WNgoSffSmeLPufIwSmB3wu92v4NL4HYsKTcmzIPH.FIg3fKDNLo.y",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มนโยบายแห่งชาติด้านยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "วรสุดา ยูงทอง",
+    "nationalId": "3100500699376",
+    "retirementDateRaw": "245454",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาเอก หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรดุษฎีบัณฑิต",
+      "highestFieldOfStudy": "Pharmacy Social and Administartive Sciences",
+      "highestInstitution": "UNIVERSITY OF MICHIGAN"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/216/profilefield_file/files_1/0/SOE%20nithima.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/216/profilefield_file/files_29/0/SD01%20DPIS%20154%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%20-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Ssuphap@fda.moph.go.th",
+    "name": "ศุภาพิชญ์ สุภาพ",
+    "password": "$2b$10$iglZvN8jR8wNYrAxad72gO9ehQdV0sE/WBi7LDdmUXR2ZKebUncKW",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "nationalId": "3102002650873",
+    "retirementDateRaw": "248376",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "จุลชีววิทยา",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/217/profilefield_file/files_1/0/SoE_Supapitch.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/217/profilefield_file/files_29/0/BO02%20DPIS%20155%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Songsak@fda.moph.go.th",
+    "name": "ทรงศักดิ์ วิมลกิตติพงศ์",
+    "password": "$2b$10$SDDCu.07R6HMkKUsc4f7fef7uo8O2j3MLZCpkWmk40v2cBkKV/3R.",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "3100500343440",
+    "retirementDateRaw": "249472",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/218/profilefield_file/files_1/0/SoE%20Template_CV_%28Mr.Songsak%20Vimolkittipong%292568.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/218/profilefield_file/files_29/0/2%20LI02%20DPIS%20156%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Akanid@fda.moph.go.th",
+    "name": "อกนิษฐ์ เวพีวุฒิกร",
+    "password": "$2b$10$eFU84k2std2cyGTVWrEK1Ojgl3syMFfZVdffMlu9qs4JM435Gyn0W",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "3100201551849",
+    "retirementDateRaw": "248011",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/219/profilefield_file/files_1/0/SoE_akanid.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/219/profilefield_file/files_29/0/3%20LI03%20DPIS%20157%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Lady_kp@fda.moph.go.th",
+    "name": "คัคนางค์ ปอแก้ว",
+    "password": "$2b$10$K5T0XF8UL5T19UlOg.wQ0uf0qI25SvkjSwnVyX9F1e7sbHwcbc/a.",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "nationalId": "3440600852785",
+    "retirementDateRaw": "248742",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/220/profilefield_file/files_1/0/SoE%20Template_KAKKANANG%20PORKAEW_26052568_250717_174639.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/220/profilefield_file/files_29/0/SD03%20DPIS%20158%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%20-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Kaisaeng@fda.moph.go.th",
+    "name": "นันทนา ไกรแสง",
+    "password": "$2b$10$FcJgCDuS8f4ZKf03b4JdJOOPW0dMm.bw5nIsDgVDVS.ydI2GGSSki",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "วิชาการ",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "nationalId": "3429900193688",
+    "retirementDateRaw": "248742",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาเอก หรือเทียบเท่า",
+      "highestDegreeName": "Doctor of philosophy",
+      "highestFieldOfStudy": "Pharmaceutical Sciences",
+      "highestInstitution": "Virginia commonwealth university"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/221/profilefield_file/files_1/0/SoE%20Nantana.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/221/profilefield_file/files_29/0/SD02%20DPIS%20159%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%20-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Rachada_t@fda.moph.go.th",
+    "name": "รัชดา โตอนันต์",
+    "password": "$2b$10$fT6s5agp3/.zCS.6j7ddvOMaD.2AyiXr/5dpR7gUNYIl2LZwymBye",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "3100502601586",
+    "retirementDateRaw": "246185",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาเอก หรือเทียบเท่า",
+      "highestDegreeName": "Doctor of philosophy",
+      "highestFieldOfStudy": "Pharmaceutical Sciences",
+      "highestInstitution": "University of South Australia"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/223/profilefield_file/files_1/0/21%20Jul%2025-RT_SoE%20Template.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/223/profilefield_file/files_29/0/4%20LI04%20DPIS%20161%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Siranee_t@hotmail.com",
+    "name": "ศิราณี พาสว่าง",
+    "password": "$2b$10$Oy5a5MOsibl1CHwJkBcE4eQdf1PbPyqOXybj1LlTtTjZ.XdvJgUWW",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มส่งเสริมเภสัชเคมีภัณฑ์",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3349900207159",
+    "retirementDateRaw": "248742",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/224/profilefield_file/files_1/0/%E0%B8%A8%E0%B8%B4%E0%B8%A3%E0%B8%B2%E0%B8%93%E0%B8%B5-Siranee%20Pasawarng_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/224/profilefield_file/files_29/0/9%20GN09%20DPIS%20162%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Erbsin.meaw@gmail.com",
+    "name": "อังคณา อิ่มเอิบสิน",
+    "password": "$2b$10$ZPKAJ/OFWatiyCJxdxC37uI/M3RBM4THvbPTi5Is9kCgQpFW/9r0C",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3102002571531",
+    "retirementDateRaw": "248011",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "institution": "มหาวิทยาลัยอุบลราชธานี",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/225/profilefield_file/files_1/0/SoE%20Template%20%E0%B8%AD%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%93%E0%B8%B2.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/225/profilefield_file/files_29/0/3%20ST03%20DPIS%20163%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Chatkul.t@fda.moph.go.th",
+    "name": "ชัชช์กุญช์ เตชะกิตติโรจน์",
+    "password": "$2b$10$yaCMCoMFiJxFhGJsQkl/2ufaDlBISqLmTr.xT8rRCJ6Hu4okg2wWW",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "nationalId": "3100900199192",
+    "retirementDateRaw": "246550",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยสงขลานครินทร์",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชวิทยา",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/226/profilefield_file/files_1/0/SoE_Chatkul.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/226/profilefield_file/files_29/0/BO03%20DPIS%20164%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Mikybluez@gmail.com",
+    "name": "ไมตรี ชีวกุลประสิทธิ์",
+    "password": "$2b$10$jjCVIYeu0lziqH..IFXUPulaR6DVEsL93lKfbWkew5aOy8CUlg546",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "3909800494924",
+    "retirementDateRaw": "249472",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/227/profilefield_file/files_1/0/06%20SoE-MAITREE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/227/profilefield_file/files_29/0/5%20SL05%20DPIS%20165%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nutsasiya.n@fda.moph.go.th",
+    "name": "ณัฐศศิญา นาคบุรี",
+    "password": "$2b$10$fOTxYAgGCFw1Hu0Gwu4.UePB.6.46oUVVu.q/qO64NBQ8oF2tsVqK",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1659900476835",
+    "retirementDateRaw": "253855",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยขอนแก่น",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยขอนแก่น"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/228/profilefield_file/files_1/0/SoE%20Template%20%E0%B8%93%E0%B8%B1%E0%B8%90%E0%B8%A8%E0%B8%A8%E0%B8%B4%E0%B8%8D%E0%B8%B2%20%E0%B8%99%E0%B8%B2%E0%B8%84%E0%B8%9A%E0%B8%B8%E0%B8%A3%E0%B8%B5.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/228/profilefield_file/files_29/0/19%20LI19%20DPIS%20166%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Ketsaraporn@fda.moph.go.th",
+    "name": "เกศราพร ต้นไม้ทอง",
+    "password": "$2b$10$trKN7OEoX7zbLoIAACL5qevCyEjdhVFcp.y444elMWYTTt7CwWfy6",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "3749900226648",
+    "retirementDateRaw": "250568",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรมชุมชน",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/229/profilefield_file/files_1/0/SoE_%E0%B9%80%E0%B8%81%E0%B8%A8%E0%B8%A3%E0%B8%B2%E0%B8%9E%E0%B8%A3%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%AF.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/229/profilefield_file/files_29/0/9%20LI09%20DPIS%20167%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nalinratt.d@fda.moph.go.th",
+    "name": "นลินรัตน์ ถิรอุฬารสกุล",
+    "password": "$2b$10$z6/X2nkNAjHsk1fvLs348uIDcWtOtqqxOkGB2sAilNEcTWpaxFk.q",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "nationalId": "1101401690677",
+    "retirementDateRaw": "253125",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of science",
+      "highestFieldOfStudy": "Biopharmaceuticals",
+      "highestInstitution": "KING COLLEGE"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/230/profilefield_file/files_1/0/SoE%20Nalinrat_D2025.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/230/profilefield_file/files_29/0/6%20ND06%20DPIS%20168%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sarunnim@fda.moph.go.com",
+    "name": "ศรัณย์ นิ่มวรพันธุ์",
+    "password": "$2b$10$f5qc/EaeBVeZDZfBnF0nKu8ajBbV5PIQisx0Qy2sEKwycy80cT6NG",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1101400401841",
+    "retirementDateRaw": "251298",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/231/profilefield_file/files_1/0/SoE%20Template%20Sarun.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/231/profilefield_file/files_29/0/10%20LI10%20DPIS%20170%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Charunee@fda.moph.go.th",
+    "name": "จารุณี กฤษณพันธ์",
+    "password": "$2b$10$NDUbiwYRgrzKXUOvSIk2GudUs09b7MGipmztR9uQrcaynuNrJNYG6",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "วิชาการ",
+    "supervisorName": "วรสุดา ยูงทอง",
+    "nationalId": "3100602091784",
+    "retirementDateRaw": "244359",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาเอก หรือเทียบเท่า",
+      "highestDegreeName": "วิทยาศาสตรดุษฎีบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์สังคมและบริหาร",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/233/profilefield_file/files_1/0/SoE_charunee.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/233/profilefield_file/files_29/0/1%20PS01%20DPIS%20172%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B9%80%E0%B8%A0%E0%B8%AA%E0%B8%B1%E0%B8%8A-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sumitra2000@yahoo.com",
+    "name": "สุมิตรา หาญพาสุพงศ์",
+    "password": "$2b$10$wCpcqajPCPXCmXFKDJz05uRgNmS4apc0RYjvWVEpxoLvxokpswwvW",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3100400442870",
+    "retirementDateRaw": "244359",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/234/profilefield_file/files_1/0/SoE%20Template%20%E0%B8%AA%E0%B8%B8%E0%B8%A1%E0%B8%B4%E0%B8%95%E0%B8%A3%E0%B8%B2.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/234/profilefield_file/files_29/0/2%20GN02%20DPIS%20173%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Kultira.k@fda.moph.go.th",
+    "name": "กุลธิรา กลิ่นโมรา",
+    "password": "$2b$10$ry3MVbAigYXmpCbPSLuVRu8wVVD8Xw.vfqLrhgofJJ6vaXJFPZZaq",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "1103700607315",
+    "retirementDateRaw": "253855",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เทคโนโลยีเภสัชภัณฑ์",
+      "institution": "มหาวิทยาลัยศรีนครินทรวิโรฒ",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เทคโนโลยีเภสัชภัณฑ์",
+      "highestInstitution": "มหาวิทยาลัยศรีนครินทรวิโรฒ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/235/profilefield_file/files_1/0/%E0%B8%81%E0%B8%B8%E0%B8%A5%E0%B8%98%E0%B8%B4%E0%B8%A3%E0%B8%B2-Kultira%20Klinmora_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/235/profilefield_file/files_29/0/21%20GN21%20DPIS%20176%20%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pongsathid.v@fda.moph.go.th",
+    "name": "พงศ์สถิต ไวทย์รุ่งโรจน์",
+    "password": "$2b$10$NQCDy1ywgBQrgMY/HLSf7evJKmzmEQ/b4n5qUdXOV6H8TDcYtUJUm",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "วิชาการ",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "nationalId": "1102002279311",
+    "retirementDateRaw": "254951",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/236/profilefield_file/files_1/0/SoE%20Pongsathid.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/236/profilefield_file/files_29/0/SD09%20DPIS%20177%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%20-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sira@fda.moph.go.th",
+    "name": "ศิระ จันทร์เพ็ง",
+    "password": "$2b$10$EhT48ju.r9GJn8uiiOqFOu6NvQdR9OuY5eA0W7NxKeAR8eP.IUwg6",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มส่งเสริมเภสัชเคมีภัณฑ์",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3409900138539",
+    "retirementDateRaw": "250568",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/237/profilefield_file/files_1/0/%E0%B8%A8%E0%B8%B4%E0%B8%A3%E0%B8%B0-Sira%20Janpeng_SOE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/237/profilefield_file/files_29/0/11%20GN11%20DPIS%20178%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Askuasku@hotmail.com",
+    "name": "จารุวรรณ โตรณ",
+    "password": "$2b$10$s1vOsZMkKoSDIQDLiKX.2Oy7/IcIpCHGJKUil.xHKAX/77/KfuDqq",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3819900100988",
+    "retirementDateRaw": "249472",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "สาธารณสุขศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/238/profilefield_file/files_1/0/%E0%B8%88%E0%B8%B2%E0%B8%A3%E0%B8%B8%E0%B8%A7%E0%B8%A3%E0%B8%A3%E0%B8%93-Jaruwan%20Toron_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/238/profilefield_file/files_29/0/4%20GN04%20DPIS%20179%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nuntiya.s@fda.moph.go.th",
+    "name": "นันทิยา สมเจตนากุล",
+    "password": "$2b$10$BSJpLhFDo7QqvnjdV8lIruLnXmCi7Rg2zlfL59rdIMJXNHGZMc6ke",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มนโยบายแห่งชาติด้านยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "nationalId": "1101401914320",
+    "retirementDateRaw": "253855",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/239/profilefield_file/files_1/0/SoE%20Template_Nuntiya.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/239/profilefield_file/files_29/0/SD08%20DPIS%20180%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%20-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Fda.patcharapan.p@gmail.com",
+    "name": "พัชรพรรณ ผลบุญ",
+    "password": "$2b$10$.gUVWu84LwFzCnNcFU2pxeTVsxn.c3ShdHww9WHe3qHFtBeKGRsYO",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "nationalId": "1209700539225",
+    "retirementDateRaw": "254586",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "การบริบาลทางเภสัชกรรม",
+      "institution": "มหาวิทยาลัยศรีนครินทรวิโรฒ",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of Science",
+      "highestInstitution": "UNIVERSITY OF MANCHESTER"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/241/profilefield_file/files_1/0/SoE%20Template%20-%20%E0%B8%9E%E0%B8%B1%E0%B8%8A%E0%B8%A3%E0%B8%9E%E0%B8%A3%E0%B8%A3%E0%B8%93%20%E0%B8%9C%E0%B8%A5%E0%B8%9A%E0%B8%B8%E0%B8%8D.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/241/profilefield_file/files_29/0/11%20ST11%20DPIS%20182%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Attifate@fda.moph.go.th",
+    "name": "ปฐวดี ออคูณสวัสดิ์",
+    "password": "$2b$10$0sd1I2qWcL/OeanTjQH50uU89mBJOW0e6FKPOvtCyTXFGfG43347K",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1959900011732",
+    "retirementDateRaw": "250933",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of Science",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "ASTON UNIVERSITY"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/242/profilefield_file/files_1/0/SoE%20Template%20Pattawadee%20O.%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%AF%2009072568.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/242/profilefield_file/files_29/0/11%20LI11%20DPIS%20504%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Kriangkrai.kaew@fda.moph.go.th",
+    "name": "เกรียงไกร แก้วชัยภูมิ",
+    "password": "$2b$10$P29Wui2W4oVSdEjRZTB0kuHyAFSc/ljfGOH2tJC/bK2lBzcAu3HMy",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "nationalId": "1369900158712",
+    "retirementDateRaw": "252759",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาโทหรือเทียบเท่า",
+      "highestDegreeName": "Master of Science",
+      "highestFieldOfStudy": "Pharmaceutical Technology",
+      "highestInstitution": "King''s College London"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/243/profilefield_file/files_1/0/SoE%20Kriangkrai%20KAEWCHAIYAPHUM%20%2827MAY2025%29.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/243/profilefield_file/files_29/0/6%20ST06%20DPIS%20506%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Juthamas.p@fda.moph.go.th",
+    "name": "จุฑามาศ พิสปิงคำ",
+    "password": "$2b$10$wvz01lFTuswziKqZsTBFcu9.fe8T7aac7r2YlbJOpXTTfU3Wwdzsu",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "nationalId": "1529900534003",
+    "retirementDateRaw": "253855",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/244/profilefield_file/files_1/0/SoE_Juthamas.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/244/profilefield_file/files_29/0/BO06%20DPIS%20507%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Jiraphar@fda.moph.go.th",
+    "name": "จิราภา รักษ์สาคร",
+    "password": "$2b$10$vGGNkHvFVe4c/JR/T1WSmegCvD7lFEbL7JjwKm9Hj/XgBiRruK2w.",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "nationalId": "3100201652386",
+    "retirementDateRaw": "249472",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "วิทยาศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "Clinical Laboratory Sciences",
+      "highestInstitution": "THE UNIVERSITY OF ALABAMA AT BIRMINGHAM"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/245/profilefield_file/files_1/0/SoE%20Chirapa_Raksakorn_Jan_7_2025.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/245/profilefield_file/files_29/0/3%20ND03%20DPIS%20508%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Giffy34@gmail.com",
+    "name": "สินีนาฏ อ่วมสำอางค์",
+    "password": "$2b$10$eNvlM7VYSwDuTla.TqSj4u8o19vnRx.GDSaZpa6MkQIXPZeez3X2a",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3719900251383",
+    "retirementDateRaw": "249837",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยขอนแก่น",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/246/profilefield_file/files_1/0/%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%B5%E0%B8%99%E0%B8%B2%E0%B8%8E-Sineenat%20Aumsomang_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/246/profilefield_file/files_29/0/8%20GN08%20DPIS%20509%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Supalakkforwork@gmail.com",
+    "name": "ศุภลักษณ์ คีรีคช",
+    "password": "$2b$10$ktvfTf6jPJYNRPnmQLsLKeyhzKB/bJ5s4hqlyOEy.u2NW/oZkOJ1a",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "nationalId": "3900400324349",
+    "retirementDateRaw": "249107",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/247/profilefield_file/files_1/0/SOE%20SupalakK-7-01-2568.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/247/profilefield_file/files_29/0/2%20ND02%20DPIS%20510%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Ningnaruk_4@hotmail.com",
+    "name": "พรหมภัสสร์ ลิ้มบวรสิน",
+    "password": "$2b$10$kEZ8BipBTfLDEj2rrjQQP.KG558s3/hfd13tc/beovxyrRirpBqEe",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "3101600350155",
+    "retirementDateRaw": "249472",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรมชุมชน",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/248/profilefield_file/files_1/0/13%20SoE-PHROMPASSORN.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/248/profilefield_file/files_29/0/13%20SL13%20DPIS%20511%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Saowalak103@gmail.com",
+    "name": "เสาวลักษณ์ เลิศอมรเสถียร",
+    "password": "$2b$10$3jJHV27irS3VTCzryFBFyelO0dsV0qgK5XYFUlXSZGRRj9HHLKnlm",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มส่งเสริมเภสัชเคมีภัณฑ์",
+    "positionType": "วิชาการ",
+    "supervisorName": "จารุณี กฤษณพันธ์",
+    "nationalId": "3639900223747",
+    "retirementDateRaw": "249837",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/249/profilefield_file/files_1/0/SoE%20Template%20of%20saowalak.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/249/profilefield_file/files_29/0/3%20PS03%20DPIS%20512%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B9%80%E0%B8%A0%E0%B8%AA%E0%B8%B1%E0%B8%8A-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Tonpai550@gmail.com",
+    "name": "ปฐมพงศ์ วิมลภูษิต",
+    "password": "$2b$10$CPu6/5UPmiAnU4ITwjPcTunAxQTj6ykNCoTXSn3v/zxEh7j2k0Eca",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1505200003028",
+    "retirementDateRaw": "255316",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/250/profilefield_file/files_1/0/Summary%20of%20experience%20Patompong.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/250/profilefield_file/files_29/0/25%20LI25%20DPIS%20513%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pattareeya.bright@gmail.com",
+    "name": "ภัทรียา ทวีกาญจน์",
+    "password": "$2b$10$242BXz8cIAVNMCadNRneoefOavBqxxL/jXCDRJUvwkE5UQBCgMYI6",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1809900588593",
+    "retirementDateRaw": "254951",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "institution": "มหาวิทยาลัยวลัยลักษณ์",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestInstitution": "มหาวิทยาลัยวลัยลักษณ์"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/251/profilefield_file/files_1/0/CV%20%E0%B8%A0%E0%B8%B1%E0%B8%97%E0%B8%A3%E0%B8%B5%E0%B8%8D%E0%B8%B2.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/251/profilefield_file/files_29/0/20%20LI20%20DPIS%20514%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Poncompa@gmail.com",
+    "name": "ปิยาภรณ์ อ้อนคำภา",
+    "password": "$2b$10$WCBEwvponVcQFsXoIHBkduAloqAYglMSS1rlGMDnqoVmIl3DisiMC",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "3101201319173",
+    "retirementDateRaw": "248376",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/252/profilefield_file/files_1/0/02%20SoE-PIYAPORN.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/252/profilefield_file/files_29/0/2%20SL02%20DPIS%20516%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sminzzallert@gmail.com",
+    "name": "อารีพันธ์ เลิศวิทยสกุล",
+    "password": "$2b$10$U/ZCZgwfwHUb/Jq7DFdeLOdfjF8/Dw6iYKcZJlYrBTbNyGGTYnYO.",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "nationalId": "1509900648793",
+    "retirementDateRaw": "252394",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "มหาวิทยาลัยนเรศวร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/253/profilefield_file/files_1/0/SoE%20Template_Areephan_30-05-68.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/253/profilefield_file/files_29/0/5%20ND05%20DPIS%20517%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Patchara.nun@hotmail.com",
+    "name": "พัชรา นันทมงคล",
+    "password": "$2b$10$aNV8C7NAFKyYbPjHk4s3wORnkRlS.lFQlmkQhyGe9bmzryvw6u9zS",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "5120699012236",
+    "retirementDateRaw": "247281",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยสงขลานครินทร์",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/254/profilefield_file/files_29/0/20%20SL20%20DPIS%20519%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/254/profilefield_file/files_29/0/20%20SL20%20DPIS%20519%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Makamas.h@gmail.com",
+    "name": "มาฆมาส หรรษคุณาฒัย",
+    "password": "$2b$10$VPvv7RtqEvFRdQ8PcH/9DeQeja8264sf.McpYymd6T68UZNr8Rkm.",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "3500700103457",
+    "retirementDateRaw": "248011",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/255/profilefield_file/files_1/0/03%20SoE-MAKAMAS.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/255/profilefield_file/files_29/0/3%20SL03%20DPIS%20521%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pchootikul@gmail.com",
+    "name": "ปิยาพรณ์ ชูติกุล",
+    "password": "$2b$10$yHfCNR1VAOZ15wCK2uT86.KrcErqrTQ3sRpktNoBALsGXUIW5B.nO",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มส่งเสริมเภสัชเคมีภัณฑ์",
+    "positionType": "วิชาการ",
+    "supervisorName": "จารุณี กฤษณพันธ์",
+    "nationalId": "3550100352481",
+    "retirementDateRaw": "248742",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/256/profilefield_file/files_1/0/SoE%20Template%20of%20Piyaporn.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/256/profilefield_file/files_29/0/5%20PS05%20DPIS%20522%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B9%80%E0%B8%A0%E0%B8%AA%E0%B8%B1%E0%B8%8A-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Kpna@fda.moph.go.th",
+    "name": "กิติยา ภู่เจริญ",
+    "password": "$2b$10$b4h6qqRDWlfB6DTbK8l6MOhdIBJUDFAmdCkoljlRZr91E4g45Cf4W",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3100902694581",
+    "retirementDateRaw": "250203",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/257/profilefield_file/files_1/0/%E0%B8%81%E0%B8%B4%E0%B8%95%E0%B8%B4%E0%B8%A2%E0%B8%B2-Kitiya%20Poocharoen_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/257/profilefield_file/files_29/0/10%20GN10%20DPIS%20524%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nujane@fda.moph.go.th",
+    "name": "ศศิธร แง้เจริญกุล",
+    "password": "$2b$10$derJEqBMwjaGcrQDE8DvWuJJ1mhymbC.u0Vl4shV49l/joUAcN9d.",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "nationalId": "3841700676170",
+    "retirementDateRaw": "249837",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรมชุมชน",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/258/profilefield_file/files_1/0/SoE%20Template%20Jane%20%E0%B8%9E%E0%B8%B5%E0%B9%88%E0%B9%82%E0%B8%AD%E0%B9%8Bedit22012025.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/258/profilefield_file/files_29/0/5%20ST05%20DPIS%20525%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Annechan@fda.moph.go.th",
+    "name": "มธุรส ยอดพรหม",
+    "password": "$2b$10$JN2xXeRjE3T63VjSbptPr..S6m.Ns4a4AufZ.qArNAR5kVhOZIPyG",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "3720701062086",
+    "retirementDateRaw": "248742",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยศิลปากร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/259/profilefield_file/files_1/0/05%20SoE-MATHUROS.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/259/profilefield_file/files_29/0/4%20SL04%20DPIS%20526%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Piyarosva@gmail.com",
+    "name": "ปิยะรส วัชระนุกุล",
+    "password": "$2b$10$lQJ/nC.w5hU/Zp27GVJo4OjCdjXdI56kNIBf92oFforBgYiufXEZe",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "3102100129621",
+    "retirementDateRaw": "248742",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "การคุ้มครองผู้บริโภคด้านสาธารณสุข",
+      "highestInstitution": "มหาวิทยาลัยศิลปากร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/260/profilefield_file/files_1/0/11%20SoE-PIYAROS.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/260/profilefield_file/files_29/0/11%20SL11%20DPIS%20528%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Rat.songmek@gmail.com",
+    "name": "รัตนา ทรงเมฆ",
+    "password": "$2b$10$esR9wRABl/ss81xE108epuH/S1Z/hJN8mWBPeZmLlg45d/TW1mm4u",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "จารุณี กฤษณพันธ์",
+    "nationalId": "3630100537129",
+    "retirementDateRaw": "249107",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยนเรศวร",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/261/profilefield_file/files_1/0/SoE%20Template%20of%20Rattana.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/261/profilefield_file/files_29/0/2%20PS02%20DPIS%20529%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B9%80%E0%B8%A0%E0%B8%AA%E0%B8%B1%E0%B8%8A-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Thanva@fda.moph.go.th",
+    "name": "ธันวา พิทักษ์มงคลกุล",
+    "password": "$2b$10$ZFc1oj89VaWVd0ySQDjE0OGI68.H2vQvcZ0k7Zkji5PJbuxmt/Cbq",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "nationalId": "1141200082751",
+    "retirementDateRaw": "253125",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยสงขลานครินทร์",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยสงขลานครินทร์"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/262/profilefield_file/files_1/0/SoE_Thanva.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/262/profilefield_file/files_29/0/BO08%20DPIS%20530%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Puttijugluksa.p@gmail.com",
+    "name": "ปรียาภรณ์ พุทธิจักรรักษา",
+    "password": "$2b$10$7L3KRSSrkzvkFeOUuJ9poezHE7DjZLw0e.mJvj.6UpPhd03Fcd9O2",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "nationalId": "1709901027081",
+    "retirementDateRaw": "255316",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/263/profilefield_file/files_1/0/SoE%20Template_Preeyaphon.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/263/profilefield_file/files_29/0/12%20ND12%20DPIS%20532%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Wittawat.v@fda.moph.go.th",
+    "name": "วิทวัส วิริยะบัญชา",
+    "password": "$2b$10$bM6MP/86E.G5uJ/nvBRM6.YPZD7/pFOS.wHZKhPaR374Ol04VEHZu",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "nationalId": "1101401737177",
+    "retirementDateRaw": "252759",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of Science",
+      "highestFieldOfStudy": "Pharmaceutical Sciences",
+      "highestInstitution": "University of Southern California"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/264/profilefield_file/files_1/0/SoE%20Template_Wittawat_May2025.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/264/profilefield_file/files_29/0/BO05%20DPIS%20533%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "U4210118@hotmail.com",
+    "name": "เสริมรัฐ ไชยคุณ",
+    "password": "$2b$10$xwP9ecDTtePXGdYlGwYeiu43G1iWV8.THMgw97ODkCMqGKmLEcPg.",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "3100504286327",
+    "retirementDateRaw": "249837",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/265/profilefield_file/files_1/0/07%20SoE-SERMRAT.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/265/profilefield_file/files_29/0/7%20SL07%20DPIS%20534%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sunny@fda.moph.go.th",
+    "name": "ศันสนีย์ มันจันดา",
+    "password": "$2b$10$4xy47FN48Ge/m2sq4z2QGu.pdalqnZh2JAsGWhdFYArQMN5PVNIDa",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "3609900937871",
+    "retirementDateRaw": "249837",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/266/profilefield_file/files_1/0/SoE%20Sansanee%20M.%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%AF.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/266/profilefield_file/files_29/0/12%20LI12%20DPIS%20535%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pornweena@hotmail.com",
+    "name": "ภรณ์วีณา ปิ่นสุวรรณ",
+    "password": "$2b$10$lLDDZvtQwyxUkrraL/m95.TMyDDjjonVxg2eQjt.PiI/uTQQ4Xn0.",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "3219800020384",
+    "retirementDateRaw": "249107",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยศิลปากร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/267/profilefield_file/files_1/0/15%20SoE-PORNWEENA.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/267/profilefield_file/files_29/0/15%20SL15%20DPIS%20536%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Yaobuna@fda.moph.go.th",
+    "name": "เยาวภา สระบัว",
+    "password": "$2b$10$2L4yDZEqs1VvO03fpXAZqet54Au.R/tTlnMvJOhKLpYir5e.aBEjy",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "3800600487650",
+    "retirementDateRaw": "248376",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยศิลปากร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/268/profilefield_file/files_1/0/SoE%20Template_YaowapaS.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/268/profilefield_file/files_29/0/6%20LI06%20DPIS%20537%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Natamon.s@fda.moph.go.th",
+    "name": "นัจธมนตร์ ทองงามขำ",
+    "password": "$2b$10$Iu9Wyo2MHf9.PJYaS5hAD.NEBooSlL85l9uSROV.ISw9vv4DpPfHS",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "nationalId": "1659900275970",
+    "retirementDateRaw": "252394",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "มหาวิทยาลัยนเรศวร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/269/profilefield_file/files_1/0/SoE%20Template-%E0%B8%99%E0%B8%B1%E0%B8%88%E0%B8%98%E0%B8%A1%E0%B8%99%E0%B8%95%E0%B8%A3%E0%B9%8C%20%E0%B8%97%E0%B8%AD%E0%B8%87%E0%B8%87%E0%B8%B2%E0%B8%A1%E0%B8%82%E0%B8%B3%20270568.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/269/profilefield_file/files_29/0/SD06%20DPIS%20539%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%20-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Chutimak@fda.moph.go.th",
+    "name": "ชุติมา เกียรติวุฒิอมร",
+    "password": "$2b$10$H5giUrwLY2uFzdJqeIkhY.NxQXGWOZi1wUhmfX/jfHMB00ubhUWJq",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "3679800041132",
+    "retirementDateRaw": "249837",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยศรีนครินทรวิโรฒ",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยศรีนครินทรวิโรฒ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/270/profilefield_file/files_1/0/14%20SoE-CHUTIMA.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/270/profilefield_file/files_29/0/14%20SL14%20DPIS%20540%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Npnc@fda.moph.go.th",
+    "name": "นารีพรรณ กิจเจริญนุกูล",
+    "password": "$2b$10$anYu9q8tQaWzlWeNbQ3MXefS88Fl3kOYNvc2IR.u6gCdjJ08Gr9Oe",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มกำหนดมาตรฐาน",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "nationalId": "3102201186026",
+    "retirementDateRaw": "249472",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "อาหารเคมี",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/271/profilefield_file/files_1/0/SoE-Nareepran.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/271/profilefield_file/files_29/0/4%20ST04%20DPIS%20541%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "A_rutti@fda.moph.go.th",
+    "name": "ณัฎฐภรณ์ เกษมพงศ์วฤทธิ์",
+    "password": "$2b$10$XCBdWsfMFGrcOl.AEM/cA.kzANW.q.GXjM2xjeD8OurcR5OxGP.jq",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "3409900114630",
+    "retirementDateRaw": "248376",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรม",
+      "institution": "มหาวิทยาลัยขอนแก่น",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยขอนแก่น"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/272/profilefield_file/files_1/0/%E0%B8%93%E0%B8%B1%E0%B8%8E%E0%B8%90%E0%B8%A0%E0%B8%A3%E0%B8%93%E0%B9%8C-Nuttaporn%20kasemphongwarit_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/272/profilefield_file/files_29/0/14%20GN14%20DPIS%20542%20%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nopdanai.c@fda.moph.go.th",
+    "name": "ณพดนัย จักรภีร์ศิริสุข",
+    "password": "$2b$10$r3RH.8FtK0YOePuGqMYi5ekcAOd4EkNuE5UwMfv8zf5iOTfH71BrO",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "nationalId": "1101402020446",
+    "retirementDateRaw": "254586",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestInstitution": "UPPSALA UNIVERSITY"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/273/profilefield_file/files_1/0/SoE%20Template_Nopdanai.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/273/profilefield_file/files_29/0/BO09%20DPIS%20543%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Tikumporn@fda.moph.go.th",
+    "name": "ทิฆัมพร เอื้อวิเศษวงศ์",
+    "password": "$2b$10$InC2bxH9qe7HoaFSgORs5OCPkEN4DUxOXxqcGm6zjhziPo1FoDolO",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "1100400213408",
+    "retirementDateRaw": "251664",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/274/profilefield_file/files_1/0/%E0%B8%97%E0%B8%B4%E0%B8%86%E0%B8%B1%E0%B8%A1%E0%B8%9E%E0%B8%A3-Tikumporn%20Uaviseswong_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/274/profilefield_file/files_29/0/16%20GN16%20DPIS%20545%20%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Anchalee.sri@fda.moph.go.th",
+    "name": "อัญชลี ศรีสวัสดิ์",
+    "password": "$2b$10$mtoES1XBeq9KRT/yNH6dj.yVpTRqgV6MoSQVrP6owdFIG0QNnAQci",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1630500002170",
+    "retirementDateRaw": "250933",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชกรรมชุมชน",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชกรรมชุมชน",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/275/profilefield_file/files_1/0/SoE%20Anchalee%20Sri.%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%AF.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/275/profilefield_file/files_29/0/13%20LI13%20DPIS%20551%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Kanokrat.cham@fda.moph.go.th",
+    "name": "กนกรัตน์ จำหาญ",
+    "password": "$2b$10$hfzMAZWEpHG.JykraOWgTObuLdikl9h/tjkd.Sgr3URML5MZj.oh6",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "3141500177222",
+    "retirementDateRaw": "250203",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/276/profilefield_file/files_1/0/SoE%20Kanokrat%20C.%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%AF%2009072568.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/276/profilefield_file/files_29/0/14%20LI14%20DPIS%20555%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "P.varatthaya@gmail.com",
+    "name": "วรัทยา พลสวัสดิ์วานิชย์",
+    "password": "$2b$10$7wfGZNgLncnceC7Xdkgrh.DUs14kEUmMPhXflGyeUo0v5larPqi1G",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มกำหนดมาตรฐาน",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1409900369798",
+    "retirementDateRaw": "252029",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/277/profilefield_file/files_1/0/SOE%20Template_CV_Varatthaya2568.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/277/profilefield_file/files_29/0/24%20LI24%20DPIS%20561%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Siwaporn168@fda.moph.go.th",
+    "name": "ศิวพร สกุลภักดี",
+    "password": "$2b$10$YEMmiLwFYyoo69GqLGfsfOI7pRSw42Duo3BbHwzJWLwz8.a5ccaZy",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการพิเศษ",
+    "positionLevel": "ชำนาญการพิเศษ",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "1729900183781",
+    "retirementDateRaw": "253490",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of science",
+      "highestFieldOfStudy": "Pharmaceutical Biotechnology",
+      "highestInstitution": "University of Greenwich"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/278/profilefield_file/files_1/0/SoE%20Siwaporn%20Sakulpakdee%281%29.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/278/profilefield_file/files_29/0/5%20GN05%20DPIS%20646%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Kulwadee@fda.moph.go.th",
+    "name": "กุลวดี สวัสดิ์ไพบูลย์ทวี",
+    "password": "$2b$10$KTnwCh1hCENXNskSCp0YiuopVX0rtk4XDoYdmUxRAGb/fCiDfdP7u",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มส่งเสริมเภสัชเคมีภัณฑ์",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "1100800237045",
+    "retirementDateRaw": "251664",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/279/profilefield_file/files_1/0/%E0%B8%81%E0%B8%B8%E0%B8%A5%E0%B8%A7%E0%B8%94%E0%B8%B5-Kulwadee%20Sawaspaiboontawee_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/279/profilefield_file/files_29/0/19%20GN19%20DPIS%20647%20%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Oraya.c@fda.moph.go.th",
+    "name": "อรญา ตรีประพิณ",
+    "password": "$2b$10$e6wR1RgN3iRttmNdMmVx9.5hvgWxiEva1hVJJfiIn1peMwL31WtW.",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "1160100491780",
+    "retirementDateRaw": "255316",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "การบริบาลทางเภสัชกรรม",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "การบริบาลทางเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/280/profilefield_file/files_1/0/%E0%B8%AD%E0%B8%A3%E0%B8%8D%E0%B8%B2-Oraya%20Chotnisakorn_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/280/profilefield_file/files_29/0/23%20GN23%20DPIS%20648%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Patharavan@fda.moph.go.th",
+    "name": "ภัทรวรรณ โกมุติกานนท์",
+    "password": "$2b$10$GkKgsKLFkfagPVhilnmgMeljnDfnIGNN9/xYD1LjAuNFpgUSv8p0K",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "1219900124819",
+    "retirementDateRaw": "252029",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยขอนแก่น",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชวิทยา",
+      "highestInstitution": "Glasgow Caledonian University"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/281/profilefield_file/files_29/0/12%20GN12%20DPIS%20649%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/281/profilefield_file/files_29/0/12%20GN12%20DPIS%20649%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pureerat@fda.moph.go.th",
+    "name": "ภูรีรัตน์ โตสถาน",
+    "password": "$2b$10$YQCaJJWZ/fkZXjRCD5uYWOXvj48l2RHSa4t3YqRt7QUrxAaeelrwS",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มส่งเสริมเภสัชเคมีภัณฑ์",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "1100800174396",
+    "retirementDateRaw": "251298",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/282/profilefield_file/files_1/0/%E0%B8%A0%E0%B8%B9%E0%B8%A3%E0%B8%B5%E0%B8%A3%E0%B8%B1%E0%B8%95%E0%B8%99%E0%B9%8C-Pureerat%20Thostan_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/282/profilefield_file/files_29/0/15%20GN15%20DPIS%20650%20%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pitchaon.b@fda.moph.go.th",
+    "name": "พิชชาอร บุตรทอง",
+    "password": "$2b$10$vYsFeMJZVIHfGqZRqNLPyu2cszN0rtXCWfKU4JglMI2aTBQqE.p2.",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "nationalId": "1103701896329",
+    "retirementDateRaw": "255316",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "วิทยาศาสตร์เภสัชกรรม",
+      "institution": "มหาวิทยาลัยศรีนครินทรวิโรฒ",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "วิทยาศาสตร์เภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยศรีนครินทรวิโรฒ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/284/profilefield_file/files_1/0/%E0%B8%9E%E0%B8%B4%E0%B8%8A%E0%B8%8A%E0%B8%B2%E0%B8%AD%E0%B8%A3-Pitchaon%20Budthong_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/284/profilefield_file/files_29/0/20%20GN20%20DPIS%20652%20%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nichanandee@gmail.com",
+    "name": "นิชานันท์ ดีวิญญา",
+    "password": "$2b$10$w.z7PomlfVCig/TmqEDryu9iA7DDOVXzqzyEbuHxMJqBgq4VbJ0a6",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "retirementDateRaw": "252029",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/285/profilefield_file/files_1/0/12%20SoE-NICHANAN.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/285/profilefield_file/files_29/0/12%20SL12%20DPIS%20653%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "W.dangyai@gmail.com",
+    "name": "วิทยรัตน์ แดงใหญ่",
+    "password": "$2b$10$lY963Qv52Im.wt6r5VXkruEbvlW8Gfo2UyWKm7kCzZGejQpVCTCg2",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "retirementDateRaw": "253125",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of Science in Advanced Pharmaceutical Manufacturing",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "University of Strathclyde"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/286/profilefield_file/files_1/0/08%20SoE-WITTHAYARAT.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/286/profilefield_file/files_29/0/8%20SL08%20DPIS%20654%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "P.napasawan.p@gmail.com",
+    "name": "ภัทราวดี ภู่มณี",
+    "password": "$2b$10$vGABf59hf2vUfgpHsQ1BCeuj43gfpEksrEqAxGVZm41TJs9DtKkAm",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "retirementDateRaw": "252759",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/287/profilefield_file/files_1/0/SoE%20Template%20Pattawadee%20O.%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%AF%2009072568.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/287/profilefield_file/files_29/0/22%20LI22%20DPIS%20655%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nipapon.b@fda.moph.go.th",
+    "name": "นิภาพร บวรรัชชโนทัย",
+    "password": "$2b$10$sYVAa4ZaecEgv962xYbujeL9OzL93Da1/HtapEcrpXPBrYjwaPybC",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "retirementDateRaw": "252029",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "มหาวิทยาลัยนเรศวร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/288/profilefield_file/files_1/0/SoE%20Template%20-%20Nipaporn%20B.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/288/profilefield_file/files_29/0/11%20ND11%20DPIS%20657%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sataporn@fda.moph.go.th",
+    "name": "สถาพร ลำไพบูลย์สุข",
+    "password": "$2b$10$3X8z3duRFy.WhK/wqs6rze5vJFvBGyytJsOQZ1QWydNqOO7KA6ck6",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "retirementDateRaw": "253490",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of Science",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "UNIVERSITY OF SOUTHERN CALIFORNIA"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/289/profilefield_file/files_1/0/SoE%20Sataporn.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/289/profilefield_file/files_29/0/4%20ND04%20DPIS%20661%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Kanokwan.sukk@gmail.com",
+    "name": "กนกวรรณ กมลกิจการ",
+    "password": "$2b$10$qm8/dIlpxX.LuQew8PcCoescLXe/2DtVZvyKqUM5.riRrdsfz165O",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "retirementDateRaw": "252759",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of Science",
+      "highestFieldOfStudy": "Pharmaceutical Technology",
+      "highestInstitution": "King''s College London"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/290/profilefield_file/files_1/0/SoE%20Template%20-%20Kanokwan%20Kamonkijjakan.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/290/profilefield_file/files_29/0/10%20ND10%20DPIS%20714%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Thanathon@fda.moph.go.th",
+    "name": "ธนธรณ์ พรมวงษ์",
+    "password": "$2b$10$ujp0GzcyM0QUg3UrClqnouUmxzjo5v3GXFPLodmNWStBBnqYi6y/W",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "retirementDateRaw": "253855",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of science",
+      "highestInstitution": "University of Sheffield"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/291/profilefield_file/files_1/0/SoE%20%20Thanathon%20Promwong%281%29.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/291/profilefield_file/files_29/0/9%20ND09%20DPIS%20715%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Arpasinee_sa@fda.moph.go.th",
+    "name": "อาภาสินี สานุพันธ์",
+    "password": "$2b$10$sQRoJ/mg0HFGRpTJD4K28eAJWq6YmyGheUo9K/0hUp3wy4E4CguEW",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "retirementDateRaw": "251298",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestFieldOfStudy": "เภสัชวิทยา",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/292/profilefield_file/files_1/0/SoE_Arpasinee.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/292/profilefield_file/files_29/0/BO07%20DPIS%20716%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Rattana.unsanee@gmail.com",
+    "name": "อัญศาณี รัตนะชีวะกุล",
+    "password": "$2b$10$1v/2Q7ZWZNyeTvLILCUV2O9pv1ngHhX6riJxRf1xqQdCNNMs674xm",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "retirementDateRaw": "253855",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/293/profilefield_file/files_1/0/%E0%B8%AD%E0%B8%B1%E0%B8%8D%E0%B8%A8%E0%B8%B2%E0%B8%93%E0%B8%B5-Unsanee%20Rattanacheevakul_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/293/profilefield_file/files_29/0/18%20GN18%20DPIS%20717%20%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Saichonnarm@fda.moph.go.th",
+    "name": "ชลธิชา สว่างแจ้ง",
+    "password": "$2b$10$WsvVpG1chSI7.g5rSXVFtuWiJUnz.f8ZPy1GHeSRhKEuIBx.hawTS",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "retirementDateRaw": "253125",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/294/profilefield_file/files_1/0/SoE%20ChontichaS.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/294/profilefield_file/files_29/0/8%20ND08%20DPIS%20718%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Anongnart@fda.moph.go.th",
+    "name": "อนงค์นาฏ สหวัชรินทร์",
+    "password": "$2b$10$Tb1dNQQX5UZYXTY9pgO1bORetm0B0N.PkC.S.J5FIJR.pHBDqOV1W",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "วิชาการ",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "retirementDateRaw": "251298",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/295/profilefield_file/files_1/0/1.%20SoE%20%E0%B8%AD%E0%B8%99%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%99%E0%B8%B2%E0%B8%8F.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/295/profilefield_file/files_29/0/SD04%20DPIS%20720%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%20-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "D.chuthamad@gmail.com",
+    "name": "จุฑามาศ ด้วงสง",
+    "password": "$2b$10$oFpcEjPfQjmzxNq/NfRMGuar9lA81.bALmiDZrPwxjxIuwivG5wPm",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "retirementDateRaw": "252029",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยหัวเฉียวเฉลิมพระเกียรติ",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยหัวเฉียวเฉลิมพระเกียรติ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/296/profilefield_file/files_1/0/16%20SoE-CHUTHAMAD.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/296/profilefield_file/files_29/0/16%20SL16%20DPIS%20721%20%E0%B8%88%E0%B8%B8%E0%B8%91%E0%B8%B2%E0%B8%A1%E0%B8%B2%E0%B8%A8%20%E0%B8%94%E0%B9%89%E0%B8%A7%E0%B8%87%E0%B8%AA%E0%B8%87%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Mic_vs_mon@hotmail.com",
+    "name": "วันวิสาข์ สุริยวงค์",
+    "password": "$2b$10$cvoPrHzFwa07FtR60Oct2.KsDVu1Xh2/9mqk0WVNx8JLcty3RrLJW",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "retirementDateRaw": "251664",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยพายัพ",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยพายัพ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/297/profilefield_file/files_1/0/%E0%B8%A7%E0%B8%B1%E0%B8%99%E0%B8%A7%E0%B8%B4%E0%B8%AA%E0%B8%B2%E0%B8%82%E0%B9%8C-Wanvisa%20Suriyawong_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/297/profilefield_file/files_29/0/17%20GN17%20DPIS%20722%20%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pharma_preeyapf@fda.moph.go.th",
+    "name": "ปรียาภรณ์ ชูประจง",
+    "password": "$2b$10$snzItdv2K/IaelkamOzTfu6.8ij7.XxtBRsltXctffxP0SJdxnOUe",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "retirementDateRaw": "250203",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยศิลปากร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/298/profilefield_file/files_1/0/CV%20%E0%B8%9B%E0%B8%A3%E0%B8%B5%E0%B8%8D%E0%B8%B2%E0%B8%A0%E0%B8%A3%E0%B8%93%E0%B9%8C.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/298/profilefield_file/files_29/0/15%20LI15%20DPIS%20723%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Krit@fda.moph.go.th",
+    "name": "กฤษณ์ เหลืองวัฒนพงศ์",
+    "password": "$2b$10$ZGVxcfsnY5tM2woXnsifpeo/l0GLOn313AQv3SQObF2uSXg67s59W",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "retirementDateRaw": "253490",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยสงขลานครินทร์",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยสงขลานครินทร์"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/299/profilefield_file/files_1/0/SoE%20Template%20%28Krit%29.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/299/profilefield_file/files_29/0/16%20LI16%20DPIS%20724%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Manachanok@fda.moph.go.th",
+    "name": "มนชนก มงคลพันธุ์",
+    "password": "$2b$10$nq8gsdyPGgotOfyhINIhzuRjA.48pd3UyrWCy7EfsB2/0/iYLj89C",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "retirementDateRaw": "253490",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/300/profilefield_file/files_1/0/09%20SoE-MANACHANOK.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/300/profilefield_file/files_29/0/9%20SL09%20DPIS%20725%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Rewoot@fda.moph.go.th",
+    "name": "เรวุฒิ ทองวัน",
+    "password": "$2b$10$YPmDRLaJr95EXSFDC1cmJOFLZrbZZAZee1jvtJSgeQD0T52nxwL0S",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "retirementDateRaw": "253855",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยอุบลราชธานี",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยอุบลราชธานี"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/301/profilefield_file/files_1/0/Rewoot%20GMDP%20SoE%20%28%E0%B9%80%E0%B8%A3%E0%B8%A7%E0%B8%B8%E0%B8%92%E0%B8%B4%29%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%AF%20.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/301/profilefield_file/files_29/0/17%20LI17%20DPIS%20726%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Umi.korakot@gmail.com",
+    "name": "กรกต ยศเรืองศรี",
+    "password": "$2b$10$SIz4Rq9tPv1zzsyvZUeAtekwDvJdsUSRwBK4NUS.Ok5lpMXb47gfu",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "retirementDateRaw": "252029",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/302/profilefield_file/files_1/0/10%20SoE-KORAKOT.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/302/profilefield_file/files_29/0/10%20SL10%20DPIS%20727%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Nataporn@fda.moph.go.th",
+    "name": "ณฐพร เอี่ยมชลวิเลิศ",
+    "password": "$2b$10$lpJYLYaDAzpJTj.oEQ4vneba9/worl63LJHO.AKpRx1kklq97Wfhm",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "retirementDateRaw": "254220",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "Master of Science",
+      "highestFieldOfStudy": "MSc in Advanced Therapy Medicinal Products",
+      "highestInstitution": "UNIVERSITY OF MANCHESTER"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/303/profilefield_file/files_1/0/SoE%20%E0%B8%93%E0%B8%90%E0%B8%9E%E0%B8%A3%20%E0%B9%80%E0%B8%AD%E0%B8%B5%E0%B9%88%E0%B8%A2%E0%B8%A1%E0%B8%8A%E0%B8%A5%E0%B8%A7%E0%B8%B4%E0%B9%80%E0%B8%A5%E0%B8%B4%E0%B8%A8%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99%E0%B8%AF.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/303/profilefield_file/files_29/0/18%20LI18%20DPIS%20728%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Teerawat@fda.moph.go.th",
+    "name": "ธีรวัต นนทสวัสดิ์ศรี",
+    "password": "$2b$10$wVX6VbnGNP5.F/.GKhAX4e6bVHl539mg/5v8fWFo4FzQd1DsxyB1e",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "Mahidol University"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/304/profilefield_file/files_1/0/SoE%20Template_Teerawat.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/304/profilefield_file/files_29/0/7%20ST07%20DPIS%20729%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Patcharaphun@fda.moph.go.th",
+    "name": "พัชราพรรณ กิจพันธ์",
+    "password": "$2b$10$bLGw6eiarc1YObNMwFhNquph6MhluJUkVBT4UgBbUuK7KakPOyFXO",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาใหม่และส่งเสริมการวิจัยยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "retirementDateRaw": "252029",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยสงขลานครินทร์",
+      "highestLevel": "ปริญญาเอก หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรดุษฎีบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์สังคมและการบริหาร",
+      "highestInstitution": "มหาวิทยาลัยศิลปากร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/305/profilefield_file/files_1/0/SoE%20%20%E0%B8%9E%E0%B8%B1%E0%B8%8A%E0%B8%A3%E0%B8%B2%E0%B8%9E%E0%B8%A3%E0%B8%A3%E0%B8%93%20%E0%B8%81.docx.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/305/profilefield_file/files_29/0/BO10%20DPIS%20730%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Chutamas.l@fda.moph.go.th",
+    "name": "จุฑามาศ เหลืองอรุณชัย",
+    "password": "$2b$10$E9sIwc8nVngX0oH/9rDXlu3yLT6sYYxx822vaT5YhRwWRZ1irpOEq",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มพัฒนาระบบ",
+    "positionType": "วิชาการ",
+    "supervisorName": "นิธิมา สุ่มประดิษฐ์",
+    "retirementDateRaw": "252759",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/306/profilefield_file/files_1/0/SoE%20Template_Chutamas%20Luangaroonchai.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/306/profilefield_file/files_29/0/SD05%20DPIS%20731%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9E%E0%B8%B1%E0%B8%92%E0%B8%99%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A%20-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Patcharawan.p@fda.moph.go.th",
+    "name": "พัชราวรรณ พลรักษา",
+    "password": "$2b$10$0Zz3K135n0mdsEt2k.lJuuEv7acihp1GvKsigsq.wN79shvCTD/eS",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มกำหนดมาตรฐาน",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "retirementDateRaw": "254220",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยเชียงใหม่",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยเชียงใหม่"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/307/profilefield_file/files_1/0/SoE-%E0%B8%9E%E0%B8%B1%E0%B8%8A%E0%B8%A3%E0%B8%B2%E0%B8%A7%E0%B8%A3%E0%B8%A3%E0%B8%93%20%E0%B8%9E%E0%B8%A5%E0%B8%A3%E0%B8%B1%E0%B8%81%E0%B8%A9%E0%B8%B2.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/307/profilefield_file/files_29/0/8%20ST08%20DPIS%20732%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Patchaya.rx@gmail.com",
+    "name": "ภัสร์ชยาน์ พรรณภัทราพงษ์",
+    "password": "$2b$10$kmHRLtI4f71pVkxrWInT3uc5axEiVmTn0FxXm0dg8NwGMgoqwpBCa",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มกำหนดมาตรฐาน",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "retirementDateRaw": "254951",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยหัวเฉียวเฉลิมพระเกียรติ",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยหัวเฉียวเฉลิมพระเกียรติ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/308/profilefield_file/files_1/0/SoE%20-%20%E0%B8%A0%E0%B8%B1%E0%B8%AA%E0%B8%A3%E0%B9%8C%E0%B8%8A%E0%B8%A2%E0%B8%B2%E0%B8%99%E0%B9%8C%20%E0%B8%9E%E0%B8%A3%E0%B8%A3%E0%B8%93%E0%B8%A0%E0%B8%B1%E0%B8%97%E0%B8%A3%E0%B8%B2%E0%B8%9E%E0%B8%87%E0%B8%A9%E0%B9%8C%202568.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/308/profilefield_file/files_29/0/12%20ST12%20DPIS%20733%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Puripong.n@fda.moph.go.th",
+    "name": "ภูริพงษ์ นิติไชย",
+    "password": "$2b$10$eKNqNxqTa69MVis23paNWe7Ez6KVtHVNb4LG8h/2O61CIj7wszvuu",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มยาสามัญและยาเสริมการรักษา",
+    "positionType": "วิชาการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "retirementDateRaw": "254220",
+    "educationHistory": {
+      "level": "ปริญญาโท หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาโท หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรมหาบัณฑิต",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/309/profilefield_file/files_1/0/SOE%20Puripong%20Nitichai_SoE%207-1-68.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/309/profilefield_file/files_29/0/7%20ND07%20DPIS%20776%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sukanya.n@fda.moph.go.th",
+    "name": "สุกัญญา นำสวัสดิ์",
+    "password": "$2b$10$In0sVcdVEqkPYv/2lEk6uOPOpTqhP6Xxqf7QYus1ZWDb2NiCLkuS6",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มนโยบายแห่งชาติด้านยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "retirementDateRaw": "252029",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยสงขลานครินทร์",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยสงขลานครินทร์"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/310/profilefield_file/files_1/0/SoE%20SN_Update%20090768.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/310/profilefield_file/files_29/0/10%20ST10%20DPIS%20777%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "T.wichaithamthorn@gmail.com",
+    "name": "วริทธิ์ วิชัยธรรมธร",
+    "password": "$2b$10$VizX/ZOfwb1fXNPZ32HI7OeUhxnUzp3qFBq4uMUietWwazmejXSGW",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "retirementDateRaw": "254220",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยวลัยลักษณ์",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยวลัยลักษณ์"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/312/profilefield_file/files_1/0/17%20SoE-WARIT.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/312/profilefield_file/files_29/0/17%20SL17%20DPIS%20782%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sirima.p@fda.moph.go.th",
+    "name": "สิริมา ปุณณินท์",
+    "password": "$2b$10$zqtjNqrJn.BF4/1AvlbLq.pmB36rEBa6wMjvdmnJU/K85VuHIga0u",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มนโยบายแห่งชาติด้านยา",
+    "positionType": "วิชาการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "retirementDateRaw": "253855",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/313/profilefield_file/files_1/0/SoE%20Template_Sirima%20Punnin.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/313/profilefield_file/files_29/0/9%20ST09%20DPIS%20785%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%81%E0%B8%B3%E0%B8%AB%E0%B8%99%E0%B8%94%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%90%E0%B8%B2%E0%B8%99-131166.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Sirichat.ch@fda.moph.go.th",
+    "name": "สิริฉัตร ชื่นใจ",
+    "password": "$2b$10$c5tHJcSDHrn19udm9Z27.OMr1QAXg9YYEcMBLo7QHhyC1ftlAGlfi",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "retirementDateRaw": "253125",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยหัวเฉียวเฉลิมพระเกียรติ",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยหัวเฉียวเฉลิมพระเกียรติ"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/314/profilefield_file/files_1/0/18%20SoE-SIRICHAT.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/314/profilefield_file/files_29/0/18%20SL18%20DPIS%20788%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "placeholder136@lmsfda.com",
+    "name": "บุญญารัสมิ์ ภูริชโรจนวัฒน์",
+    "password": "$2b$10$pCkFJHREdSrbmL8BL67LCewfXhfZiCCTp.oPhjEuD0QcESAN41KZK",
+    "department": "กองควบคุมเครื่องมือแพทย์",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มเครื่องมือแพทย์สำหรับการวินิจฉัยภายนอกร่างกาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "มรกต ประภัสศิริพันธุ์",
+    "retirementDateRaw": "252029",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "บริบาลเภสัชกรรม",
+      "institution": "มหาวิทยาลัยนเรศวร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "บริบาลเภสัชกรรม",
+      "highestInstitution": "มหาวิทยาลัยนเรศวร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/315/profilefield_file/files_1/0/CV%20Bunyarat%20ATMPs%20and%20Biologics.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/315/profilefield_file/files_29/0/BO12%20DPIS%20796%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%8A%E0%B8%B5%E0%B8%A7%E0%B8%A7%E0%B8%B1%E0%B8%95%E0%B8%96%E0%B8%B8-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "placeholder137@lmsfda.com",
+    "name": "อภิษฎา ชูสถาน",
+    "password": "$2b$10$7g5p0lq3l2oBshPKUw6l2uVcEyN1BQIwNgbuo9csYp7wsgTRZHEte",
+    "department": "กองควบคุมเครื่องมือแพทย์",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มเครื่องมือแพทย์ที่มีกำลัง",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "retirementDateRaw": "253855",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/316/profilefield_file/files_1/0/19%20SoE-APISADA.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/316/profilefield_file/files_29/0/19%20SL19%20DPIS%20797%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Thanakorn.leelalai@gmail.com",
+    "name": "ธนกร ลีลาลัย",
+    "password": "$2b$10$TVKra7WhTWWwvtPuhhyMUexfGbwx/Z3ntCdUaolvw4AFaPHK/MH1O",
+    "department": "กองควบคุมเครื่องสำอางและวัตถุอันตราย",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มวัตถุอันตรายใหม่และนวัตกรรม",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "retirementDateRaw": "255316",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยศิลปากร",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยศิลปากร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/317/profilefield_file/files_1/0/SoE%20Thanakorn%20Leelalai_edited29.05.68.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/317/profilefield_file/files_29/0/26%20LI26%20DPIS%20807%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pichamon.w@fda.moph.go.th",
+    "name": "พิชามญชุ์ วิถีสวัสดิ์",
+    "password": "$2b$10$8ArtjGyZih8ZOifUUoSdvODVemQccFIFkazZ8Iy1GlKEPzttXvRu6",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มส่งเสริมเภสัชเคมีภัณฑ์",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "retirementDateRaw": "254951",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชอุตสาหการ",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชอุตสาหการ",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/318/profilefield_file/files_1/0/SoE%20Template%20%28%E0%B8%9E%E0%B8%B4%E0%B8%8A%E0%B8%B2%E0%B8%A1%E0%B8%8D%E0%B8%8A%E0%B8%B8%E0%B9%8C%20%E0%B8%A7%E0%B8%B4%E0%B8%96%E0%B8%B5%E0%B8%AA%E0%B8%A7%E0%B8%B1%E0%B8%AA%E0%B8%94%E0%B8%B4%E0%B9%8C%29.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/318/profilefield_file/files_29/0/23%20LI23%20DPIS%20829%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Benjamart.k@fda.moph.go.th",
+    "name": "เบญจมาศ คุ้มแก้ว",
+    "password": "$2b$10$IX3.D6KSleVa5eKV7aIdvuaxXs4TLAk53yWXFG16YTq3Qb3ZV1GKW",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "ใจพร พุ่มคำ",
+    "retirementDateRaw": "255316",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชอุตสาหการ",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชอุตสาหการ",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/319/profilefield_file/files_1/0/%E0%B9%80%E0%B8%9A%E0%B8%8D%E0%B8%88%E0%B8%A1%E0%B8%B2%E0%B8%A8-Benjamart%20kumkaeo_SoE.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/319/profilefield_file/files_29/0/22%20GN22%20DPIS%20830%20%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B8%AA%E0%B8%B2%E0%B8%A1%E0%B8%B1%E0%B8%8D-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Lertrobfolkswaken2537@gmail.com",
+    "name": "เลิศรบ หนหาญรบ",
+    "password": "$2b$10$/LpYVV4WaCq4QHh1Ev/a1udPt.Kc28KUFavif9Dl80TwhIQ8doTJu",
+    "department": "กองยา",
+    "position": "นายสัตวแพทย์ปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มผลิตภัณฑ์การแพทย์ขั้นสูงและชีววัตถุ",
+    "positionType": "วิชาการ",
+    "supervisorName": "จารุณี กฤษณพันธ์",
+    "retirementDateRaw": "254586",
+    "educationHistory": {
+      "level": "ปริญญาตรีหรือเทียบเท่า",
+      "degreeName": "สัตวแพทยศาสตรบัณฑิต",
+      "institution": "จุฬาลงกรณ์มหาวิทยาลัย",
+      "highestLevel": "ปริญญาตรีหรือเทียบเท่า",
+      "highestDegreeName": "สัตวแพทยศาสตรบัณฑิต",
+      "highestInstitution": "จุฬาลงกรณ์มหาวิทยาลัย"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/321/profilefield_file/files_1/0/SoE%20Template%20of%20Lertrob.docx?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/321/profilefield_file/files_29/0/7%20PS07%20DPIS%20859%20JD%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B9%80%E0%B8%A0%E0%B8%AA%E0%B8%B1%E0%B8%8A-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "placeholder11@lmsfda.com",
+    "name": "ปาริษา สุภาภรรณ",
+    "password": "$2b$10$oVLVLClBFBNNuvRSv3PgV.8m2aNUHslxKX1Xq1dYaOcc2XFFUHWmC",
+    "department": "กองยา",
+    "position": "นักจัดการงานทั่วไป",
+    "positionLevel": "กลุ่มงานบริหารทั่วไป",
+    "subdivision": "ฝ่ายบริหารทั่วไป",
+    "positionType": "กลุ่มงานบริหารทั่วไป",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "1100200964426",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "คหกรรมศาสตรบัณฑิต",
+      "institution": "มหาวิทยาลัยเทคโนโลยีราชมงคลพระนคร"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/461/profilefield_file/files_1/0/21%20SoE-PARISA.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/461/profilefield_file/files_29/0/21%20SL21%20DPIS%20111%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Amapisit@hotmail.com",
+    "name": "อภิสิทธิ์ ม่วงไทยงาม",
+    "password": "$2b$10$rnoJ2u17X21RpHIuFuYfqO9Kop6RKf7cYau8rA8DDKvU0WiX12WmO",
+    "position": "ปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "positionType": "ปฏิบัติการ",
+    "supervisorName": "ปราโมทย์ อัครภานนท์",
+    "educationHistory": {},
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/619/profilefield_file/files_1/0/SoE%20Template%20%E0%B8%AD%E0%B8%A0%E0%B8%B4%E0%B8%AA%E0%B8%B4%E0%B8%97%E0%B8%98%E0%B8%B4%E0%B9%8C%20%E0%B8%A1%E0%B9%88%E0%B8%A7%E0%B8%87%E0%B9%84%E0%B8%97%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%A1%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%AA%E0%B9%88%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%A3%E0%B8%B4%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%88%E0%B8%B1%E0%B8%A2%E0%B8%A2%E0%B8%B2.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/619/profilefield_file/files_29/0/15%20ND15%20DPIS%20780%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%A2%E0%B8%B2%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%20-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "dpis372@lmsfda.com",
+    "name": "วรสุดา ยูงทอง",
+    "password": "$2b$10$pNs4Vj/IbYRdc6mQ7IKxfOEldLcIVYZ18kr.2e4sIdbBzNLZoN8PG",
+    "educationHistory": {},
+    "profileFiles": {},
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Deo_dee1@hotmail.com",
+    "name": "ทศพล จันทร์ภักดี",
+    "password": "$2b$10$YXBALwAcAxhMnHJF4IhXrud1/rZT5bvYKW.nbh9tI3LC9jRcA67zK",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1100500320648",
+    "retirementDateRaw": "252759",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยรังสิต",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยรังสิต"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/283/profilefield_file/files_1/0/SoE%20%E0%B8%97%E0%B8%A8%E0%B8%9E%E0%B8%A5%20%E0%B8%88%E0%B8%B1%E0%B8%99%E0%B8%97%E0%B8%A3%E0%B9%8C%E0%B8%A0%E0%B8%B1%E0%B8%81%E0%B8%94%E0%B8%B5.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/283/profilefield_file/files_29/0/21%20LI21%20DPIS%20651%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Chandaeng.ta@gmail.com",
+    "name": "ธวัชชัย จันทร์แดง",
+    "password": "$2b$10$o4FaqsSpyOsif15JGdXrXuqfcFm5rdRL3RCKL/N7eT62QJhwlpJeq",
+    "department": "กองยา",
+    "position": "นักวิชาการอาหารและยาปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "subdivision": "กลุ่มประเมินและอนุญาตสถานที่",
+    "positionType": "วิชาการ",
+    "supervisorName": "กฤษดา ลิมปนานนท์",
+    "nationalId": "1560400050874",
+    "retirementDateRaw": "254951",
+    "educationHistory": {
+      "level": "ปริญญาตรีหรือเทียบเท่า",
+      "degreeName": "วิทยาศาสตรบัณฑิต",
+      "fieldOfStudy": "อาชีวอนามัยและความปลอดภัย",
+      "institution": "มหาวิทยาลัยพะเยา",
+      "highestLevel": "ปริญญาตรีหรือเทียบเท่า",
+      "highestDegreeName": "วิทยาศาสตรบัณฑิต",
+      "highestFieldOfStudy": "อาชีวอนามัยและความปลอดภัย",
+      "highestInstitution": "มหาวิทยาลัยพะเยา"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/232/profilefield_file/files_1/0/SOE%20Template_CV_Tawatchai%202568.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/232/profilefield_file/files_29/0/27%20LI27%20DPIS%20171%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%A1%E0%B8%B4%E0%B8%99-100667.docx?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Pairoj.o@live.com",
+    "name": "ไพโรจน์ โอสถาภิรัตน์",
+    "password": "$2b$10$5qH/aeq1shShCD62XiMsDeL10ktLPTaCuPf31e4hcYuNlC6r.Rv5G",
+    "department": "กองยา",
+    "position": "เภสัชกรชำนาญการ",
+    "positionLevel": "ชำนาญการ",
+    "subdivision": "กลุ่มเฝ้าระวังและบังคับใช้กฎหมาย",
+    "positionType": "วิชาการ",
+    "supervisorName": "จีรัง ภมรสูต",
+    "nationalId": "3100800329906",
+    "retirementDateRaw": "250203",
+    "educationHistory": {
+      "level": "ปริญญาตรี หรือเทียบเท่า",
+      "degreeName": "เภสัชศาสตรบัณฑิต",
+      "fieldOfStudy": "เภสัชศาสตร์",
+      "institution": "มหาวิทยาลัยมหิดล",
+      "highestLevel": "ปริญญาตรี หรือเทียบเท่า",
+      "highestDegreeName": "เภสัชศาสตรบัณฑิต",
+      "highestFieldOfStudy": "เภสัชศาสตร์",
+      "highestInstitution": "มหาวิทยาลัยมหิดล"
+    },
+    "profileFiles": {
+      "cv": "https://lms.fda.moph.go.th/pluginfile.php/240/profilefield_file/files_1/0/04%20SoE-PAIROJ.pdf?forcedownload=1",
+      "jobDescription": "https://lms.fda.moph.go.th/pluginfile.php/240/profilefield_file/files_29/0/6%20SL06%20DPIS%20181%20new%20JD-N%20%E0%B8%81%E0%B8%A5%E0%B8%B8%E0%B9%88%E0%B8%A1%E0%B9%80%E0%B8%9D%E0%B9%89%E0%B8%B2%E0%B8%A3%E0%B8%B0%E0%B8%A7%E0%B8%B1%E0%B8%87-100667.doc?forcedownload=1"
+    },
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "tipwimoljun.fda@gmail.com",
+    "name": "ทิพย์วิมล จุลหาญกิจ",
+    "password": "$2b$10$fIBGmKDreoRPqrKACeqI6ucxriuoq5jpjLW1ArWlDEfjq7BYasQJW",
+    "educationHistory": {},
+    "profileFiles": {},
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "N.ratipong@gmail.com",
+    "name": "รติพงศ์ นิรัติศยกุล",
+    "password": "$2b$10$d8GZMhbyh/yaTv4afvWbb.i335fWQM.PTEG8oHVQF6l7yr1og809u",
+    "educationHistory": {},
+    "profileFiles": {},
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "Aranyat@fda.moph.go.th",
+    "name": "อรัญญา เทพพิทักษ์",
+    "password": "$2b$10$Bxxv7104q6gHb9LA31MViuvOY/A.3wmSWM9oRsH.yxnv9Q74S.w.W",
+    "educationHistory": {},
+    "profileFiles": {},
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  },
+  {
+    "email": "naphasorn.ar@gmail.com",
+    "name": "นภสร อารยะชุตินันท์",
+    "password": "$2b$10$.2VribS1pFF4pjfZGEw9f.Dz.HkwxhkFQVC/K/0BYoIEYctdgJnCO",
+    "department": "กองยา",
+    "position": "เภสัชกรปฏิบัติการ",
+    "positionLevel": "ปฏิบัติการ",
+    "supervisorName": "นันทรัตน์ สุขรอด",
+    "educationHistory": {},
+    "profileFiles": {},
+    "status": "ACTIVE",
+    "permission": "user",
+    "roles": []
+  }
+]

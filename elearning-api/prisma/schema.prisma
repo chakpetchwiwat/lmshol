@@ -24,6 +24,13 @@ model User {
   employmentDate        DateTime?
   tierId                String?
   profileImageUrl       String?
+  position              String?
+  positionLevel         String?
+  subdivision           String?
+  positionType          String?
+  supervisorName        String?
+  nationalId            String?
+  retirementDateRaw     String?
   educationHistory      Json?
   profileFiles          Json?
   signatureImageUrl     String?
