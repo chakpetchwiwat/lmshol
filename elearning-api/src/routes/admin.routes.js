@@ -44,6 +44,9 @@ router.put('/tiers/reorder', verifySuperAdmin, auditRequest('admin.tier.reordere
 router.put('/tiers/:id', verifySuperAdmin, auditRequest('admin.tier.updated', { entityType: 'tier' }), adminController.updateTier);
 router.delete('/tiers/:id', verifySuperAdmin, auditRequest('admin.tier.deleted', { entityType: 'tier', includeBody: false }), adminController.deleteTier);
 
+router.get('/settings/:key', adminController.getSetting);
+router.put('/settings/:key', verifySuperAdmin, auditRequest('admin.setting.updated', { entityType: 'systemSetting' }), adminController.updateSetting);
+
 router.get('/instructor-presets', adminController.getInstructorPresets);
 router.post('/instructor-presets', verifySuperAdmin, adminController.createInstructorPreset);
 router.put('/instructor-presets/:id', verifySuperAdmin, adminController.updateInstructorPreset);

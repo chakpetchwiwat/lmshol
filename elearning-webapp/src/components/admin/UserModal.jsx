@@ -16,6 +16,9 @@ const UserModal = ({
   setFormData,
   departments,
   tiers,
+  positionLevels = [],
+  positionTypes = [],
+  cohortRoles = [],
   canEditRole = true,
   profileCertificates = [],
   lmsCertificates = [],
@@ -155,33 +158,25 @@ const UserModal = ({
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">ตำแหน่ง (Position)</label>
-                <input
-                  type="text"
-                  className="form-input w-full"
-                  value={formData.position || ''}
-                  onChange={(event) => setFormData({ ...formData, position: event.target.value })}
-                  placeholder="เช่น นักวิชาการคอมพิวเตอร์"
-                />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">ระดับตำแหน่ง (Level)</label>
-                <input
-                  type="text"
-                  className="form-input w-full"
+                <CustomSelect
+                  label="ระดับตำแหน่ง (Level)"
                   value={formData.positionLevel || ''}
                   onChange={(event) => setFormData({ ...formData, positionLevel: event.target.value })}
-                  placeholder="เช่น ชำนาญการ"
+                  options={[
+                    { value: '', label: 'ไม่ได้ระบุ' },
+                    ...positionLevels.map(l => ({ value: l.name, label: l.name }))
+                  ]}
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">ประเภทตำแหน่ง (Type)</label>
-                <input
-                  type="text"
-                  className="form-input w-full"
+                <CustomSelect
+                  label="ประเภทตำแหน่ง (Type)"
                   value={formData.positionType || ''}
                   onChange={(event) => setFormData({ ...formData, positionType: event.target.value })}
-                  placeholder="เช่น ข้าราชการ"
+                  options={[
+                    { value: '', label: 'ไม่ได้ระบุ' },
+                    ...positionTypes.map(t => ({ value: t.name, label: t.name }))
+                  ]}
                 />
               </div>
               <div className="md:col-span-2">
@@ -225,7 +220,7 @@ const UserModal = ({
                 />
                 {formData.tierId && formData.role !== 'admin' && (
                   <p className="mt-1 ml-1 text-[11px] font-medium text-slate-400 italic">
-                    * สิทธิ์ระบบจะถูกกำหนดโดยอัตโนมัติตาม "ระดับ" ที่คุณเลือก
+                    * สิทธิ์ระบบจะถูกกำหนดโดยอัตโนมัติตาม "ตำแหน่ง (Position)" ที่คุณเลือก
                   </p>
                 )}
               </div>
@@ -279,11 +274,11 @@ const UserModal = ({
                     />
 
                     <CustomSelect
-                      label="ระดับ"
+                      label="ตำแหน่ง (Position)"
                       value={formData.tierId}
                       onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
                       options={[
-                        { value: '', label: 'ยังไม่ได้กำหนดระดับ' },
+                        { value: '', label: 'ไม่ได้ระบุ' },
                         ...tiers.map((t) => ({ value: t.id, label: t.name }))
                       ]}
                     />

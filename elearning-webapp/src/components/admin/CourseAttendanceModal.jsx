@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { CalendarClock, Printer, Search, Users, X } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -209,7 +209,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
       filters: [
         { label: 'คอร์ส', value: courseTitle },
         { label: 'แผนก', value: departments.find((department) => department.id === filters.departmentId)?.name || 'ทั้งหมด' },
-        { label: 'ระดับผู้ใช้งาน', value: tiers.find((tier) => tier.id === filters.tierId)?.name || 'ทั้งหมด' },
+        { label: 'ตำแหน่ง', value: tiers.find((tier) => tier.id === filters.tierId)?.name || 'ทั้งหมด' },
         { label: 'สถานะ', value: STATUS_OPTIONS.find((option) => option.value === filters.status)?.label || 'ทั้งหมด' },
         { label: 'อิงวันที่', value: DATE_FIELD_OPTIONS.find((option) => option.value === filters.dateField)?.label || 'วันที่เริ่มเรียน' },
         { label: 'เดือน', value: months.find((month) => month.value === filters.month)?.label || 'ทุกเดือน' },

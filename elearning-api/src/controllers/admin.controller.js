@@ -199,6 +199,17 @@ const reorderTiers = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Tiers reordered successfully' });
 });
 
+// SYSTEM SETTINGS
+const getSetting = asyncHandler(async (req, res) => {
+  const setting = await AdminService.getSetting(req.params.key);
+  res.json({ success: true, data: setting });
+});
+
+const updateSetting = asyncHandler(async (req, res) => {
+  const setting = await AdminService.updateSetting(req.params.key, req.body.items);
+  res.json({ success: true, data: setting });
+});
+
 // INSTRUCTOR PRESETS
 const getInstructorPresets = asyncHandler(async (req, res) => {
   const presets = await AdminService.getInstructorPresets();
@@ -514,6 +525,8 @@ module.exports = {
   updateTier,
   deleteTier,
   reorderTiers,
+  getSetting,
+  updateSetting,
   getInstructorPresets,
   createInstructorPreset,
   updateInstructorPreset,

@@ -4,6 +4,7 @@ import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import UserModal from '../../components/admin/UserModal';
 import ReferenceDataModal from '../../components/admin/ReferenceDataModal';
+import PositionManagementModal from '../../components/admin/PositionManagementModal';
 import UserDetailModal from '../../components/admin/UserDetailModal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { canEditAdminUsers } from '../../utils/roles';
@@ -45,6 +46,8 @@ const UserManagement = () => {
   const [users, setUsers] = React.useState([]);
   const [departments, setDepartments] = React.useState([]);
   const [tiers, setTiers] = React.useState([]);
+  const [positionLevels, setPositionLevels] = React.useState([]);
+  const [positionTypes, setPositionTypes] = React.useState([]);
   const [cohortRoles, setCohortRoles] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [referenceLoading, setReferenceLoading] = React.useState(true);
@@ -92,11 +95,15 @@ const UserManagement = () => {
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
         adminAPI.getCohortRoles(),
+        adminAPI.getSetting('POSITION_LEVELS'),
+        adminAPI.getSetting('POSITION_TYPES'),
       ];
-      const [departmentResponse, tierResponse, cohortRoleResponse] = await Promise.all(requests);
+      const [departmentResponse, tierResponse, cohortRoleResponse, levelsRes, typesRes] = await Promise.all(requests);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
       setCohortRoles(cohortRoleResponse.data);
+      setPositionLevels(levelsRes.data?.data || []);
+      setPositionTypes(typesRes.data?.data || []);
     } catch (error) {
       console.error('Fetch reference data error:', error);
     } finally {
@@ -500,7 +507,7 @@ const UserManagement = () => {
                 </button>
                 <button type="button" onClick={() => setShowTierModal(true)} className="btn btn-outline">
                   <Sparkles size={18} />
-                  จัดการระดับ
+                  จัดการตำแหน่ง
                 </button>
                 <button type="button" onClick={() => setShowCohortRoleModal(true)} className="btn btn-outline">
                   <Users size={18} />
@@ -535,6 +542,8 @@ const UserManagement = () => {
         setFormData={setFormData}
         departments={departments}
         tiers={tiers}
+        positionLevels={positionLevels}
+        positionTypes={positionTypes}
         cohortRoles={cohortRoles}
         canEditRole={canEditUsers}
         profileCertificates={profileCertificates}
@@ -574,27 +583,13 @@ const UserManagement = () => {
             onDelete={handleDepartmentDelete}
           />
 
-          <ReferenceDataModal
+          <PositionManagementModal
             isOpen={showTierModal}
-            title="จัดการระดับ"
-            description="ระดับจะถูกใช้แบบลำดับขั้น เช่น ตั้งแต่ Supervisor จะครอบคลุม Manager และ Director ที่สูงกว่า"
-            itemLabel="ระดับ"
-            items={tiers}
-            loading={referenceLoading}
             onClose={() => setShowTierModal(false)}
-            onCreate={async (payload) => {
-              await adminAPI.createTier(payload);
-              toast.success('สร้างระดับเรียบร้อย');
-              await Promise.all([fetchReferenceData(), fetchUsers()]);
+            onPositionsChange={() => {
+              fetchReferenceData();
+              fetchUsers();
             }}
-            onUpdate={async (id, payload) => {
-              await adminAPI.updateTier(id, payload);
-              toast.success('อัปเดตระดับเรียบร้อย');
-              await Promise.all([fetchReferenceData(), fetchUsers()]);
-            }}
-            onDelete={handleTierDelete}
-            onReorder={handleTierReorder}
-            showAccessToggle={true}
           />
 
           <ReferenceDataModal

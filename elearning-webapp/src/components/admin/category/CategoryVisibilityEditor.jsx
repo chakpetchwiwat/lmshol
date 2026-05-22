@@ -69,7 +69,7 @@ const CategoryVisibilityEditor = ({
         </div>
 
         <div>
-          <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">ระดับผู้ใช้งาน (Tier)</p>
+          <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">ตำแหน่ง (Position)</p>
           <div className="flex flex-wrap gap-1.5">
             {tiers.map((tier) => {
               const isSelected = (categoryForm.visibleTierIds || []).includes(tier.id);

@@ -213,7 +213,7 @@ const CourseBasicInfoForm = ({
         <div className="flex flex-col gap-1">
           <h4 className="text-base font-black text-slate-900">สิทธิ์การมองเห็นคอร์ส</h4>
           <p className="text-sm text-slate-500">
-            กำหนดได้ว่าแผนกไหนและระดับผู้ใช้งานไหนจะเห็นคอร์สนี้ ถ้าไม่จำกัด ระบบจะแสดงคอร์สให้ทุกคน
+            กำหนดได้ว่าแผนกไหนและตำแหน่งไหนจะเห็นคอร์สนี้ ถ้าไม่จำกัด ระบบจะแสดงคอร์สให้ทุกคน
           </p>
         </div>
 
@@ -235,7 +235,7 @@ const CourseBasicInfoForm = ({
             <span>
               <span className="block text-sm font-bold text-slate-900">เปิดให้ทุกคนเห็นคอร์สนี้</span>
               <span className="block text-xs text-slate-500">
-                ถ้าปิดตัวเลือกนี้ ระบบจะใช้แผนกและระดับผู้ใช้งานด้านล่างในการควบคุมการมองเห็น
+                ถ้าปิดตัวเลือกนี้ ระบบจะใช้แผนกและตำแหน่งในการควบคุมการมองเห็น
               </span>
             </span>
           </label>
@@ -246,7 +246,7 @@ const CourseBasicInfoForm = ({
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="mb-3">
                 <h5 className="text-sm font-black text-slate-900">แผนกที่เห็นคอร์สได้</h5>
-                <p className="text-xs text-slate-500">ถ้าไม่เลือกแผนกเลย ระบบจะใช้เฉพาะระดับผู้ใช้งานในการกำหนดสิทธิ์</p>
+                <p className="text-xs text-slate-500">ถ้าไม่เลือกแผนกเลย ระบบจะใช้เฉพาะตำแหน่งในการกำหนดสิทธิ์</p>
               </div>
               <div className="space-y-2">
                 {departments.length === 0 ? (
@@ -278,12 +278,12 @@ const CourseBasicInfoForm = ({
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <div className="mb-3">
-                <h5 className="text-sm font-black text-slate-900">ระดับผู้ใช้งานที่เห็นคอร์สได้</h5>
-                <p className="text-xs text-slate-500">ถ้าเลือกทั้งแผนกและระดับ ผู้ใช้ต้องผ่านทั้งสองเงื่อนไข</p>
+                <h5 className="text-sm font-black text-slate-900">ตำแหน่งที่เห็นคอร์สได้</h5>
+                <p className="text-xs text-slate-500">ถ้าเลือกทั้งแผนกและตำแหน่ง ผู้ใช้ต้องผ่านทั้งสองเงื่อนไข</p>
               </div>
               <div className="space-y-2">
                 {tiers.length === 0 ? (
-                  <p className="text-sm text-slate-500">ยังไม่มีระดับผู้ใช้งานในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
+                  <p className="text-sm text-slate-500">ยังไม่มีตำแหน่งในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
                 ) : (
                   tiers.map((tier) => (
                     <label key={tier.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700">
