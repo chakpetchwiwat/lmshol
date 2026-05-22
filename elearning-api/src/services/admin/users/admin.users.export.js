@@ -185,7 +185,7 @@ const exportUserProfiles = async (actor) => {
 const trainingLine = (items, mapper, fallback = '') => {
   const values = items.map(mapper).filter((value) => value !== undefined && value !== null && value !== '');
   if (values.length === 0) return fallback;
-  return values.map((value, index) => `${index + 1}. ${value}`).join('\n');
+  return values.map((value, index) => `${index + 1}. ${value}`).join('\n\n');
 };
 
 const calculateDays = (start, end) => {
@@ -198,16 +198,18 @@ const calculateDays = (start, end) => {
 };
 
 const buildTrainingItems = (user) => {
-  const systemItems = (user.issuedCertificates || []).map((cert) => ({
-    source: 'LMS',
-    courseType: 'ระบบ LMS',
-    courseGroup: cert.course?.category?.name || '',
-    courseName: cert.course?.title || '',
-    enrolmentDate: '',
-    completionDate: formatDate(cert.issuedAt),
-    numberOfDays: '',
-    intakeNo: '',
-    organizingAgency: 'LMS System',
+  const systemItems = (user.issuedCertificates || []).map((cert) => {
+    const formattedDate = formatDate(cert.issuedAt);
+    return {
+      source: 'LMS',
+      courseType: 'ระบบ LMS',
+      courseGroup: cert.course?.category?.name || '',
+      courseName: cert.course?.title ? `${cert.course.title} - ${formattedDate}` : '',
+      enrolmentDate: '',
+      completionDate: formattedDate,
+      numberOfDays: '',
+      intakeNo: '',
+      organizingAgency: 'LMS System',
     venue: 'Online',
     organizingCountry: 'ไทย',
     scholarship: '',
@@ -220,16 +222,18 @@ const buildTrainingItems = (user) => {
     orderDate: ''
   }));
 
-  const externalItems = (user.certificates || []).map((cert) => ({
-    source: 'External',
-    courseType: 'อบรมภายนอก',
-    courseGroup: '',
-    courseName: cert.title || '',
-    enrolmentDate: '',
-    completionDate: formatDate(cert.issueDate),
-    numberOfDays: calculateDays(cert.issueDate, cert.expirationDate),
-    intakeNo: '',
-    organizingAgency: cert.issuer || '',
+  const externalItems = (user.certificates || []).map((cert) => {
+    const formattedDate = formatDate(cert.issueDate);
+    return {
+      source: 'External',
+      courseType: 'อบรมภายนอก',
+      courseGroup: '',
+      courseName: cert.title ? `${cert.title} - ${formattedDate}` : '',
+      enrolmentDate: '',
+      completionDate: formattedDate,
+      numberOfDays: calculateDays(cert.issueDate, cert.expirationDate),
+      intakeNo: '',
+      organizingAgency: cert.issuer || '',
     venue: '',
     organizingCountry: '',
     scholarship: '',
