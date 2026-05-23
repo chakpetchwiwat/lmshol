@@ -31,7 +31,6 @@ const UserList = ({
             <div className="font-medium text-xs sm:text-sm">{user.name}</div>
             <div className="mt-0.5 text-[10px] sm:text-xs text-muted">{user.email}</div>
           </td>
-          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted">{getRoleLabel(user)}</td>
           <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted min-w-[120px]">
             {Array.isArray(user.roles) && user.roles.length > 0 ? (
               <div className="flex flex-wrap gap-1">

@@ -136,8 +136,14 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
 
 const getUsers = async (authUser) => {
     const actor = await getActorContext(authUser);
+    const baseWhere = authHelpers.buildUserManagementWhere(actor);
     const users = await prisma.user.findMany({
-        where: authHelpers.buildUserManagementWhere(actor),
+        where: {
+            AND: [
+                baseWhere,
+                { permission: { not: 'ADMIN' } }
+            ]
+        },
         include: userInclude,
         orderBy: [{ tier: { order: 'asc' } }, { permission: 'asc' }, { name: 'asc' }]
     });

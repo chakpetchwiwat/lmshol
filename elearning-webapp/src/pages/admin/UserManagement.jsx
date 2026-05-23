@@ -437,7 +437,6 @@ const UserManagement = () => {
 
   const columns = React.useMemo(() => [
     { label: 'ผู้ใช้งาน' },
-    { label: 'Permission ระบบ' },
     { label: 'บทบาท (Role)' },
     { label: 'แผนก' },
     { label: 'กลุ่มงาน (Sub-division)' },

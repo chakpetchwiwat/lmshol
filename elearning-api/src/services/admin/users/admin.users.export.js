@@ -112,8 +112,14 @@ const findProfileFile = (user, patterns) => {
 
 const getScopedUsersForExport = async (authUser, extraSelect) => {
   const actor = await authHelpers.getActorContext(prisma, authUser);
+  const baseWhere = authHelpers.buildUserManagementWhere(actor);
   return prisma.user.findMany({
-    where: authHelpers.buildUserManagementWhere(actor),
+    where: {
+      AND: [
+        baseWhere,
+        { permission: { not: 'ADMIN' } }
+      ]
+    },
     select: {
       id: true,
       name: true,
