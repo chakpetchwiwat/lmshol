@@ -28,29 +28,18 @@ const PROFILE_HEADERS = [
 ];
 
 const TRAINING_HEADERS = [
-  'Full Name',
-  'Email',
-  'Division',
-  'Position',
-  'Total Courses',
-  'Course Type',
-  'Course Group',
-  'Course Name',
-  'Enrolment Date',
-  'Completion Date',
-  'Number of Days',
-  'Intake No.',
-  'Organizing Agency',
-  'Venue',
-  'Organizing Country',
-  'Name of Scholarship',
-  'Scholarship Sponsoring Country',
-  'Remarks',
-  'Transmittal Letter No.',
-  'Date of Transmittal Letter',
-  'Project Name',
-  'Order Number',
-  'Order Date'
+  'คำนำหน้า',
+  'ชื่อ',
+  'ตำแหน่ง',
+  'กลุ่ม/ฝ่าย',
+  'ประเภท',
+  'รายการ',
+  'รายละเอียด',
+  'หลักสูตร/หัวข้อเรื่อง ประชุม/ฝึกอบรม/สัมมนา',
+  'วัน/เดือน/ปี',
+  'สถานที่',
+  'ผู้จัด',
+  'หมายเหตุ'
 ];
 
 const empty = (value, fallback = '-') => {
@@ -197,54 +186,58 @@ const calculateDays = (start, end) => {
   return diffDays > 0 ? String(diffDays) : '1';
 };
 
+const parseNamePrefix = (fullName = '') => {
+  const prefixes = ['นายแพทย์', 'แพทย์หญิง', 'นางสาว', 'นาง', 'นาย', 'ดร.', 'ศ.', 'รศ.', 'ผศ.', 'ภก.', 'ภญ.', 'เภสัชกรหญิง', 'เภสัชกร'];
+  let prefix = '';
+  let name = fullName.trim();
+  for (const p of prefixes) {
+    if (name.startsWith(p)) {
+      prefix = p;
+      name = name.slice(p.length).trim();
+      break;
+    }
+  }
+  return { prefix, name };
+};
+
 const buildTrainingItems = (user) => {
+  const { prefix, name } = parseNamePrefix(user.name || '');
+  const position = [(user.position || ''), (user.positionLevel || '')].filter(Boolean).join('');
+  const department = user.departmentRef?.name || user.department || '';
+
   const systemItems = (user.issuedCertificates || []).map((cert) => {
     const formattedDate = formatDate(cert.issuedAt);
     return {
-      source: 'LMS',
-      courseType: 'ประวัติการอบรมในระบบ',
-      courseGroup: cert.course?.category?.name || '',
-      courseName: cert.course?.title ? `${cert.course.title} - ${formattedDate}` : '',
-      enrolmentDate: '',
-      completionDate: formattedDate,
-      numberOfDays: '',
-      intakeNo: '',
-      organizingAgency: 'LMS System',
-    venue: 'Online',
-    organizingCountry: 'ไทย',
-    scholarship: '',
-    scholarshipCountry: '',
-    remarks: cert.certificateNo ? `Certificate No. ${cert.certificateNo}` : '',
-    transmittalNo: '',
-    transmittalDate: '',
-    projectName: '',
-    orderNumber: '',
-    orderDate: ''
+      prefix,
+      name,
+      position,
+      department,
+      type: 'ภายใน',
+      item: 'อบรม',
+      details: '',
+      courseName: cert.course?.title || '',
+      date: formattedDate,
+      venue: 'Online (e-Learning)',
+      organizer: 'LMS System',
+      remarks: cert.certificateNo ? `Certificate No. ${cert.certificateNo}` : ''
     };
   });
 
   const externalItems = (user.certificates || []).map((cert) => {
     const formattedDate = formatDate(cert.issueDate);
     return {
-      source: 'External',
-      courseType: 'ประวัติการอบรมนอกระบบ',
-      courseGroup: '',
-      courseName: cert.title ? `${cert.title} - ${formattedDate}` : '',
-      enrolmentDate: '',
-      completionDate: formattedDate,
-      numberOfDays: calculateDays(cert.issueDate, cert.expirationDate),
-      intakeNo: '',
-      organizingAgency: cert.issuer || '',
-    venue: '',
-    organizingCountry: '',
-    scholarship: '',
-    scholarshipCountry: '',
-    remarks: cert.credentialId || cert.credentialUrl || '',
-    transmittalNo: '',
-    transmittalDate: '',
-    projectName: '',
-    orderNumber: '',
-    orderDate: ''
+      prefix,
+      name,
+      position,
+      department,
+      type: 'ภายนอก',
+      item: 'อบรม',
+      details: '',
+      courseName: cert.title || '',
+      date: formattedDate,
+      venue: '',
+      organizer: cert.issuer || '',
+      remarks: cert.credentialId || cert.credentialUrl || ''
     };
   });
 
@@ -280,49 +273,50 @@ const exportUserTrainings = async (actor) => {
     }
   });
 
-  const rows = users.map((user) => {
+  const rows = [];
+  users.forEach((user) => {
     const items = buildTrainingItems(user);
-    return [
-      empty(user.name, ''),
-      empty(user.email, ''),
-      empty(user.departmentRef?.name || user.department, ''),
-      empty(user.position, ''),
-      items.length,
-      trainingLine(items, (item) => item.courseType),
-      trainingLine(items, (item) => item.courseGroup),
-      items.length > 0 ? trainingLine(items, (item) => item.courseName) : 'ยังไม่มีประวัติการอบรม',
-      trainingLine(items, (item) => item.enrolmentDate),
-      trainingLine(items, (item) => item.completionDate),
-      trainingLine(items, (item) => item.numberOfDays),
-      trainingLine(items, (item) => item.intakeNo),
-      trainingLine(items, (item) => item.organizingAgency),
-      trainingLine(items, (item) => item.venue),
-      trainingLine(items, (item) => item.organizingCountry),
-      trainingLine(items, (item) => item.scholarship),
-      trainingLine(items, (item) => item.scholarshipCountry),
-      trainingLine(items, (item) => item.remarks),
-      trainingLine(items, (item) => item.transmittalNo),
-      trainingLine(items, (item) => item.transmittalDate),
-      trainingLine(items, (item) => item.projectName),
-      trainingLine(items, (item) => item.orderNumber),
-      trainingLine(items, (item) => item.orderDate)
-    ];
+    if (items.length === 0) {
+      const { prefix, name } = parseNamePrefix(user.name || '');
+      rows.push([
+        prefix,
+        name,
+        [(user.position || ''), (user.positionLevel || '')].filter(Boolean).join(''),
+        user.departmentRef?.name || user.department || '',
+        '',
+        '',
+        '',
+        'ยังไม่มีประวัติการอบรม',
+        '',
+        '',
+        '',
+        ''
+      ]);
+    } else {
+      items.forEach((item) => {
+        rows.push([
+          item.prefix,
+          item.name,
+          item.position,
+          item.department,
+          item.type,
+          item.item,
+          item.details,
+          item.courseName,
+          item.date,
+          item.venue,
+          item.organizer,
+          item.remarks
+        ]);
+      });
+    }
   });
 
-  const rowHeights = [
-    24,
-    ...rows.map((row) => {
-      const lineCount = String(row[7] || '').split('\n').length;
-      return Math.min(240, Math.max(28, lineCount * 20));
-    })
-  ];
-
   return createWorkbook(
-    'External Training Report',
+    'Training Report',
     TRAINING_HEADERS,
     rows,
-    [26, 30, 24, 26, 12, 22, 28, 70, 24, 24, 14, 16, 34, 34, 20, 28, 28, 36, 24, 24, 28, 18, 18],
-    rowHeights
+    [15, 30, 25, 25, 15, 15, 20, 50, 15, 25, 25, 25]
   );
 };
 
