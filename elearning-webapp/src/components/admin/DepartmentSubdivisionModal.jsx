@@ -10,9 +10,9 @@ import ModalPortal from '../common/ModalPortal';
 export default function PositionManagementModal({ isOpen, onClose, onPositionsChange }) {
   const [activeTab, setActiveTab] = useState('position');
   
-  const [positions, setPositions] = useState([]);
-  const [levels, setLevels] = useState([]);
-  const [types, setTypes] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [subdivisions, setSubdivisions] = useState([]);
+  
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const { confirm, ConfirmDialogProps } = useConfirm();
@@ -53,7 +53,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
         await adminAPI.createTier({ name: newItemName.trim() });
         toast.success('เพิ่มแผนกเรียบร้อย');
       } else if (activeTab === 'level') {
-        const newLevels = [...levels, { name: newItemName.trim() }];
+        const newLevels = [...subdivisions, { name: newItemName.trim() }];
         await adminAPI.updateSetting('SUBDIVISIONS', newLevels.map(l => l.name));
         toast.success('เพิ่มกลุ่มงานเรียบร้อย');
       }
@@ -82,7 +82,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
         await adminAPI.deleteTier(item.id);
         toast.success('ลบแผนกเรียบร้อย');
       } else if (activeTab === 'level') {
-        const newLevels = levels.filter(l => l.name !== item.name);
+        const newLevels = subdivisions.filter(l => l.name !== item.name);
         await adminAPI.updateSetting('SUBDIVISIONS', newLevels.map(l => l.name));
         toast.success('ลบกลุ่มงานเรียบร้อย');
       }
@@ -100,16 +100,16 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
     if (!result.destination) return;
     
     let items = [];
-    if (activeTab === 'position') items = Array.from(positions);
-    if (activeTab === 'level') items = Array.from(levels);
-    if (activeTab === 'type') items = Array.from(types);
+    if (activeTab === 'position') items = Array.from(departments);
+    if (activeTab === 'level') items = Array.from(subdivisions);
+    
 
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    if (activeTab === 'position') setPositions(items);
-    if (activeTab === 'level') setLevels(items);
-    if (activeTab === 'type') setTypes(items);
+    if (activeTab === 'position') setDepartments(items);
+    if (activeTab === 'level') setSubdivisions(items);
+    if (activeTab === 'type') 
 
     try {
       if (activeTab === 'position') {
@@ -140,9 +140,9 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
   };
 
   const getItems = () => {
-    if (activeTab === 'position') return positions;
-    if (activeTab === 'level') return levels;
-    if (activeTab === 'type') return types;
+    if (activeTab === 'position') return departments;
+    if (activeTab === 'level') return subdivisions;
+    
     return [];
   };
 
