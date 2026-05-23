@@ -55,17 +55,11 @@ const UserList = ({
           <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted max-w-[120px] truncate" title={user.subdivision}>{user.subdivision || '-'}</td>
           <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted max-w-[120px] truncate" title={user.position}>{user.position || '-'}</td>
           <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted whitespace-nowrap">{user.positionLevel || '-'}</td>
-          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted whitespace-nowrap">{user.positionType || '-'}</td>
-          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted whitespace-nowrap">{user.supervisorName || '-'}</td>
-          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted whitespace-nowrap">
-            {user.employmentDate ? formatThaiDateTime(user.employmentDate) : '-'}
-          </td>
           <td className="p-3 sm:p-4 text-center text-xs sm:text-sm whitespace-nowrap">
             <span className="rounded-full bg-primary-light px-2 py-1 font-bold text-primary">
               {user._count?.enrollments || 0}
             </span>
           </td>
-          <td className="p-3 sm:p-4 text-right text-xs sm:text-sm font-bold text-warning whitespace-nowrap">{user.pointsBalance || 0}</td>
           <td className="p-3 sm:p-4 text-right whitespace-nowrap">
             <div className="flex justify-end gap-3">
               <button

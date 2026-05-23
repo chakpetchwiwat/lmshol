@@ -247,14 +247,14 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
           { label: 'ไฟล์ข้อมูลอื่นๆ', value: `${profileFiles.length} ไฟล์` },
         ],
       },
-      sections
+sections
     });
   };
 
   return (
     <ModalPortal isOpen>
       <div className="fixed inset-0 z-[95] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
-        <div className="card flex max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
+        <div className="card flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl">
           <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-6 py-5 rounded-t-[inherit]">
             <div className="flex-1 min-w-0">
               <h3 className="text-xl font-black text-slate-900 truncate">ประวัติผู้ใช้งานรายบุคคล</h3>
@@ -333,193 +333,153 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
                   </div>
                 </div>
 
-                <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-                  <div className="grid gap-0 lg:grid-cols-[14rem_1fr]">
-                    <div className="flex flex-col items-center justify-center border-b border-slate-100 bg-slate-50/70 px-5 py-6 lg:border-b-0 lg:border-r">
-                      <div className="h-32 w-32 overflow-hidden rounded-3xl border border-white bg-white shadow-lg shadow-slate-200/70">
+                <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm flex flex-col">
+                  {/* Top Section: User Profile Info */}
+                  <div className="flex flex-col md:flex-row items-center gap-8 border-b border-slate-100 bg-slate-50/70 p-6 md:p-8">
+                    <div className="shrink-0 flex flex-col items-center w-full md:w-auto">
+                      <div className="h-32 w-32 md:h-40 md:w-40 overflow-hidden rounded-3xl border-4 border-white bg-white shadow-lg shadow-slate-200/70">
                         {profileImageUrl ? (
                           <img src={profileImageUrl} alt={detail.name || 'Profile'} className="h-full w-full object-cover" />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-indigo-50 text-slate-400">
-                            <User2 size={48} strokeWidth={1.6} />
-                          </div>
-                        )}
-                      </div>
-                      <p className="mt-4 text-center text-sm font-black text-slate-900">{detail.name}</p>
-                      <p className="mt-1 max-w-[11rem] truncate text-center text-xs font-bold text-slate-500">{detail.email}</p>
-                      {Array.isArray(detail.roles) && detail.roles.length > 0 && (
-                        <div className="mt-3 flex flex-wrap justify-center gap-1">
-                          {detail.roles.map((r) => {
-                            const label = cohortRoleLabelMap[r] || r;
-                            return (
-                              <span key={r} className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-200 text-slate-800">
-                                {label}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
-                      
-                      <div className="mt-5 w-full space-y-2 border-t border-slate-200/60 pt-4 text-xs">
-                        {detail.department && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">แผนก:</span>
-                            <span className="font-semibold text-slate-700">{detail.department}</span>
-                          </div>
-                        )}
-                        {detail.subdivision && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">กลุ่มงาน:</span>
-                            <span className="font-semibold text-slate-700">{detail.subdivision}</span>
-                          </div>
-                        )}
-                        {detail.position && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">ตำแหน่ง:</span>
-                            <span className="font-semibold text-slate-700">{detail.position}</span>
-                          </div>
-                        )}
-                        {detail.positionLevel && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">ระดับ:</span>
-                            <span className="font-semibold text-slate-700">{detail.positionLevel}</span>
-                          </div>
-                        )}
-                        {detail.positionType && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">ประเภท:</span>
-                            <span className="font-semibold text-slate-700">{detail.positionType}</span>
-                          </div>
-                        )}
-                        {detail.supervisorName && (
-                          <div className="flex justify-between">
-                            <span className="text-slate-400">หัวหน้างาน:</span>
-                            <span className="font-semibold text-slate-700">{detail.supervisorName}</span>
+                            <User2 size={64} strokeWidth={1.6} />
                           </div>
                         )}
                       </div>
                     </div>
+                    
+                    <div className="flex-1 w-full">
+                      <h3 className="text-2xl font-black text-slate-900">{detail.name}</h3>
+                      <p className="text-base font-bold text-slate-500">{detail.email}</p>
+                      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-base">
+                        {detail.department && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">แผนก</span>
+                            <span className="text-lg font-black text-slate-700">{detail.department}</span>
+                          </div>
+                        )}
+                        {detail.position && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">ตำแหน่ง</span>
+                            <span className="text-lg font-black text-slate-700">{detail.position}</span>
+                          </div>
+                        )}
+                        {detail.tier && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">ระดับ</span>
+                            <span className="text-lg font-black text-slate-700">{detail.tier?.name || detail.tier}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
-                    <div className="p-5">
-                      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <h4 className="text-base font-black text-slate-900">ข้อมูลโปรไฟล์จากผู้ใช้</h4>
-                          <p className="mt-1 text-xs font-bold text-slate-500">แสดงข้อมูลเดียวกับหน้า Profile ที่ผู้ใช้แก้ไขล่าสุด</p>
+                  {/* Bottom Section: Education and Other info (1:1) */}
+                  <div className="p-6 md:p-8">
+                    <div className="grid gap-6 lg:grid-cols-2">
+                      <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-5 md:p-6">
+                        <div className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-400">
+                          <GraduationCap size={18} className="text-primary" />
+                          Education
                         </div>
-                        <div className="rounded-2xl bg-indigo-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-primary">
-                          Profile Sync
-                        </div>
+                        {!detail.educationHistory || (Array.isArray(detail.educationHistory) && detail.educationHistory.length === 0) ? (
+                          <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-8 text-center text-sm font-bold text-slate-400">
+                            ยังไม่มีประวัติการศึกษา
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {Array.isArray(detail.educationHistory) ? detail.educationHistory.map((item) => (
+                              <div key={item.id} className="rounded-2xl border border-slate-100 bg-white p-5">
+                                <p className="text-lg font-black text-slate-900">{item.institution || '-'}</p>
+                                <p className="mt-2 text-base font-bold text-slate-600">{item.degree || '-'} · {item.faculty || '-'}</p>
+                                <p className="mt-1 text-base font-bold text-slate-400">{item.major || '-'} · {item.graduationYear || '-'}</p>
+                              </div>
+                            )) : (
+                              <div className="rounded-2xl border border-slate-100 bg-white p-5">
+                                <div className="border-b border-slate-100 pb-4">
+                                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">การศึกษา</p>
+                                  <p className="mt-2 text-lg font-black text-slate-900">{detail.educationHistory.institution || '-'}</p>
+                                  <p className="mt-1 text-base font-bold text-slate-600">{detail.educationHistory.degreeName || '-'} · {detail.educationHistory.fieldOfStudy || '-'}</p>
+                                  <p className="mt-1 text-sm text-slate-500">ระดับ: {detail.educationHistory.level || '-'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">การศึกษาสูงสุด</p>
+                                  <p className="mt-2 text-lg font-black text-slate-900">{detail.educationHistory.highestInstitution || '-'}</p>
+                                  <p className="mt-1 text-base font-bold text-slate-600">{detail.educationHistory.highestDegreeName || '-'} · {detail.educationHistory.highestFieldOfStudy || '-'}</p>
+                                  <p className="mt-1 text-sm text-slate-500">ระดับ: {detail.educationHistory.highestLevel || '-'}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
-                      <div className="grid gap-4 xl:grid-cols-2">
-                        <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-                          <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
-                            <GraduationCap size={15} className="text-primary" />
-                            Education
-                          </div>
-                          {!detail.educationHistory || Object.keys(detail.educationHistory).length === 0 ? (
-                            <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-xs font-bold text-slate-400">
-                              ยังไม่มีประวัติการศึกษา
-                            </div>
-                          ) : (
-                            <div className="space-y-3">
-                              {/* Display array format if exists */}
-                              {Array.isArray(detail.educationHistory) && detail.educationHistory.map((item) => (
-                                <div key={item.id} className="rounded-2xl border border-slate-100 bg-white p-3">
-                                  <p className="text-sm font-black text-slate-900">{item.institution || '-'}</p>
-                                  <p className="mt-1 text-xs font-bold text-slate-600">{item.degree || '-'} · {item.faculty || '-'}</p>
-                                  <p className="mt-1 text-xs font-bold text-slate-400">{item.major || '-'} · {item.graduationYear || '-'}</p>
-                                </div>
-                              ))}
-                              
-                              {/* Display object format from Excel import */}
-                              {!Array.isArray(detail.educationHistory) && (
-                                <div className="rounded-2xl border border-slate-100 bg-white p-3">
-                                  <div className="mb-3 border-b border-slate-100 pb-2">
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">การศึกษา</p>
-                                    <p className="mt-1 text-sm font-black text-slate-900">{detail.educationHistory.institution || '-'}</p>
-                                    <p className="mt-0.5 text-xs font-bold text-slate-600">{detail.educationHistory.degreeName || '-'} · {detail.educationHistory.fieldOfStudy || '-'}</p>
-                                    <p className="mt-0.5 text-xs text-slate-500">ระดับ: {detail.educationHistory.level || '-'}</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">การศึกษาสูงสุด</p>
-                                    <p className="mt-1 text-sm font-black text-slate-900">{detail.educationHistory.highestInstitution || '-'}</p>
-                                    <p className="mt-0.5 text-xs font-bold text-slate-600">{detail.educationHistory.highestDegreeName || '-'} · {detail.educationHistory.highestFieldOfStudy || '-'}</p>
-                                    <p className="mt-0.5 text-xs text-slate-500">ระดับ: {detail.educationHistory.highestLevel || '-'}</p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
+                      <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-5 md:p-6">
+                        <div className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-400">
+                          <Paperclip size={18} className="text-emerald-600" />
+                          Other Information
                         </div>
-
-                        <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-                          <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
-                            <Paperclip size={15} className="text-emerald-600" />
-                            Other Information
+                        {!detail.profileFiles || (Array.isArray(detail.profileFiles) ? detail.profileFiles.length === 0 : Object.keys(detail.profileFiles).length === 0) ? (
+                          <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-8 text-center text-sm font-bold text-slate-400">
+                            ยังไม่มีไฟล์ข้อมูลอื่นๆ
                           </div>
-                          {!detail.profileFiles || Object.keys(detail.profileFiles).length === 0 ? (
-                            <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-xs font-bold text-slate-400">
-                              ยังไม่มีไฟล์ข้อมูลอื่นๆ
-                            </div>
-                          ) : (
-                            <div className="space-y-3">
-                              {/* Display object format from Excel import */}
-                              {!Array.isArray(detail.profileFiles) && detail.profileFiles.cv && (
-                                <button
-                                  type="button"
-                                  onClick={() => window.open(detail.profileFiles.cv, '_blank')}
-                                  className="group flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 text-left transition-all hover:border-emerald-200 hover:shadow-md"
-                                >
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                                    <FileText size={18} />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-black text-slate-900">CV (Curriculum Vitae)</p>
-                                    <p className="mt-1 truncate text-xs font-bold text-slate-400">ไฟล์ประวัติการทำงาน</p>
-                                  </div>
-                                  <ExternalLink size={14} className="shrink-0 text-slate-300 transition-colors group-hover:text-emerald-600" />
-                                </button>
-                              )}
-                              
-                              {!Array.isArray(detail.profileFiles) && detail.profileFiles.jobDescription && (
-                                <button
-                                  type="button"
-                                  onClick={() => window.open(detail.profileFiles.jobDescription, '_blank')}
-                                  className="group flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 text-left transition-all hover:border-emerald-200 hover:shadow-md"
-                                >
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                    <FileText size={18} />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-black text-slate-900">Job Description</p>
-                                    <p className="mt-1 truncate text-xs font-bold text-slate-400">ไฟล์คำบรรยายลักษณะงาน</p>
-                                  </div>
-                                  <ExternalLink size={14} className="shrink-0 text-slate-300 transition-colors group-hover:text-indigo-600" />
-                                </button>
-                              )}
+                        ) : (
+                          <div className="space-y-4">
+                            {/* Display object format from Excel import */}
+                            {!Array.isArray(detail.profileFiles) && detail.profileFiles.cv && (
+                              <button
+                                type="button"
+                                onClick={() => window.open(detail.profileFiles.cv, '_blank')}
+                                className="group flex w-full items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 text-left transition-all hover:border-emerald-200 hover:shadow-md"
+                              >
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                                  <FileText size={20} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-base font-black text-slate-900">CV (Curriculum Vitae)</p>
+                                  <p className="mt-1 truncate text-sm font-bold text-slate-400">ไฟล์ประวัติการทำงาน</p>
+                                </div>
+                                <ExternalLink size={16} className="shrink-0 text-slate-300 transition-colors group-hover:text-emerald-600" />
+                              </button>
+                            )}
+                            
+                            {!Array.isArray(detail.profileFiles) && detail.profileFiles.jobDescription && (
+                              <button
+                                type="button"
+                                onClick={() => window.open(detail.profileFiles.jobDescription, '_blank')}
+                                className="group flex w-full items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 text-left transition-all hover:border-emerald-200 hover:shadow-md"
+                              >
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                  <FileText size={20} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-base font-black text-slate-900">Job Description</p>
+                                  <p className="mt-1 truncate text-sm font-bold text-slate-400">ไฟล์คำบรรยายลักษณะงาน</p>
+                                </div>
+                                <ExternalLink size={16} className="shrink-0 text-slate-300 transition-colors group-hover:text-indigo-600" />
+                              </button>
+                            )}
 
-                              {/* Display array format if exists */}
-                              {Array.isArray(detail.profileFiles) && detail.profileFiles.map((file) => (
-                                <button
-                                  key={file.id}
-                                  type="button"
-                                  onClick={() => handleOpenProfileFile(file)}
-                                  className="group flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 text-left transition-all hover:border-emerald-200 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
-                                >
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                                    <FileText size={18} />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-black text-slate-900">{file.title || file.fileName || '-'}</p>
-                                    <p className="mt-1 truncate text-xs font-bold text-slate-400">{file.fileName || file.fileMimeType || '-'}</p>
-                                  </div>
-                                  <ExternalLink size={14} className="shrink-0 text-slate-300 transition-colors group-hover:text-emerald-600" />
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                            {/* Display array format if exists */}
+                            {Array.isArray(detail.profileFiles) && detail.profileFiles.map((file) => (
+                              <button
+                                key={file.id}
+                                type="button"
+                                onClick={() => handleOpenProfileFile(file)}
+                                className="group flex w-full items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 text-left transition-all hover:border-emerald-200 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-500/10"
+                              >
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                                  <FileText size={20} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-base font-black text-slate-900">{file.title || file.fileName || '-'}</p>
+                                  <p className="mt-1 truncate text-sm font-bold text-slate-400">{file.fileName || file.fileMimeType || '-'}</p>
+                                </div>
+                                <ExternalLink size={16} className="shrink-0 text-slate-300 transition-colors group-hover:text-emerald-600" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -443,11 +443,7 @@ const UserManagement = () => {
     { label: 'กลุ่มงาน (Sub-division)' },
     { label: 'ตำแหน่ง (Position)' },
     { label: 'ระดับตำแหน่ง (Level)' },
-    { label: 'ประเภทตำแหน่ง (Type)' },
-    { label: 'หัวหน้างาน (Supervisor)' },
-    { label: 'เริ่มงาน' },
     { label: 'คอร์สที่จบ', className: 'text-center' },
-    { label: 'แต้มสะสม', className: 'text-right' },
     { label: 'จัดการ', className: 'text-right' },
   ], []);
 
