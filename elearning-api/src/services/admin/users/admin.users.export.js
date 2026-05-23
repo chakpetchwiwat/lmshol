@@ -72,14 +72,36 @@ const usernameFromEmail = (email = '') => String(email || '').split('@')[0] || '
 
 const normalizeJsonArray = (value) => (Array.isArray(value) ? value : []);
 
-const getFirstEducation = (user) => normalizeJsonArray(user.educationHistory)[0] || {};
+const getFirstEducation = (user) => {
+  if (user.educationHistory && !Array.isArray(user.educationHistory)) {
+    return {
+      degree: user.educationHistory.level || '',
+      degreeName: user.educationHistory.degreeName || '',
+      major: user.educationHistory.fieldOfStudy || '',
+      institution: user.educationHistory.institution || ''
+    };
+  }
+  return normalizeJsonArray(user.educationHistory)[0] || {};
+};
 
 const getHighestEducation = (user) => {
+  if (user.educationHistory && !Array.isArray(user.educationHistory)) {
+    return {
+      degree: user.educationHistory.highestLevel || '',
+      degreeName: user.educationHistory.highestDegreeName || '',
+      major: user.educationHistory.highestFieldOfStudy || '',
+      institution: user.educationHistory.highestInstitution || ''
+    };
+  }
   const history = normalizeJsonArray(user.educationHistory);
   return history[history.length - 1] || history[0] || {};
 };
 
 const findProfileFile = (user, patterns) => {
+  if (user.profileFiles && !Array.isArray(user.profileFiles)) {
+    if (patterns.includes('cv')) return user.profileFiles.cv || '';
+    if (patterns.includes('jd')) return user.profileFiles.jobDescription || '';
+  }
   const files = normalizeJsonArray(user.profileFiles);
   const matched = files.find((file) => {
     const haystack = `${file.title || ''} ${file.fileName || ''} ${file.fileUrl || ''} ${file.fileKey || ''}`.toLowerCase();
@@ -147,11 +169,11 @@ const exportUserProfiles = async (actor) => {
       empty(user.departmentRef?.name || user.department, ''),
       empty(user.subdivision, ''),
       empty(firstEducation.degree, ''),
-      empty(firstEducation.degree, ''),
+      empty(firstEducation.degreeName || firstEducation.degree, ''),
       empty(firstEducation.major || firstEducation.faculty, ''),
       empty(firstEducation.institution, ''),
       empty(highestEducation.degree, ''),
-      empty(highestEducation.degree, ''),
+      empty(highestEducation.degreeName || highestEducation.degree, ''),
       empty(highestEducation.major || highestEducation.faculty, ''),
       empty(highestEducation.institution, ''),
       empty(user.retirementDateRaw, ''),
