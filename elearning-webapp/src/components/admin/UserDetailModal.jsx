@@ -31,6 +31,8 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
   const [activeTab, setActiveTab] = React.useState('learning');
   const [filterMonth, setFilterMonth] = React.useState(FILTER_VALUES.ALL);
   const [filterYear, setFilterYear] = React.useState(FILTER_VALUES.ALL);
+  const [expandedExternal, setExpandedExternal] = React.useState(false);
+  const [expandedSystem, setExpandedSystem] = React.useState(false);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, index) => currentYear - index);
@@ -542,32 +544,43 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
                         <ExternalLink size={14} className="text-primary" />
                         ประวัติการอบรมนอกระบบ
                       </h5>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 gap-3">
                         {(!detail.externalCertificates || detail.externalCertificates.length === 0) ? (
-                          <div className="col-span-2 rounded-2xl border border-dashed border-slate-200 py-6 text-center text-xs font-bold text-slate-400">
+                          <div className="rounded-2xl border border-dashed border-slate-200 py-6 text-center text-xs font-bold text-slate-400">
                             ยังไม่มีประวัติการอบรมนอกระบบ
                           </div>
                         ) : (
-                          detail.externalCertificates.map((cert) => (
-                            <div 
-                              key={cert.id} 
-                              className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:bg-white hover:border-primary/20 hover:shadow-md cursor-pointer"
-                              onClick={() => cert.fileUrl && window.open(cert.fileUrl, '_blank')}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-primary border border-slate-100 shadow-sm group-hover:bg-primary group-hover:text-white transition-colors">
-                                  <ExternalLink size={18} />
+                          <>
+                            {(expandedExternal ? detail.externalCertificates : detail.externalCertificates.slice(0, 10)).map((cert) => (
+                              <div 
+                                key={cert.id} 
+                                className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:bg-white hover:border-primary/20 hover:shadow-md cursor-pointer"
+                                onClick={() => cert.fileUrl && window.open(cert.fileUrl, '_blank')}
+                              >
+                                <div className="flex items-center gap-3 w-full">
+                                  <div className="h-10 w-10 shrink-0 rounded-xl bg-white flex items-center justify-center text-primary border border-slate-100 shadow-sm group-hover:bg-primary group-hover:text-white transition-colors">
+                                    <ExternalLink size={18} />
+                                  </div>
+                                  <div className="min-w-0 flex-1 pr-4">
+                                    <p className="text-sm font-black text-slate-900 leading-snug">{cert.title}</p>
+                                    <p className="text-[10px] font-bold text-slate-500 mt-1">{cert.issuer} · {cert.issueDate ? formatThaiDateTime(cert.issueDate) : 'ไม่ระบุวันที่'}</p>
+                                  </div>
                                 </div>
-                                <div className="min-w-0">
-                                  <p className="text-sm font-black text-slate-900 line-clamp-1">{cert.title}</p>
-                                  <p className="text-[10px] font-bold text-slate-500">{cert.issuer} · {cert.issueDate ? formatThaiDateTime(cert.issueDate) : 'ไม่ระบุวันที่'}</p>
+                                <div className="text-slate-300 group-hover:text-primary transition-colors shrink-0">
+                                  <ExternalLink size={14} />
                                 </div>
                               </div>
-                              <div className="text-slate-300 group-hover:text-primary transition-colors">
-                                <ExternalLink size={14} />
-                              </div>
-                            </div>
-                          ))
+                            ))}
+                            {detail.externalCertificates.length > 10 && (
+                              <button
+                                type="button"
+                                onClick={() => setExpandedExternal(!expandedExternal)}
+                                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-50"
+                              >
+                                {expandedExternal ? 'ย่อการแสดงผล' : `แสดงทั้งหมด (${detail.externalCertificates.length} รายการ)`}
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
@@ -578,32 +591,43 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
                         <Award size={14} className="text-emerald-500" />
                         ประวัติการอบรมในระบบ
                       </h5>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 gap-3">
                         {(!detail.systemCertificates || detail.systemCertificates.length === 0) ? (
-                          <div className="col-span-2 rounded-2xl border border-dashed border-slate-200 py-6 text-center text-xs font-bold text-slate-400">
+                          <div className="rounded-2xl border border-dashed border-slate-200 py-6 text-center text-xs font-bold text-slate-400">
                             ยังไม่มีประวัติการอบรมจากคอร์สเรียน
                           </div>
                         ) : (
-                          detail.systemCertificates.map((cert) => (
-                            <div 
-                              key={cert.id} 
-                              className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-emerald-50/30 p-4 transition-all hover:bg-white hover:border-emerald-200 hover:shadow-md cursor-pointer"
-                              onClick={() => cert.pdfUrl && window.open(cert.pdfUrl, '_blank')}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                                  <Award size={18} />
+                          <>
+                            {(expandedSystem ? detail.systemCertificates : detail.systemCertificates.slice(0, 10)).map((cert) => (
+                              <div 
+                                key={cert.id} 
+                                className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-emerald-50/30 p-4 transition-all hover:bg-white hover:border-emerald-200 hover:shadow-md cursor-pointer"
+                                onClick={() => cert.pdfUrl && window.open(cert.pdfUrl, '_blank')}
+                              >
+                                <div className="flex items-center gap-3 w-full">
+                                  <div className="h-10 w-10 shrink-0 rounded-xl bg-white flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                    <Award size={18} />
+                                  </div>
+                                  <div className="min-w-0 flex-1 pr-4">
+                                    <p className="text-sm font-black text-slate-900 leading-snug">{cert.courseTitle}</p>
+                                    <p className="text-[10px] font-bold text-emerald-600/70 mt-1">{cert.certificateNo} · {cert.issuedAt ? formatThaiDateTime(cert.issuedAt) : '-'}</p>
+                                  </div>
                                 </div>
-                                <div className="min-w-0">
-                                  <p className="text-sm font-black text-slate-900 line-clamp-1">{cert.courseTitle}</p>
-                                  <p className="text-[10px] font-bold text-emerald-600/70">{cert.certificateNo} · {cert.issuedAt ? formatThaiDateTime(cert.issuedAt) : '-'}</p>
+                                <div className="text-emerald-300 group-hover:text-emerald-500 transition-colors shrink-0">
+                                  <ExternalLink size={14} />
                                 </div>
                               </div>
-                              <div className="text-emerald-300 group-hover:text-emerald-500 transition-colors">
-                                <ExternalLink size={14} />
-                              </div>
-                            </div>
-                          ))
+                            ))}
+                            {detail.systemCertificates.length > 10 && (
+                              <button
+                                type="button"
+                                onClick={() => setExpandedSystem(!expandedSystem)}
+                                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200"
+                              >
+                                {expandedSystem ? 'ย่อการแสดงผล' : `แสดงทั้งหมด (${detail.systemCertificates.length} รายการ)`}
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
