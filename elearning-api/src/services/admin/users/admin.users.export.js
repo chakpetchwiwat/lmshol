@@ -267,7 +267,11 @@ const exportUserTrainings = async (actor) => {
         issueDate: true,
         expirationDate: true,
         credentialId: true,
-        credentialUrl: true
+        credentialUrl: true,
+        trainingType: true,
+        trainingItem: true,
+        trainingDetails: true,
+        trainingVenue: true
       },
       orderBy: { issueDate: 'desc' }
     }
