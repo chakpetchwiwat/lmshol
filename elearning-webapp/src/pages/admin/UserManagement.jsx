@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Plus, Settings2, Sparkles, Users } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -84,7 +84,7 @@ const UserManagement = () => {
       setUsers(response.data);
     } catch (error) {
       console.error('Fetch users error:', error);
-      toast.error('ไม่สามารถโหลดข้อมูลผู้ใช้งานได้');
+      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เนเธซเธฅเธ”เธเนเธญเธกเธนเธฅเธเธนเนเนเธเนเธเธฒเธเนเธ”เน');
     } finally {
       setLoading(false);
     }
@@ -133,10 +133,10 @@ const UserManagement = () => {
 
       if (editingUser) {
         await adminAPI.updateUser(editingUser.id, payload);
-        toast.success('อัปเดตข้อมูลผู้ใช้งานเรียบร้อย');
+        toast.success('เธญเธฑเธเน€เธ”เธ•เธเนเธญเธกเธนเธฅเธเธนเนเนเธเนเธเธฒเธเน€เธฃเธตเธขเธเธฃเนเธญเธข');
       } else {
         await adminAPI.createUser(payload);
-        toast.success('เพิ่มผู้ใช้งานเรียบร้อย');
+        toast.success('เน€เธเธดเนเธกเธเธนเนเนเธเนเธเธฒเธเน€เธฃเธตเธขเธเธฃเนเธญเธข');
       }
 
       setShowUserModal(false);
@@ -145,26 +145,26 @@ const UserManagement = () => {
       fetchUsers();
     } catch (error) {
       console.error('Save user error:', error);
-      toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลผู้ใช้งานได้');
+      toast.error(error.response?.data?.message || 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธเธฑเธเธ—เธถเธเธเนเธญเธกเธนเธฅเธเธนเนเนเธเนเธเธฒเธเนเธ”เน');
     }
   };
 
   const handleDeleteUser = async (id, name) => {
     const ok = await confirm({
-      title: 'ยืนยันการลบผู้ใช้งาน',
-      message: `ต้องการลบผู้ใช้งาน "${name}" ใช่หรือไม่?`,
-      confirmLabel: 'ลบ',
+      title: 'เธขเธทเธเธขเธฑเธเธเธฒเธฃเธฅเธเธเธนเนเนเธเนเธเธฒเธ',
+      message: `เธ•เนเธญเธเธเธฒเธฃเธฅเธเธเธนเนเนเธเนเธเธฒเธ "${name}" เนเธเนเธซเธฃเธทเธญเนเธกเน?`,
+      confirmLabel: 'เธฅเธ',
       variant: 'danger',
     });
     if (!ok) return;
 
     try {
       await adminAPI.deleteUser(id);
-      toast.success('ลบผู้ใช้งานเรียบร้อย');
+      toast.success('เธฅเธเธเธนเนเนเธเนเธเธฒเธเน€เธฃเธตเธขเธเธฃเนเธญเธข');
       fetchUsers();
     } catch (error) {
       console.error('Delete user error:', error);
-      toast.error(error.response?.data?.message || 'ลบผู้ใช้งานไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'เธฅเธเธเธนเนเนเธเนเธเธฒเธเนเธกเนเธชเธณเน€เธฃเนเธ');
     }
   };
 
@@ -176,7 +176,7 @@ const UserManagement = () => {
       setSelectedUserDetail(response.data);
     } catch (error) {
       console.error('Fetch user detail error:', error);
-      toast.error(error.response?.data?.message || 'ไม่สามารถโหลดประวัติผู้ใช้งานได้');
+      toast.error(error.response?.data?.message || 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เนเธซเธฅเธ”เธเธฃเธฐเธงเธฑเธ•เธดเธเธนเนเนเธเนเธเธฒเธเนเธ”เน');
       setShowDetailModal(false);
     } finally {
       setDetailLoading(false);
@@ -223,58 +223,58 @@ const UserManagement = () => {
 
   const handleDepartmentDelete = async (id, name) => {
     const ok = await confirm({
-      title: 'ยืนยันการลบแผนก',
-      message: `ต้องการลบแผนก "${name}" ใช่หรือไม่?`,
-      confirmLabel: 'ลบ',
+      title: 'เธขเธทเธเธขเธฑเธเธเธฒเธฃเธฅเธเนเธเธเธ',
+      message: `เธ•เนเธญเธเธเธฒเธฃเธฅเธเนเธเธเธ "${name}" เนเธเนเธซเธฃเธทเธญเนเธกเน?`,
+      confirmLabel: 'เธฅเธ',
       variant: 'danger',
     });
     if (!ok) return;
 
     try {
       await adminAPI.deleteDepartment(id);
-      toast.success('ลบแผนกเรียบร้อย');
+      toast.success('เธฅเธเนเธเธเธเน€เธฃเธตเธขเธเธฃเนเธญเธข');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete department error:', error);
-      toast.error(error.response?.data?.message || 'ลบแผนกไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'เธฅเธเนเธเธเธเนเธกเนเธชเธณเน€เธฃเนเธ');
     }
   };
 
   const handleTierDelete = async (id, name) => {
     const ok = await confirm({
-      title: 'ยืนยันการลบระดับ',
-      message: `ต้องการลบระดับ "${name}" ใช่หรือไม่?`,
-      confirmLabel: 'ลบ',
+      title: 'เธขเธทเธเธขเธฑเธเธเธฒเธฃเธฅเธเธฃเธฐเธ”เธฑเธ',
+      message: `เธ•เนเธญเธเธเธฒเธฃเธฅเธเธฃเธฐเธ”เธฑเธ "${name}" เนเธเนเธซเธฃเธทเธญเนเธกเน?`,
+      confirmLabel: 'เธฅเธ',
       variant: 'danger',
     });
     if (!ok) return;
 
     try {
       await adminAPI.deleteTier(id);
-      toast.success('ลบระดับเรียบร้อย');
+      toast.success('เธฅเธเธฃเธฐเธ”เธฑเธเน€เธฃเธตเธขเธเธฃเนเธญเธข');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete tier error:', error);
-      toast.error(error.response?.data?.message || 'ลบระดับไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'เธฅเธเธฃเธฐเธ”เธฑเธเนเธกเนเธชเธณเน€เธฃเนเธ');
     }
   };
 
   const handleCohortRoleDelete = async (id, name) => {
     const ok = await confirm({
-      title: 'ยืนยันการลบ Cohort Role',
-      message: `ต้องการลบ role "${name}" ใช่หรือไม่? Role นี้จะถูกถอดออกจากผู้ใช้งานที่เลือกไว้ด้วย`,
-      confirmLabel: 'ลบ',
+      title: 'เธขเธทเธเธขเธฑเธเธเธฒเธฃเธฅเธ Cohort Role',
+      message: `เธ•เนเธญเธเธเธฒเธฃเธฅเธ role "${name}" เนเธเนเธซเธฃเธทเธญเนเธกเน? Role เธเธตเนเธเธฐเธ–เธนเธเธ–เธญเธ”เธญเธญเธเธเธฒเธเธเธนเนเนเธเนเธเธฒเธเธ—เธตเนเน€เธฅเธทเธญเธเนเธงเนเธ”เนเธงเธข`,
+      confirmLabel: 'เธฅเธ',
       variant: 'danger',
     });
     if (!ok) return;
 
     try {
       await adminAPI.deleteCohortRole(id);
-      toast.success('ลบ Cohort Role เรียบร้อย');
+      toast.success('เธฅเธ Cohort Role เน€เธฃเธตเธขเธเธฃเนเธญเธข');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete cohort role error:', error);
-      toast.error(error.response?.data?.message || 'ลบ Cohort Role ไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'เธฅเธ Cohort Role เนเธกเนเธชเธณเน€เธฃเนเธ');
     }
   };
 
@@ -283,10 +283,10 @@ const UserManagement = () => {
       const tierIds = reorderedItems.map(item => item.id);
       setTiers(reorderedItems); // Optimistic update
       await adminAPI.reorderTiers(tierIds);
-      toast.success('บันทึกลำดับระดับเรียบร้อย');
+      toast.success('เธเธฑเธเธ—เธถเธเธฅเธณเธ”เธฑเธเธฃเธฐเธ”เธฑเธเน€เธฃเธตเธขเธเธฃเนเธญเธข');
     } catch (error) {
       console.error('Reorder tiers error:', error);
-      toast.error('ไม่สามารถบันทึกลำดับได้');
+      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธเธฑเธเธ—เธถเธเธฅเธณเธ”เธฑเธเนเธ”เน');
       fetchReferenceData(); // Rollback
     }
   };
@@ -296,10 +296,10 @@ const UserManagement = () => {
       const roleIds = reorderedItems.map(item => item.id);
       setCohortRoles(reorderedItems);
       await adminAPI.reorderCohortRoles(roleIds);
-      toast.success('บันทึกลำดับ Cohort Role เรียบร้อย');
+      toast.success('เธเธฑเธเธ—เธถเธเธฅเธณเธ”เธฑเธ Cohort Role เน€เธฃเธตเธขเธเธฃเนเธญเธข');
     } catch (error) {
       console.error('Reorder cohort roles error:', error);
-      toast.error('ไม่สามารถบันทึกลำดับ Cohort Role ได้');
+      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธเธฑเธเธ—เธถเธเธฅเธณเธ”เธฑเธ Cohort Role เนเธ”เน');
       fetchReferenceData();
     }
   };
@@ -308,11 +308,11 @@ const UserManagement = () => {
     try {
       setUploadingProfileFile(true);
       const response = await adminAPI.uploadProfileFile(file);
-      toast.success('อัปโหลดไฟล์ข้อมูลอื่นๆ สำเร็จ');
+      toast.success('เธญเธฑเธเนเธซเธฅเธ”เนเธเธฅเนเธเนเธญเธกเธนเธฅเธญเธทเนเธเน เธชเธณเน€เธฃเนเธ');
       return response?.data || response;
     } catch (error) {
       console.error('Upload profile file error:', error);
-      toast.error(error.response?.data?.message || 'อัปโหลดไฟล์ไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'เธญเธฑเธเนเธซเธฅเธ”เนเธเธฅเนเนเธกเนเธชเธณเน€เธฃเนเธ');
       return null;
     } finally {
       setUploadingProfileFile(false);
@@ -331,7 +331,7 @@ const UserManagement = () => {
       if (url) window.open(url, '_blank', 'noopener,noreferrer');
     } catch (error) {
       console.error('Open profile file error:', error);
-      toast.error('เปิดไฟล์ไม่สำเร็จ');
+      toast.error('เน€เธเธดเธ”เนเธเธฅเนเนเธกเนเธชเธณเน€เธฃเนเธ');
     }
   };
 
@@ -342,11 +342,11 @@ const UserManagement = () => {
       const response = await adminAPI.createUserCertificate(editingUser.id, payload);
       const certificate = response?.data || response;
       setProfileCertificates((current) => [certificate, ...current]);
-      toast.success('เพิ่มประวัติอบรมสำเร็จ');
+      toast.success('เน€เธเธดเนเธกเธเธฃเธฐเธงเธฑเธ•เธดเธญเธเธฃเธกเธชเธณเน€เธฃเนเธ');
       return certificate;
     } catch (error) {
       console.error('Create user certificate error:', error);
-      toast.error(error.response?.data?.message || 'เพิ่มประวัติอบรมไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'เน€เธเธดเนเธกเธเธฃเธฐเธงเธฑเธ•เธดเธญเธเธฃเธกเนเธกเนเธชเธณเน€เธฃเนเธ');
       return null;
     } finally {
       setSavingCertificate(false);
@@ -360,11 +360,11 @@ const UserManagement = () => {
       const response = await adminAPI.updateUserCertificate(editingUser.id, certificateId, payload);
       const certificate = response?.data || response;
       setProfileCertificates((current) => current.map((item) => (item.id === certificateId ? certificate : item)));
-      toast.success('อัปเดตประวัติอบรมสำเร็จ');
+      toast.success('เธญเธฑเธเน€เธ”เธ•เธเธฃเธฐเธงเธฑเธ•เธดเธญเธเธฃเธกเธชเธณเน€เธฃเนเธ');
       return certificate;
     } catch (error) {
       console.error('Update user certificate error:', error);
-      toast.error(error.response?.data?.message || 'อัปเดตประวัติอบรมไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'เธญเธฑเธเน€เธ”เธ•เธเธฃเธฐเธงเธฑเธ•เธดเธญเธเธฃเธกเนเธกเนเธชเธณเน€เธฃเนเธ');
       return null;
     } finally {
       setSavingCertificate(false);
@@ -373,16 +373,16 @@ const UserManagement = () => {
 
   const handleDeleteEditableCertificate = async (certificateId) => {
     if (!editingUser?.id) return;
-    const ok = window.confirm('ลบประวัติอบรมนี้ออกจากโปรไฟล์?');
+    const ok = window.confirm('เธฅเธเธเธฃเธฐเธงเธฑเธ•เธดเธญเธเธฃเธกเธเธตเนเธญเธญเธเธเธฒเธเนเธเธฃเนเธเธฅเน?');
     if (!ok) return;
 
     try {
       await adminAPI.deleteUserCertificate(editingUser.id, certificateId);
       setProfileCertificates((current) => current.filter((item) => item.id !== certificateId));
-      toast.success('ลบประวัติอบรมแล้ว');
+      toast.success('เธฅเธเธเธฃเธฐเธงเธฑเธ•เธดเธญเธเธฃเธกเนเธฅเนเธง');
     } catch (error) {
       console.error('Delete user certificate error:', error);
-      toast.error(error.response?.data?.message || 'ลบประวัติอบรมไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'เธฅเธเธเธฃเธฐเธงเธฑเธ•เธดเธญเธเธฃเธกเนเธกเนเธชเธณเน€เธฃเนเธ');
     }
   };
 
@@ -390,11 +390,11 @@ const UserManagement = () => {
     try {
       setUploadingCertificate(true);
       const response = await adminAPI.uploadCertificateFile(file);
-      toast.success('อัปโหลดไฟล์ certificate สำเร็จ');
+      toast.success('เธญเธฑเธเนเธซเธฅเธ”เนเธเธฅเน certificate เธชเธณเน€เธฃเนเธ');
       return response?.data || response;
     } catch (error) {
       console.error('Upload certificate file error:', error);
-      toast.error(error.response?.data?.message || 'อัปโหลดไฟล์ certificate ไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'เธญเธฑเธเนเธซเธฅเธ”เนเธเธฅเน certificate เนเธกเนเธชเธณเน€เธฃเนเธ');
       return null;
     } finally {
       setUploadingCertificate(false);
@@ -433,24 +433,24 @@ const UserManagement = () => {
   }, [searchTerm, selectedDepartment, selectedTier, users, tiers]);
 
   const columns = React.useMemo(() => [
-    { label: 'ผู้ใช้งาน' },
-    { label: 'Permission ระบบ' },
-    { label: 'บทบาท (Role)' },
-    { label: 'แผนก' },
-    { label: 'กลุ่มงาน (Sub-division)' },
-    { label: 'ตำแหน่ง (Position)' },
-    { label: 'ระดับตำแหน่ง (Level)' },
-    { label: 'ประเภทตำแหน่ง (Type)' },
-    { label: 'หัวหน้างาน (Supervisor)' },
-    { label: 'เริ่มงาน' },
-    { label: 'คอร์สที่จบ', className: 'text-center' },
-    { label: 'แต้มสะสม', className: 'text-right' },
-    { label: 'จัดการ', className: 'text-right' },
+    { label: 'เธเธนเนเนเธเนเธเธฒเธ' },
+    { label: 'Permission เธฃเธฐเธเธ' },
+    { label: 'เธเธ—เธเธฒเธ— (Role)' },
+    { label: 'เนเธเธเธ' },
+    { label: 'เธเธฅเธธเนเธกเธเธฒเธ (Sub-division)' },
+    { label: 'เธ•เธณเนเธซเธเนเธ (Position)' },
+    { label: 'เธฃเธฐเธ”เธฑเธเธ•เธณเนเธซเธเนเธ (Level)' },
+    { label: 'เธเธฃเธฐเน€เธ เธ—เธ•เธณเนเธซเธเนเธ (Type)' },
+    { label: 'เธซเธฑเธงเธซเธเนเธฒเธเธฒเธ (Supervisor)' },
+    { label: 'เน€เธฃเธดเนเธกเธเธฒเธ' },
+    { label: 'เธเธญเธฃเนเธชเธ—เธตเนเธเธ', className: 'text-center' },
+    { label: 'เนเธ•เนเธกเธชเธฐเธชเธก', className: 'text-right' },
+    { label: 'เธเธฑเธ”เธเธฒเธฃ', className: 'text-right' },
   ], []);
 
   const handleExportProfiles = async () => {
     try {
-      toast.info('กำลังสร้างไฟล์รายงานข้อมูลผู้ใช้งาน กรุณารอสักครู่...');
+      toast.info('เธเธณเธฅเธฑเธเธชเธฃเนเธฒเธเนเธเธฅเนเธฃเธฒเธขเธเธฒเธเธเนเธญเธกเธนเธฅเธเธนเนเนเธเนเธเธฒเธ เธเธฃเธธเธ“เธฒเธฃเธญเธชเธฑเธเธเธฃเธนเน...');
       const response = await adminAPI.exportUserProfiles();
       
       const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -462,16 +462,16 @@ const UserManagement = () => {
       link.click();
       document.body.removeChild(link);
       
-      toast.success('ดาวน์โหลดรายงานข้อมูลผู้ใช้งานสำเร็จ');
+      toast.success('เธ”เธฒเธงเธเนเนเธซเธฅเธ”เธฃเธฒเธขเธเธฒเธเธเนเธญเธกเธนเธฅเธเธนเนเนเธเนเธเธฒเธเธชเธณเน€เธฃเนเธ');
     } catch (error) {
       console.error('Export profiles error:', error);
-      toast.error('ไม่สามารถดาวน์โหลดรายงานข้อมูลผู้ใช้งานได้');
+      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ”เธฒเธงเธเนเนเธซเธฅเธ”เธฃเธฒเธขเธเธฒเธเธเนเธญเธกเธนเธฅเธเธนเนเนเธเนเธเธฒเธเนเธ”เน');
     }
   };
 
   const handleExportTrainings = async () => {
     try {
-      toast.info('กำลังสร้างไฟล์รายงาน กรุณารอสักครู่...');
+      toast.info('เธเธณเธฅเธฑเธเธชเธฃเนเธฒเธเนเธเธฅเนเธฃเธฒเธขเธเธฒเธ เธเธฃเธธเธ“เธฒเธฃเธญเธชเธฑเธเธเธฃเธนเน...');
       const response = await adminAPI.exportUserTrainings();
       
       const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -484,57 +484,49 @@ const UserManagement = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      toast.success('ดาวน์โหลดรายงานสำเร็จ');
+      toast.success('เธ”เธฒเธงเธเนเนเธซเธฅเธ”เธฃเธฒเธขเธเธฒเธเธชเธณเน€เธฃเนเธ');
     } catch (error) {
       console.error('Export error:', error);
-      toast.error('ไม่สามารถดาวน์โหลดรายงานได้');
+      toast.error('เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธ”เธฒเธงเธเนเนเธซเธฅเธ”เธฃเธฒเธขเธเธฒเธเนเธ”เน');
     }
   };
 
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title={`${isManagerView ? 'พนักงานในแผนก' : 'ผู้ใช้งานระบบ'} (รวม ${users.length} คน)`}
+        title={`${isManagerView ? 'เธเธเธฑเธเธเธฒเธเนเธเนเธเธเธ' : 'เธเธนเนเนเธเนเธเธฒเธเธฃเธฐเธเธ'} (เธฃเธงเธก ${users.length} เธเธ)`}
         subtitle={isManagerView
-          ? `ดูข้อมูลผู้ใช้งานเฉพาะแผนก ${currentUser?.department || 'ของคุณ'} และตรวจสอบประวัติการเรียนกับ Point ได้ในที่เดียว`
-          : 'เพิ่มผู้ใช้งาน จัดการแผนก/ระดับ และดูประวัติการเรียนกับ Point รายบุคคล'}
+          ? `เธ”เธนเธเนเธญเธกเธนเธฅเธเธนเนเนเธเนเธเธฒเธเน€เธเธเธฒเธฐเนเธเธเธ ${currentUser?.department || 'เธเธญเธเธเธธเธ“'} เนเธฅเธฐเธ•เธฃเธงเธเธชเธญเธเธเธฃเธฐเธงเธฑเธ•เธดเธเธฒเธฃเน€เธฃเธตเธขเธเธเธฑเธ Point เนเธ”เนเนเธเธ—เธตเนเน€เธ”เธตเธขเธง`
+          : 'เน€เธเธดเนเธกเธเธนเนเนเธเนเธเธฒเธ เธเธฑเธ”เธเธฒเธฃเนเธเธเธ/เธฃเธฐเธ”เธฑเธ เนเธฅเธฐเธ”เธนเธเธฃเธฐเธงเธฑเธ•เธดเธเธฒเธฃเน€เธฃเธตเธขเธเธเธฑเธ Point เธฃเธฒเธขเธเธธเธเธเธฅ'}
         actions={(
           <div className="flex flex-wrap gap-2">
             {canEditUsers && (
               <>
                 <button type="button" onClick={() => setShowDepartmentModal(true)} className="btn btn-outline">
                   <Settings2 size={18} />
-                  จัดการแผนก
+                  เธเธฑเธ”เธเธฒเธฃเนเธเธเธ
                 </button>
                 <button type="button" onClick={() => setShowTierModal(true)} className="btn btn-outline">
                   <Sparkles size={18} />
-                  จัดการตำแหน่ง
+                  เธเธฑเธ”เธเธฒเธฃเธ•เธณเนเธซเธเนเธ
                 </button>
                 <button type="button" onClick={() => setShowCohortRoleModal(true)} className="btn btn-outline">
                   <Users size={18} />
-                  จัดการ Role
+                  เธเธฑเธ”เธเธฒเธฃ Role
                 </button>
                 <div className="flex gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
-                  <DepartmentSubdivisionModal
-                    isOpen={showDepartmentModal}
-                    onClose={() => setShowDepartmentModal(false)}
-                    onPositionsChange={() => {
-                      fetchReferenceData();
-                      fetchUsers();
-                    }}
-                  />
                   <button type="button" onClick={handleExportProfiles} className="btn btn-outline border-sky-200 bg-white text-sky-700 hover:bg-sky-50 hover:border-sky-300 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Export ข้อมูลผู้ใช้งาน
+                    Export เธเนเธญเธกเธนเธฅเธเธนเนเนเธเนเธเธฒเธ
                   </button>
                   <button type="button" onClick={handleExportTrainings} className="btn btn-outline border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Export ประวัติอบรม
+                    Export เธเธฃเธฐเธงเธฑเธ•เธดเธญเธเธฃเธก
                   </button>
                 </div>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
-                  เพิ่มผู้ใช้งาน
+                  เน€เธเธดเนเธกเธเธนเนเนเธเนเธเธฒเธ
                 </button>
               </>
             )}
@@ -571,26 +563,7 @@ const UserManagement = () => {
 
       {canEditUsers && (
         <>
-          <ReferenceDataModal
-            isOpen={showDepartmentModal}
-            title="จัดการแผนก"
-            description="เพิ่ม แก้ไข หรือลบแผนกที่ใช้กับการกำหนดผู้ใช้งานและขอบเขตการมองเห็นคอร์ส"
-            itemLabel="แผนก"
-            items={departments}
-            loading={referenceLoading}
-            onClose={() => setShowDepartmentModal(false)}
-            onCreate={async (payload) => {
-              await adminAPI.createDepartment(payload);
-              toast.success('สร้างแผนกเรียบร้อย');
-              await Promise.all([fetchReferenceData(), fetchUsers()]);
-            }}
-            onUpdate={async (id, payload) => {
-              await adminAPI.updateDepartment(id, payload);
-              toast.success('อัปเดตแผนกเรียบร้อย');
-              await Promise.all([fetchReferenceData(), fetchUsers()]);
-            }}
-            onDelete={handleDepartmentDelete}
-          />
+          <DepartmentSubdivisionModal isOpen={showDepartmentModal} onClose={() => setShowDepartmentModal(false)} onPositionsChange={() => { fetchReferenceData(); fetchUsers(); }} />
 
           <PositionManagementModal
             isOpen={showTierModal}
@@ -603,20 +576,20 @@ const UserManagement = () => {
 
           <ReferenceDataModal
             isOpen={showCohortRoleModal}
-            title="จัดการ Cohort Role"
-            description="เพิ่ม แก้ไข ลบ และเรียงลำดับ role ที่ใช้ assign ผู้ใช้งาน เช่น Trainee G1, Trainee G2, Trainee G3"
+            title="เธเธฑเธ”เธเธฒเธฃ Cohort Role"
+            description="เน€เธเธดเนเธก เนเธเนเนเธ เธฅเธ เนเธฅเธฐเน€เธฃเธตเธขเธเธฅเธณเธ”เธฑเธ role เธ—เธตเนเนเธเน assign เธเธนเนเนเธเนเธเธฒเธ เน€เธเนเธ Trainee G1, Trainee G2, Trainee G3"
             itemLabel="Cohort Role"
             items={cohortRoles}
             loading={referenceLoading}
             onClose={() => setShowCohortRoleModal(false)}
             onCreate={async (payload) => {
               await adminAPI.createCohortRole(payload);
-              toast.success('สร้าง Cohort Role เรียบร้อย');
+              toast.success('เธชเธฃเนเธฒเธ Cohort Role เน€เธฃเธตเธขเธเธฃเนเธญเธข');
               await fetchReferenceData();
             }}
             onUpdate={async (id, payload) => {
               await adminAPI.updateCohortRole(id, payload);
-              toast.success('อัปเดต Cohort Role เรียบร้อย');
+              toast.success('เธญเธฑเธเน€เธ”เธ• Cohort Role เน€เธฃเธตเธขเธเธฃเนเธญเธข');
               await fetchReferenceData();
             }}
             onDelete={handleCohortRoleDelete}
@@ -625,7 +598,7 @@ const UserManagement = () => {
             getMemberIds={(role) => users.filter((user) => (user.roles || []).includes(role.key)).map((user) => user.id)}
             onUpdateMembers={async (id, userIds) => {
               await adminAPI.updateCohortRoleMembers(id, userIds);
-              toast.success('บันทึกสมาชิก Cohort Role เรียบร้อย');
+              toast.success('เธเธฑเธเธ—เธถเธเธชเธกเธฒเธเธดเธ Cohort Role เน€เธฃเธตเธขเธเธฃเนเธญเธข');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
           />
@@ -673,3 +646,4 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
+

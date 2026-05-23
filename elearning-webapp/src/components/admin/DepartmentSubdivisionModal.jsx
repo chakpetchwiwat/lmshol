@@ -22,14 +22,12 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
   const loadData = async () => {
     setLoading(true);
     try {
-      const [posRes, lvlRes, typeRes] = await Promise.all([
-        adminAPI.getTiers(),
-        adminAPI.getSetting('SUBDIVISIONS'),
-        adminAPI.getSetting('POSITION_TYPES')
+      const [deptRes, subRes] = await Promise.all([
+        adminAPI.getDepartments(),
+        adminAPI.getSetting('SUBDIVISIONS')
       ]);
-      setDepartments(posRes.data?.data || []);
-      setLevels(lvlRes.data?.data || []);
-      setTypes(typeRes.data?.data || []);
+      setDepartments(deptRes.data?.data || []);
+      setSubdivisions((subRes.data?.data || []).map(x => (typeof x === 'string' ? { id: x, name: x } : x)));
     } catch (err) {
       console.error(err);
       toast.error('ไม่สามารถโหลดข้อมูลได้');
@@ -50,7 +48,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
 
     try {
       if (activeTab === 'position') {
-        await adminAPI.createTier({ name: newItemName.trim() });
+        await adminAPI.createDepartment({ name: newItemName.trim() });
         toast.success('เพิ่มแผนกเรียบร้อย');
       } else if (activeTab === 'level') {
         const newLevels = [...subdivisions, { name: newItemName.trim() }];
@@ -79,7 +77,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
 
     try {
       if (activeTab === 'position') {
-        await adminAPI.deleteTier(item.id);
+        await adminAPI.deleteDepartment(item.id);
         toast.success('ลบแผนกเรียบร้อย');
       } else if (activeTab === 'level') {
         const newLevels = subdivisions.filter(l => l.name !== item.name);
@@ -109,11 +107,10 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
 
     if (activeTab === 'position') setDepartments(items);
     if (activeTab === 'level') setSubdivisions(items);
-    if (activeTab === 'type') 
 
     try {
       if (activeTab === 'position') {
-        await adminAPI.reorderTiers(items.map(i => i.id));
+        await adminAPI.reorderDepartments(items.map(i => i.id));
       } else if (activeTab === 'level') {
         await adminAPI.updateSetting('SUBDIVISIONS', items.map(l => l.name));
       }
@@ -128,15 +125,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
   };
 
   const toggleAccessAdmin = async (item) => {
-    if (activeTab !== 'position') return;
-    try {
-      await adminAPI.updateTier(item.id, { accessAdmin: !item.accessAdmin });
-      toast.success('อัปเดตสิทธิ์เรียบร้อย');
-      loadData();
-      if (onPositionsChange) onPositionsChange();
-    } catch (err) {
-      toast.error('อัปเดตไม่สำเร็จ');
-    }
+    // Not applicable for departments
   };
 
   const getItems = () => {
@@ -229,21 +218,6 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
                           </div>
                           
                           <div className="flex items-center gap-2">
-                            {activeTab === 'position' && (
-                              <button
-                                type="button"
-                                onClick={() => toggleAccessAdmin(item)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                                  item.accessAdmin
-                                    ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                                    : 'bg-slate-50 text-slate-500 border border-slate-200 hover:bg-slate-100'
-                                }`}
-                                title={item.accessAdmin ? 'สิทธิ์เข้าถึงระบบจัดการ' : 'ไม่มีสิทธิ์เข้าถึงระบบจัดการ'}
-                              >
-                                <Shield size={14} className={item.accessAdmin ? 'text-indigo-500' : 'text-slate-400'} />
-                                {item.accessAdmin ? 'เข้าถึงระบบหลังบ้าน' : 'ผู้ใช้งานทั่วไป'}
-                              </button>
-                            )}
                             <button
                               type="button"
                               onClick={() => handleDeleteItem(item)}
