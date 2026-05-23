@@ -18,6 +18,7 @@ const UserModal = ({
   tiers,
   positionLevels = [],
   positionTypes = [],
+  subdivisions = [],
   cohortRoles = [],
   canEditRole = true,
   profileCertificates = [],
@@ -148,13 +149,14 @@ const UserModal = ({
 
             <div className="grid gap-5 md:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">กลุ่มงาน (Sub-division)</label>
-                <input
-                  type="text"
-                  className="form-input w-full"
+                <CustomSelect
+                  label="กลุ่มงาน (Sub-division)"
                   value={formData.subdivision || ''}
                   onChange={(event) => setFormData({ ...formData, subdivision: event.target.value })}
-                  placeholder="เช่น กลุ่มงานพัฒนาระบบ"
+                  options={[
+                    { value: '', label: 'ไม่ได้ระบุ' },
+                    ...subdivisions.map(s => ({ value: s.name, label: s.name }))
+                  ]}
                 />
               </div>
               <div>

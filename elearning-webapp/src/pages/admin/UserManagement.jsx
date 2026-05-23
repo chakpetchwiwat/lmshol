@@ -49,6 +49,7 @@ const UserManagement = () => {
   const [tiers, setTiers] = React.useState([]);
   const [positionLevels, setPositionLevels] = React.useState([]);
   const [positionTypes, setPositionTypes] = React.useState([]);
+  const [subdivisions, setSubdivisions] = React.useState([]);
   const [cohortRoles, setCohortRoles] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [referenceLoading, setReferenceLoading] = React.useState(true);
@@ -98,13 +99,15 @@ const UserManagement = () => {
         adminAPI.getCohortRoles(),
         adminAPI.getSetting('POSITION_LEVELS'),
         adminAPI.getSetting('POSITION_TYPES'),
+        adminAPI.getSetting('SUBDIVISIONS'),
       ];
-      const [departmentResponse, tierResponse, cohortRoleResponse, levelsRes, typesRes] = await Promise.all(requests);
+      const [departmentResponse, tierResponse, cohortRoleResponse, levelsRes, typesRes, subdivRes] = await Promise.all(requests);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
       setCohortRoles(cohortRoleResponse.data);
       setPositionLevels(levelsRes.data?.data || []);
       setPositionTypes(typesRes.data?.data || []);
+      setSubdivisions((subdivRes.data?.data || subdivRes.data || []).map(x => (typeof x === 'string' ? { name: x } : x)));
     } catch (error) {
       console.error('Fetch reference data error:', error);
     } finally {
@@ -546,6 +549,7 @@ const UserManagement = () => {
         tiers={tiers}
         positionLevels={positionLevels}
         positionTypes={positionTypes}
+        subdivisions={subdivisions}
         cohortRoles={cohortRoles}
         canEditRole={canEditUsers}
         profileCertificates={profileCertificates}
