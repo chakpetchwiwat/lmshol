@@ -37,6 +37,8 @@ const TRAINING_HEADERS = [
   'รายละเอียด',
   'หลักสูตร/หัวข้อเรื่อง ประชุม/ฝึกอบรม/สัมมนา',
   'วัน/เดือน/ปี',
+  'จำนวนวัน',
+  'รุ่นที่',
   'สถานที่',
   'ผู้จัด',
   'หมายเหตุ'
@@ -245,6 +247,8 @@ const buildTrainingItems = (user) => {
       details: '',
       courseName: cert.course?.title || '',
       date: formattedDate,
+      days: '',
+      intake: '',
       venue: 'Online (e-Learning)',
       organizer: 'LMS System',
       remarks: cert.certificateNo ? `Certificate No. ${cert.certificateNo}` : ''
@@ -263,6 +267,8 @@ const buildTrainingItems = (user) => {
       details: cert.trainingDetails || '',
       courseName: cert.title || '',
       date: formattedDate,
+      days: cert.trainingDays || '',
+      intake: cert.intakeNo || '',
       venue: cert.trainingVenue || '',
       organizer: cert.issuer || '',
       remarks: cert.credentialId || cert.credentialUrl || ''
@@ -299,7 +305,9 @@ const exportUserTrainings = async (actor) => {
         trainingType: true,
         trainingItem: true,
         trainingDetails: true,
-        trainingVenue: true
+        trainingVenue: true,
+        trainingDays: true,
+        intakeNo: true
       },
       orderBy: { issueDate: 'desc' }
     }
@@ -322,6 +330,8 @@ const exportUserTrainings = async (actor) => {
         '',
         '',
         '',
+        '',
+        '',
         ''
       ]);
     } else {
@@ -336,6 +346,8 @@ const exportUserTrainings = async (actor) => {
           item.details,
           item.courseName,
           item.date,
+          item.days,
+          item.intake,
           item.venue,
           item.organizer,
           item.remarks
@@ -348,7 +360,7 @@ const exportUserTrainings = async (actor) => {
     'Training Report',
     TRAINING_HEADERS,
     rows,
-    [15, 30, 25, 25, 15, 15, 20, 50, 15, 25, 25, 25]
+    [15, 30, 25, 25, 15, 15, 20, 50, 15, 15, 15, 25, 25, 25]
   );
 };
 

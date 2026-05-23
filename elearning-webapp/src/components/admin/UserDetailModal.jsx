@@ -523,7 +523,11 @@ sections
                                   </div>
                                   <div className="min-w-0 flex-1 pr-4">
                                     <p className="text-sm font-black text-slate-900 leading-snug">{cert.title}</p>
-                                    <p className="text-[10px] font-bold text-slate-500 mt-1">{cert.issuer} · {cert.issueDate ? formatThaiDateTime(cert.issueDate) : 'ไม่ระบุวันที่'}</p>
+                                    <p className="text-[10px] font-bold text-slate-500 mt-1">
+                                      {cert.issuer} · {cert.issueDate ? formatThaiDateTime(cert.issueDate) : 'ไม่ระบุวันที่'}
+                                      {cert.trainingDays && ` · ระยะเวลา ${cert.trainingDays} วัน`}
+                                      {cert.intakeNo && ` · รุ่นที่ ${cert.intakeNo}`}
+                                    </p>
                                   </div>
                                 </div>
                                 <div className="text-slate-300 group-hover:text-primary transition-colors shrink-0">
