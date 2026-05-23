@@ -27,9 +27,9 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
         adminAPI.getSetting('POSITION_LEVELS'),
         adminAPI.getSetting('POSITION_TYPES')
       ]);
-      setPositions(posRes.data?.data || []);
-      setLevels((lvlRes.data?.data || []).map(x => (typeof x === 'string' ? { id: x, name: x } : x)));
-      setTypes((typeRes.data?.data || []).map(x => (typeof x === 'string' ? { id: x, name: x } : x)));
+      setPositions(posRes.data || []);
+      setLevels((lvlRes.data || []).map(x => (typeof x === 'string' ? { id: x, name: x } : x)));
+      setTypes((typeRes.data || []).map(x => (typeof x === 'string' ? { id: x, name: x } : x)));
     } catch (err) {
       console.error(err);
       toast.error('ไม่สามารถโหลดข้อมูลได้');

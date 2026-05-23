@@ -26,8 +26,8 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
         adminAPI.getDepartments(),
         adminAPI.getSetting('SUBDIVISIONS')
       ]);
-      setDepartments(deptRes.data?.data || []);
-      setSubdivisions((subRes.data?.data || []).map(x => (typeof x === 'string' ? { id: x, name: x } : x)));
+      setDepartments(deptRes.data || []);
+      setSubdivisions((subRes.data || []).map(x => (typeof x === 'string' ? { id: x, name: x } : x)));
     } catch (err) {
       console.error(err);
       toast.error('ไม่สามารถโหลดข้อมูลได้');
