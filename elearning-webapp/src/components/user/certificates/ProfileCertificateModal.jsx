@@ -72,7 +72,7 @@ const ProfileCertificateModal = ({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label htmlFor={titleInputId} className="sm:col-span-2">
-              <span className="mb-2 block text-sm font-bold text-slate-700">ชื่ออบรม</span>
+              <span className="mb-2 block text-sm font-bold text-slate-700">ชื่ออบรม / หลักสูตร</span>
               <input
                 ref={titleInputRef}
                 id={titleInputId}
@@ -85,8 +85,62 @@ const ProfileCertificateModal = ({
               />
             </label>
 
+            <label htmlFor="trainingTypeInputId">
+              <span className="mb-2 block text-sm font-bold text-slate-700">ประเภท</span>
+              <select
+                id="trainingTypeInputId"
+                value={form.trainingType || ''}
+                onChange={(event) => onFormChange('trainingType', event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white"
+              >
+                <option value="">-- เลือกประเภท --</option>
+                <option value="ภายใน">ภายใน</option>
+                <option value="ภายนอก">ภายนอก</option>
+              </select>
+            </label>
+
+            <label htmlFor="trainingItemInputId">
+              <span className="mb-2 block text-sm font-bold text-slate-700">รายการ</span>
+              <select
+                id="trainingItemInputId"
+                value={form.trainingItem || ''}
+                onChange={(event) => onFormChange('trainingItem', event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white"
+              >
+                <option value="">-- เลือกรายการ --</option>
+                <option value="ประชุม">ประชุม</option>
+                <option value="อบรม">อบรม</option>
+                <option value="สัมมนา">สัมมนา</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+              </select>
+            </label>
+
+            <label htmlFor="trainingVenueInputId" className="sm:col-span-2">
+              <span className="mb-2 block text-sm font-bold text-slate-700">สถานที่</span>
+              <input
+                id="trainingVenueInputId"
+                type="text"
+                value={form.trainingVenue || ''}
+                onChange={(event) => onFormChange('trainingVenue', event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white"
+                placeholder="เช่น โรงแรม... / Online"
+              />
+            </label>
+
+            <label htmlFor="trainingDetailsInputId" className="sm:col-span-2">
+              <span className="mb-2 block text-sm font-bold text-slate-700">รายละเอียดเพิ่มเติม (ถ้ามี)</span>
+              <textarea
+                id="trainingDetailsInputId"
+                value={form.trainingDetails || ''}
+                onChange={(event) => onFormChange('trainingDetails', event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white"
+                placeholder="รายละเอียดเพิ่มเติม..."
+                rows="2"
+              />
+            </label>
+
             <label htmlFor={issuerInputId} className="sm:col-span-2">
-              <span className="mb-2 block text-sm font-bold text-slate-700">หน่วยงาน</span>
+              <span className="mb-2 block text-sm font-bold text-slate-700">หน่วยงาน / ผู้จัด</span>
               <input
                 id={issuerInputId}
                 type="text"
@@ -99,7 +153,7 @@ const ProfileCertificateModal = ({
             </label>
 
             <label htmlFor={issueDateId}>
-              <span className="mb-2 block text-sm font-bold text-slate-700">วันที่ออกเกียรติบัตร</span>
+              <span className="mb-2 block text-sm font-bold text-slate-700">วันที่ออกเกียรติบัตร / วันที่อบรม</span>
               <input
                 id={issueDateId}
                 type="date"
@@ -129,11 +183,11 @@ const ProfileCertificateModal = ({
                 onChange={(event) => onFormChange('noExpiration', event.target.checked)}
                 className="h-4 w-4 accent-primary"
               />
-              <span className="text-sm font-bold text-slate-700">ไม่มีวันหมดอายุ</span>
+              <span className="text-sm font-bold text-slate-700">ไม่มีวันหมดอายุเกียรติบัตร</span>
             </label>
 
             <label htmlFor={credentialIdInputId}>
-              <span className="mb-2 block text-sm font-bold text-slate-700">Credential ID</span>
+              <span className="mb-2 block text-sm font-bold text-slate-700">Credential ID (หมายเหตุ)</span>
               <input
                 id={credentialIdInputId}
                 type="text"

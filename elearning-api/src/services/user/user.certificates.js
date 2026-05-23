@@ -44,7 +44,11 @@ const normalizeCertificatePayload = (data = {}) => {
         fileUrl: normalizeOptionalText(data.fileUrl),
         fileKey: normalizeOptionalText(data.fileKey),
         fileName: normalizeOptionalText(data.fileName),
-        fileMimeType: normalizeOptionalText(data.fileMimeType)
+        fileMimeType: normalizeOptionalText(data.fileMimeType),
+        trainingType: normalizeOptionalText(data.trainingType),
+        trainingItem: normalizeOptionalText(data.trainingItem),
+        trainingDetails: normalizeOptionalText(data.trainingDetails),
+        trainingVenue: normalizeOptionalText(data.trainingVenue)
     };
 };
 

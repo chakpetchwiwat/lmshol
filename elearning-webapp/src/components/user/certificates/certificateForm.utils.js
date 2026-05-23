@@ -11,7 +11,11 @@ export const emptyCertificateForm = {
   fileUrl: '',
   fileKey: '',
   fileName: '',
-  fileMimeType: ''
+  fileMimeType: '',
+  trainingType: 'ภายนอก',
+  trainingItem: 'อบรม',
+  trainingDetails: '',
+  trainingVenue: ''
 };
 
 const toDateInputValue = (value) => {
@@ -32,7 +36,11 @@ export const buildFormFromCertificate = (certificate) => ({
   fileUrl: certificate?.fileUrl || '',
   fileKey: certificate?.fileKey || '',
   fileName: certificate?.fileName || '',
-  fileMimeType: certificate?.fileMimeType || ''
+  fileMimeType: certificate?.fileMimeType || '',
+  trainingType: certificate?.trainingType || 'ภายนอก',
+  trainingItem: certificate?.trainingItem || 'อบรม',
+  trainingDetails: certificate?.trainingDetails || '',
+  trainingVenue: certificate?.trainingVenue || ''
 });
 
 export const formatCertificateDateRange = (certificate, isLms = false) => {

@@ -230,12 +230,12 @@ const buildTrainingItems = (user) => {
       name,
       position,
       department,
-      type: 'ภายนอก',
-      item: 'อบรม',
-      details: '',
+      type: cert.trainingType || 'ภายนอก',
+      item: cert.trainingItem || 'อบรม',
+      details: cert.trainingDetails || '',
       courseName: cert.title || '',
       date: formattedDate,
-      venue: '',
+      venue: cert.trainingVenue || '',
       organizer: cert.issuer || '',
       remarks: cert.credentialId || cert.credentialUrl || ''
     };
