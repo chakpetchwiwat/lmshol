@@ -242,14 +242,24 @@ sections
             
             <div className="flex items-center gap-3">
               {detail && !loading && (
-                <button
-                  type="button"
-                  onClick={handlePrint}
-                  className="flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 text-sm font-black text-white transition-all hover:bg-primary-dark active:scale-95 shadow-lg shadow-primary/20"
-                >
-                  <Printer size={16} />
-                  <span className="hidden sm:inline">Print to PDF</span>
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={handleExport}
+                    className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-4 py-2 text-sm font-black text-white transition-all duration-300 hover:from-emerald-600 hover:to-teal-700 hover:shadow-lg hover:shadow-emerald-500/25 active:scale-95 shadow-md shadow-emerald-500/10"
+                  >
+                    <FileDown size={16} />
+                    <span className="hidden sm:inline">Export to Excel</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    className="flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 text-sm font-black text-white transition-all hover:bg-primary-dark active:scale-95 shadow-lg shadow-primary/20"
+                  >
+                    <Printer size={16} />
+                    <span className="hidden sm:inline">Print to PDF</span>
+                  </button>
+                </>
               )}
               
               <button
