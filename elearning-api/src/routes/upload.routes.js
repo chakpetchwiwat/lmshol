@@ -47,8 +47,8 @@ const ensureDir = async (dirPath) => {
     catch { await fs.mkdir(dirPath, { recursive: true }); }
 };
 
-const createSecureDocumentSignedUrl = async (fileKey, expiresIn = 900) => {
-    const token = jwt.sign({ fileKey }, process.env.JWT_SECRET, { expiresIn });
+const createSecureDocumentSignedUrl = async (fileKey, originalName = null, expiresIn = 900) => {
+    const token = jwt.sign({ fileKey, originalName }, process.env.JWT_SECRET, { expiresIn });
     return `/api/upload/secure/${token}`;
 };
 
@@ -159,7 +159,7 @@ const uploadToLocalDisk = async (req, res, { forceSubDir, includeSignedUrl = fal
         };
 
         if (isSensitive && includeSignedUrl) {
-            payload.signedUrl = await createSecureDocumentSignedUrl(fileKey);
+            payload.signedUrl = await createSecureDocumentSignedUrl(fileKey, req.file.originalname);
         }
 
         res.json(payload);
@@ -224,8 +224,9 @@ const canPreviewProfileFile = async (authUser, fileKey) => {
     });
 
     const files = Array.isArray(user?.profileFiles) ? user.profileFiles : [];
-    if (files.some((file) => file?.fileKey === fileKey)) {
-        return { allowed: true, ownerUserId: authUser.userId, accessType: 'owner' };
+    const matchedFile = files.find((file) => file?.fileKey === fileKey);
+    if (matchedFile) {
+        return { allowed: true, ownerUserId: authUser.userId, accessType: 'owner', fileName: matchedFile.fileName };
     }
 
     const actor = await getActorContext(authUser);
@@ -240,10 +241,17 @@ const canPreviewProfileFile = async (authUser, fileKey) => {
         }
     });
 
-    const matchedUser = usersWithProfileFiles.find((candidate) => (
-        Array.isArray(candidate.profileFiles)
-        && candidate.profileFiles.some((file) => file?.fileKey === fileKey)
-    ));
+    let matchedFileAdmin = null;
+    const matchedUser = usersWithProfileFiles.find((candidate) => {
+        if (Array.isArray(candidate.profileFiles)) {
+            const found = candidate.profileFiles.find((file) => file?.fileKey === fileKey);
+            if (found) {
+                matchedFileAdmin = found;
+                return true;
+            }
+        }
+        return false;
+    });
 
     if (!matchedUser) {
         return { allowed: false };
@@ -257,7 +265,8 @@ const canPreviewProfileFile = async (authUser, fileKey) => {
     return {
         allowed: Boolean(scopedUser),
         ownerUserId: matchedUser.id,
-        accessType: 'admin-scoped'
+        accessType: 'admin-scoped',
+        fileName: matchedFileAdmin ? matchedFileAdmin.fileName : null
     };
 };
 
@@ -374,7 +383,7 @@ router.get('/signature-url', verifyToken, async (req, res) => {
             return res.status(403).json({ message: 'You do not have access to this signature.' });
         }
 
-        const signedUrl = await createSecureDocumentSignedUrl(fileKey);
+        const signedUrl = await createSecureDocumentSignedUrl(fileKey, path.basename(fileKey));
         return res.json({ url: signedUrl });
     } catch (error) {
         console.error('Signature signed URL error:', error);
@@ -404,7 +413,7 @@ router.get('/profile-file-url', verifyToken, async (req, res) => {
             return res.status(403).json({ message: 'You do not have access to this file.' });
         }
 
-        const signedUrl = await createSecureDocumentSignedUrl(fileKey);
+        const signedUrl = await createSecureDocumentSignedUrl(fileKey, access.fileName);
         await writeAuditLog({
             req,
             action: 'profile_file.signed_url.created',
@@ -442,7 +451,7 @@ router.post('/', verifyToken, verifyAdminPanelAccess, uploadRateLimiter, upload.
 router.get('/secure/:token', async (req, res) => {
     try {
         const decoded = jwt.verify(req.params.token, process.env.JWT_SECRET);
-        const { fileKey } = decoded;
+        const { fileKey, originalName } = decoded;
         
         // Prevent path traversal
         const normalizedKey = path.normalize(fileKey).replace(/^(\.\.(\/|\\|$))+/, '');
@@ -451,6 +460,11 @@ router.get('/secure/:token', async (req, res) => {
         // Ensure it only serves from secure folder
         if (!absolutePath.includes(path.join('secure', ''))) {
             return res.status(403).send('Forbidden access to non-secure directory');
+        }
+
+        if (originalName) {
+            const encodedName = encodeURIComponent(originalName);
+            res.setHeader('Content-Disposition', `inline; filename="${encodedName}"; filename*=UTF-8''${encodedName}`);
         }
 
         res.sendFile(absolutePath);
