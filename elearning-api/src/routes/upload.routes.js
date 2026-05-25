@@ -504,8 +504,9 @@ router.get('/secure/:token', async (req, res) => {
             } catch (e) {
                 // Ignore decoding error
             }
+            const asciiFilename = decodedOriginalName.replace(/[^\x20-\x7E]/g, '_').replace(/"/g, '_');
             const encodedName = encodeURIComponent(decodedOriginalName);
-            res.setHeader('Content-Disposition', `inline; filename="${decodedOriginalName.replace(/"/g, '_')}"; filename*=UTF-8''${encodedName}`);
+            res.setHeader('Content-Disposition', `inline; filename="${asciiFilename}"; filename*=UTF-8''${encodedName}`);
         }
 
         res.sendFile(absolutePath);
