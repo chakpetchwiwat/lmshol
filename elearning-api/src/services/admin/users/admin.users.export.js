@@ -115,7 +115,7 @@ const findProfileFile = (user, patterns) => {
 const getScopedUsersForExport = async (authUser, extraSelect) => {
   const actor = await authHelpers.getActorContext(prisma, authUser);
   const baseWhere = authHelpers.buildUserManagementWhere(actor);
-  return prisma.user.findMany({
+  const users = await prisma.user.findMany({
     where: {
       AND: [
         baseWhere,
@@ -140,6 +140,14 @@ const getScopedUsersForExport = async (authUser, extraSelect) => {
       ...extraSelect
     },
     orderBy: { name: 'asc' }
+  });
+
+  return users.sort((a, b) => {
+    const aUnreg = String(a.email || '').startsWith('unregistered.user_');
+    const bUnreg = String(b.email || '').startsWith('unregistered.user_');
+    if (aUnreg && !bUnreg) return 1;
+    if (!aUnreg && bUnreg) return -1;
+    return 0;
   });
 };
 
@@ -313,12 +321,13 @@ const exportUserTrainings = async (actor) => {
     }
   });
 
-  const rows = [];
+  const hasTrainingRows = [];
+  const noTrainingRows = [];
   users.forEach((user) => {
     const items = buildTrainingItems(user);
     if (items.length === 0) {
       const { prefix, name } = parseNamePrefix(user.name || '');
-      rows.push([
+      noTrainingRows.push([
         prefix,
         name,
         [(user.position || ''), (user.positionLevel || '')].filter(Boolean).join(''),
@@ -336,7 +345,7 @@ const exportUserTrainings = async (actor) => {
       ]);
     } else {
       items.forEach((item) => {
-        rows.push([
+        hasTrainingRows.push([
           item.prefix,
           item.name,
           item.position,
@@ -356,6 +365,8 @@ const exportUserTrainings = async (actor) => {
     }
   });
 
+  const rows = [...hasTrainingRows, ...noTrainingRows];
+
   return createWorkbook(
     'Training Report',
     TRAINING_HEADERS,
@@ -364,7 +375,96 @@ const exportUserTrainings = async (actor) => {
   );
 };
 
+const exportSingleUser = async (id, authUser) => {
+  const detailsService = require('./admin.users.details');
+  const detail = await detailsService.getUserDetails(id, authUser);
+  if (!detail) throw new Error('User not found');
+
+  // Sheet 1: ข้อมูลทั่วไป (General Info)
+  const profileHeaders = ['หัวข้อ', 'ข้อมูล'];
+  const profileRows = [
+    ['ชื่อ-นามสกุล', detail.name || '-'],
+    ['อีเมล', detail.email || '-'],
+    ['แผนก', detail.department || '-'],
+    ['ตำแหน่ง', detail.position || '-'],
+    ['ระดับ', detail.tier?.name || detail.tier || '-'],
+    ['ประเภทตำแหน่ง', detail.positionType || '-'],
+    ['หัวหน้างาน', detail.supervisorName || '-'],
+    ['วันเริ่มงาน', formatDate(detail.employmentDate)],
+    ['แต้มคงเหลือ', String(detail.pointsBalance || 0)]
+  ];
+
+  // Sheet 2: ประวัติการเรียน (Learning History)
+  const learningHeaders = ['คอร์ส', 'หมวดหมู่', 'เริ่มเรียน', 'สำเร็จเมื่อ', 'ความคืบหน้า', 'สถานะ'];
+  const learningRows = (detail.enrollments || []).map(item => [
+    item.course?.title || '-',
+    item.course?.categoryName || '-',
+    item.startedAt ? formatDate(item.startedAt) : '-',
+    item.completedAt ? formatDate(item.completedAt) : '-',
+    `${Math.round(item.progressPercent || 0)}%`,
+    item.status === 'COMPLETED' ? 'เรียนจบแล้ว' : 'กำลังเรียน'
+  ]);
+
+  // Sheet 3: ประวัติ Point
+  const pointsHeaders = ['ประเภท', 'ที่มา/การใช้งาน', 'หมายเหตุ', 'Point', 'เวลา'];
+  const pointsRows = (detail.pointsHistory || []).map(item => [
+    item.points >= 0 ? 'ได้รับแต้ม' : 'ใช้แต้ม',
+    item.sourceLabel || '-',
+    item.note || '-',
+    String(item.points),
+    item.createdAt ? formatDate(item.createdAt) : '-'
+  ]);
+
+  // Sheet 4: ประวัติการอบรม (Training History)
+  const certHeaders = ['หลักสูตร / หัวข้อ', 'ประเภท', 'ผู้จัด / ผู้ออก', 'เลขที่ใบเซอร์ / รายละเอียด', 'วันที่ได้รับ', 'จำนวนวัน', 'รุ่นที่', 'สถานที่', 'หมายเหตุ'];
+  
+  const systemCerts = (detail.systemCertificates || []).map(cert => [
+    cert.courseTitle || '-',
+    'ภายใน',
+    'LMS System',
+    cert.certificateNo || '-',
+    cert.issuedAt ? formatDate(cert.issuedAt) : '-',
+    '-',
+    '-',
+    'Online (e-Learning)',
+    ''
+  ]);
+  
+  const externalCerts = (detail.externalCertificates || []).map(cert => [
+    cert.title || '-',
+    cert.trainingType || 'ภายนอก',
+    cert.issuer || '-',
+    cert.credentialId || cert.trainingDetails || '-',
+    cert.issueDate ? formatDate(cert.issueDate) : '-',
+    cert.trainingDays || '-',
+    cert.intakeNo || '-',
+    cert.trainingVenue || '-',
+    cert.remarks || ''
+  ]);
+  
+  const certRows = [...systemCerts, ...externalCerts];
+
+  // Build Workbook
+  const wb = xlsx.utils.book_new();
+
+  // Helper to add sheet
+  const addSheet = (sheetName, headers, rows, colWidths) => {
+    const ws = xlsx.utils.aoa_to_sheet([headers, ...rows]);
+    setWorkbookView(ws, colWidths);
+    xlsx.utils.book_append_sheet(wb, ws, sheetName);
+  };
+
+  addSheet('ข้อมูลทั่วไป', profileHeaders, profileRows, [25, 45]);
+  addSheet('ประวัติการเรียน', learningHeaders, learningRows, [45, 25, 18, 18, 15, 15]);
+  addSheet('ประวัติ Point', pointsHeaders, pointsRows, [15, 35, 30, 12, 18]);
+  addSheet('ประวัติการอบรม', certHeaders, certRows, [45, 15, 25, 30, 18, 12, 12, 25, 20]);
+
+  const buffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  return { name: detail.name, buffer };
+};
+
 module.exports = {
   exportUserProfiles,
-  exportUserTrainings
+  exportUserTrainings,
+  exportSingleUser
 };

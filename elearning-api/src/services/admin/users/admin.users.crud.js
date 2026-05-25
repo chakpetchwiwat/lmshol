@@ -80,15 +80,33 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
         if (tierId) {
             const tier = await tx.tier.findUnique({
                 where: { id: tierId },
-                select: { id: true, accessAdmin: true }
+                select: { id: true, name: true, accessAdmin: true }
             });
             if (!tier) throw new Error('Tier not found');
             data.tierId = tier.id;
+            data.position = tier.name;
             const targetPermission = tier.accessAdmin ? USER_PERMISSIONS.MANAGER : USER_PERMISSIONS.USER;
             if (data.permission !== USER_PERMISSIONS.ADMIN) data.permission = targetPermission;
         } else {
             data.tierId = null;
+            data.position = null;
         }
+    }
+
+    if (baseData.subdivision !== undefined) {
+        data.subdivision = baseData.subdivision ? String(baseData.subdivision).trim() : null;
+    }
+
+    if (baseData.positionLevel !== undefined) {
+        data.positionLevel = baseData.positionLevel ? String(baseData.positionLevel).trim() : null;
+    }
+
+    if (baseData.positionType !== undefined) {
+        data.positionType = baseData.positionType ? String(baseData.positionType).trim() : null;
+    }
+
+    if (baseData.supervisorName !== undefined) {
+        data.supervisorName = baseData.supervisorName ? String(baseData.supervisorName).trim() : null;
     }
 
     if (baseData.employmentDate !== undefined) {

@@ -1,7 +1,8 @@
-﻿import React from 'react';
+import React from 'react';
 import { X, Upload, ImageIcon } from 'lucide-react';
 import { getFullUrl } from '../../utils/api';
 import ModalPortal from '../common/ModalPortal';
+import MediaLibraryModal from '../common/MediaLibraryModal';
 
 const RewardModal = ({ 
   isOpen, 
@@ -14,6 +15,11 @@ const RewardModal = ({
   uploadingImage 
 }) => {
   const fileInputRef = React.useRef(null);
+  const [mediaLibrary, setMediaLibrary] = React.useState({
+    isOpen: false,
+    allowedTypes: 'all',
+    onSelect: null
+  });
 
   if (!isOpen) return null;
 
@@ -59,6 +65,18 @@ const RewardModal = ({
                       disabled={uploadingImage}
                     >
                       <Upload size={14} /> {uploadingImage ? 'อัปโหลด...' : 'เปลี่ยนรูปภาพ'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMediaLibrary({
+                        isOpen: true,
+                        allowedTypes: 'image',
+                        onSelect: (file) => setRewardForm({ ...rewardForm, image: file.fileUrl })
+                      })}
+                      className="btn btn-outline py-1.5 px-3 text-sm cursor-pointer whitespace-nowrap"
+                      disabled={uploadingImage}
+                    >
+                      เลือกจากคลังสื่อ
                     </button>
                     {rewardForm.image && (
                        <button type="button" onClick={() => setRewardForm({...rewardForm, image: ''})} className="text-xs text-red-500 hover:underline">ลบรูป</button>
@@ -118,6 +136,12 @@ const RewardModal = ({
         </div>
       </div>
       </div>
+      <MediaLibraryModal
+        isOpen={mediaLibrary.isOpen}
+        allowedTypes={mediaLibrary.allowedTypes}
+        onClose={() => setMediaLibrary(prev => ({ ...prev, isOpen: false }))}
+        onSelect={mediaLibrary.onSelect}
+      />
     </ModalPortal>
   );
 };

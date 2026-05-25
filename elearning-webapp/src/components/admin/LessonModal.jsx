@@ -4,6 +4,7 @@ import QuizBuilder from './QuizBuilder';
 import ModalPortal from '../common/ModalPortal';
 import RichTextEditor from '../common/RichTextEditor';
 import CustomSelect from '../common/CustomSelect';
+import MediaLibraryModal from '../common/MediaLibraryModal';
 
 const LessonModal = ({
   isOpen,
@@ -18,6 +19,11 @@ const LessonModal = ({
   isEditing = false,
 }) => {
   const docInputRef = React.useRef(null);
+  const [mediaLibrary, setMediaLibrary] = React.useState({
+    isOpen: false,
+    allowedTypes: 'all',
+    onSelect: null
+  });
 
   if (!isOpen) return null;
 
@@ -81,6 +87,17 @@ const LessonModal = ({
                 placeholder="URL หรืออัปโหลดไฟล์"
                 readOnly={uploading}
               />
+              <button
+                type="button"
+                onClick={() => setMediaLibrary({
+                  isOpen: true,
+                  allowedTypes: 'document',
+                  onSelect: (file) => setLessonForm({ ...lessonForm, contentUrl: file.fileUrl })
+                })}
+                className="btn btn-outline btn-sm shrink-0"
+              >
+                เลือกจากคลังสื่อ
+              </button>
               <button
                 type="button"
                 onClick={() => docInputRef.current?.click()}
@@ -322,6 +339,12 @@ const LessonModal = ({
           </form>
         </div>
       </div>
+      <MediaLibraryModal
+        isOpen={mediaLibrary.isOpen}
+        allowedTypes={mediaLibrary.allowedTypes}
+        onClose={() => setMediaLibrary(prev => ({ ...prev, isOpen: false }))}
+        onSelect={mediaLibrary.onSelect}
+      />
     </ModalPortal>
   );
 };

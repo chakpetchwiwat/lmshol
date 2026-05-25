@@ -28,6 +28,10 @@ const getDefaultFormData = () => ({
   tierId: '',
   employmentDate: '',
   pointsBalance: 0,
+  subdivision: '',
+  positionLevel: '',
+  positionType: '',
+  supervisorName: '',
   educationHistory: [],
   profileFiles: [],
   profileImageUrl: '',
@@ -39,6 +43,66 @@ const formatDateForInput = (value) => {
   }
 
   return new Date(value).toISOString().slice(0, 10);
+};
+
+const normalizeEducationHistory = (edu) => {
+  if (Array.isArray(edu)) return edu;
+  if (edu && typeof edu === 'object') {
+    const list = [];
+    if (edu.institution || edu.degreeName || edu.fieldOfStudy || edu.level) {
+      list.push({
+        id: 'edu_imported_base',
+        institution: edu.institution || '',
+        degree: edu.degreeName || edu.level || '',
+        faculty: '',
+        major: edu.fieldOfStudy || '',
+        graduationYear: '',
+      });
+    }
+    if (edu.highestInstitution || edu.highestDegreeName || edu.highestFieldOfStudy || edu.highestLevel) {
+      list.push({
+        id: 'edu_imported_highest',
+        institution: edu.highestInstitution || '',
+        degree: edu.highestDegreeName || edu.highestLevel || '',
+        faculty: '',
+        major: edu.highestFieldOfStudy || '',
+        graduationYear: '',
+      });
+    }
+    return list;
+  }
+  return [];
+};
+
+const normalizeProfileFiles = (files) => {
+  if (Array.isArray(files)) return files;
+  if (files && typeof files === 'object') {
+    const list = [];
+    if (files.cv) {
+      list.push({
+        id: 'file_imported_cv',
+        title: 'CV (Curriculum Vitae)',
+        fileName: 'CV_imported.pdf',
+        fileKey: '',
+        fileUrl: files.cv,
+        fileMimeType: 'application/pdf',
+        uploadedAt: new Date().toISOString(),
+      });
+    }
+    if (files.jobDescription) {
+      list.push({
+        id: 'file_imported_jd',
+        title: 'Job Description',
+        fileName: 'Job_Description_imported.pdf',
+        fileKey: '',
+        fileUrl: files.jobDescription,
+        fileMimeType: 'application/pdf',
+        uploadedAt: new Date().toISOString(),
+      });
+    }
+    return list;
+  }
+  return [];
 };
 
 const UserManagement = () => {
@@ -206,8 +270,12 @@ const UserManagement = () => {
       tierId: user.tierId || '',
       employmentDate: formatDateForInput(user.employmentDate),
       pointsBalance: user.pointsBalance || 0,
-      educationHistory: Array.isArray(user.educationHistory) ? user.educationHistory : [],
-      profileFiles: Array.isArray(user.profileFiles) ? user.profileFiles : [],
+      subdivision: user.subdivision || '',
+      positionLevel: user.positionLevel || '',
+      positionType: user.positionType || '',
+      supervisorName: user.supervisorName || '',
+      educationHistory: normalizeEducationHistory(user.educationHistory),
+      profileFiles: normalizeProfileFiles(user.profileFiles),
       profileImageUrl: user.profileImageUrl || '',
     });
     setShowUserModal(true);

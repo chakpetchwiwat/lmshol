@@ -33,6 +33,12 @@ const AdminLayout = () => {
   });
   const navigate = useNavigate();
   const location = useLocation();
+  const isWiderPage = location.pathname.startsWith('/admin/users') ||
+                      location.pathname.startsWith('/admin/courses') ||
+                      location.pathname.startsWith('/admin/redeems') ||
+                      location.pathname.startsWith('/admin/certificates') ||
+                      location.pathname.startsWith('/admin/assessments') ||
+                      location.pathname.startsWith('/admin/goals');
   const drawerRef = React.useRef(null);
   const mainRef = React.useRef(null);
   const closeButtonRef = React.useRef(null);
@@ -194,7 +200,7 @@ const AdminLayout = () => {
       </aside>
 
       <main ref={mainRef} className="admin-main">
-        <div className="admin-content-wrapper">
+        <div className={`admin-content-wrapper ${isWiderPage ? 'wider-page' : ''}`}>
           <Outlet />
         </div>
       </main>

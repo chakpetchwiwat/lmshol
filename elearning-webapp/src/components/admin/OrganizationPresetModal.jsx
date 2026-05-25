@@ -5,6 +5,7 @@ import { adminAPI, getFullUrl } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 import SignaturePadModal from '../common/SignaturePadModal';
 import SignatureImage from '../common/SignatureImage';
+import MediaLibraryModal from '../common/MediaLibraryModal';
 
 const getDefaultForm = () => ({
   name: '',
@@ -32,6 +33,11 @@ const OrganizationPresetModal = ({
   const [signaturePreviewUrl, setSignaturePreviewUrl] = React.useState('');
   const stampFileInputRef = React.useRef(null);
   const signatureFileInputRef = React.useRef(null);
+  const [mediaLibrary, setMediaLibrary] = React.useState({
+    isOpen: false,
+    allowedTypes: 'all',
+    onSelect: null
+  });
 
   if (!isOpen) {
     return null;
@@ -343,19 +349,36 @@ const OrganizationPresetModal = ({
                         
                         <div className="flex flex-col gap-2">
                            {signatureMode === 'upload' ? (
-                                <button
-                                    type="button"
-                                    onClick={() => signatureFileInputRef.current?.click()}
-                                    className="flex flex-1 flex-col items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 text-slate-400 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all"
-                                >
-                                    <Upload size={20} />
-                                    <span className="text-[9px] font-black uppercase tracking-wider text-center">Change<br/>File</span>
-                                </button>
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => signatureFileInputRef.current?.click()}
+                                        className="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all rounded-2xl bg-white border border-slate-200 shadow-sm p-1.5"
+                                    >
+                                        <Upload size={16} />
+                                        <span className="text-[9px] font-black uppercase tracking-wider text-center">อัปโหลด</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setMediaLibrary({
+                                            isOpen: true,
+                                            allowedTypes: 'image',
+                                            onSelect: (file) => {
+                                                setForm(c => ({ ...c, signatureImageUrl: file.fileUrl }));
+                                                setSignaturePreviewUrl('');
+                                            }
+                                        })}
+                                        className="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all rounded-2xl bg-white border border-slate-200 shadow-sm p-1.5"
+                                    >
+                                        <PenLine size={16} />
+                                        <span className="text-[9px] font-black uppercase tracking-wider text-center">คลังสื่อ</span>
+                                    </button>
+                                </>
                            ) : (
                                 <button
                                     type="button"
                                     onClick={() => setShowSignaturePad(true)}
-                                    className="flex flex-1 flex-col items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 text-slate-400 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all"
+                                    className="flex flex-1 flex-col items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 text-slate-400 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all p-1.5 shadow-sm"
                                 >
                                     <PencilLine size={20} />
                                     <span className="text-[9px] font-black uppercase tracking-wider text-center">Redraw<br/>Signature</span>
@@ -384,22 +407,36 @@ const OrganizationPresetModal = ({
                       </div>
 
                       <div className="flex flex-col sm:flex-row items-center gap-6">
-                        <div className="group relative h-28 w-28 shrink-0 overflow-hidden rounded-[1.75rem] border-2 border-white bg-white shadow-md transition-transform hover:scale-105">
-                          {form.stampImageUrl ? (
-                            <img src={getFullUrl(form.stampImageUrl)} alt="Stamp Preview" className="h-full w-full object-contain p-2" />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-slate-100">
-                              <Building2 size={32} />
-                            </div>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => stampFileInputRef.current?.click()}
-                            className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100"
-                          >
-                             <Upload className="text-white mb-1" size={20} />
-                             <span className="text-[8px] font-black text-white tracking-[0.2em] uppercase">Upload</span>
-                          </button>
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="group relative h-28 w-28 shrink-0 overflow-hidden rounded-[1.75rem] border-2 border-white bg-white shadow-md transition-transform">
+                            {form.stampImageUrl ? (
+                              <img src={getFullUrl(form.stampImageUrl)} alt="Stamp Preview" className="h-full w-full object-contain p-2" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-slate-100">
+                                <Building2 size={32} />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex gap-1.5">
+                              <button
+                                  type="button"
+                                  onClick={() => stampFileInputRef.current?.click()}
+                                  className="btn btn-outline btn-xs px-2 py-1 text-[10px]"
+                              >
+                                  อัปโหลด
+                              </button>
+                              <button
+                                  type="button"
+                                  onClick={() => setMediaLibrary({
+                                      isOpen: true,
+                                      allowedTypes: 'image',
+                                      onSelect: (file) => setForm(c => ({ ...c, stampImageUrl: file.fileUrl }))
+                                  })}
+                                  className="btn btn-outline btn-xs px-2 py-1 text-[10px]"
+                              >
+                                  คลังสื่อ
+                              </button>
+                          </div>
                           <input ref={stampFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleStampUpload} />
                         </div>
 
@@ -443,6 +480,12 @@ const OrganizationPresetModal = ({
         onClose={() => setShowSignaturePad(false)}
         onSave={handleDrawnSignature}
         title={`เซ็นชื่อสำหรับหน่วยงาน: ${form.name || 'หน่วยงานใหม่'}`}
+      />
+      <MediaLibraryModal
+        isOpen={mediaLibrary.isOpen}
+        allowedTypes={mediaLibrary.allowedTypes}
+        onClose={() => setMediaLibrary(prev => ({ ...prev, isOpen: false }))}
+        onSelect={mediaLibrary.onSelect}
       />
     </ModalPortal>
   );

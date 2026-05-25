@@ -97,50 +97,27 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
     }
   };
 
-  const handleExport = () => {
-    const data = activeTab === 'learning' ? filteredEnrollments : filteredPointsHistory;
-    if (data.length === 0) {
-      toast.info('ไม่มีข้อมูลสำหรับการส่งออก');
-      return;
+  const handleExport = async () => {
+    try {
+      toast.info('กำลังสร้างไฟล์รายงานประวัติผู้ใช้งานรายบุคคล กรุณารอสักครู่...');
+      const response = await adminAPI.exportSingleUser(detail.id);
+      
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      const sanitizedName = String(detail.name || 'user').trim().replace(/[\s/\\:*?"<>|]+/g, '_');
+      link.setAttribute('download', `ประวัติการอบรม_${sanitizedName}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('ดาวน์โหลดรายงานสำเร็จ');
+    } catch (error) {
+      console.error('Export single user history error:', error);
+      toast.error('ไม่สามารถดาวน์โหลดรายงานประวัติผู้ใช้งานได้');
     }
-
-    let csvContent = '\uFEFF';
-    csvContent += `ประวัติผู้ใช้งานรายบุคคล (${activeTab === 'learning' ? 'ประวัติการเรียน' : 'ประวัติ Point'})\n`;
-    csvContent += `พนักงาน,${detail.name}\n`;
-    csvContent += `อีเมล,${detail.email}\n`;
-    csvContent += `แผนก,${detail.department || '-'}\n`;
-    csvContent += `ระดับ,${detail.tier?.name || detail.tier || '-'}\n`;
-    csvContent += `แต้มคงเหลือ,${detail.pointsBalance || 0}\n`;
-    csvContent += `วันที่ส่งออก,${formatThaiDateTime(new Date())}\n\n`;
-
-    if (activeTab === 'learning') {
-      csvContent += 'คอร์ส,หมวดหมู่,เริ่มเรียน,สำเร็จเมื่อ,ความคืบหน้า,สถานะ\n';
-      data.forEach((item) => {
-        const started = item.startedAt ? formatThaiDateTime(item.startedAt) : '-';
-        const completed = getEnrollmentCompletedAtLabel(item);
-        const status = item.status === ENROLLMENT_STATUS.COMPLETED ? 'เรียนจบแล้ว' : 'กำลังเรียน';
-        csvContent += `"${item.course.title}","${item.course.categoryName || '-'}","${started}","${completed}","${Math.round(item.progressPercent || 0)}%","${status}"\n`;
-      });
-    } else {
-      csvContent += 'ประเภท,ที่มา/การใช้งาน,หมายเหตุ,Point,เวลา\n';
-      data.forEach((item) => {
-        const time = item.createdAt ? formatThaiDateTime(item.createdAt) : '-';
-        const type = item.points >= 0 ? 'ได้รับแต้ม' : 'ใช้แต้ม';
-        csvContent += `"${type}","${item.sourceLabel}","${item.note || '-'}","${item.points}","${time}"\n`;
-      });
-    }
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    const fileName = `Export_${activeTab === 'learning' ? 'Learning' : 'Points'}_${detail.name}_${formatThaiDateTime(new Date()).replace(/\//g, '-')}.csv`;
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', fileName);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const handlePrint = () => {
@@ -243,6 +220,8 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
         items: [
           { label: 'แผนก', value: detail?.department || '-' },
           { label: 'ระดับ', value: detail?.tier?.name || detail?.tier || '-' },
+          { label: 'ประเภทตำแหน่ง', value: detail?.positionType || '-' },
+          { label: 'หัวหน้างาน', value: detail?.supervisorName || '-' },
           { label: 'ประวัติการศึกษา', value: `${educationHistory.length} รายการ` },
           { label: 'ไฟล์ข้อมูลอื่นๆ', value: `${profileFiles.length} ไฟล์` },
         ],
@@ -364,10 +343,22 @@ sections
                             <span className="text-lg font-black text-slate-700">{detail.position}</span>
                           </div>
                         )}
+                        {detail.positionType && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">ประเภทตำแหน่ง</span>
+                            <span className="text-lg font-black text-slate-700">{detail.positionType}</span>
+                          </div>
+                        )}
                         {detail.tier && (
                           <div className="flex flex-col gap-1">
                             <span className="text-sm font-bold uppercase tracking-wider text-slate-400">ระดับ</span>
                             <span className="text-lg font-black text-slate-700">{detail.tier?.name || detail.tier}</span>
+                          </div>
+                        )}
+                        {detail.supervisorName && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">หัวหน้างาน</span>
+                            <span className="text-lg font-black text-slate-700">{detail.supervisorName}</span>
                           </div>
                         )}
                       </div>

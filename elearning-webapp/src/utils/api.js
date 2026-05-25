@@ -38,7 +38,7 @@ export const getFullUrl = (url) => {
   return url;
 };
 
-export const isSignatureStorageKey = (url) => Boolean(url && !url.startsWith('http') && url.startsWith('signatures/'));
+export const isSignatureStorageKey = (url) => Boolean(url && !url.startsWith('http') && (url.startsWith('signatures/') || url.startsWith('secure/signatures/')));
 
 export const getSignaturePreviewUrl = async (fileKey) => {
   if (!isSignatureStorageKey(fileKey)) return getFullUrl(fileKey);
@@ -210,6 +210,7 @@ export const adminAPI = {
   exportUserProfiles: () => api.get('/admin/users/export-profiles', { responseType: 'blob' }),
   exportUserTrainings: () => api.get('/admin/users/export-trainings', { responseType: 'blob' }),
   getUserDetails: (id) => api.get(`/admin/users/${id}/details`),
+  exportSingleUser: (id) => api.get(`/admin/users/${id}/export`, { responseType: 'blob' }),
   getProfileFileDownloadUrl: (fileKey) => api.get('/upload/profile-file-url', { params: { key: fileKey } }),
   createUser: (data) => api.post('/admin/users', data),
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
@@ -333,6 +334,7 @@ export const adminAPI = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
+  getMediaLibrary: (params) => api.get('/upload/media-library', { params }),
 
   // System Settings
   getSettings: () => api.get('/settings'),

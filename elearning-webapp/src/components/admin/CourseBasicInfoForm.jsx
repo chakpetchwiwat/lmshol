@@ -4,6 +4,7 @@ import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import InstructorPresetPicker from './InstructorPresetPicker';
 import CertificateTemplateSelector from './CertificateTemplateSelector';
+import MediaLibraryModal from '../common/MediaLibraryModal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
 import { adminAPI, getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
@@ -28,6 +29,11 @@ const CourseBasicInfoForm = ({
   readOnly
 }) => {
   const signatureUploadRefs = React.useRef({});
+  const [mediaLibrary, setMediaLibrary] = React.useState({
+    isOpen: false,
+    allowedTypes: 'all',
+    onSelect: null
+  });
 
   const signatureSlots = Array.isArray(courseForm.certificateSignatureSlots) && courseForm.certificateSignatureSlots.length > 0
     ? courseForm.certificateSignatureSlots
@@ -167,31 +173,58 @@ const CourseBasicInfoForm = ({
               <button type="button" onClick={() => imageInputRef.current?.click()} className="btn btn-outline btn-sm flex-1 text-xs" disabled={uploading}>
                 <Upload size={14} /> เปลี่ยนรูป
               </button>
+              <button
+                type="button"
+                onClick={() => setMediaLibrary({
+                  isOpen: true,
+                  allowedTypes: 'image',
+                  onSelect: (file) => setCourseForm({ ...courseForm, image: file.fileUrl })
+                })}
+                className="btn btn-outline btn-sm flex-1 text-xs"
+              >
+                เลือกจากคลังสื่อ
+              </button>
               <button type="button" onClick={() => setCourseForm({ ...courseForm, image: '' })} className="btn btn-outline btn-sm border-danger/30 text-xs text-danger">
                 <Trash2 size={14} /> ลบ
               </button>
             </div>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => imageInputRef.current?.click()}
-            disabled={uploading}
-            className="flex h-40 w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-gray-200 text-gray-400 transition-colors hover:border-primary hover:text-primary"
-          >
+          <div className="flex h-40 w-full flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-gray-200 bg-gray-50/50 text-gray-400 p-4">
             {uploading ? (
-              <>
+              <div className="flex flex-col items-center justify-center gap-2">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/20 border-t-primary"></div>
                 <span className="text-xs font-bold">กำลังอัปโหลด...</span>
-              </>
+              </div>
             ) : (
-              <>
-                <ImageIcon size={32} />
-                <span className="text-xs font-bold">คลิกเพื่ออัปโหลดรูปหน้าปก</span>
-                <span className="text-[10px]">รองรับ JPG, PNG, WebP</span>
-              </>
+              <div className="flex flex-col items-center justify-center gap-2.5">
+                <div className="flex items-center gap-1.5">
+                  <ImageIcon size={24} />
+                  <span className="text-xs font-bold">ยังไม่มีรูปหน้าปกคอร์ส</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => imageInputRef.current?.click()}
+                    className="btn btn-outline btn-sm gap-1 text-xs"
+                  >
+                    <Upload size={12} /> อัปโหลดรูปใหม่
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMediaLibrary({
+                      isOpen: true,
+                      allowedTypes: 'image',
+                      onSelect: (file) => setCourseForm({ ...courseForm, image: file.fileUrl })
+                    })}
+                    className="btn btn-primary btn-sm gap-1 text-xs"
+                  >
+                    เลือกจากคลังสื่อ
+                  </button>
+                </div>
+              </div>
             )}
-          </button>
+          </div>
         )}
       </div>
 
@@ -690,6 +723,17 @@ const CourseBasicInfoForm = ({
                                     />
                                     <button
                                       type="button"
+                                      onClick={() => setMediaLibrary({
+                                        isOpen: true,
+                                        allowedTypes: 'image',
+                                        onSelect: (file) => updateSignatureSlot(index, { signatureImageUrl: file.fileUrl })
+                                      })}
+                                      className="btn btn-outline btn-sm gap-1"
+                                    >
+                                      เลือกจากคลังสื่อ
+                                    </button>
+                                    <button
+                                      type="button"
                                       onClick={() => signatureUploadRefs.current[index]?.click()}
                                       className="btn btn-outline btn-sm gap-1"
                                     >
@@ -730,6 +774,12 @@ const CourseBasicInfoForm = ({
         lessonCount={lessonCount}
         onClose={onClose}
         readOnly={readOnly}
+      />
+      <MediaLibraryModal
+        isOpen={mediaLibrary.isOpen}
+        allowedTypes={mediaLibrary.allowedTypes}
+        onClose={() => setMediaLibrary(prev => ({ ...prev, isOpen: false }))}
+        onSelect={mediaLibrary.onSelect}
       />
     </form>
   );

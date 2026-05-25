@@ -6,6 +6,7 @@ import { compressImage } from '../../utils/imageUtils';
 import { useToast } from '../../context/useToast';
 import SignaturePadModal from '../common/SignaturePadModal';
 import SignatureImage from '../common/SignatureImage';
+import MediaLibraryModal from '../common/MediaLibraryModal';
 
 const getDefaultForm = () => ({
   name: '',
@@ -35,6 +36,11 @@ const InstructorPresetModal = ({
   const [signatureMode, setSignatureMode] = React.useState('upload');
   const [showSignaturePad, setShowSignaturePad] = React.useState(false);
   const [signaturePreviewUrl, setSignaturePreviewUrl] = React.useState('');
+  const [mediaLibrary, setMediaLibrary] = React.useState({
+    isOpen: false,
+    allowedTypes: 'all',
+    onSelect: null
+  });
 
   if (!isOpen) {
     return null;
@@ -268,23 +274,37 @@ const InstructorPresetModal = ({
                 </div>
 
                 <div className="flex-1 space-y-6 overflow-y-auto pr-1 custom-scrollbar">
-                   <div className="flex flex-col sm:flex-row items-start gap-6">
-                        <div className="group relative h-28 w-28 shrink-0 overflow-hidden rounded-[2rem] border-4 border-slate-50 bg-slate-100 shadow-lg">
-                            {form.avatar ? (
-                                <img src={getFullUrl(form.avatar)} alt="Avatar" className="h-full w-full object-cover" />
-                            ) : (
-                                <div className="flex h-full w-full items-center justify-center text-slate-300">
-                                    <UserRound size={40} />
-                                </div>
-                            )}
-                            <button
-                                type="button"
-                                onClick={() => imageInputRef.current?.click()}
-                                className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100"
-                            >
-                                <Upload className="text-white mb-1" size={20} />
-                                <span className="text-[8px] font-black text-white tracking-widest uppercase">Upload</span>
-                            </button>
+                    <div className="flex flex-col sm:flex-row items-start gap-6">
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="group relative h-28 w-28 shrink-0 overflow-hidden rounded-[2rem] border-4 border-slate-50 bg-slate-100 shadow-lg">
+                                {form.avatar ? (
+                                    <img src={getFullUrl(form.avatar)} alt="Avatar" className="h-full w-full object-cover" />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-slate-300">
+                                        <UserRound size={40} />
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex gap-1.5 mt-1">
+                                <button
+                                    type="button"
+                                    onClick={() => imageInputRef.current?.click()}
+                                    className="btn btn-outline btn-xs px-2 py-1 text-[10px]"
+                                >
+                                    อัปโหลด
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setMediaLibrary({
+                                        isOpen: true,
+                                        allowedTypes: 'image',
+                                        onSelect: (file) => setForm(c => ({ ...c, avatar: file.fileUrl }))
+                                    })}
+                                    className="btn btn-outline btn-xs px-2 py-1 text-[10px]"
+                                >
+                                    คลังสื่อ
+                                </button>
+                            </div>
                             <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                         </div>
                         <div className="flex-1 space-y-4 w-full">
@@ -377,14 +397,31 @@ const InstructorPresetModal = ({
                             
                             <div className="flex flex-col gap-2">
                                 {signatureMode === 'upload' ? (
-                                    <button
-                                        type="button"
-                                        onClick={() => signatureFileInputRef.current?.click()}
-                                        className="flex flex-1 flex-col items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 text-slate-400 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all shadow-sm"
-                                    >
-                                        <Upload size={20} />
-                                        <span className="text-[9px] font-black uppercase tracking-wider text-center">Change<br/>File</span>
-                                    </button>
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => signatureFileInputRef.current?.click()}
+                                            className="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all rounded-2xl bg-white border border-slate-200 shadow-sm p-1.5"
+                                        >
+                                            <Upload size={16} />
+                                            <span className="text-[9px] font-black uppercase tracking-wider text-center">อัปโหลด</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setMediaLibrary({
+                                                isOpen: true,
+                                                allowedTypes: 'image',
+                                                onSelect: (file) => {
+                                                    setForm(c => ({ ...c, signatureImageUrl: file.fileUrl }));
+                                                    setSignaturePreviewUrl('');
+                                                }
+                                            })}
+                                            className="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all rounded-2xl bg-white border border-slate-200 shadow-sm p-1.5"
+                                        >
+                                            <PenLine size={16} />
+                                            <span className="text-[9px] font-black uppercase tracking-wider text-center">คลังสื่อ</span>
+                                        </button>
+                                    </>
                                 ) : (
                                     <button
                                         type="button"
@@ -433,6 +470,12 @@ const InstructorPresetModal = ({
         onClose={() => setShowSignaturePad(false)}
         onSave={handleDrawnSignature}
         title={`เซ็นชื่อสำหรับวิทยากร: ${form.name || 'วิทยากรใหม่'}`}
+      />
+      <MediaLibraryModal
+        isOpen={mediaLibrary.isOpen}
+        allowedTypes={mediaLibrary.allowedTypes}
+        onClose={() => setMediaLibrary(prev => ({ ...prev, isOpen: false }))}
+        onSelect={mediaLibrary.onSelect}
       />
     </ModalPortal>
   );

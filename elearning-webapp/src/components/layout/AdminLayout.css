@@ -109,6 +109,10 @@
   margin: 0 auto;
 }
 
+.admin-content-wrapper.wider-page {
+  max-width: 100%;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1024px) {
   .admin-layout {

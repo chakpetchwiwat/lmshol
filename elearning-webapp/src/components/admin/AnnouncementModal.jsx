@@ -3,6 +3,7 @@ import { X, Upload, CheckCircle2, Globe, Users } from 'lucide-react';
 
 import ModalPortal from '../common/ModalPortal';
 import RichTextEditor from '../common/RichTextEditor';
+import MediaLibraryModal from '../common/MediaLibraryModal';
 import QuizBuilder from '../admin/QuizBuilder';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
@@ -23,6 +24,12 @@ const AnnouncementModal = ({
   uploading,
   editorImageUploading = false,
 }) => {
+  const [mediaLibrary, setMediaLibrary] = React.useState({
+    isOpen: false,
+    allowedTypes: 'all',
+    onSelect: null
+  });
+
   // Render specific attachment/content forms based on type
   const renderSourceField = () => {
     switch (form.type) {
@@ -44,20 +51,31 @@ const AnnouncementModal = ({
         return (
           <div>
             <label className="mb-1 block text-sm font-bold text-gray-700">ไฟล์เอกสาร (PDF)</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                className="form-input flex-1"
-                value={form.contentUrl || ''}
-                onChange={(event) => setForm((current) => ({ ...current, contentUrl: event.target.value }))}
-                placeholder="URL ของไฟล์ หรือคลิกอัปโหลด"
-              />
-              <label className="btn btn-outline btn-sm gap-1 cursor-pointer">
-                <Upload size={14} />
-                อัปโหลดเอกสาร
-                <input type="file" accept=".pdf" className="hidden" onChange={onDocUpload} />
-              </label>
-            </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="form-input flex-1"
+                  value={form.contentUrl || ''}
+                  onChange={(event) => setForm((current) => ({ ...current, contentUrl: event.target.value }))}
+                  placeholder="URL ของไฟล์ หรือคลิกอัปโหลด"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMediaLibrary({
+                    isOpen: true,
+                    allowedTypes: 'document',
+                    onSelect: (file) => setForm((current) => ({ ...current, contentUrl: file.fileUrl }))
+                  })}
+                  className="btn btn-outline btn-sm gap-1"
+                >
+                  เลือกจากคลังสื่อ
+                </button>
+                <label className="btn btn-outline btn-sm gap-1 cursor-pointer">
+                  <Upload size={14} />
+                  อัปโหลดเอกสาร
+                  <input type="file" accept=".pdf" className="hidden" onChange={onDocUpload} />
+                </label>
+              </div>
           </div>
         );
       case 'quiz':
@@ -232,6 +250,17 @@ const AnnouncementModal = ({
                       onChange={(event) => setForm((current) => ({ ...current, image: event.target.value }))}
                       placeholder="URL ของภาพหน้าปก"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setMediaLibrary({
+                        isOpen: true,
+                        allowedTypes: 'image',
+                        onSelect: (file) => setForm((current) => ({ ...current, image: file.fileUrl }))
+                      })}
+                      className="btn btn-outline btn-sm gap-1"
+                    >
+                      เลือกจากคลังสื่อ
+                    </button>
                     <label className="btn btn-outline btn-sm gap-1 cursor-pointer">
                       <Upload size={14} />
                       อัปโหลด
@@ -290,6 +319,13 @@ const AnnouncementModal = ({
           </form>
         </div>
       </div>
+      
+      <MediaLibraryModal
+        isOpen={mediaLibrary.isOpen}
+        allowedTypes={mediaLibrary.allowedTypes}
+        onClose={() => setMediaLibrary(prev => ({ ...prev, isOpen: false }))}
+        onSelect={mediaLibrary.onSelect}
+      />
     </ModalPortal>
   );
 };

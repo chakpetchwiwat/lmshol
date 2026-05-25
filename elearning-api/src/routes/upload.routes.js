@@ -52,6 +52,63 @@ const createSecureDocumentSignedUrl = async (fileKey, expiresIn = 900) => {
     return `/api/upload/secure/${token}`;
 };
 
+const scanExistingUploads = async () => {
+    const list = [];
+    const publicDir = path.join(UPLOADS_DIR, 'public');
+    try {
+        await fs.access(publicDir);
+    } catch {
+        return list; // Directory doesn't exist yet
+    }
+
+    const recurse = async (dir) => {
+        const items = await fs.readdir(dir, { withFileTypes: true });
+        for (const item of items) {
+            const fullPath = path.join(dir, item.name);
+            if (item.isDirectory()) {
+                await recurse(fullPath);
+            } else {
+                if (item.name === 'metadata.json') continue;
+                const fileKey = path.relative(UPLOADS_DIR, fullPath).replace(/\\/g, '/');
+                const stat = await fs.stat(fullPath);
+                list.push({
+                    fileKey,
+                    fileUrl: `/uploads/${fileKey}`,
+                    fileName: item.name,
+                    fileMimeType: fileKey.endsWith('.pdf') ? 'application/pdf' : (fileKey.endsWith('.mp3') ? 'audio/mpeg' : 'image/png'),
+                    createdAt: stat.mtime.toISOString()
+                });
+            }
+        }
+    };
+    
+    await recurse(publicDir);
+    // Sort by modified time descending
+    list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return list;
+};
+
+const appendToMediaLibrary = async (record) => {
+    try {
+        const metadataPath = path.join(UPLOADS_DIR, 'metadata.json');
+        let list = [];
+        try {
+            const data = await fs.readFile(metadataPath, 'utf8');
+            list = JSON.parse(data);
+        } catch (e) {
+            try {
+                list = await scanExistingUploads();
+            } catch (scanErr) {
+                list = [];
+            }
+        }
+        list.unshift(record);
+        await fs.writeFile(metadataPath, JSON.stringify(list, null, 2), 'utf8');
+    } catch (err) {
+        console.error('Error writing to media library metadata:', err);
+    }
+};
+
 const uploadToLocalDisk = async (req, res, { forceSubDir, includeSignedUrl = false } = {}) => {
     try {
         if (req.file) {
@@ -82,6 +139,16 @@ const uploadToLocalDisk = async (req, res, { forceSubDir, includeSignedUrl = fal
         await fs.writeFile(absolutePath, req.file.buffer);
 
         const fileUrl = isSensitive ? null : `/uploads/${fileKey}`;
+
+        if (!isSensitive) {
+            await appendToMediaLibrary({
+                fileKey,
+                fileUrl,
+                fileName: req.file.originalname,
+                fileMimeType: req.file.mimetype,
+                createdAt: new Date().toISOString()
+            });
+        }
 
         const payload = {
             message: 'Upload successful!',
@@ -389,6 +456,39 @@ router.get('/secure/:token', async (req, res) => {
         res.sendFile(absolutePath);
     } catch (err) {
         return res.status(403).send('Invalid or expired signed URL');
+    }
+});
+
+// GET /api/upload/media-library - List and search uploaded files
+router.get('/media-library', verifyToken, verifyAdminPanelAccess, async (req, res) => {
+    try {
+        const metadataPath = path.join(UPLOADS_DIR, 'metadata.json');
+        let list = [];
+        try {
+            const data = await fs.readFile(metadataPath, 'utf8');
+            list = JSON.parse(data);
+        } catch (e) {
+            try {
+                list = await scanExistingUploads();
+                // Save the scanned list so next time we don't have to rescan
+                await fs.writeFile(metadataPath, JSON.stringify(list, null, 2), 'utf8');
+            } catch (scanErr) {
+                list = [];
+            }
+        }
+        
+        const search = String(req.query.search || '').trim().toLowerCase();
+        if (search) {
+            list = list.filter(item => 
+                String(item.fileName).toLowerCase().includes(search) ||
+                String(item.fileKey).toLowerCase().includes(search)
+            );
+        }
+        
+        res.json(list);
+    } catch (err) {
+        console.error('Error reading media library:', err);
+        res.status(500).json({ message: 'Failed to read media library', error: err.message });
     }
 });
 

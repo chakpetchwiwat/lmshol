@@ -75,6 +75,15 @@ const exportUserProfiles = asyncHandler(async (req, res) => {
   res.send(buffer);
 });
 
+const exportSingleUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { name, buffer } = await AdminService.exportSingleUser(id, req.user);
+  const safeName = encodeURIComponent(name || 'user');
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="user_history_${safeName}.xlsx"`);
+  res.send(buffer);
+});
+
 const getUserDetails = asyncHandler(async (req, res) => {
   const user = await AdminService.getUserDetails(req.params.id, req.user);
   res.json({ success: true, data: user });
@@ -502,6 +511,7 @@ module.exports = {
   getUsers,
   exportUserProfiles,
   exportUserTrainings,
+  exportSingleUser,
   getUserDetails,
   createUser,
   updateUser,

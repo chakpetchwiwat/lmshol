@@ -18,6 +18,7 @@ router.get('/users', adminController.getUsers);
 router.get('/users/export-profiles', adminController.exportUserProfiles);
 router.get('/users/export-trainings', adminController.exportUserTrainings);
 router.get('/users/:id/details', auditRequest('admin.user_details.viewed', { entityType: 'user', includeBody: false }), adminController.getUserDetails);
+router.get('/users/:id/export', auditRequest('admin.user_export.viewed', { entityType: 'user', includeBody: false }), adminController.exportSingleUser);
 router.get('/users/:id/certificates', verifySuperAdmin, adminController.getUserCertificates);
 router.post('/users/:id/certificates', verifySuperAdmin, auditRequest('admin.user_certificate.created', { entityType: 'userCertificate' }), adminController.createUserCertificate);
 router.put('/users/:id/certificates/:certificateId', verifySuperAdmin, auditRequest('admin.user_certificate.updated', { entityType: 'userCertificate' }), adminController.updateUserCertificate);

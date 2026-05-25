@@ -5,7 +5,7 @@ const crypto = require('crypto');
 
 const p = new PrismaClient();
 
-const file = '/tmp/merged_training_report.xlsx';
+const file = process.argv[2] || '/home/ubuntu/lmsfda/elearning-api/scratch/merged_external_training_deduped.xlsx';
 
 const prefixes = [
   'นางสาว', 'นาง', 'นาย', 'นายแพทย์', 'แพทย์หญิง', 'ดร.', 'นพ.', 'พญ.',
@@ -83,7 +83,7 @@ async function run() {
     return;
   }
   
-  const sheetName = workbook.SheetNames[0];
+  const sheetName = workbook.SheetNames.find(name => name === 'Merged Deduped Data') || workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
   const rawRows = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
   
@@ -130,10 +130,6 @@ async function run() {
     const normName = cleanPrefixAndSpaces(rawName).replace(/\s+/g, '');
     let user = userMap.get(normName);
     if (!user) {
-      if (normName === 'คัคนางค์โตสงวน') user = userMap.get('คัคนางค์ปอแก้ว');
-      if (normName === 'อัญชลีจิตรักนที') user = userMap.get('อัญชลีศรีสวัสดิ์');
-    }
-    if (!user) {
       missingUsers.add(rawName.trim());
     }
   });
@@ -173,11 +169,6 @@ async function run() {
 
     const normName = cleanPrefixAndSpaces(rawName).replace(/\s+/g, '');
     let user = userMap.get(normName);
-    if (!user) {
-      if (normName === 'คัคนางค์โตสงวน') user = userMap.get('คัคนางค์ปอแก้ว');
-      if (normName === 'อัญชลีจิตรักนที') user = userMap.get('อัญชลีศรีสวัสดิ์');
-    }
-
     if (!user) {
       console.error(`User "${rawName}" still not resolved. Skipping.`);
       continue;
