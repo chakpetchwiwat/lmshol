@@ -21,7 +21,8 @@ const truncateString = (value, maxLength = MAX_PROFILE_TEXT_LENGTH) => {
 const normalizeProfileFileKey = (value) => {
     const fileKey = normalizeString(value);
     if (!fileKey) return '';
-    if (!fileKey.startsWith(PROFILE_FILE_KEY_PREFIX) || fileKey.includes('..')) {
+    const isAllowed = fileKey.startsWith('secure/certificates/') || fileKey.startsWith('certificates/');
+    if (!isAllowed || fileKey.includes('..')) {
         throw new Error('Invalid profile file key');
     }
     return fileKey;
