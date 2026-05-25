@@ -164,10 +164,13 @@ const getAssessmentSubmissionDownloadUrl = asyncHandler(async (req, res) => {
 const getLessonDocumentStream = asyncHandler(async (req, res) => {
   const result = await UserService.getLessonDocumentStream(req.params.id, req.query.token);
   const { upstreamResponse, fileName, isLocal, localFilePath } = result;
-  const sanitizedFileName = JSON.stringify(fileName || 'document');
+  
+  const rawFileName = fileName || 'document';
+  const asciiFilename = rawFileName.replace(/[^\x20-\x7E]/g, '_').replace(/"/g, '_');
+  const encodedName = encodeURIComponent(rawFileName);
 
   res.setHeader('Cache-Control', 'private, no-store, max-age=0');
-  res.setHeader('Content-Disposition', `inline; filename=${sanitizedFileName}`);
+  res.setHeader('Content-Disposition', `inline; filename="${asciiFilename}"; filename*=UTF-8''${encodedName}`);
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
 
   if (isLocal) {
@@ -193,10 +196,13 @@ const getLessonDocumentStream = asyncHandler(async (req, res) => {
 const getAnnouncementDocumentStream = asyncHandler(async (req, res) => {
   const result = await UserService.getAnnouncementDocumentStream(req.params.id, req.query.token);
   const { upstreamResponse, fileName, isLocal, localFilePath } = result;
-  const sanitizedFileName = JSON.stringify(fileName || 'document');
+  
+  const rawFileName = fileName || 'document';
+  const asciiFilename = rawFileName.replace(/[^\x20-\x7E]/g, '_').replace(/"/g, '_');
+  const encodedName = encodeURIComponent(rawFileName);
 
   res.setHeader('Cache-Control', 'private, no-store, max-age=0');
-  res.setHeader('Content-Disposition', `inline; filename=${sanitizedFileName}`);
+  res.setHeader('Content-Disposition', `inline; filename="${asciiFilename}"; filename*=UTF-8''${encodedName}`);
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
 
   if (isLocal) {
