@@ -1,5 +1,5 @@
 import React from 'react';
-import { Book, Trophy, Clock, Plus, ImageIcon, Upload, Trash2, FileText, Layers, Users, GraduationCap, Video, Award, CheckCircle2, Building2, PenLine } from 'lucide-react';
+import { Book, Trophy, Clock, Plus, ImageIcon, Upload, Trash2, FileText, Layers, Users, GraduationCap, Video, Award, CheckCircle2, Building2 } from 'lucide-react';
 import OutcomeListEditor from './OutcomeListEditor';
 import BenefitListEditor from './BenefitListEditor';
 import InstructorPresetPicker from './InstructorPresetPicker';
@@ -713,14 +713,15 @@ const CourseBasicInfoForm = ({
                                     className="hidden"
                                     onChange={(event) => handleSignatureUpload(index, event.target.files?.[0])}
                                   />
-                                  <div className="flex gap-2">
+                                  <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_8.75rem]">
                                     <input
                                       type="text"
-                                      className="form-input flex-1 bg-white"
+                                      className="form-input min-w-0 bg-white"
                                       value={slot.signatureImageUrl || ''}
                                       onChange={(event) => updateSignatureSlot(index, { signatureImageUrl: event.target.value })}
                                       placeholder="URL หรือ PNG/WebP 1000 x 300"
                                     />
+                                    <div className="grid gap-2">
                                     <button
                                       type="button"
                                       onClick={() => setMediaLibrary({
@@ -728,18 +729,20 @@ const CourseBasicInfoForm = ({
                                         allowedTypes: 'image',
                                         onSelect: (file) => updateSignatureSlot(index, { signatureImageUrl: file.fileUrl })
                                       })}
-                                      className="btn btn-outline btn-sm gap-1"
+                                      className="btn btn-outline btn-sm min-h-11 w-full justify-center gap-1.5 !rounded-xl px-3 text-center text-[11px] leading-tight whitespace-normal"
                                     >
+                                      <ImageIcon size={14} />
                                       เลือกจากคลังสื่อ
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => signatureUploadRefs.current[index]?.click()}
-                                      className="btn btn-outline btn-sm gap-1"
+                                      className="btn btn-outline btn-sm min-h-11 w-full justify-center gap-1.5 !rounded-xl px-3 text-center text-[11px] leading-tight whitespace-normal"
                                     >
-                                      <PenLine size={14} />
+                                      <Upload size={14} />
                                       อัปโหลด
                                     </button>
+                                    </div>
                                   </div>
                                   {slot.signatureImageUrl && (
                                     <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
