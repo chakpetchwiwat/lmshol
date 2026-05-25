@@ -19,11 +19,35 @@ const LessonModal = ({
   isEditing = false,
 }) => {
   const docInputRef = React.useRef(null);
+  const videoInputRef = React.useRef(null);
+  const [sourceMode, setSourceMode] = React.useState('link');
   const [mediaLibrary, setMediaLibrary] = React.useState({
     isOpen: false,
     allowedTypes: 'all',
     onSelect: null
   });
+
+  React.useEffect(() => {
+    if (isOpen) {
+      const url = lessonForm.contentUrl || '';
+      const isVideo = lessonForm.type === 'video';
+      
+      if (isVideo) {
+        const isMoodleOrYoutube = url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com');
+        if (url && !isMoodleOrYoutube && (url.startsWith('/uploads/') || url.includes('/uploads/'))) {
+          setSourceMode('upload');
+        } else {
+          setSourceMode('link');
+        }
+      } else if (lessonForm.type === 'pdf') {
+        if (url && !url.startsWith('/uploads/') && !url.includes('/uploads/')) {
+          setSourceMode('link');
+        } else {
+          setSourceMode('upload');
+        }
+      }
+    }
+  }, [isOpen, lessonForm.type, lessonForm.contentUrl]);
 
   if (!isOpen) return null;
 
@@ -46,84 +70,202 @@ const LessonModal = ({
   const renderLessonSourceField = () => {
     if (lessonForm.type === 'video') {
       return (
-        <div>
+        <div className="md:col-span-2 space-y-3">
           <label className="mb-1 block text-sm font-bold text-gray-700">
-            ลิงก์วิดีโอ (YouTube / Vimeo)
+            แหล่งที่มาวิดีโอ
           </label>
-          <div className="flex flex-col gap-1.5">
-            <input
-              type="text"
-              className="form-input w-full"
-              value={lessonForm.contentUrl}
-              onChange={(event) => setLessonForm({ ...lessonForm, contentUrl: event.target.value })}
-              placeholder="https://www.youtube.com/watch?v=... หรือ https://vimeo.com/..."
-            />
-            <p className="flex items-center gap-1 text-[10px] text-muted">
-              <Play size={10} /> รองรับลิงก์ YouTube และ Vimeo
-            </p>
+          <div className="flex gap-4 mb-1">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="radio"
+                name="videoSourceMode"
+                value="link"
+                checked={sourceMode === 'link'}
+                onChange={() => setSourceMode('link')}
+                className="h-4 w-4 accent-primary"
+              />
+              <span className="text-sm font-bold text-slate-700">ลิงก์วิดีโอ (YouTube / Vimeo / URL)</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="radio"
+                name="videoSourceMode"
+                value="upload"
+                checked={sourceMode === 'upload'}
+                onChange={() => setSourceMode('upload')}
+                className="h-4 w-4 accent-primary"
+              />
+              <span className="text-sm font-bold text-slate-700">อัปโหลดไฟล์วิดีโอ (MP4/WebM)</span>
+            </label>
           </div>
+
+          {sourceMode === 'link' ? (
+            <div className="flex flex-col gap-1.5">
+              <input
+                type="text"
+                className="form-input w-full"
+                value={lessonForm.contentUrl}
+                onChange={(event) => setLessonForm({ ...lessonForm, contentUrl: event.target.value })}
+                placeholder="https://www.youtube.com/watch?v=... หรือ https://vimeo.com/..."
+              />
+              <p className="flex items-center gap-1 text-[10px] text-muted">
+                <Play size={10} /> รองรับลิงก์ YouTube และ Vimeo หรือ URL วิดีโอโดยตรง
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <input
+                type="file"
+                ref={videoInputRef}
+                onChange={onDocUpload}
+                className="hidden"
+                accept="video/mp4,video/webm,video/ogg"
+              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="form-input flex-1 font-mono text-xs"
+                  value={lessonForm.contentUrl}
+                  onChange={(event) => setLessonForm({ ...lessonForm, contentUrl: event.target.value })}
+                  placeholder="URL หรืออัปโหลดไฟล์วิดีโอ"
+                  readOnly={uploading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setMediaLibrary({
+                    isOpen: true,
+                    allowedTypes: 'video',
+                    onSelect: (file) => setLessonForm({ ...lessonForm, contentUrl: file.fileUrl })
+                  })}
+                  className="btn btn-outline btn-sm shrink-0"
+                >
+                  เลือกจากคลังสื่อ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => videoInputRef.current?.click()}
+                  disabled={uploading}
+                  className="btn btn-outline btn-sm shrink-0 gap-1"
+                >
+                  {uploading ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+                  ) : (
+                    <Upload size={14} />
+                  )}
+                  อัปโหลด
+                </button>
+              </div>
+              {lessonForm.contentUrl && (
+                <p className="flex items-center gap-1 text-[10px] font-bold text-green-600">
+                  <Play size={12} className="text-green-600" /> เลือกวิดีโอแล้ว
+                </p>
+              )}
+            </div>
+          )}
         </div>
       );
     }
 
     if (lessonForm.type === 'pdf') {
       return (
-        <div>
-          <label className="mb-1 block text-sm font-bold text-gray-700">ไฟล์เอกสาร</label>
-          <div className="flex flex-col gap-2">
-            <input
-              type="file"
-              ref={docInputRef}
-              onChange={onDocUpload}
-              className="hidden"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-            />
-            <div className="flex gap-2">
+        <div className="md:col-span-2 space-y-3">
+          <label className="mb-1 block text-sm font-bold text-gray-700">
+            แหล่งที่มาเอกสาร
+          </label>
+          <div className="flex gap-4 mb-1">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="radio"
+                name="pdfSourceMode"
+                value="upload"
+                checked={sourceMode === 'upload'}
+                onChange={() => setSourceMode('upload')}
+                className="h-4 w-4 accent-primary"
+              />
+              <span className="text-sm font-bold text-slate-700">อัปโหลดไฟล์เอกสาร (PDF/Word/Excel)</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="radio"
+                name="pdfSourceMode"
+                value="link"
+                checked={sourceMode === 'link'}
+                onChange={() => setSourceMode('link')}
+                className="h-4 w-4 accent-primary"
+              />
+              <span className="text-sm font-bold text-slate-700">ลิงก์เอกสารภายนอก (Direct URL)</span>
+            </label>
+          </div>
+
+          {sourceMode === 'link' ? (
+            <div className="flex flex-col gap-1.5">
               <input
                 type="text"
-                className="form-input flex-1 font-mono text-xs"
+                className="form-input w-full"
                 value={lessonForm.contentUrl}
                 onChange={(event) => setLessonForm({ ...lessonForm, contentUrl: event.target.value })}
-                placeholder="URL หรืออัปโหลดไฟล์"
-                readOnly={uploading}
+                placeholder="https://example.com/document.pdf"
               />
-              <button
-                type="button"
-                onClick={() => setMediaLibrary({
-                  isOpen: true,
-                  allowedTypes: 'document',
-                  onSelect: (file) => setLessonForm({ ...lessonForm, contentUrl: file.fileUrl })
-                })}
-                className="btn btn-outline btn-sm shrink-0"
-              >
-                เลือกจากคลังสื่อ
-              </button>
-              <button
-                type="button"
-                onClick={() => docInputRef.current?.click()}
-                disabled={uploading}
-                className="btn btn-outline btn-sm shrink-0 gap-1"
-              >
-                {uploading ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-                ) : (
-                  <Upload size={14} />
-                )}
-                อัปโหลด
-              </button>
-            </div>
-            {lessonForm.contentUrl && (
-              <p className="flex items-center gap-1 text-[10px] font-bold text-green-600">
-                <FileText size={12} /> อัปโหลดไฟล์แล้ว
+              <p className="flex items-center gap-1 text-[10px] text-muted">
+                <FileText size={10} /> ระบุลิงก์ตรงไปยังเอกสาร PDF หรือเอกสารอื่น ๆ
               </p>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <input
+                type="file"
+                ref={docInputRef}
+                onChange={onDocUpload}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="form-input flex-1 font-mono text-xs"
+                  value={lessonForm.contentUrl}
+                  onChange={(event) => setLessonForm({ ...lessonForm, contentUrl: event.target.value })}
+                  placeholder="URL หรืออัปโหลดไฟล์"
+                  readOnly={uploading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setMediaLibrary({
+                    isOpen: true,
+                    allowedTypes: 'document',
+                    onSelect: (file) => setLessonForm({ ...lessonForm, contentUrl: file.fileUrl })
+                  })}
+                  className="btn btn-outline btn-sm shrink-0"
+                >
+                  เลือกจากคลังสื่อ
+                </button>
+                <button
+                  type="button"
+                  onClick={() => docInputRef.current?.click()}
+                  disabled={uploading}
+                  className="btn btn-outline btn-sm shrink-0 gap-1"
+                >
+                  {uploading ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+                  ) : (
+                    <Upload size={14} />
+                  )}
+                  อัปโหลด
+                </button>
+              </div>
+              {lessonForm.contentUrl && (
+                <p className="flex items-center gap-1 text-[10px] font-bold text-green-600">
+                  <FileText size={12} /> เลือกเอกสารแล้ว
+                </p>
+              )}
+            </div>
+          )}
         </div>
       );
     }
 
     return (
-      <div className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3">
+      <div className="md:col-span-2 rounded-2xl border border-primary/10 bg-primary/5 px-4 py-3">
         <p className="text-sm font-bold text-primary">บทความจะแสดงจากเนื้อหาด้านล่างเป็นหลัก</p>
         <p className="mt-1 text-xs text-muted">
           คุณสามารถจัดรูปแบบข้อความ ใส่ลิงก์ และปรับสีข้อความได้จาก editor นี้

@@ -1,16 +1,9 @@
 const path = require('path');
-const { createClient } = require('@supabase/supabase-js');
 const jwt = require('jsonwebtoken');
 const ErrorResponse = require('../../utils/errorResponse');
 
 const SUPABASE_BUCKET = 'secure-documents';
-const DOCUMENT_SIGNED_URL_TTL_SECONDS = 90;
 const DOCUMENT_ACCESS_TOKEN_TTL_SECONDS = 120;
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-const supabase = supabaseUrl && supabaseKey
-    ? createClient(supabaseUrl, supabaseKey)
-    : null;
 
 const isProtectedDocumentLesson = (lesson) => (
     !!lesson?.contentUrl && !['video', 'quiz'].includes(String(lesson?.type || '').toLowerCase())
@@ -139,27 +132,70 @@ const getDocumentPreviewMeta = (documentRef) => {
     };
 };
 
+const fs = require('fs/promises');
+const UPLOADS_DIR = process.env.NODE_ENV === 'production' ? '/var/www/html/uploads' : path.join(__dirname, '../../../uploads');
+
+const resolveLocalPath = async (bucket, storagePath) => {
+    let possiblePaths = [
+        path.join(UPLOADS_DIR, storagePath),
+    ];
+    
+    if (!storagePath.startsWith('secure/') && !storagePath.startsWith('public/')) {
+        possiblePaths.push(path.join(UPLOADS_DIR, 'secure', storagePath));
+        possiblePaths.push(path.join(UPLOADS_DIR, 'public', storagePath));
+    }
+    
+    if (bucket && bucket !== 'secure-documents') {
+        possiblePaths.push(path.join(UPLOADS_DIR, bucket, storagePath));
+    }
+
+    let cleanPath = storagePath;
+    if (cleanPath.startsWith('/uploads/')) {
+        cleanPath = cleanPath.replace(/^\/uploads\//, '');
+    } else if (cleanPath.startsWith('uploads/')) {
+        cleanPath = cleanPath.replace(/^uploads\//, '');
+    }
+    possiblePaths.push(path.join(UPLOADS_DIR, cleanPath));
+
+    for (const p of possiblePaths) {
+        try {
+            await fs.access(p);
+            return p;
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    return possiblePaths[0];
+};
+
 const getDocumentUpstreamResponse = async (documentAccessPayload) => {
     const { bucket, path: storagePath, sourceUrl } = documentAccessPayload || {};
     let upstreamUrl = '';
     let fileName = 'document';
 
     if (storagePath) {
-        if (!supabase) {
-            throw new ErrorResponse('Secure document storage is unavailable', 500);
-        }
-
-        const { data, error } = await supabase.storage
-            .from(bucket || SUPABASE_BUCKET)
-            .createSignedUrl(storagePath, DOCUMENT_SIGNED_URL_TTL_SECONDS);
-
-        if (error || !data?.signedUrl) {
-            throw new ErrorResponse('Unable to create secure document access', 500);
-        }
-
-        upstreamUrl = data.signedUrl;
+        const localFilePath = await resolveLocalPath(bucket || SUPABASE_BUCKET, storagePath);
         fileName = getDocumentFilename(storagePath);
+        return {
+            isLocal: true,
+            localFilePath,
+            fileName
+        };
     } else if (sourceUrl) {
+        const isSupabase = sourceUrl.includes('.supabase.co/storage/v1/object/');
+        if (isSupabase) {
+            const storageRef = getStorageObjectRefFromContentUrl(sourceUrl);
+            if (storageRef?.path) {
+                const localFilePath = await resolveLocalPath(storageRef.bucket, storageRef.path);
+                fileName = getDocumentFilename(storageRef.path);
+                return {
+                    isLocal: true,
+                    localFilePath,
+                    fileName
+                };
+            }
+        }
         upstreamUrl = sourceUrl;
         fileName = getDocumentFilename(sourceUrl);
     } else {

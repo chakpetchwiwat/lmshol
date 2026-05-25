@@ -2,7 +2,6 @@ const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 const sharp = require('sharp');
-const supabase = require('../../utils/supabase');
 const { getTemplateById } = require('../../config/certificateTemplates');
 
 const PDFDocument = require('pdfkit');
@@ -31,83 +30,97 @@ async function loadThaiFont() {
 /**
  * Standardizes relative storage paths into absolute URLs
  */
-const getFullUrl = (url) => {
-  if (!url) return null;
-  if (url.startsWith('http')) return url;
-  
-  const supabaseUrl = process.env.SUPABASE_URL;
-  if (!supabaseUrl) return url;
-  
-  // Case 1: Already has storage prefix
-  if (url.startsWith('/storage/v1/object/public/')) {
-    return `${supabaseUrl}${url}`;
-  }
-
-  // Case 2: Starts with /uploads (common in our DB)
-  if (url.startsWith('/uploads/')) {
-    return `${supabaseUrl}/storage/v1/object/public${url}`;
-  }
-
-  // Case 3: Starts with uploads/ (no leading slash)
-  if (url.startsWith('uploads/')) {
-    return `${supabaseUrl}/storage/v1/object/public/${url}`;
-  }
-  
-  // Case 4: Just a relative path or filename
-  const cleanPath = url.startsWith('/') ? url.slice(1) : url;
-  return `${supabaseUrl}/storage/v1/object/public/uploads/${cleanPath}`;
-};
+const UPLOADS_DIR = process.env.NODE_ENV === 'production' ? '/var/www/html/uploads' : path.join(__dirname, '../../../uploads');
 
 async function loadImageBuffer(imageUrl) {
-  if (imageUrl && !imageUrl.startsWith('http') && imageUrl.startsWith('signatures/')) {
-    try {
-      const { data, error } = await supabase.storage
-        .from('secure-documents')
-        .download(imageUrl);
+  if (!imageUrl) return null;
 
-      if (error || !data) {
-        throw error || new Error('No signature data returned from storage');
+  // 1. Identify if it can be resolved locally
+  let isLocal = false;
+  let relativePath = '';
+
+  if (!imageUrl.startsWith('http')) {
+    isLocal = true;
+    if (imageUrl.startsWith('/uploads/')) {
+      relativePath = imageUrl.replace(/^\/uploads\//, '');
+    } else if (imageUrl.startsWith('uploads/')) {
+      relativePath = imageUrl.replace(/^uploads\//, '');
+    } else if (imageUrl.startsWith('signatures/')) {
+      relativePath = 'secure/' + imageUrl;
+    } else {
+      relativePath = imageUrl;
+    }
+  } else {
+    // Check if it's a Supabase URL pointing to our files (e.g. from migrated DB records)
+    const isSupabase = imageUrl.includes('.supabase.co/storage/v1/object/');
+    if (isSupabase) {
+      try {
+        const parsedUrl = new URL(imageUrl);
+        const match = parsedUrl.pathname.match(/\/storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)$/);
+        if (match) {
+          isLocal = true;
+          let decodedPath = decodeURIComponent(match[2]);
+          if (match[1] === 'secure-documents') {
+            relativePath = 'secure/' + decodedPath;
+          } else {
+            if (decodedPath.startsWith('uploads/')) {
+              decodedPath = decodedPath.replace(/^uploads\//, '');
+            }
+            relativePath = decodedPath;
+          }
+        }
+      } catch (err) {
+        // Ignore and fallback to axios fetch
+      }
+    }
+  }
+
+  if (isLocal) {
+    try {
+      const fsPromises = require('fs/promises');
+      const absolutePath = path.join(UPLOADS_DIR, relativePath);
+      const imageBuffer = await fsPromises.readFile(absolutePath);
+      
+      const isPngOrJpeg = /\.(png|jpe?g)$/i.test(relativePath);
+      if (isPngOrJpeg) {
+        return imageBuffer;
+      }
+      return await sharp(imageBuffer).png().toBuffer();
+    } catch (error) {
+      console.warn(`[CertificatePdf] Failed to load local file directly: ${imageUrl} (resolved to ${relativePath}) | Error: ${error.message}`);
+    }
+  }
+
+  // 2. Fetch remote URLs (e.g. external logos, non-Supabase URLs)
+  if (imageUrl.startsWith('http')) {
+    try {
+      const response = await axios.get(imageUrl, { 
+        responseType: 'arraybuffer', 
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+        }
+      });
+      const imageBuffer = Buffer.from(response.data);
+      const contentType = String(response.headers?.['content-type'] || '').toLowerCase();
+      const isPdfKitNativeImage = contentType.includes('image/png')
+        || contentType.includes('image/jpeg')
+        || contentType.includes('image/jpg')
+        || /\.(png|jpe?g)(\?|$)/i.test(imageUrl);
+
+      if (isPdfKitNativeImage) {
+        return imageBuffer;
       }
 
-      const arrayBuffer = await data.arrayBuffer();
-      const imageBuffer = Buffer.from(arrayBuffer);
-      return /\.(png|jpe?g)$/i.test(imageUrl)
-        ? imageBuffer
-        : await sharp(imageBuffer).png().toBuffer();
+      return await sharp(imageBuffer).png().toBuffer();
     } catch (error) {
-      console.warn(`[CertificatePdf] Failed to load private signature: ${imageUrl} | Error: ${error.message}`);
+      console.warn(`[CertificatePdf] Failed to load remote image: ${imageUrl} | Error: ${error.message}`);
       return null;
     }
   }
 
-  const absoluteUrl = getFullUrl(imageUrl);
-  if (!absoluteUrl) return null;
-
-  try {
-    const response = await axios.get(absoluteUrl, { 
-      responseType: 'arraybuffer', 
-      timeout: 15000,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
-      }
-    });
-    const imageBuffer = Buffer.from(response.data);
-    const contentType = String(response.headers?.['content-type'] || '').toLowerCase();
-    const isPdfKitNativeImage = contentType.includes('image/png')
-      || contentType.includes('image/jpeg')
-      || contentType.includes('image/jpg')
-      || /\.(png|jpe?g)(\?|$)/i.test(absoluteUrl);
-
-    if (isPdfKitNativeImage) {
-      return imageBuffer;
-    }
-
-    return await sharp(imageBuffer).png().toBuffer();
-  } catch (error) {
-    console.warn(`[CertificatePdf] Failed to load image: ${absoluteUrl} | Error: ${error.message}`);
-    return null;
-  }
+  return null;
 }
 
 /**
@@ -402,40 +415,21 @@ async function generatePdfBuffer(_html, options = {}) {
  * Uploads the certificate PDF buffer to local storage (or Supabase if not production).
  */
 async function uploadCertificatePdf({ buffer, userId, certificateId }) {
-  if (process.env.NODE_ENV === 'production') {
-    const fs = require('fs/promises');
-    const path = require('path');
-    
-    // Save to /var/www/html/uploads/certificates/...
-    const relativePath = `certificates/${userId}/${certificateId}/${Date.now()}.pdf`;
-    const fullPath = path.join('/var/www/html/uploads', relativePath);
-    
-    // Ensure directory exists
-    await fs.mkdir(path.dirname(fullPath), { recursive: true });
-    
-    // Write file
-    await fs.writeFile(fullPath, buffer);
-    
-    // Return the local URL
-    return `/uploads/${relativePath}`;
-  } else {
-    // Fallback for local development if still using Supabase
-    const bucketName = 'uploads';
-    const filePath = `certificates/${userId}/${certificateId}/${Date.now()}.pdf`;
-
-    const { error } = await supabase.storage
-      .from(bucketName)
-      .upload(filePath, buffer, {
-        contentType: 'application/pdf',
-        cacheControl: '60',
-        upsert: false
-      });
-
-    if (error) throw new Error(`Failed to upload to Supabase Storage: ${error.message}`);
-
-    const { data: { publicUrl } } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-    return publicUrl;
-  }
+  const fsPromises = require('fs/promises');
+  const path = require('path');
+  
+  // Save to UPLOADS_DIR/secure/certificates/...
+  const relativePath = `secure/certificates/${userId}/${certificateId}/${Date.now()}.pdf`;
+  const fullPath = path.join(UPLOADS_DIR, relativePath);
+  
+  // Ensure directory exists
+  await fsPromises.mkdir(path.dirname(fullPath), { recursive: true });
+  
+  // Write file
+  await fsPromises.writeFile(fullPath, buffer);
+  
+  // Return the local URL path
+  return `/uploads/${relativePath}`;
 }
 
 module.exports = {

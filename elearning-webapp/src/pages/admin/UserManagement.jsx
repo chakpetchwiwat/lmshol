@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Settings2, Sparkles, Users } from 'lucide-react';
+import { Plus, Settings2, Sparkles, Users, ChevronDown, FileDown, Upload } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import UserModal from '../../components/admin/UserModal';
@@ -7,6 +7,7 @@ import ReferenceDataModal from '../../components/admin/ReferenceDataModal';
 import DepartmentSubdivisionModal from '../../components/admin/DepartmentSubdivisionModal';
 import PositionManagementModal from '../../components/admin/PositionManagementModal';
 import UserDetailModal from '../../components/admin/UserDetailModal';
+import ImportModal from '../../components/admin/ImportModal';
 import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { canEditAdminUsers } from '../../utils/roles';
 import { useToast } from '../../context/useToast';
@@ -138,6 +139,10 @@ const UserManagement = () => {
   const [uploadingProfileFile, setUploadingProfileFile] = React.useState(false);
   const [savingCertificate, setSavingCertificate] = React.useState(false);
   const [uploadingCertificate, setUploadingCertificate] = React.useState(false);
+  const [showExportDropdown, setShowExportDropdown] = React.useState(false);
+  const [showImportDropdown, setShowImportDropdown] = React.useState(false);
+  const [importModalOpen, setImportModalOpen] = React.useState(false);
+  const [importModalType, setImportModalType] = React.useState('profiles');
 
   const currentUser = React.useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const canEditUsers = canEditAdminUsers(currentUser);
@@ -580,16 +585,137 @@ const UserManagement = () => {
                   <Users size={18} />
                   จัดการ Role
                 </button>
-                <div className="flex gap-2 bg-slate-50 p-1 rounded-xl border border-slate-200">
+                {/* Export Excel Dropdown */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowExportDropdown(!showExportDropdown)}
+                    className="btn btn-outline border-sky-200 bg-white text-sky-700 hover:bg-sky-50 hover:border-sky-300 shadow-sm flex items-center gap-1.5"
+                  >
+                    <FileDown size={18} />
+                    <span>Export Excel</span>
+                    <ChevronDown size={14} className={`transition-transform duration-200 ${showExportDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                  {showExportDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setShowExportDropdown(false)} />
+                      <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl z-20">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowExportDropdown(false);
+                            handleExportProfiles();
+                          }}
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"
+                        >
+                          Export ประวัติผู้เรียน
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowExportDropdown(false);
+                            handleExportTrainings();
+                          }}
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"
+                        >
+                          Export ประวัติอบรม
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
 
-                  <button type="button" onClick={handleExportProfiles} className="btn btn-outline border-sky-200 bg-white text-sky-700 hover:bg-sky-50 hover:border-sky-300 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Export ข้อมูลผู้ใช้งาน
+                {/* Import Excel Dropdown */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowImportDropdown(!showImportDropdown)}
+                    className="btn btn-outline border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 shadow-sm flex items-center gap-1.5"
+                  >
+                    <Upload size={18} />
+                    <span>Import Excel</span>
+                    <ChevronDown size={14} className={`transition-transform duration-200 ${showImportDropdown ? 'rotate-180' : ''}`} />
                   </button>
-                  <button type="button" onClick={handleExportTrainings} className="btn btn-outline border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Export ประวัติอบรม
-                  </button>
+                  {showImportDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setShowImportDropdown(false)} />
+                      <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl z-20">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowImportDropdown(false);
+                            setImportModalType('profiles');
+                            setImportModalOpen(true);
+                          }}
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"
+                        >
+                          Import ประวัติผู้เรียน
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowImportDropdown(false);
+                            setImportModalType('trainings');
+                            setImportModalOpen(true);
+                          }}
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"
+                        >
+                          Import ประวัติอบรม
+                        </button>
+                        <div className="my-1 border-t border-slate-100" />
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setShowImportDropdown(false);
+                            try {
+                              toast.info('กำลังดาวน์โหลดแบบฟอร์ม...');
+                              const response = await adminAPI.downloadTemplate('profiles');
+                              const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                              const url = window.URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.setAttribute('download', 'แบบฟอร์ม_ประวัติผู้เรียน.xlsx');
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              toast.success('ดาวน์โหลดแบบฟอร์มสำเร็จ');
+                            } catch (e) {
+                              toast.error('ดาวน์โหลดแบบฟอร์มไม่สำเร็จ');
+                            }
+                          }}
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-500 hover:bg-slate-50"
+                        >
+                          <FileDown size={14} className="text-slate-400" />
+                          Template ประวัติผู้เรียน
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setShowImportDropdown(false);
+                            try {
+                              toast.info('กำลังดาวน์โหลดแบบฟอร์ม...');
+                              const response = await adminAPI.downloadTemplate('trainings');
+                              const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                              const url = window.URL.createObjectURL(blob);
+                              const link = document.createElement('a');
+                              link.href = url;
+                              link.setAttribute('download', 'แบบฟอร์ม_ประวัติอบรม.xlsx');
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              toast.success('ดาวน์โหลดแบบฟอร์มสำเร็จ');
+                            } catch (e) {
+                              toast.error('ดาวน์โหลดแบบฟอร์มไม่สำเร็จ');
+                            }
+                          }}
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-500 hover:bg-slate-50"
+                        >
+                          <FileDown size={14} className="text-slate-400" />
+                          Template ประวัติอบรม
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
@@ -715,6 +841,12 @@ const UserManagement = () => {
           cohortRoles={cohortRoles}
         />
       </div>
+      <ImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        type={importModalType}
+        onImportSuccess={fetchUsers}
+      />
       <ConfirmDialog {...ConfirmDialogProps} />
     </div>
   );

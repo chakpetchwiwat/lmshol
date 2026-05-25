@@ -108,7 +108,7 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
       link.href = url;
       
       const sanitizedName = String(detail.name || 'user').trim().replace(/[\s/\\:*?"<>|]+/g, '_');
-      link.setAttribute('download', `ประวัติการอบรม_${sanitizedName}.xlsx`);
+      link.setAttribute('download', `ประวัติผู้เรียน_${sanitizedName}.xlsx`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

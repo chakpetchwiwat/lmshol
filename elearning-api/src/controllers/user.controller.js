@@ -162,39 +162,61 @@ const getAssessmentSubmissionDownloadUrl = asyncHandler(async (req, res) => {
 });
 
 const getLessonDocumentStream = asyncHandler(async (req, res) => {
-  const { upstreamResponse, fileName } = await UserService.getLessonDocumentStream(req.params.id, req.query.token);
-  const contentType = upstreamResponse.headers.get('content-type') || 'application/octet-stream';
-  const contentLength = upstreamResponse.headers.get('content-length');
+  const result = await UserService.getLessonDocumentStream(req.params.id, req.query.token);
+  const { upstreamResponse, fileName, isLocal, localFilePath } = result;
   const sanitizedFileName = JSON.stringify(fileName || 'document');
 
-  res.setHeader('Content-Type', contentType);
   res.setHeader('Cache-Control', 'private, no-store, max-age=0');
   res.setHeader('Content-Disposition', `inline; filename=${sanitizedFileName}`);
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
 
-  if (contentLength) {
-    res.setHeader('Content-Length', contentLength);
+  if (isLocal) {
+    res.sendFile(localFilePath, (err) => {
+      if (err) {
+        console.error('Error sending local lesson document:', err);
+        if (!res.headersSent) {
+          res.status(404).send('File not found');
+        }
+      }
+    });
+  } else {
+    const contentType = upstreamResponse.headers.get('content-type') || 'application/octet-stream';
+    const contentLength = upstreamResponse.headers.get('content-length');
+    res.setHeader('Content-Type', contentType);
+    if (contentLength) {
+      res.setHeader('Content-Length', contentLength);
+    }
+    Readable.fromWeb(upstreamResponse.body).pipe(res);
   }
-
-  Readable.fromWeb(upstreamResponse.body).pipe(res);
 });
 
 const getAnnouncementDocumentStream = asyncHandler(async (req, res) => {
-  const { upstreamResponse, fileName } = await UserService.getAnnouncementDocumentStream(req.params.id, req.query.token);
-  const contentType = upstreamResponse.headers.get('content-type') || 'application/octet-stream';
-  const contentLength = upstreamResponse.headers.get('content-length');
+  const result = await UserService.getAnnouncementDocumentStream(req.params.id, req.query.token);
+  const { upstreamResponse, fileName, isLocal, localFilePath } = result;
   const sanitizedFileName = JSON.stringify(fileName || 'document');
 
-  res.setHeader('Content-Type', contentType);
   res.setHeader('Cache-Control', 'private, no-store, max-age=0');
   res.setHeader('Content-Disposition', `inline; filename=${sanitizedFileName}`);
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
 
-  if (contentLength) {
-    res.setHeader('Content-Length', contentLength);
+  if (isLocal) {
+    res.sendFile(localFilePath, (err) => {
+      if (err) {
+        console.error('Error sending local announcement document:', err);
+        if (!res.headersSent) {
+          res.status(404).send('File not found');
+        }
+      }
+    });
+  } else {
+    const contentType = upstreamResponse.headers.get('content-type') || 'application/octet-stream';
+    const contentLength = upstreamResponse.headers.get('content-length');
+    res.setHeader('Content-Type', contentType);
+    if (contentLength) {
+      res.setHeader('Content-Length', contentLength);
+    }
+    Readable.fromWeb(upstreamResponse.body).pipe(res);
   }
-
-  Readable.fromWeb(upstreamResponse.body).pipe(res);
 });
 
 const getNotifications = asyncHandler(async (req, res) => {

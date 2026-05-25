@@ -1,7 +1,6 @@
 const express = require('express');
 const multer = require('multer');
 const crypto = require('crypto');
-const supabase = require('../config/supabase');
 const path = require('path');
 const { getSecurityConfig } = require('../config/security');
 const { verifyToken, verifyAdminPanelAccess } = require('../middleware/auth');
@@ -71,11 +70,26 @@ const scanExistingUploads = async () => {
                 if (item.name === 'metadata.json') continue;
                 const fileKey = path.relative(UPLOADS_DIR, fullPath).replace(/\\/g, '/');
                 const stat = await fs.stat(fullPath);
+                let fileMimeType = 'image/png';
+                const lowerKey = fileKey.toLowerCase();
+                if (lowerKey.endsWith('.pdf')) fileMimeType = 'application/pdf';
+                else if (lowerKey.endsWith('.mp3')) fileMimeType = 'audio/mpeg';
+                else if (lowerKey.endsWith('.mp4')) fileMimeType = 'video/mp4';
+                else if (lowerKey.endsWith('.webm')) fileMimeType = 'video/webm';
+                else if (lowerKey.endsWith('.webp')) fileMimeType = 'image/webp';
+                else if (lowerKey.endsWith('.jpg') || lowerKey.endsWith('.jpeg')) fileMimeType = 'image/jpeg';
+                else if (lowerKey.endsWith('.gif')) fileMimeType = 'image/gif';
+                else if (lowerKey.endsWith('.svg')) fileMimeType = 'image/svg+xml';
+                else if (lowerKey.endsWith('.doc')) fileMimeType = 'application/msword';
+                else if (lowerKey.endsWith('.docx')) fileMimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                else if (lowerKey.endsWith('.xls')) fileMimeType = 'application/vnd.ms-excel';
+                else if (lowerKey.endsWith('.xlsx')) fileMimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
                 list.push({
                     fileKey,
                     fileUrl: `/uploads/${fileKey}`,
                     fileName: item.name,
-                    fileMimeType: fileKey.endsWith('.pdf') ? 'application/pdf' : (fileKey.endsWith('.mp3') ? 'audio/mpeg' : 'image/png'),
+                    fileMimeType,
                     createdAt: stat.mtime.toISOString()
                 });
             }
@@ -455,11 +469,32 @@ router.get('/secure/:token', async (req, res) => {
         
         // Prevent path traversal
         const normalizedKey = path.normalize(fileKey).replace(/^(\.\.(\/|\\|$))+/, '');
-        const absolutePath = path.join(UPLOADS_DIR, normalizedKey);
+        let absolutePath = path.join(UPLOADS_DIR, normalizedKey);
         
-        // Ensure it only serves from secure folder
-        if (!absolutePath.includes(path.join('secure', ''))) {
+        // Ensure it only serves from allowed secure/private directories to prevent arbitrary file read
+        const isAllowedPath = 
+            absolutePath.includes(path.join('secure', '')) ||
+            absolutePath.includes(path.join('certificates', '')) ||
+            absolutePath.includes(path.join('assessments', '')) ||
+            absolutePath.includes(path.join('signatures', ''));
+            
+        if (!isAllowedPath) {
             return res.status(403).send('Forbidden access to non-secure directory');
+        }
+
+        // Try local file exists check, fallback to prepended secure/ if it's a migrated bucket file
+        try {
+            await fs.access(absolutePath);
+        } catch (e) {
+            if (!normalizedKey.startsWith('secure/') && !normalizedKey.startsWith('secure\\')) {
+                const fallbackPath = path.join(UPLOADS_DIR, 'secure', normalizedKey);
+                try {
+                    await fs.access(fallbackPath);
+                    absolutePath = fallbackPath;
+                } catch (fallbackErr) {
+                    // Let res.sendFile handle error naturally
+                }
+            }
         }
 
         if (originalName) {

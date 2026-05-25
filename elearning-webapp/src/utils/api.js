@@ -212,6 +212,12 @@ export const adminAPI = {
   getUserDetails: (id) => api.get(`/admin/users/${id}/details`),
   exportSingleUser: (id) => api.get(`/admin/users/${id}/export`, { responseType: 'blob' }),
   getProfileFileDownloadUrl: (fileKey) => api.get('/upload/profile-file-url', { params: { key: fileKey } }),
+  downloadTemplate: (type) => api.get(`/admin/users/templates/${type}`, { responseType: 'blob' }),
+  importUsers: (type, formData) => api.post(`/admin/users/import/${type}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  }),
   createUser: (data) => api.post('/admin/users', data),
   updateUser: (id, data) => api.put(`/admin/users/${id}`, data),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),

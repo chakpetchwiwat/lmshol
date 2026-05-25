@@ -43,14 +43,17 @@ const MediaLibraryModal = ({ isOpen, onClose, onSelect, allowedTypes = 'all' }) 
   const filteredItems = items.filter((item) => {
     const mime = String(item.fileMimeType || '').toLowerCase();
     const isImage = mime.startsWith('image/');
+    const isVideo = mime.startsWith('video/');
     
     // Check type constraints (e.g. if allowedTypes is 'image', only show images)
     if (allowedTypes === 'image' && !isImage) return false;
-    if (allowedTypes === 'document' && isImage) return false;
+    if (allowedTypes === 'video' && !isVideo) return false;
+    if (allowedTypes === 'document' && (isImage || isVideo)) return false;
 
     // Apply quick filters
     if (filterType === 'image') return isImage;
-    if (filterType === 'document') return !isImage;
+    if (filterType === 'video') return isVideo;
+    if (filterType === 'document') return (!isImage && !isVideo);
     return true;
   });
 
@@ -164,6 +167,15 @@ const MediaLibraryModal = ({ isOpen, onClose, onSelect, allowedTypes = 'all' }) 
                   </button>
                   <button
                     type="button"
+                    onClick={() => setFilterType('video')}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                      filterType === 'video' ? 'bg-white text-primary shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    วิดีโอ
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setFilterType('document')}
                     className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                       filterType === 'document' ? 'bg-white text-primary shadow-sm' : 'text-slate-600 hover:text-slate-900'
@@ -184,7 +196,15 @@ const MediaLibraryModal = ({ isOpen, onClose, onSelect, allowedTypes = 'all' }) 
                 <span>อัปโหลดใหม่</span>
                 <input
                   type="file"
-                  accept={allowedTypes === 'image' ? 'image/*' : (allowedTypes === 'document' ? '.pdf' : '*')}
+                  accept={
+                    allowedTypes === 'image'
+                      ? 'image/*'
+                      : allowedTypes === 'video'
+                      ? 'video/*'
+                      : allowedTypes === 'document'
+                      ? '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt'
+                      : '*'
+                  }
                   className="hidden"
                   onChange={handleFileUpload}
                   disabled={uploading}
@@ -220,6 +240,7 @@ const MediaLibraryModal = ({ isOpen, onClose, onSelect, allowedTypes = 'all' }) 
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {filteredItems.map((item) => {
                   const isImage = String(item.fileMimeType || '').startsWith('image/');
+                  const isVideo = String(item.fileMimeType || '').startsWith('video/');
                   const isSelected = selectedItem?.fileKey === item.fileKey;
 
                   return (
@@ -249,10 +270,15 @@ const MediaLibraryModal = ({ isOpen, onClose, onSelect, allowedTypes = 'all' }) 
                             className="h-full w-full object-cover transition-transform group-hover:scale-105"
                             loading="lazy"
                           />
+                        ) : isVideo ? (
+                          <div className="flex flex-col items-center justify-center gap-1 text-slate-400">
+                            <Play size={32} />
+                            <span className="text-[9px] uppercase tracking-wider font-bold">VIDEO</span>
+                          </div>
                         ) : (
                           <div className="flex flex-col items-center justify-center gap-1 text-slate-400">
                             <FileText size={32} />
-                            <span className="text-[9px] uppercase tracking-wider font-bold">PDF</span>
+                            <span className="text-[9px] uppercase tracking-wider font-bold">DOCUMENT</span>
                           </div>
                         )}
                       </div>

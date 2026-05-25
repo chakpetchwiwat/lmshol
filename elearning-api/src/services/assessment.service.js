@@ -1,5 +1,5 @@
 const prisma = require('../utils/prisma');
-const supabase = require('../config/supabase');
+const jwt = require('jsonwebtoken');
 const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
 const { ASSESSMENT_SUBMISSION_STATUS } = require('../utils/constants/statuses');
 const { completeLessonAndRefreshCourse } = require('./user/user.progress');
@@ -219,15 +219,25 @@ const getSubmissionDownloadUrl = async (actor, submissionId) => {
     throw new Error('No assessment file attached');
   }
 
-  const { data, error } = await supabase.storage
-    .from('secure-documents')
-    .createSignedUrl(submission.fileKey, 3600);
-
-  if (error || !data?.signedUrl) {
-    throw new Error(`Unable to create assessment download URL: ${error?.message || 'unknown error'}`);
+  let cleanFileKey = submission.fileKey;
+  if (cleanFileKey.startsWith('/uploads/')) {
+    cleanFileKey = cleanFileKey.replace(/^\/uploads\//, '');
+  } else if (cleanFileKey.startsWith('uploads/')) {
+    cleanFileKey = cleanFileKey.replace(/^uploads\//, '');
   }
 
-  return { url: data.signedUrl };
+  if (!cleanFileKey.startsWith('secure/') && !cleanFileKey.startsWith('public/')) {
+    cleanFileKey = 'secure/' + cleanFileKey;
+  }
+
+  const token = jwt.sign(
+    { fileKey: cleanFileKey, originalName: submission.fileName || 'submission.zip' },
+    process.env.JWT_SECRET,
+    { expiresIn: 3600 }
+  );
+  const signedUrl = `/api/upload/secure/${token}`;
+
+  return { url: signedUrl };
 };
 
 const listCourseAssessmentSubmissions = async (actor, courseId) => {

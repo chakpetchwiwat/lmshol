@@ -458,35 +458,28 @@ async function createCertificateSignedUrl({ certificateId, requester }) {
 
   if (!hasAccess) throw new ErrorResponse('Forbidden: You do not have permission to access this certificate', 403);
 
-  if (cert.pdfUrl.startsWith('/uploads/')) {
-    return {
-      url: `${process.env.API_URL || ''}${cert.pdfUrl}`,
-      expiresIn: 3600
-    };
+  let cleanFileKey = cert.pdfUrl;
+  if (cleanFileKey.startsWith('http')) {
+    const { path: storagePath } = extractStoragePath(cleanFileKey);
+    cleanFileKey = storagePath;
+  }
+  
+  if (cleanFileKey.startsWith('/uploads/')) {
+    cleanFileKey = cleanFileKey.replace(/^\/uploads\//, '');
+  } else if (cleanFileKey.startsWith('uploads/')) {
+    cleanFileKey = cleanFileKey.replace(/^uploads\//, '');
   }
 
-  const supabase = require('../../utils/supabase');
-  const { bucket, path: storagePath } = extractStoragePath(cert.pdfUrl);
-  const expiresIn = parseInt(process.env.CERTIFICATE_SIGNED_URL_EXPIRES_SECONDS || '300', 10);
-
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .createSignedUrl(storagePath, expiresIn);
-
-  if (error) {
-    console.error(`[Certificate] Signed URL failed | id=${certificateId} | bucket=${bucket} | path=${storagePath}:`, error);
-    throw new Error(`Storage Error: ${error.message} (Bucket: ${bucket})`);
-  }
-
-  if (!data?.signedUrl) {
-    throw new Error('Storage Error: Failed to retrieve signed URL from Supabase');
-  }
-
-  console.log(`[Certificate] download_url.created | id=${certificateId} | user=${requesterId} | bucket=${bucket}`);
-
+  const jwt = require('jsonwebtoken');
+  const token = jwt.sign(
+    { fileKey: cleanFileKey, originalName: cert.metadata?.course?.title ? `${cert.metadata.course.title}.pdf` : 'certificate.pdf' },
+    process.env.JWT_SECRET,
+    { expiresIn: 3600 }
+  );
+  
   return {
-    url: data.signedUrl,
-    expiresIn
+    url: `/api/upload/secure/${token}`,
+    expiresIn: 3600
   };
 }
 

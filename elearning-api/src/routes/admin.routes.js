@@ -6,6 +6,8 @@ const certificateController = require('../controllers/certificate.controller');
 const { verifyToken, verifyAdmin, verifySuperAdmin, verifyAdminOrManager, verifyAdminPanelAccess, verifyCourseAccess } = require('../middleware/auth');
 const { adminAnalyticsRateLimiter } = require('../middleware/rateLimiters');
 const { auditRequest } = require('../services/audit.service');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.use(verifyToken, verifyAdminPanelAccess); // Admin + manager can access the admin panel
 
@@ -17,6 +19,8 @@ router.post('/system/security/reset', verifySuperAdmin, systemController.resetRa
 router.get('/users', adminController.getUsers);
 router.get('/users/export-profiles', adminController.exportUserProfiles);
 router.get('/users/export-trainings', adminController.exportUserTrainings);
+router.get('/users/templates/:type', verifySuperAdmin, adminController.downloadTemplate);
+router.post('/users/import/:type', verifySuperAdmin, upload.single('file'), auditRequest('admin.users.imported', { entityType: 'user' }), adminController.importUsers);
 router.get('/users/:id/details', auditRequest('admin.user_details.viewed', { entityType: 'user', includeBody: false }), adminController.getUserDetails);
 router.get('/users/:id/export', auditRequest('admin.user_export.viewed', { entityType: 'user', includeBody: false }), adminController.exportSingleUser);
 router.get('/users/:id/certificates', verifySuperAdmin, adminController.getUserCertificates);

@@ -78,10 +78,41 @@ const exportUserProfiles = asyncHandler(async (req, res) => {
 const exportSingleUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name, buffer } = await AdminService.exportSingleUser(id, req.user);
-  const safeName = encodeURIComponent(name || 'user');
+  const rawFilename = `ประวัติผู้เรียน_${name || 'user'}`;
+  const safeFilename = encodeURIComponent(rawFilename);
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', `attachment; filename="user_history_${safeName}.xlsx"`);
+  res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}.xlsx"; filename*=UTF-8''${safeFilename}.xlsx`);
   res.send(buffer);
+});
+
+const downloadTemplate = asyncHandler(async (req, res) => {
+  const { type } = req.params;
+  const buffer = await AdminService.downloadTemplate(type);
+  const encodedFilename = encodeURIComponent(type === 'profiles' ? 'แบบฟอร์ม_ประวัติผู้เรียน.xlsx' : 'แบบฟอร์ม_ประวัติอบรม.xlsx');
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${encodedFilename}"; filename*=UTF-8''${encodedFilename}`);
+  res.send(buffer);
+});
+
+const importUsers = asyncHandler(async (req, res) => {
+  const { type } = req.params;
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: 'Please upload an Excel file.' });
+  }
+
+  let result;
+  if (type === 'profiles') {
+    result = await AdminService.importProfiles(req.file.buffer);
+  } else if (type === 'trainings') {
+    result = await AdminService.importTrainings(req.file.buffer);
+  } else {
+    return res.status(400).json({ success: false, message: 'Invalid import type.' });
+  }
+
+  res.json({
+    success: true,
+    data: result
+  });
 });
 
 const getUserDetails = asyncHandler(async (req, res) => {
@@ -512,6 +543,8 @@ module.exports = {
   exportUserProfiles,
   exportUserTrainings,
   exportSingleUser,
+  downloadTemplate,
+  importUsers,
   getUserDetails,
   createUser,
   updateUser,
