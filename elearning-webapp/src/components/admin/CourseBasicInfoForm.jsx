@@ -713,7 +713,7 @@ const CourseBasicInfoForm = ({
                                     className="hidden"
                                     onChange={(event) => handleSignatureUpload(index, event.target.files?.[0])}
                                   />
-                                  <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_8.75rem]">
+                                  <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_7.5rem]">
                                     <input
                                       type="text"
                                       className="form-input min-w-0 bg-white"
@@ -722,26 +722,26 @@ const CourseBasicInfoForm = ({
                                       placeholder="URL หรือ PNG/WebP 1000 x 300"
                                     />
                                     <div className="grid gap-2">
-                                    <button
-                                      type="button"
-                                      onClick={() => setMediaLibrary({
-                                        isOpen: true,
-                                        allowedTypes: 'image',
-                                        onSelect: (file) => updateSignatureSlot(index, { signatureImageUrl: file.fileUrl })
-                                      })}
-                                      className="btn btn-outline btn-sm min-h-11 w-full justify-center gap-1.5 !rounded-xl px-3 text-center text-[11px] leading-tight whitespace-normal"
-                                    >
-                                      <ImageIcon size={14} />
-                                      เลือกจากคลังสื่อ
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => signatureUploadRefs.current[index]?.click()}
-                                      className="btn btn-outline btn-sm min-h-11 w-full justify-center gap-1.5 !rounded-xl px-3 text-center text-[11px] leading-tight whitespace-normal"
-                                    >
-                                      <Upload size={14} />
-                                      อัปโหลด
-                                    </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => setMediaLibrary({
+                                          isOpen: true,
+                                          allowedTypes: 'image',
+                                          onSelect: (file) => updateSignatureSlot(index, { signatureImageUrl: file.fileUrl })
+                                        })}
+                                        className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-black leading-tight text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                      >
+                                        <ImageIcon size={14} className="shrink-0" />
+                                        <span>คลังสื่อ</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => signatureUploadRefs.current[index]?.click()}
+                                        className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-black leading-tight text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                      >
+                                        <Upload size={14} className="shrink-0" />
+                                        <span>อัปโหลด</span>
+                                      </button>
                                     </div>
                                   </div>
                                   {slot.signatureImageUrl && (
