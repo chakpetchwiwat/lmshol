@@ -510,6 +510,7 @@ router.get('/secure/:token', async (req, res) => {
 
         res.sendFile(absolutePath);
     } catch (err) {
+        console.error('Secure stream verification failed:', err);
         return res.status(403).send('Invalid or expired signed URL');
     }
 });
