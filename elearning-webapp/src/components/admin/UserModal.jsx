@@ -3,6 +3,7 @@ import { Building2, Check, Tags, X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
+import CustomMultiSelect from '../common/CustomMultiSelect';
 import ProfileEducationSection from '../user/ProfileEducationSection';
 import ProfileFilesSection from '../user/ProfileFilesSection';
 import ProfileCertificates from '../user/ProfileCertificates';
@@ -33,12 +34,28 @@ const UserModal = ({
   onUpdateCertificate,
   onDeleteCertificate,
   onUploadCertificate,
+  eligibleSupervisors = [],
+  supervisorAssignments = {},
+  onSupervisorChange,
 }) => {
-  const assignmentMode = 'department';
-  const setAssignmentMode = () => {};
-  const roleOptions = [];
-  const selectedRoleLabels = [];
-  const toggleCohortRole = () => {};
+  const [assignmentMode, setAssignmentMode] = React.useState('department');
+  const roleOptions = cohortRoles;
+  const selectedRoleLabels = (formData.roles || []).map(key => cohortRoles.find(r => r.key === key)?.name).filter(Boolean);
+  
+  const toggleCohortRole = (roleKey) => {
+    const current = formData.roles || [];
+    const isSelected = current.includes(roleKey);
+    const next = isSelected ? current.filter(k => k !== roleKey) : [...current, roleKey];
+    setFormData(prev => ({ ...prev, roles: next }));
+    
+    // If deselected, optionally notify parent to clear supervisors for that role group
+    if (isSelected && onSupervisorChange) {
+      const role = cohortRoles.find(r => r.key === roleKey);
+      if (role) {
+        onSupervisorChange(role.id, []);
+      }
+    }
+  };
 
   // Sync Role with Tier managerAccess
   React.useEffect(() => {
@@ -184,7 +201,7 @@ const UserModal = ({
                   options={[
                     { value: 'user', label: 'User' },
                     { value: 'manager', label: 'Manager' },
-                    ...(canEditRole || formData.role === 'admin' ? [{ value: 'admin', label: 'Admin (Superadmin)' }] : [])
+                    ...(canEditRole || formData.role === 'admin' ? [{ value: 'admin', label: 'Admin' }] : [])
                   ]}
                 />
                 {formData.tierId && formData.role !== 'admin' && (
@@ -217,14 +234,14 @@ const UserModal = ({
                   <button
                     type="button"
                     onClick={() => setAssignmentMode('role')}
-                    className={`hidden items-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-all ${
+                    className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-black transition-all ${
                       assignmentMode === 'role'
                         ? 'bg-primary text-white shadow-sm'
                         : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                     }`}
                   >
                     <Tags size={15} />
-                    Role
+                    กลุ่มงาน / Role Group
                   </button>
                 </div>
               </div>
@@ -325,6 +342,40 @@ const UserModal = ({
                             </button>
                           );
                         })}
+                      </div>
+                    )}
+
+                    {formData.roles && formData.roles.length > 0 && (
+                      <div className="mt-6 border-t border-slate-100 pt-4">
+                        <label className="mb-2.5 block text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          ผู้ควบคุมดูแล / Supervisor (ตามกลุ่มงาน)
+                        </label>
+                        <div className="space-y-3.5">
+                          {formData.roles.map((roleKey) => {
+                            const role = cohortRoles.find((r) => r.key === roleKey);
+                            if (!role) return null;
+                            const assignedSupervisors = supervisorAssignments[role.id] || [];
+                            return (
+                              <div key={roleKey} className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="min-w-0">
+                                  <span className="text-sm font-black text-slate-800">{role.name}</span>
+                                  <p className="mt-0.5 text-xs font-semibold text-slate-500">เลือกผู้ควบคุมดูแลที่จะสามารถติดตามความคืบหน้าของกลุ่มงานนี้ได้</p>
+                                </div>
+                                <div className="w-full sm:w-80">
+                                  <CustomMultiSelect
+                                    placeholder="เลือกผู้ควบคุมดูแล..."
+                                    options={eligibleSupervisors.map((s) => ({
+                                      value: s.id,
+                                      label: s.department ? `${s.name} (${s.department})` : s.name
+                                    }))}
+                                    value={assignedSupervisors}
+                                    onChange={(selectedIds) => onSupervisorChange(role.id, selectedIds)}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>

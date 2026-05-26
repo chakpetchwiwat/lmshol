@@ -164,7 +164,7 @@ const Dashboard = () => {
       filters: [
         { label: 'เดือน/ปี', value: periodLabel },
         { label: 'แผนก', value: selectedDepartmentName },
-        { label: 'มุมมอง', value: isManagerView ? 'Manager' : 'Superadmin' },
+        { label: 'มุมมอง', value: isManagerView ? 'Manager' : 'Admin' },
       ],
       columns: ['ผู้เรียน', 'แผนก', 'คอร์ส', 'หมวดหมู่', 'สถานะ', 'คะแนน', 'เริ่มเรียน', 'สำเร็จเมื่อ'],
       rows: performanceRows.map((row) => ([

@@ -116,8 +116,17 @@ const UserManagement = () => {
   const [positionTypes, setPositionTypes] = React.useState([]);
   const [subdivisions, setSubdivisions] = React.useState([]);
   const [cohortRoles, setCohortRoles] = React.useState([]);
+  const [eligibleSupervisors, setEligibleSupervisors] = React.useState([]);
+  const [supervisorAssignments, setSupervisorAssignments] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [referenceLoading, setReferenceLoading] = React.useState(true);
+
+  const handleSupervisorChange = (cohortRoleId, selectedSupervisorIds) => {
+    setSupervisorAssignments((prev) => ({
+      ...prev,
+      [cohortRoleId]: selectedSupervisorIds,
+    }));
+  };
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedDepartment, setSelectedDepartment] = React.useState(FILTER_VALUES.ALL);
   const [selectedTier, setSelectedTier] = React.useState(FILTER_VALUES.ALL);
@@ -169,14 +178,16 @@ const UserManagement = () => {
         adminAPI.getSetting('POSITION_LEVELS'),
         adminAPI.getSetting('POSITION_TYPES'),
         adminAPI.getSetting('SUBDIVISIONS'),
+        adminAPI.getEligibleSupervisors(),
       ];
-      const [departmentResponse, tierResponse, cohortRoleResponse, levelsRes, typesRes, subdivRes] = await Promise.all(requests);
+      const [departmentResponse, tierResponse, cohortRoleResponse, levelsRes, typesRes, subdivRes, supervisorsRes] = await Promise.all(requests);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
       setCohortRoles(cohortRoleResponse.data);
       setPositionLevels(Array.isArray(levelsRes.data) ? levelsRes.data : levelsRes.data?.data || []);
       setPositionTypes(Array.isArray(typesRes.data) ? typesRes.data : typesRes.data?.data || []);
       setSubdivisions((Array.isArray(subdivRes.data) ? subdivRes.data : subdivRes.data?.data || []).map(x => (typeof x === 'string' ? { name: x } : x)));
+      setEligibleSupervisors(supervisorsRes.data || []);
     } catch (error) {
       console.error('Fetch reference data error:', error);
     } finally {
@@ -203,17 +214,43 @@ const UserManagement = () => {
         employmentDate: formData.employmentDate || null,
       };
 
+      let savedUser;
       if (editingUser) {
-        await adminAPI.updateUser(editingUser.id, payload);
+        const response = await adminAPI.updateUser(editingUser.id, payload);
+        savedUser = response.data;
+        
+        // Save supervisor assignments
+        const assignmentsList = [];
+        Object.entries(supervisorAssignments).forEach(([cohortRoleId, supervisorIds]) => {
+          supervisorIds.forEach((supervisorId) => {
+            assignmentsList.push({ cohortRoleId, supervisorId });
+          });
+        });
+        await adminAPI.saveUserCohortSupervisors(editingUser.id, assignmentsList);
+        
         toast.success('อัปเดตข้อมูลผู้ใช้งานเรียบร้อย');
       } else {
-        await adminAPI.createUser(payload);
+        const response = await adminAPI.createUser(payload);
+        savedUser = response.data;
+        
+        // Save supervisor assignments for new user
+        if (savedUser?.id) {
+          const assignmentsList = [];
+          Object.entries(supervisorAssignments).forEach(([cohortRoleId, supervisorIds]) => {
+            supervisorIds.forEach((supervisorId) => {
+              assignmentsList.push({ cohortRoleId, supervisorId });
+            });
+          });
+          await adminAPI.saveUserCohortSupervisors(savedUser.id, assignmentsList);
+        }
+        
         toast.success('เพิ่มผู้ใช้งานเรียบร้อย');
       }
 
       setShowUserModal(false);
       setEditingUser(null);
       setFormData(getDefaultFormData());
+      setSupervisorAssignments({});
       fetchUsers();
     } catch (error) {
       console.error('Save user error:', error);
@@ -286,12 +323,25 @@ const UserManagement = () => {
     setShowUserModal(true);
     setProfileCertificates([]);
     setLmsCertificates([]);
+    setSupervisorAssignments({});
     Promise.all([
       adminAPI.getUserCertificates(user.id),
-      adminAPI.getUserDetails(user.id)
-    ]).then(([certificatesRes, detailsRes]) => {
+      adminAPI.getUserDetails(user.id),
+      adminAPI.getUserCohortSupervisors(user.id),
+    ]).then(([certificatesRes, detailsRes, supervisorsRes]) => {
       setProfileCertificates(Array.isArray(certificatesRes?.data) ? certificatesRes.data : []);
       setLmsCertificates(Array.isArray(detailsRes?.data?.systemCertificates) ? detailsRes.data.systemCertificates : []);
+      
+      const mappings = {};
+      if (Array.isArray(supervisorsRes?.data)) {
+        supervisorsRes.data.forEach((item) => {
+          if (!mappings[item.cohortRoleId]) {
+            mappings[item.cohortRoleId] = [];
+          }
+          mappings[item.cohortRoleId].push(item.supervisorId);
+        });
+      }
+      setSupervisorAssignments(mappings);
     }).catch((error) => {
       console.error('Fetch editable profile extras error:', error);
     });
@@ -350,7 +400,7 @@ const UserManagement = () => {
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete cohort role error:', error);
-      toast.error(error.response?.data?.message || 'ลบ Cohort Role ไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'ลบกลุ่มงานไม่สำเร็จ');
     }
   };
 
@@ -372,10 +422,10 @@ const UserManagement = () => {
       const roleIds = reorderedItems.map(item => item.id);
       setCohortRoles(reorderedItems);
       await adminAPI.reorderCohortRoles(roleIds);
-      toast.success('บันทึกลำดับ Cohort Role เรียบร้อย');
+      toast.success('บันทึกลำดับกลุ่มงานเรียบร้อย');
     } catch (error) {
       console.error('Reorder cohort roles error:', error);
-      toast.error('ไม่สามารถบันทึกลำดับ Cohort Role ได้');
+      toast.error('ไม่สามารถบันทึกลำดับกลุ่มงานได้');
       fetchReferenceData();
     }
   };
@@ -583,7 +633,7 @@ const UserManagement = () => {
                 </button>
                 <button type="button" onClick={() => setShowCohortRoleModal(true)} className="btn btn-outline">
                   <Users size={18} />
-                  จัดการ Role
+                  จัดการกลุ่มงาน
                 </button>
                 {/* Export Excel Dropdown */}
                 <div className="relative">
@@ -753,6 +803,9 @@ const UserManagement = () => {
         onUpdateCertificate={handleUpdateEditableCertificate}
         onDeleteCertificate={handleDeleteEditableCertificate}
         onUploadCertificate={handleUploadEditableCertificateFile}
+        eligibleSupervisors={eligibleSupervisors}
+        supervisorAssignments={supervisorAssignments}
+        onSupervisorChange={handleSupervisorChange}
       />
 
       {canEditUsers && (
@@ -777,20 +830,20 @@ const UserManagement = () => {
 
           <ReferenceDataModal
             isOpen={showCohortRoleModal}
-            title="จัดการ Cohort Role"
-            description="เพิ่ม แก้ไข ลบ และเรียงลำดับ role ที่ใช้ assign ผู้ใช้งาน เช่น Trainee G1, Trainee G2, Trainee G3"
-            itemLabel="Cohort Role"
+            title="จัดการกลุ่มงาน (Role Group)"
+            description="เพิ่ม แก้ไข ลบ และเรียงลำดับกลุ่มงานที่ใช้กำหนดให้กับผู้ใช้งาน เช่น Trainee G1, Trainee G2, Trainee G3"
+            itemLabel="กลุ่มงาน (Role Group)"
             items={cohortRoles}
             loading={referenceLoading}
             onClose={() => setShowCohortRoleModal(false)}
             onCreate={async (payload) => {
               await adminAPI.createCohortRole(payload);
-              toast.success('สร้าง Cohort Role เรียบร้อย');
+              toast.success('สร้างกลุ่มงานเรียบร้อย');
               await fetchReferenceData();
             }}
             onUpdate={async (id, payload) => {
               await adminAPI.updateCohortRole(id, payload);
-              toast.success('อัปเดต Cohort Role เรียบร้อย');
+              toast.success('อัปเดตกลุ่มงานเรียบร้อย');
               await fetchReferenceData();
             }}
             onDelete={handleCohortRoleDelete}
@@ -799,7 +852,7 @@ const UserManagement = () => {
             getMemberIds={(role) => users.filter((user) => (user.roles || []).includes(role.key)).map((user) => user.id)}
             onUpdateMembers={async (id, userIds) => {
               await adminAPI.updateCohortRoleMembers(id, userIds);
-              toast.success('บันทึกสมาชิก Cohort Role เรียบร้อย');
+              toast.success('บันทึกสมาชิกกลุ่มงานเรียบร้อย');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
           />

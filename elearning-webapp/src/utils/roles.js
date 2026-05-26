@@ -18,7 +18,7 @@ export const canEditAdminUsers = (user) => {
 
 export const getRoleLabel = (user) => {
   const permission = user?.permission || user?.role;
-  if (permission === USER_PERMISSIONS.SUPERADMIN) return 'Super Admin';
+  if (permission === USER_PERMISSIONS.SUPERADMIN) return 'Admin';
   if (permission === USER_PERMISSIONS.ADMIN) return 'Admin';
   if (permission === USER_PERMISSIONS.MANAGER || user?.tier?.accessAdmin) return 'Manager';
   if (user?.isCourseStaff) return 'Course Staff';
