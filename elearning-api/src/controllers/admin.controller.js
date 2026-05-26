@@ -69,7 +69,22 @@ const exportUserTrainings = asyncHandler(async (req, res) => {
 });
 
 const exportUserProfiles = asyncHandler(async (req, res) => {
-  const buffer = await AdminService.exportUserProfiles(req.user);
+  const referer = req.headers.referer;
+  let frontendUrl = 'http://localhost:3000';
+  if (referer) {
+    try {
+      const urlObj = new URL(referer);
+      frontendUrl = urlObj.origin;
+    } catch (e) {
+      // ignore
+    }
+  }
+  
+  if (req.query.frontendUrl) {
+    frontendUrl = String(req.query.frontendUrl);
+  }
+
+  const buffer = await AdminService.exportUserProfiles(req.user, frontendUrl);
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename="users_profile.xlsx"');
   res.send(buffer);

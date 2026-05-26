@@ -112,6 +112,47 @@ const findProfileFile = (user, patterns) => {
   return matched?.fileUrl || matched?.fileName || matched?.fileKey || '';
 };
 
+const findProfileFileLink = (user, patterns, frontendUrl) => {
+  if (user.profileFiles && !Array.isArray(user.profileFiles)) {
+    let fileUrl = '';
+    let fileName = '';
+    if (patterns.includes('cv')) {
+      fileUrl = user.profileFiles.cv || '';
+      fileName = 'CV';
+    } else if (patterns.includes('jd')) {
+      fileUrl = user.profileFiles.jobDescription || '';
+      fileName = 'Job Description';
+    }
+    if (fileUrl) {
+      const fileKey = fileUrl.replace(/^\/?uploads\//, '');
+      const downloadUrl = `${frontendUrl}/download-file?key=${encodeURIComponent(fileKey)}&name=${encodeURIComponent(fileName)}`;
+      return {
+        v: fileName,
+        l: { Target: downloadUrl, Tooltip: fileName }
+      };
+    }
+    return '';
+  }
+
+  const files = normalizeJsonArray(user.profileFiles);
+  const matched = files.find((file) => {
+    const haystack = `${file.title || ''} ${file.fileName || ''} ${file.fileUrl || ''} ${file.fileKey || ''}`.toLowerCase();
+    return patterns.some((pattern) => haystack.includes(pattern));
+  });
+
+  if (matched) {
+    const fileKey = matched.fileKey || matched.fileUrl || matched.fileName || '';
+    const fileName = matched.fileName || matched.title || 'document';
+    const downloadUrl = `${frontendUrl}/download-file?key=${encodeURIComponent(fileKey)}&name=${encodeURIComponent(fileName)}`;
+    return {
+      v: fileName,
+      l: { Target: downloadUrl, Tooltip: fileName }
+    };
+  }
+
+  return '';
+};
+
 const getScopedUsersForExport = async (authUser, extraSelect) => {
   const actor = await authHelpers.getActorContext(prisma, authUser);
   const baseWhere = authHelpers.buildUserManagementWhere(actor);
@@ -168,7 +209,7 @@ const createWorkbook = (sheetName, headers, rows, columnWidths, rowHeights = [])
   return xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
 };
 
-const exportUserProfiles = async (actor) => {
+const exportUserProfiles = async (actor, frontendUrl = 'http://localhost:3000') => {
   const users = await getScopedUsersForExport(actor, {});
   const rows = users.map((user) => {
     const { firstName, lastName } = splitName(user.name);
@@ -196,8 +237,8 @@ const exportUserProfiles = async (actor) => {
       empty(user.nationalId, ''),
       empty(user.positionType, ''),
       empty(user.supervisorName, ''),
-      findProfileFile(user, ['cv', 'resume', 'ประวัติ']),
-      findProfileFile(user, ['job description', 'jd', 'description', 'หน้าที่'])
+      findProfileFileLink(user, ['cv', 'resume', 'ประวัติ'], frontendUrl),
+      findProfileFileLink(user, ['job description', 'jd', 'description', 'หน้าที่'], frontendUrl)
     ];
   });
 
