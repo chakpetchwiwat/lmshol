@@ -53,6 +53,8 @@ model User {
   targetedGoals         GoalTargetUser[]
   courseBookmarks       UserCourseBookmark[]
   auditLogs             AuditLog[]            @relation("AuditActor")
+  cohortSupervised      UserCohortSupervisor[] @relation("UserCohorts")
+  cohortSupervisors     UserCohortSupervisor[] @relation("SupervisorUsers")
 
   @@index([status, departmentId, tierId])
   @@index([departmentId, status])
@@ -256,6 +258,23 @@ model CohortRole {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   goalTargets GoalTargetCohortRole[]
+  supervisors UserCohortSupervisor[] @relation("CohortSupervisors")
+}
+
+model UserCohortSupervisor {
+  userId         String
+  cohortRoleId   String
+  supervisorId   String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  user           User       @relation("UserCohorts", fields: [userId], references: [id], onDelete: Cascade)
+  cohortRole     CohortRole @relation("CohortSupervisors", fields: [cohortRoleId], references: [id], onDelete: Cascade)
+  supervisor     User       @relation("SupervisorUsers", fields: [supervisorId], references: [id], onDelete: Cascade)
+
+  @@id([userId, cohortRoleId, supervisorId])
+  @@index([userId])
+  @@index([cohortRoleId])
+  @@index([supervisorId])
 }
 
 model CategoryDepartmentAccess {
