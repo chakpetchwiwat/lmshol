@@ -148,40 +148,6 @@ const UserModal = ({
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <CustomSelect
-                  label="กลุ่มงาน (Sub-division)"
-                  value={formData.subdivision || ''}
-                  onChange={(event) => setFormData({ ...formData, subdivision: event.target.value })}
-                  options={[
-                    { value: '', label: 'ไม่ได้ระบุ' },
-                    ...subdivisions.map(s => ({ value: s.name, label: s.name }))
-                  ]}
-                />
-              </div>
-              <div>
-                <CustomSelect
-                  label="ระดับตำแหน่ง (Level)"
-                  value={formData.positionLevel || ''}
-                  onChange={(event) => setFormData({ ...formData, positionLevel: event.target.value })}
-                  options={[
-                    { value: '', label: 'ไม่ได้ระบุ' },
-                    ...positionLevels.map(l => ({ value: l.name, label: l.name }))
-                  ]}
-                />
-              </div>
-              <div>
-                <CustomSelect
-                  label="ประเภทตำแหน่ง (Type)"
-                  value={formData.positionType || ''}
-                  onChange={(event) => setFormData({ ...formData, positionType: event.target.value })}
-                  options={[
-                    { value: '', label: 'ไม่ได้ระบุ' },
-                    ...positionTypes.map(t => ({ value: t.name, label: t.name }))
-                  ]}
-                />
-              </div>
-              <div className="hidden md:block"></div>
               <div className="md:col-span-2">
                 <label className="mb-1.5 block text-sm font-bold text-slate-700">หัวหน้างาน (Supervisor)</label>
                 <input
@@ -277,12 +243,42 @@ const UserModal = ({
                     />
 
                     <CustomSelect
+                      label="กลุ่มงาน (SUB-DIVISION)"
+                      value={formData.subdivision || ''}
+                      onChange={(event) => setFormData({ ...formData, subdivision: event.target.value })}
+                      options={[
+                        { value: '', label: 'ไม่ได้ระบุ' },
+                        ...subdivisions.map(s => ({ value: s.name, label: s.name }))
+                      ]}
+                    />
+
+                    <CustomSelect
                       label="ตำแหน่ง (POSITION)"
                       value={formData.tierId}
                       onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
                       options={[
                         { value: '', label: 'ไม่ได้ระบุ' },
                         ...tiers.map((t) => ({ value: t.id, label: t.name }))
+                      ]}
+                    />
+
+                    <CustomSelect
+                      label="ระดับตำแหน่ง (LEVEL)"
+                      value={formData.positionLevel || ''}
+                      onChange={(event) => setFormData({ ...formData, positionLevel: event.target.value })}
+                      options={[
+                        { value: '', label: 'ไม่ได้ระบุ' },
+                        ...positionLevels.map(l => ({ value: l.name, label: l.name }))
+                      ]}
+                    />
+
+                    <CustomSelect
+                      label="ประเภทตำแหน่ง (TYPE)"
+                      value={formData.positionType || ''}
+                      onChange={(event) => setFormData({ ...formData, positionType: event.target.value })}
+                      options={[
+                        { value: '', label: 'ไม่ได้ระบุ' },
+                        ...positionTypes.map(t => ({ value: t.name, label: t.name }))
                       ]}
                     />
                   </div>

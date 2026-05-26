@@ -174,9 +174,9 @@ const UserManagement = () => {
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
       setCohortRoles(cohortRoleResponse.data);
-      setPositionLevels(levelsRes.data?.data || []);
-      setPositionTypes(typesRes.data?.data || []);
-      setSubdivisions((subdivRes.data?.data || subdivRes.data || []).map(x => (typeof x === 'string' ? { name: x } : x)));
+      setPositionLevels(Array.isArray(levelsRes.data) ? levelsRes.data : levelsRes.data?.data || []);
+      setPositionTypes(Array.isArray(typesRes.data) ? typesRes.data : typesRes.data?.data || []);
+      setSubdivisions((Array.isArray(subdivRes.data) ? subdivRes.data : subdivRes.data?.data || []).map(x => (typeof x === 'string' ? { name: x } : x)));
     } catch (error) {
       console.error('Fetch reference data error:', error);
     } finally {
