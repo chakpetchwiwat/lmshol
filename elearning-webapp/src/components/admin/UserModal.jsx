@@ -337,6 +337,7 @@ const UserModal = ({
                           const isSelected = (formData.roles || []).includes(role.key);
                           const currentLevel = formData.roleLevels?.[role.key] || '';
                           const roleLevels = role.levels || [];
+                          const roleAdminLevels = role.adminLevels || [];
 
                           return (
                             <div
@@ -374,10 +375,15 @@ const UserModal = ({
                                     <option value="">เลือกระดับ...</option>
                                     {roleLevels.map((lvl) => (
                                       <option key={lvl} value={lvl}>
-                                        {lvl}
+                                        {roleAdminLevels.includes(lvl) ? `${lvl} (Admin/Supervisor)` : lvl}
                                       </option>
                                     ))}
                                   </select>
+                                  {currentLevel && roleAdminLevels.includes(currentLevel) && (
+                                    <div className="mt-1 text-[10px] font-black uppercase tracking-wide text-emerald-600">
+                                      Admin/Supervisor
+                                    </div>
+                                  )}
                                 </div>
                               )}
 

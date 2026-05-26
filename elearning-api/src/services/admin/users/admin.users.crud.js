@@ -97,6 +97,24 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
         }
     }
 
+    const cohortRoleKeys = Array.isArray(data.roles)
+        ? data.roles
+        : (Array.isArray(baseData.roles) ? baseData.roles : []);
+    const cohortRoleLevels = data.roleLevels || baseData.roleLevels || {};
+    if (cohortRoleKeys.length > 0 && cohortRoleLevels && data.permission !== USER_PERMISSIONS.ADMIN) {
+        const cohortRoles = await tx.cohortRole.findMany({
+            where: { key: { in: cohortRoleKeys } },
+            select: { key: true, adminLevels: true }
+        });
+        const hasAdminLevel = cohortRoles.some((role) => {
+            const assignedLevel = cohortRoleLevels[role.key];
+            return assignedLevel && (role.adminLevels || []).includes(assignedLevel);
+        });
+        if (hasAdminLevel) {
+            data.permission = USER_PERMISSIONS.MANAGER;
+        }
+    }
+
     if (baseData.subdivision !== undefined) {
         data.subdivision = baseData.subdivision ? String(baseData.subdivision).trim() : null;
     }

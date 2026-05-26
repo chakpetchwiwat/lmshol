@@ -258,6 +258,7 @@ model CohortRole {
   name      String   @unique
   order     Int      @default(0)
   levels    String[] @default([])
+  adminLevels String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   goalTargets GoalTargetCohortRole[]

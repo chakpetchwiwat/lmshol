@@ -24,7 +24,81 @@ const buildRoleData = (data, { includeOrderDefault = false } = {}) => {
         }
     }
 
+    if (data.adminLevels !== undefined) {
+        const levels = Array.isArray(payload.levels)
+            ? payload.levels
+            : (Array.isArray(data.levels) ? data.levels.map(l => String(l || '').trim()).filter(Boolean) : null);
+        const adminLevels = Array.isArray(data.adminLevels)
+            ? data.adminLevels.map(l => String(l || '').trim()).filter(Boolean)
+            : [];
+        payload.adminLevels = levels
+            ? adminLevels.filter((level) => levels.includes(level))
+            : adminLevels;
+    }
+
     return payload;
+};
+
+const shouldUserKeepManagerPermission = async (tx, user, targetRoleKey = null) => {
+    if (['admin', 'superadmin', 'ADMIN', 'SUPERADMIN'].includes(user.permission)) {
+        return true;
+    }
+
+    const tierId = user.tierId || null;
+    if (tierId) {
+        const tier = await tx.tier.findUnique({
+            where: { id: tierId },
+            select: { accessAdmin: true }
+        });
+        if (tier?.accessAdmin) {
+            return true;
+        }
+    }
+
+    const roleKeys = (user.roles || []).filter((roleKey) => roleKey !== targetRoleKey);
+    if (!roleKeys.length) {
+        return false;
+    }
+
+    const roles = await tx.cohortRole.findMany({
+        where: { key: { in: roleKeys } },
+        select: { key: true, adminLevels: true }
+    });
+    const roleLevels = typeof user.roleLevels === 'object' && user.roleLevels ? user.roleLevels : {};
+    return roles.some((role) => {
+        const assignedLevel = roleLevels[role.key];
+        return assignedLevel && (role.adminLevels || []).includes(assignedLevel);
+    });
+};
+
+const syncRoleAdminMemberPermissions = async (tx, role) => {
+    const users = await tx.user.findMany({
+        where: { roles: { has: role.key } }
+    });
+
+    for (const user of users) {
+        if (['admin', 'superadmin', 'ADMIN', 'SUPERADMIN'].includes(user.permission)) {
+            continue;
+        }
+
+        const roleLevels = typeof user.roleLevels === 'object' && user.roleLevels ? user.roleLevels : {};
+        const assignedLevel = roleLevels[role.key];
+        let nextPermission = user.permission;
+
+        if (assignedLevel && (role.adminLevels || []).includes(assignedLevel)) {
+            nextPermission = 'manager';
+        } else if (user.permission === 'manager') {
+            const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key);
+            nextPermission = keepManagerPermission ? user.permission : 'user';
+        }
+
+        if (nextPermission !== user.permission) {
+            await tx.user.update({
+                where: { id: user.id },
+                data: { permission: nextPermission }
+            });
+        }
+    }
 };
 
 const getCohortRoles = async () => {
@@ -84,9 +158,13 @@ const createCohortRole = async (data) => {
     });
 };
 
-const updateCohortRole = async (id, data) => prisma.cohortRole.update({
-    where: { id },
-    data: buildRoleData(data)
+const updateCohortRole = async (id, data) => prisma.$transaction(async (tx) => {
+    const role = await tx.cohortRole.update({
+        where: { id },
+        data: buildRoleData(data)
+    });
+    await syncRoleAdminMemberPermissions(tx, role);
+    return role;
 });
 
 const deleteCohortRole = async (id) => prisma.$transaction(async (tx) => {
@@ -107,12 +185,14 @@ const deleteCohortRole = async (id) => prisma.$transaction(async (tx) => {
         const updatedRoles = user.roles.filter((r) => r !== role.key);
         let updatedRoleLevels = typeof user.roleLevels === 'object' && user.roleLevels ? { ...user.roleLevels } : {};
         delete updatedRoleLevels[role.key];
+        const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key);
 
         await tx.user.update({
             where: { id: user.id },
             data: {
                 roles: updatedRoles,
                 roleLevels: updatedRoleLevels,
+                permission: keepManagerPermission ? user.permission : 'user',
                 updatedAt: new Date()
             }
         });
@@ -198,6 +278,7 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
             const isNewMember = normalizedUserIds.includes(user.id);
             let updatedRoles = [...(user.roles || [])];
             let updatedRoleLevels = typeof user.roleLevels === 'object' && user.roleLevels ? { ...user.roleLevels } : {};
+            let nextPermission = user.permission;
 
             if (isNewMember) {
                 if (!updatedRoles.includes(role.key)) {
@@ -205,9 +286,21 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
                 }
                 const memberInfo = parsedMembers.find((m) => m.userId === user.id);
                 updatedRoleLevels[role.key] = memberInfo.level;
+                if (memberInfo.level && (role.adminLevels || []).includes(memberInfo.level) && user.permission !== 'admin') {
+                    nextPermission = 'manager';
+                } else if (user.permission === 'manager') {
+                    const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key);
+                    if (!keepManagerPermission) {
+                        nextPermission = 'user';
+                    }
+                }
             } else {
                 updatedRoles = updatedRoles.filter((r) => r !== role.key);
                 delete updatedRoleLevels[role.key];
+                const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key);
+                if (!keepManagerPermission) {
+                    nextPermission = 'user';
+                }
             }
 
             await tx.user.update({
@@ -215,6 +308,7 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
                 data: {
                     roles: updatedRoles,
                     roleLevels: updatedRoleLevels,
+                    permission: nextPermission,
                     updatedAt: new Date()
                 }
             });

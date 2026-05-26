@@ -33,6 +33,7 @@ const ReferenceDataModal = ({
   const [accessAdmin, setAccessAdmin] = React.useState(false);
   const [draftType, setDraftType] = React.useState('FUNCTION');
   const [draftLevelsList, setDraftLevelsList] = React.useState([]);
+  const [draftAdminLevels, setDraftAdminLevels] = React.useState([]);
   const [levelInput, setLevelInput] = React.useState('');
   const [editingItem, setEditingItem] = React.useState(null);
   const [memberEditorItem, setMemberEditorItem] = React.useState(null);
@@ -68,6 +69,7 @@ const ReferenceDataModal = ({
     setAccessAdmin(false);
     setDraftType('FUNCTION');
     setDraftLevelsList([]);
+    setDraftAdminLevels([]);
     setLevelInput('');
     setEditingItem(null);
   };
@@ -92,7 +94,10 @@ const ReferenceDataModal = ({
         name,
         ...(showAccessToggle ? { accessAdmin } : {}),
         ...(showTypeSelection ? { type: draftType } : {}),
-        ...(itemLabel === 'Role' ? { levels: draftLevelsList } : {})
+        ...(itemLabel === 'Role' ? {
+          levels: draftLevelsList,
+          adminLevels: draftAdminLevels.filter((level) => draftLevelsList.includes(level))
+        } : {})
       };
 
       if (editingItem) {
@@ -119,8 +124,30 @@ const ReferenceDataModal = ({
     }
     if (itemLabel === 'Role') {
       setDraftLevelsList(Array.isArray(item.levels) ? item.levels : []);
+      setDraftAdminLevels(Array.isArray(item.adminLevels) ? item.adminLevels : []);
       setLevelInput('');
     }
+  };
+
+  const addDraftLevel = () => {
+    const val = levelInput.trim();
+    if (val && !draftLevelsList.includes(val)) {
+      setDraftLevelsList([...draftLevelsList, val]);
+      setLevelInput('');
+    }
+  };
+
+  const removeDraftLevel = (level) => {
+    setDraftLevelsList(draftLevelsList.filter((lvl) => lvl !== level));
+    setDraftAdminLevels(draftAdminLevels.filter((lvl) => lvl !== level));
+  };
+
+  const toggleDraftAdminLevel = (level) => {
+    setDraftAdminLevels((current) => (
+      current.includes(level)
+        ? current.filter((lvl) => lvl !== level)
+        : [...current, level]
+    ));
   };
 
   const openMemberEditor = (item) => {
@@ -313,11 +340,7 @@ const ReferenceDataModal = ({
                       onKeyDown={(event) => {
                         if (event.key === 'Enter') {
                           event.preventDefault();
-                          const val = levelInput.trim();
-                          if (val && !draftLevelsList.includes(val)) {
-                            setDraftLevelsList([...draftLevelsList, val]);
-                            setLevelInput('');
-                          }
+                          addDraftLevel();
                         }
                       }}
                       placeholder="พิมพ์ชื่อระดับความเชี่ยวชาญ แล้วกด Add..."
@@ -325,13 +348,7 @@ const ReferenceDataModal = ({
                     />
                     <button
                       type="button"
-                      onClick={() => {
-                        const val = levelInput.trim();
-                        if (val && !draftLevelsList.includes(val)) {
-                          setDraftLevelsList([...draftLevelsList, val]);
-                          setLevelInput('');
-                        }
-                      }}
+                      onClick={addDraftLevel}
                       className="btn btn-primary px-4 py-2.5 text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-1.5"
                     >
                       <Plus size={14} />
@@ -342,18 +359,30 @@ const ReferenceDataModal = ({
                   {draftLevelsList.length > 0 ? (
                     <div className="mt-2 space-y-1.5">
                       {draftLevelsList.map((lvl, index) => (
-                        <div key={index} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/60 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200">
+                        <div key={lvl} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/60 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm animate-in fade-in slide-in-from-top-1 duration-200">
                           <span className="flex items-center gap-2">
                             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black text-slate-400">
                               {index + 1}
                             </span>
                             <span>{lvl}</span>
+                            {draftAdminLevels.includes(lvl) && (
+                              <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-black uppercase text-emerald-600 ring-1 ring-inset ring-emerald-200">
+                                ADMIN
+                              </span>
+                            )}
                           </span>
+                          <label className="ml-auto flex cursor-pointer items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wide text-slate-500 hover:bg-white">
+                            <input
+                              type="checkbox"
+                              checked={draftAdminLevels.includes(lvl)}
+                              onChange={() => toggleDraftAdminLevel(lvl)}
+                              className="h-3.5 w-3.5 rounded border-slate-300 text-primary focus:ring-primary"
+                            />
+                            Admin/Supervisor
+                          </label>
                           <button
                             type="button"
-                            onClick={() => {
-                              setDraftLevelsList(draftLevelsList.filter((_, i) => i !== index));
-                            }}
+                            onClick={() => removeDraftLevel(lvl)}
                             className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors"
                             aria-label={`ลบระดับ ${lvl}`}
                           >
@@ -533,6 +562,7 @@ const ReferenceDataModal = ({
                           const isSelected = getMembers ? (user.id in selectedMembersMap) : selectedMemberIds.includes(user.id);
                           const currentLevel = getMembers ? (selectedMembersMap[user.id] || '') : '';
                           const roleLevels = memberEditorItem?.levels || [];
+                          const roleAdminLevels = memberEditorItem?.adminLevels || [];
 
                           return (
                             <div
@@ -579,10 +609,15 @@ const ReferenceDataModal = ({
                                     <option value="">เลือกระดับ (Level)...</option>
                                     {roleLevels.map((lvl) => (
                                       <option key={lvl} value={lvl}>
-                                        {lvl}
+                                        {roleAdminLevels.includes(lvl) ? `${lvl} (Admin/Supervisor)` : lvl}
                                       </option>
                                     ))}
                                   </select>
+                                  {currentLevel && roleAdminLevels.includes(currentLevel) && (
+                                    <div className="mt-1 text-[10px] font-black uppercase tracking-wide text-emerald-600">
+                                      Admin/Supervisor
+                                    </div>
+                                  )}
                                 </div>
                               )}
 
