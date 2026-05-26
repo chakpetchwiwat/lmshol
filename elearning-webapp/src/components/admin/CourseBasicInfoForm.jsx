@@ -21,6 +21,7 @@ const CourseBasicInfoForm = ({
   organizationPresets = [],
   departments,
   tiers,
+  cohortRoles = [],
   onSaveCourse,
   onImageUpload,
   uploading,
@@ -29,6 +30,9 @@ const CourseBasicInfoForm = ({
   readOnly
 }) => {
   const signatureUploadRefs = React.useRef({});
+  const [targetMode, setTargetMode] = React.useState(
+    Array.isArray(courseForm.visibleCohortRoleIds) && courseForm.visibleCohortRoleIds.length > 0 ? 'cohortRole' : 'department'
+  );
   const [mediaLibrary, setMediaLibrary] = React.useState({
     isOpen: false,
     allowedTypes: 'all',
@@ -246,7 +250,7 @@ const CourseBasicInfoForm = ({
         <div className="flex flex-col gap-1">
           <h4 className="text-base font-black text-slate-900">สิทธิ์การมองเห็นคอร์ส</h4>
           <p className="text-sm text-slate-500">
-            กำหนดได้ว่าแผนกไหนและตำแหน่งไหนจะเห็นคอร์สนี้ ถ้าไม่จำกัด ระบบจะแสดงคอร์สให้ทุกคน
+            กำหนดได้ว่าแผนกไหนหรือ Role ไหนจะเห็นคอร์สนี้ ถ้าไม่จำกัด ระบบจะแสดงคอร์สให้ทุกคน
           </p>
         </div>
 
@@ -259,8 +263,9 @@ const CourseBasicInfoForm = ({
                 setCourseForm({
                   ...courseForm,
                   visibleToAll: event.target.checked,
-                  visibleDepartmentIds: event.target.checked ? [] : courseForm.visibleDepartmentIds,
-                  visibleTierIds: event.target.checked ? [] : courseForm.visibleTierIds,
+                  visibleDepartmentIds: [],
+                  visibleTierIds: [],
+                  visibleCohortRoleIds: [],
                 })
               }
               className="mt-1 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
@@ -268,79 +273,126 @@ const CourseBasicInfoForm = ({
             <span>
               <span className="block text-sm font-bold text-slate-900">เปิดให้ทุกคนเห็นคอร์สนี้</span>
               <span className="block text-xs text-slate-500">
-                ถ้าปิดตัวเลือกนี้ ระบบจะใช้แผนกและตำแหน่งในการควบคุมการมองเห็น
+                ถ้าปิดตัวเลือกนี้ ระบบจะใช้แผนกหรือ Role ในการควบคุมการมองเห็น
               </span>
             </span>
           </label>
         </div>
 
         {!courseForm.visibleToAll && (
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="mb-3">
-                <h5 className="text-sm font-black text-slate-900">แผนกที่เห็นคอร์สได้</h5>
-                <p className="text-xs text-slate-500">ถ้าไม่เลือกแผนกเลย ระบบจะใช้เฉพาะตำแหน่งในการกำหนดสิทธิ์</p>
-              </div>
-              <div className="space-y-2">
-                {departments.length === 0 ? (
-                  <p className="text-sm text-slate-500">ยังไม่มีแผนกในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
-                ) : (
-                  departments.map((department) => (
-                    <label key={department.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700">
-                      <input
-                        type="checkbox"
-                        checked={courseForm.visibleDepartmentIds.includes(department.id)}
-                        onChange={(event) => {
-                          const nextIds = event.target.checked
-                            ? [...courseForm.visibleDepartmentIds, department.id]
-                            : courseForm.visibleDepartmentIds.filter((id) => id !== department.id);
-
-                          setCourseForm({
-                            ...courseForm,
-                            visibleDepartmentIds: nextIds,
-                          });
-                        }}
-                        className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                      />
-                      {department.name}
-                    </label>
-                  ))
-                )}
-              </div>
+          <div className="mt-4 space-y-4">
+            <div className="inline-flex rounded-2xl border border-slate-200 bg-white p-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setTargetMode('department');
+                  setCourseForm({
+                    ...courseForm,
+                    visibleCohortRoleIds: [],
+                    visibleTierIds: [],
+                  });
+                }}
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black transition-all ${
+                  targetMode === 'department'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <Building2 size={15} />
+                แผนก
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTargetMode('cohortRole');
+                  setCourseForm({
+                    ...courseForm,
+                    visibleDepartmentIds: [],
+                    visibleTierIds: [],
+                  });
+                }}
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black transition-all ${
+                  targetMode === 'cohortRole'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <Users size={15} />
+                Role (Cohort Role)
+              </button>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="mb-3">
-                <h5 className="text-sm font-black text-slate-900">ตำแหน่งที่เห็นคอร์สได้</h5>
-                <p className="text-xs text-slate-500">ถ้าเลือกทั้งแผนกและตำแหน่ง ผู้ใช้ต้องผ่านทั้งสองเงื่อนไข</p>
-              </div>
-              <div className="space-y-2">
-                {tiers.length === 0 ? (
-                  <p className="text-sm text-slate-500">ยังไม่มีตำแหน่งในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
-                ) : (
-                  tiers.map((tier) => (
-                    <label key={tier.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700">
-                      <input
-                        type="checkbox"
-                        checked={courseForm.visibleTierIds.includes(tier.id)}
-                        onChange={(event) => {
-                          const nextIds = event.target.checked
-                            ? [...courseForm.visibleTierIds, tier.id]
-                            : courseForm.visibleTierIds.filter((id) => id !== tier.id);
+            {targetMode === 'department' && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="mb-3">
+                  <h5 className="text-sm font-black text-slate-900">แผนกที่เห็นคอร์สได้</h5>
+                  <p className="text-xs text-slate-500">พนักงานในแผนกที่เลือกจะสามารถมองเห็นและเข้าเรียนคอร์สนี้ได้</p>
+                </div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {departments.length === 0 ? (
+                    <p className="text-sm text-slate-500 col-span-full">ยังไม่มีแผนกในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
+                  ) : (
+                    departments.map((department) => (
+                      <label key={department.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={Array.isArray(courseForm.visibleDepartmentIds) && courseForm.visibleDepartmentIds.includes(department.id)}
+                          onChange={(event) => {
+                            const currentIds = Array.isArray(courseForm.visibleDepartmentIds) ? courseForm.visibleDepartmentIds : [];
+                            const nextIds = event.target.checked
+                              ? [...currentIds, department.id]
+                              : currentIds.filter((id) => id !== department.id);
 
-                          setCourseForm({
-                            ...courseForm,
-                            visibleTierIds: nextIds,
-                          });
-                        }}
-                        className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                      />
-                      {tier.name}
-                    </label>
-                  ))
-                )}
+                            setCourseForm({
+                              ...courseForm,
+                              visibleDepartmentIds: nextIds,
+                            });
+                          }}
+                          className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                        />
+                        <span className="font-bold truncate">{department.name}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {targetMode === 'cohortRole' && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="mb-3">
+                  <h5 className="text-sm font-black text-slate-900">Role ที่เห็นคอร์สได้</h5>
+                  <p className="text-xs text-slate-500">พนักงานที่มี Role ตามที่เลือกจะสามารถมองเห็นและเข้าเรียนคอร์สนี้ได้</p>
+                </div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {cohortRoles.length === 0 ? (
+                    <p className="text-sm text-slate-500 col-span-full">ยังไม่มี Role ในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
+                  ) : (
+                    cohortRoles.map((role) => (
+                      <label key={role.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={Array.isArray(courseForm.visibleCohortRoleIds) && courseForm.visibleCohortRoleIds.includes(role.id)}
+                          onChange={(event) => {
+                            const currentIds = Array.isArray(courseForm.visibleCohortRoleIds) ? courseForm.visibleCohortRoleIds : [];
+                            const nextIds = event.target.checked
+                              ? [...currentIds, role.id]
+                              : currentIds.filter((id) => id !== role.id);
+
+                            setCourseForm({
+                              ...courseForm,
+                              visibleCohortRoleIds: nextIds,
+                            });
+                          }}
+                          className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                        />
+                        <span className="font-bold truncate">{role.name}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

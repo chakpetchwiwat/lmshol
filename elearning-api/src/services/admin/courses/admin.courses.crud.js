@@ -17,12 +17,14 @@ const {
 const buildCourseMutationPayload = async (tx, input) => {
     const visibleDepartmentIds = normalizeIdArray(input.visibleDepartmentIds);
     const visibleTierIds = normalizeIdArray(input.visibleTierIds);
+    const visibleCohortRoleIds = normalizeIdArray(input.visibleCohortRoleIds);
     const categoryId = normalizeNullableId(input.categoryId);
     const instructorPresetId = normalizeNullableId(input.instructorPresetId);
     const temporaryState = buildTemporaryStateData(input);
 
     await ensureReferenceIdsExist(tx, 'department', visibleDepartmentIds);
     await ensureReferenceIdsExist(tx, 'tier', visibleTierIds);
+    await ensureReferenceIdsExist(tx, 'cohortRole', visibleCohortRoleIds);
     await ensureReferenceName(tx, 'category', categoryId);
     const instructorPreset = await ensureInstructorPresetExists(tx, instructorPresetId);
 
@@ -71,6 +73,7 @@ const buildCourseMutationPayload = async (tx, input) => {
         data,
         visibleDepartmentIds,
         visibleTierIds,
+        visibleCohortRoleIds,
         certificateEnabled,
         certificatePassingScore,
         certificateTemplateId,
@@ -78,9 +81,10 @@ const buildCourseMutationPayload = async (tx, input) => {
     };
 };
 
-const saveCourseVisibility = async (tx, courseId, visibleToAll, visibleDepartmentIds, visibleTierIds) => {
+const saveCourseVisibility = async (tx, courseId, visibleToAll, visibleDepartmentIds, visibleTierIds, visibleCohortRoleIds) => {
     await tx.courseDepartmentAccess.deleteMany({ where: { courseId } });
     await tx.courseTierAccess.deleteMany({ where: { courseId } });
+    await tx.courseCohortRoleAccess.deleteMany({ where: { courseId } });
 
     if (visibleToAll) {
         return;
@@ -100,6 +104,15 @@ const saveCourseVisibility = async (tx, courseId, visibleToAll, visibleDepartmen
             data: visibleTierIds.map((tierId) => ({
                 courseId,
                 tierId
+            }))
+        });
+    }
+
+    if (visibleCohortRoleIds && visibleCohortRoleIds.length > 0) {
+        await tx.courseCohortRoleAccess.createMany({
+            data: visibleCohortRoleIds.map((cohortRoleId) => ({
+                courseId,
+                cohortRoleId
             }))
         });
     }
@@ -136,9 +149,9 @@ const getAdminCourses = async (user) => {
 };
 
 const createCourse = async (input) => prisma.$transaction(async (tx) => {
-    const { data, visibleDepartmentIds, visibleTierIds, certificateEnabled, certificatePassingScore, certificateTemplateId, certificateSignatureSlots } = await buildCourseMutationPayload(tx, input);
+    const { data, visibleDepartmentIds, visibleTierIds, visibleCohortRoleIds, certificateEnabled, certificatePassingScore, certificateTemplateId, certificateSignatureSlots } = await buildCourseMutationPayload(tx, input);
     const course = await tx.course.create({ data });
-    await saveCourseVisibility(tx, course.id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+    await saveCourseVisibility(tx, course.id, data.visibleToAll, visibleDepartmentIds, visibleTierIds, visibleCohortRoleIds);
 
     if (certificateEnabled !== undefined) {
         const defaultTemplate = certificateTemplateId
@@ -176,9 +189,9 @@ const createCourse = async (input) => prisma.$transaction(async (tx) => {
 });
 
 const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
-    const { data, visibleDepartmentIds, visibleTierIds, certificateEnabled, certificatePassingScore, certificateTemplateId, certificateSignatureSlots } = await buildCourseMutationPayload(tx, input);
+    const { data, visibleDepartmentIds, visibleTierIds, visibleCohortRoleIds, certificateEnabled, certificatePassingScore, certificateTemplateId, certificateSignatureSlots } = await buildCourseMutationPayload(tx, input);
     await tx.course.update({ where: { id }, data });
-    await saveCourseVisibility(tx, id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+    await saveCourseVisibility(tx, id, data.visibleToAll, visibleDepartmentIds, visibleTierIds, visibleCohortRoleIds);
 
     if (certificateEnabled !== undefined) {
         const defaultTemplate = certificateTemplateId

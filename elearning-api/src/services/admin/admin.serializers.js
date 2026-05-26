@@ -3,9 +3,10 @@ const authHelpers = require('../../utils/auth.helpers');
 const mapUserRecord = authHelpers.mapUserRecord;
 
 const mapCourseRecord = (course) => {
-    const { departmentAccess, tierAccess, instructorPreset, ...rest } = course;
+    const { departmentAccess, tierAccess, cohortRoleAccess, instructorPreset, ...rest } = course;
     const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
     const visibleTiers = tierAccess?.map((item) => item.tier) || [];
+    const visibleCohortRoles = cohortRoleAccess?.map((item) => item.cohortRole) || [];
     const isArchived = authHelpers.isTimedEntityExpired(rest);
 
     return {
@@ -16,6 +17,8 @@ const mapCourseRecord = (course) => {
         visibleDepartmentIds: visibleDepartments.map((d) => d.id),
         visibleTiers,
         visibleTierIds: visibleTiers.map((t) => t.id),
+        visibleCohortRoles,
+        visibleCohortRoleIds: visibleCohortRoles.map((cr) => cr.id),
         certificateEnabled: rest.certificateSetting?.enabled || false,
         certificatePassingScore: rest.certificateSetting?.passingScore || 80,
         certificateTemplateId: rest.certificateSetting?.templateId || '',

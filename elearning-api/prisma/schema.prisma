@@ -141,6 +141,7 @@ model Course {
   departmentAccess   CourseDepartmentAccess[]
   staff              CourseStaff[]
   tierAccess         CourseTierAccess[]
+  cohortRoleAccess   CourseCohortRoleAccess[]
   learningGoals      GoalCourse[]
   lessons            Lesson[]
   enrollments        UserCourse[]
@@ -261,6 +262,7 @@ model CohortRole {
   updatedAt DateTime @updatedAt
   goalTargets GoalTargetCohortRole[]
   supervisors UserCohortSupervisor[] @relation("CohortSupervisors")
+  courseAccess CourseCohortRoleAccess[]
 }
 
 model UserCohortSupervisor {
@@ -307,6 +309,17 @@ model CourseDepartmentAccess {
   department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
 
   @@id([courseId, departmentId])
+}
+
+model CourseCohortRoleAccess {
+  courseId     String
+  cohortRoleId String
+  createdAt    DateTime   @default(now())
+  course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  cohortRole   CohortRole @relation(fields: [cohortRoleId], references: [id], onDelete: Cascade)
+
+  @@id([courseId, cohortRoleId])
+  @@index([cohortRoleId])
 }
 
 model CourseTierAccess {

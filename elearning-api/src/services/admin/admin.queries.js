@@ -15,6 +15,11 @@ const courseInclude = {
             tier: true
         }
     },
+    cohortRoleAccess: {
+        include: {
+            cohortRole: true
+        }
+    },
     certificateSetting: true,
     _count: {
         select: {

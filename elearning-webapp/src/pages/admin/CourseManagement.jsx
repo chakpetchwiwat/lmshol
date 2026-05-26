@@ -38,6 +38,7 @@ const getDefaultCourseForm = () => ({
   visibleToAll: true,
   visibleDepartmentIds: [],
   visibleTierIds: [],
+  visibleCohortRoleIds: [],
   isTemporary: false,
   expiredAt: '',
   status: ENTITY_STATUS.DRAFT,
@@ -96,6 +97,7 @@ const CourseManagement = () => {
   const [categories, setCategories] = React.useState([]);
   const [departments, setDepartments] = React.useState([]);
   const [tiers, setTiers] = React.useState([]);
+  const [cohortRoles, setCohortRoles] = React.useState([]);
   const [instructorPresets, setInstructorPresets] = React.useState([]);
   const [organizationPresets, setOrganizationPresets] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -127,11 +129,12 @@ const CourseManagement = () => {
 
   const fetchData = React.useCallback(async () => {
     try {
-      const [courseResponse, categoryResponse, departmentResponse, tierResponse, instructorPresetResponse, organizationPresetResponse] = await Promise.all([
+      const [courseResponse, categoryResponse, departmentResponse, tierResponse, cohortRoleResponse, instructorPresetResponse, organizationPresetResponse] = await Promise.all([
         adminAPI.getCourses(),
         adminAPI.getCategories(),
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
+        adminAPI.getCohortRoles(),
         adminAPI.getInstructorPresets(),
         adminAPI.getOrganizationPresets(),
       ]);
@@ -140,6 +143,7 @@ const CourseManagement = () => {
       setCategories(categoryResponse.data || []);
       setDepartments(departmentResponse.data || []);
       setTiers(tierResponse.data || []);
+      setCohortRoles(cohortRoleResponse.data || []);
       setInstructorPresets(instructorPresetResponse.data || []);
       setOrganizationPresets(organizationPresetResponse.data || []);
     } catch (error) {
@@ -189,6 +193,7 @@ const CourseManagement = () => {
       visibleToAll: course.visibleToAll ?? true,
       visibleDepartmentIds: course.visibleDepartmentIds || [],
       visibleTierIds: course.visibleTierIds || [],
+      visibleCohortRoleIds: course.visibleCohortRoleIds || [],
       isTemporary: Boolean(course.isTemporary),
       expiredAt: toLocalInputValue(course.expiredAt),
       status: course.status || ENTITY_STATUS.DRAFT,
@@ -539,6 +544,7 @@ const CourseManagement = () => {
         organizationPresets={organizationPresets}
         departments={departments}
         tiers={tiers}
+        cohortRoles={cohortRoles}
         lessons={lessons}
         loadingReports={loadingReports}
         quizReports={quizReports}

@@ -35,6 +35,11 @@ const enrollCourse = async (userId, courseId) => {
                 include: {
                     tier: true
                 }
+            },
+            cohortRoleAccess: {
+                include: {
+                    cohortRole: true
+                }
             }
         }
     });

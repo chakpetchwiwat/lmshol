@@ -189,6 +189,19 @@ const buildVisibilityWhere = (actor, { status = ENTITY_STATUS.PUBLISHED, referen
         });
     }
 
+    const cohortConditions = [{ cohortRoleAccess: { none: {} } }];
+    if (actor.roles && actor.roles.length > 0) {
+        cohortConditions.push({
+            cohortRoleAccess: {
+                some: {
+                    cohortRole: {
+                        key: { in: actor.roles }
+                    }
+                }
+            }
+        });
+    }
+
     return {
         AND: [
             status ? { status } : {},
@@ -198,7 +211,10 @@ const buildVisibilityWhere = (actor, { status = ENTITY_STATUS.PUBLISHED, referen
                     { visibleToAll: true },
                     {
                         visibleToAll: false,
-                        AND: [{ OR: departmentConditions }]
+                        AND: [
+                            { OR: departmentConditions },
+                            { OR: cohortConditions }
+                        ]
                     }
                 ]
             }
@@ -235,6 +251,16 @@ const canAccessEntity = (actor, entity, referenceDate = new Date()) => {
                          (actor.departmentId && departmentAccess.some(d => d.departmentId === actor.departmentId));
     
     if (!hasDeptAccess) return false;
+
+    // 3b. Cohort Role check
+    const cohortRoleAccess = entity.cohortRoleAccess || [];
+    const hasCohortRoleAccess = cohortRoleAccess.length === 0 ||
+                               (actor.roles && actor.roles.length > 0 && cohortRoleAccess.some(cra => {
+                                   const roleKey = cra.cohortRole?.key || cra.cohortRoleKey;
+                                   return actor.roles.includes(roleKey);
+                               }));
+
+    if (!hasCohortRoleAccess) return false;
 
     // 4. Tier hierarchy check
     const tierAccess = entity.tierAccess || [];

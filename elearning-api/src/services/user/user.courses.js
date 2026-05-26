@@ -67,6 +67,11 @@ const getCourses = async (userId) => {
                     tier: true
                 }
             },
+            cohortRoleAccess: {
+                include: {
+                    cohortRole: true
+                }
+            },
             lessons: {
                 select: {
                     type: true,
@@ -118,6 +123,11 @@ const getCourseDetails = async (courseId, userId) => {
             tierAccess: {
                 include: {
                     tier: true
+                }
+            },
+            cohortRoleAccess: {
+                include: {
+                    cohortRole: true
                 }
             },
             lessons: {
