@@ -10,7 +10,11 @@ const normalizeRoleKey = (value) => String(value || '')
 
 async function main() {
   try {
-    const filePath = "C:\\Users\\AlexWang\\OneDrive\\เอกสาร\\Role - Level.xlsx";
+    let filePath = "/home/ubuntu/Role_Level.xlsx";
+    const fs = require('fs');
+    if (!fs.existsSync(filePath)) {
+      filePath = "C:\\Users\\AlexWang\\OneDrive\\เอกสาร\\Role - Level.xlsx";
+    }
     console.log("Reading excel from:", filePath);
     const workbook = xlsx.readFile(filePath);
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
