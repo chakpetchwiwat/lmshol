@@ -25,6 +25,7 @@ const getDefaultFormData = () => ({
   password: '',
   role: USER_ROLES.USER,
   roles: [],
+  roleLevels: {},
   departmentId: '',
   tierId: '',
   employmentDate: '',
@@ -211,6 +212,7 @@ const UserManagement = () => {
         ...formData,
         permission: formData.role,
         roles: formData.roles || [],
+        roleLevels: formData.roleLevels || {},
         employmentDate: formData.employmentDate || null,
       };
 
@@ -308,6 +310,7 @@ const UserManagement = () => {
       password: '',
       role: user.permission || user.role || USER_ROLES.USER,
       roles: user.roles || [],
+      roleLevels: user.roleLevels || {},
       departmentId: user.departmentId || '',
       tierId: user.tierId || '',
       employmentDate: formatDateForInput(user.employmentDate),
@@ -396,11 +399,11 @@ const UserManagement = () => {
 
     try {
       await adminAPI.deleteCohortRole(id);
-      toast.success('ลบ Cohort Role เรียบร้อย');
+      toast.success('ลบ Role เรียบร้อย');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete cohort role error:', error);
-      toast.error(error.response?.data?.message || 'ลบกลุ่มงานไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'ลบ Role ไม่สำเร็จ');
     }
   };
 
@@ -633,7 +636,7 @@ const UserManagement = () => {
                 </button>
                 <button type="button" onClick={() => setShowCohortRoleModal(true)} className="btn btn-outline">
                   <Users size={18} />
-                  จัดการกลุ่มงาน
+                  จัดการ Role
                 </button>
                 {/* Export Excel Dropdown */}
                 <div className="relative">
@@ -830,29 +833,32 @@ const UserManagement = () => {
 
           <ReferenceDataModal
             isOpen={showCohortRoleModal}
-            title="จัดการกลุ่มงาน (Role Group)"
-            description="เพิ่ม แก้ไข ลบ และเรียงลำดับกลุ่มงานที่ใช้กำหนดให้กับผู้ใช้งาน เช่น Trainee G1, Trainee G2, Trainee G3"
-            itemLabel="กลุ่มงาน (Role Group)"
+            title="จัดการ Role"
+            description="เพิ่ม แก้ไข ลบ และเรียงลำดับ Role ที่ใช้กำหนดให้กับผู้ใช้งาน เช่น Trainee G1, Trainee G2, Trainee G3"
+            itemLabel="Role"
             items={cohortRoles}
             loading={referenceLoading}
             onClose={() => setShowCohortRoleModal(false)}
             onCreate={async (payload) => {
               await adminAPI.createCohortRole(payload);
-              toast.success('สร้างกลุ่มงานเรียบร้อย');
+              toast.success('สร้าง Role เรียบร้อย');
               await fetchReferenceData();
             }}
             onUpdate={async (id, payload) => {
               await adminAPI.updateCohortRole(id, payload);
-              toast.success('อัปเดตกลุ่มงานเรียบร้อย');
+              toast.success('อัปเดต Role เรียบร้อย');
               await fetchReferenceData();
             }}
             onDelete={handleCohortRoleDelete}
             onReorder={handleCohortRoleReorder}
             memberUsers={users}
-            getMemberIds={(role) => users.filter((user) => (user.roles || []).includes(role.key)).map((user) => user.id)}
-            onUpdateMembers={async (id, userIds) => {
-              await adminAPI.updateCohortRoleMembers(id, userIds);
-              toast.success('บันทึกสมาชิกกลุ่มงานเรียบร้อย');
+            getMembers={(role) => users.filter((user) => (user.roles || []).includes(role.key)).map((user) => ({
+              userId: user.id,
+              level: user.roleLevels?.[role.key] || ''
+            }))}
+            onUpdateMembers={async (id, members) => {
+              await adminAPI.updateCohortRoleMembers(id, members);
+              toast.success('บันทึกสมาชิกเรียบร้อย');
               await Promise.all([fetchReferenceData(), fetchUsers()]);
             }}
           />

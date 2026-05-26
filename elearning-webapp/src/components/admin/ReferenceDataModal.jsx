@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Check, Edit2, Plus, Search, Trash2, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
@@ -17,6 +17,7 @@ const ReferenceDataModal = ({
   onDelete,
   onReorder = null,
   memberUsers = [],
+  getMembers = null,
   getMemberIds = null,
   onUpdateMembers = null,
   showAccessToggle = false,
@@ -31,12 +32,14 @@ const ReferenceDataModal = ({
   const [draftName, setDraftName] = React.useState('');
   const [accessAdmin, setAccessAdmin] = React.useState(false);
   const [draftType, setDraftType] = React.useState('FUNCTION');
+  const [draftLevels, setDraftLevels] = React.useState('');
   const [editingItem, setEditingItem] = React.useState(null);
   const [memberEditorItem, setMemberEditorItem] = React.useState(null);
   const [memberSearch, setMemberSearch] = React.useState('');
   const [selectedMemberIds, setSelectedMemberIds] = React.useState([]);
+  const [selectedMembersMap, setSelectedMembersMap] = React.useState({});
   const [savingMembers, setSavingMembers] = React.useState(false);
-  const canManageMembers = Boolean(onUpdateMembers && getMemberIds);
+  const canManageMembers = Boolean(onUpdateMembers && (getMembers || getMemberIds));
 
   const handleMove = async (index, direction) => {
     if (!onReorder) return;
@@ -63,6 +66,7 @@ const ReferenceDataModal = ({
     setDraftName('');
     setAccessAdmin(false);
     setDraftType('FUNCTION');
+    setDraftLevels('');
     setEditingItem(null);
   };
 
@@ -70,6 +74,7 @@ const ReferenceDataModal = ({
     setMemberEditorItem(null);
     setMemberSearch('');
     setSelectedMemberIds([]);
+    setSelectedMembersMap({});
   };
 
   const handleSubmit = async (event) => {
@@ -85,6 +90,7 @@ const ReferenceDataModal = ({
         name,
         ...(showAccessToggle ? { accessAdmin } : {}),
         ...(showTypeSelection ? { type: draftType } : {}),
+        ...(itemLabel === 'Role' ? { levels: draftLevels.split(',').map(l => l.trim()).filter(Boolean) } : {})
       };
 
       if (editingItem) {
@@ -109,20 +115,52 @@ const ReferenceDataModal = ({
     if (showTypeSelection) {
       setDraftType(item.type || 'FUNCTION');
     }
+    if (itemLabel === 'Role') {
+      setDraftLevels(Array.isArray(item.levels) ? item.levels.join(', ') : '');
+    }
   };
 
   const openMemberEditor = (item) => {
     setMemberEditorItem(item);
-    setSelectedMemberIds(getMemberIds?.(item) || []);
+    if (getMembers) {
+      const initialMembers = getMembers(item) || [];
+      const map = {};
+      initialMembers.forEach((m) => {
+        map[m.userId] = m.level || '';
+      });
+      setSelectedMembersMap(map);
+    } else {
+      setSelectedMemberIds(getMemberIds?.(item) || []);
+    }
     setMemberSearch('');
   };
 
   const toggleMember = (userId) => {
-    setSelectedMemberIds((current) => (
-      current.includes(userId)
-        ? current.filter((id) => id !== userId)
-        : [...current, userId]
-    ));
+    if (getMembers) {
+      setSelectedMembersMap((current) => {
+        const next = { ...current };
+        if (userId in next) {
+          delete next[userId];
+        } else {
+          const roleLevels = memberEditorItem?.levels || [];
+          next[userId] = roleLevels[0] || '';
+        }
+        return next;
+      });
+    } else {
+      setSelectedMemberIds((current) => (
+        current.includes(userId)
+          ? current.filter((id) => id !== userId)
+          : [...current, userId]
+      ));
+    }
+  };
+
+  const handleMemberLevelChange = (userId, newLevel) => {
+    setSelectedMembersMap((current) => ({
+      ...current,
+      [userId]: newLevel
+    }));
   };
 
   const handleSaveMembers = async () => {
@@ -130,7 +168,15 @@ const ReferenceDataModal = ({
 
     try {
       setSavingMembers(true);
-      await onUpdateMembers(memberEditorItem.id, selectedMemberIds);
+      if (getMembers) {
+        const membersPayload = Object.entries(selectedMembersMap).map(([userId, level]) => ({
+          userId,
+          level: level || null
+        }));
+        await onUpdateMembers(memberEditorItem.id, membersPayload);
+      } else {
+        await onUpdateMembers(memberEditorItem.id, selectedMemberIds);
+      }
       closeMemberEditor();
     } catch (error) {
       console.error(`Update ${itemLabel} members error:`, error);
@@ -205,50 +251,68 @@ const ReferenceDataModal = ({
               )}
             </div>
 
-            <div className="flex flex-col gap-3 md:flex-row">
-              <input
-                type="text"
-                value={draftName}
-                onChange={(event) => setDraftName(event.target.value)}
-                placeholder={editingItem ? `ชื่อ${itemLabel}ใหม่...` : `ตั้งชื่อ${itemLabel}...`}
-                className={`form-input flex-1 bg-white px-5 py-3 text-sm font-bold transition-all focus:ring-4 ${
-                  editingItem ? 'border-primary/50 focus:ring-primary/10' : 'border-slate-200'
-                }`}
-                required
-              />
-              {showTypeSelection && (
-                <div className="flex gap-1.5 p-1 bg-white border border-slate-100 rounded-2xl">
-                  {typeOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setDraftType(opt.value)}
-                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
-                        draftType === opt.value
-                          ? opt.color + ' border shadow-sm scale-105'
-                          : 'text-slate-400 hover:text-slate-600'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 md:flex-row">
+                <input
+                  type="text"
+                  value={draftName}
+                  onChange={(event) => setDraftName(event.target.value)}
+                  placeholder={editingItem ? `ชื่อ${itemLabel}ใหม่...` : `ตั้งชื่อ${itemLabel}...`}
+                  className={`form-input flex-1 bg-white px-5 py-3 text-sm font-bold transition-all focus:ring-4 ${
+                    editingItem ? 'border-primary/50 focus:ring-primary/10' : 'border-slate-200'
+                  }`}
+                  required
+                />
+                {showTypeSelection && (
+                  <div className="flex gap-1.5 p-1 bg-white border border-slate-100 rounded-2xl">
+                    {typeOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setDraftType(opt.value)}
+                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                          draftType === opt.value
+                            ? opt.color + ' border shadow-sm scale-105'
+                            : 'text-slate-400 hover:text-slate-600'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {showAccessToggle && (
+                  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2 hover:bg-slate-50">
+                    <input
+                      type="checkbox"
+                      checked={accessAdmin}
+                      onChange={(event) => setAccessAdmin(event.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-slate-700">สิทธิ์ Manager Access</span>
+                      <span className="text-[10px] text-slate-400">อนุญาตการใช้งานหน้าหลังบ้าน</span>
+                    </div>
+                  </label>
+                )}
+              </div>
+              
+              {itemLabel === 'Role' && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">
+                    ระดับของ Role / Levels (คั่นด้วยเครื่องหมายจุลภาค , เช่น Trainee, Inspector, Observer)
+                  </label>
+                  <input
+                    type="text"
+                    value={draftLevels}
+                    onChange={(event) => setDraftLevels(event.target.value)}
+                    placeholder="ใส่ระดับความเชี่ยวชาญ/ตำแหน่งย่อย..."
+                    className="form-input w-full bg-white px-5 py-3 text-sm font-bold border-slate-200 focus:ring-4"
+                  />
                 </div>
               )}
-              {showAccessToggle && (
-                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2 hover:bg-slate-50">
-                  <input
-                    type="checkbox"
-                    checked={accessAdmin}
-                    onChange={(event) => setAccessAdmin(event.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                  />
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-slate-700">สิทธิ์ Manager Access</span>
-                    <span className="text-[10px] text-slate-400">อนุญาตการใช้งานหน้าหลังบ้าน</span>
-                  </div>
-                </label>
-              )}
-              <div className="flex gap-2">
+
+              <div className="flex justify-end gap-2 mt-2">
                 {editingItem && (
                   <button
                     type="button"
@@ -260,7 +324,7 @@ const ReferenceDataModal = ({
                 )}
                 <button 
                   type="submit" 
-                  className={`btn ${editingItem ? 'bg-slate-900 text-white' : 'btn-primary'} flex-1 px-8 py-3 text-xs font-black uppercase tracking-widest shadow-xl transition-all active:scale-95 md:flex-none`}
+                  className={`btn ${editingItem ? 'bg-slate-900 text-white' : 'btn-primary'} px-8 py-3 text-xs font-black uppercase tracking-widest shadow-xl transition-all active:scale-95`}
                 >
                   {editingItem ? <Edit2 size={16} /> : <Plus size={16} />}
                   {submitLabel}
@@ -398,7 +462,9 @@ const ReferenceDataModal = ({
               <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h4 className="text-base font-black text-slate-900">สมาชิก {memberEditorItem.name}</h4>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">{selectedMemberIds.length} คนที่เลือก</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    {getMembers ? Object.keys(selectedMembersMap).length : selectedMemberIds.length} คนที่เลือก
+                  </p>
                 </div>
                 <button type="button" onClick={closeMemberEditor} className="rounded-xl bg-white px-3 py-2 text-xs font-black text-slate-500 hover:text-slate-900">
                   ปิด
@@ -418,28 +484,57 @@ const ReferenceDataModal = ({
 
               <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
                 {filteredMemberUsers.map((user) => {
-                  const isSelected = selectedMemberIds.includes(user.id);
+                  const isSelected = getMembers ? (user.id in selectedMembersMap) : selectedMemberIds.includes(user.id);
+                  const currentLevel = getMembers ? (selectedMembersMap[user.id] || '') : '';
+                  const roleLevels = memberEditorItem?.levels || [];
+
                   return (
-                    <button
+                    <div
                       key={user.id}
-                      type="button"
-                      onClick={() => toggleMember(user.id)}
-                      className={`flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-all ${
+                      className={`flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-all bg-white ${
                         isSelected
-                          ? 'border-primary bg-white text-primary shadow-sm'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                          ? 'border-primary shadow-sm'
+                          : 'border-slate-200 hover:border-slate-300'
                       }`}
                     >
-                      <span className="min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => toggleMember(user.id)}
+                        className="flex-1 min-w-0 text-left"
+                      >
                         <span className="block truncate text-sm font-black">{user.name || user.email}</span>
-                        <span className="block truncate text-xs font-semibold text-slate-400">{user.email} • {user.department || user.departmentRef?.name || '-'}</span>
-                      </span>
-                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
-                        isSelected ? 'border-primary bg-primary text-white' : 'border-slate-300 text-transparent'
-                      }`}>
+                        <span className="block truncate text-xs font-semibold text-slate-400">
+                          {user.email} • {user.department || user.departmentRef?.name || '-'}
+                        </span>
+                      </button>
+                      
+                      {isSelected && getMembers && roleLevels.length > 0 && (
+                        <div className="shrink-0 mr-2">
+                          <select
+                            value={currentLevel}
+                            onChange={(e) => handleMemberLevelChange(user.id, e.target.value)}
+                            className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold text-slate-700 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-primary"
+                          >
+                            <option value="">เลือกระดับ (Level)...</option>
+                            {roleLevels.map((lvl) => (
+                              <option key={lvl} value={lvl}>
+                                {lvl}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => toggleMember(user.id)}
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                          isSelected ? 'border-primary bg-primary text-white' : 'border-slate-300 text-transparent'
+                        }`}
+                      >
                         <Check size={13} strokeWidth={3} />
-                      </span>
-                    </button>
+                      </button>
+                    </div>
                   );
                 })}
                 {filteredMemberUsers.length === 0 && (

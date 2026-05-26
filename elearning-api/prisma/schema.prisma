@@ -33,6 +33,7 @@ model User {
   retirementDateRaw     String?
   educationHistory      Json?
   profileFiles          Json?
+  roleLevels            Json?                  @default("{}")
   signatureImageUrl     String?
   signatureTitle        String?
   createdAnnouncements  Announcement[]         @relation("AnnouncementCreator")
@@ -255,6 +256,7 @@ model CohortRole {
   key       String   @unique
   name      String   @unique
   order     Int      @default(0)
+  levels    String[] @default([])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   goalTargets GoalTargetCohortRole[]

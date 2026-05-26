@@ -45,8 +45,24 @@ const UserModal = ({
   const toggleCohortRole = (roleKey) => {
     const current = formData.roles || [];
     const isSelected = current.includes(roleKey);
-    const next = isSelected ? current.filter(k => k !== roleKey) : [...current, roleKey];
-    setFormData(prev => ({ ...prev, roles: next }));
+    let nextRoles = [];
+    let nextRoleLevels = { ...(formData.roleLevels || {}) };
+
+    if (isSelected) {
+      nextRoles = current.filter(k => k !== roleKey);
+      delete nextRoleLevels[roleKey];
+    } else {
+      nextRoles = [...current, roleKey];
+      const role = cohortRoles.find(r => r.key === roleKey);
+      const roleLevels = role?.levels || [];
+      nextRoleLevels[roleKey] = roleLevels[0] || '';
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      roles: nextRoles,
+      roleLevels: nextRoleLevels
+    }));
     
     // If deselected, optionally notify parent to clear supervisors for that role group
     if (isSelected && onSupervisorChange) {
@@ -241,7 +257,7 @@ const UserModal = ({
                     }`}
                   >
                     <Tags size={15} />
-                    กลุ่มงาน / Role Group
+                    Role
                   </button>
                 </div>
               </div>
@@ -319,27 +335,64 @@ const UserModal = ({
                       <div className="grid max-h-52 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
                         {roleOptions.map((role) => {
                           const isSelected = (formData.roles || []).includes(role.key);
+                          const currentLevel = formData.roleLevels?.[role.key] || '';
+                          const roleLevels = role.levels || [];
+
                           return (
-                            <button
+                            <div
                               key={role.key}
-                              type="button"
-                              onClick={() => toggleCohortRole(role.key)}
                               className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-all ${
                                 isSelected
                                   ? 'border-primary/40 bg-primary/10 text-primary shadow-sm'
                                   : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
                               }`}
                             >
-                              <span className="min-w-0 truncate">{role.name}</span>
-                              <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
-                                isSelected
-                                  ? 'border-primary bg-primary text-white'
-                                  : 'border-slate-300 bg-white text-transparent'
-                              }`}
+                              <button
+                                type="button"
+                                onClick={() => toggleCohortRole(role.key)}
+                                className="flex-1 min-w-0 text-left hover:text-primary"
+                              >
+                                <span className="truncate block">{role.name}</span>
+                              </button>
+
+                              {isSelected && roleLevels.length > 0 && (
+                                <div className="shrink-0">
+                                  <select
+                                    value={currentLevel}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        roleLevels: {
+                                          ...(prev.roleLevels || {}),
+                                          [role.key]: val
+                                        }
+                                      }));
+                                    }}
+                                    className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold text-slate-700 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                                  >
+                                    <option value="">เลือกระดับ...</option>
+                                    {roleLevels.map((lvl) => (
+                                      <option key={lvl} value={lvl}>
+                                        {lvl}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => toggleCohortRole(role.key)}
+                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                                  isSelected
+                                    ? 'border-primary bg-primary text-white'
+                                    : 'border-slate-300 bg-white text-transparent'
+                                }`}
                               >
                                 <Check size={13} strokeWidth={3} />
-                              </span>
-                            </button>
+                              </button>
+                            </div>
                           );
                         })}
                       </div>
@@ -348,7 +401,7 @@ const UserModal = ({
                     {formData.roles && formData.roles.length > 0 && (
                       <div className="mt-6 border-t border-slate-100 pt-4">
                         <label className="mb-2.5 block text-xs font-bold text-slate-400 uppercase tracking-wider">
-                          ผู้ควบคุมดูแล / Supervisor (ตามกลุ่มงาน)
+                          ผู้ควบคุมดูแล / Supervisor (ตาม Role)
                         </label>
                         <div className="space-y-3.5">
                           {formData.roles.map((roleKey) => {
@@ -359,7 +412,7 @@ const UserModal = ({
                               <div key={roleKey} className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="min-w-0">
                                   <span className="text-sm font-black text-slate-800">{role.name}</span>
-                                  <p className="mt-0.5 text-xs font-semibold text-slate-500">เลือกผู้ควบคุมดูแลที่จะสามารถติดตามความคืบหน้าของกลุ่มงานนี้ได้</p>
+                                  <p className="mt-0.5 text-xs font-semibold text-slate-500">เลือกผู้ควบคุมดูแลที่จะสามารถติดตามความคืบหน้าของ Role นี้ได้</p>
                                 </div>
                                 <div className="w-full sm:w-80">
                                   <CustomMultiSelect

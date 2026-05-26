@@ -16,6 +16,14 @@ const buildRoleData = (data, { includeOrderDefault = false } = {}) => {
         payload.order = parseInteger(data.order, 0);
     }
 
+    if (data.levels !== undefined) {
+        if (Array.isArray(data.levels)) {
+            payload.levels = data.levels.map(l => String(l || '').trim()).filter(Boolean);
+        } else if (typeof data.levels === 'string') {
+            payload.levels = data.levels.split(',').map(l => l.trim()).filter(Boolean);
+        }
+    }
+
     return payload;
 };
 
@@ -87,11 +95,28 @@ const deleteCohortRole = async (id) => prisma.$transaction(async (tx) => {
         throw new Error('Cohort role not found');
     }
 
-    await tx.$executeRaw`
-        UPDATE "User"
-        SET "roles" = array_remove("roles", ${role.key}), "updatedAt" = NOW()
-        WHERE ${role.key} = ANY("roles")
-    `;
+    const usersWithRole = await tx.user.findMany({
+        where: {
+            roles: {
+                has: role.key
+            }
+        }
+    });
+
+    for (const user of usersWithRole) {
+        const updatedRoles = user.roles.filter((r) => r !== role.key);
+        let updatedRoleLevels = typeof user.roleLevels === 'object' && user.roleLevels ? { ...user.roleLevels } : {};
+        delete updatedRoleLevels[role.key];
+
+        await tx.user.update({
+            where: { id: user.id },
+            data: {
+                roles: updatedRoles,
+                roleLevels: updatedRoleLevels,
+                updatedAt: new Date()
+            }
+        });
+    }
 
     return tx.cohortRole.delete({ where: { id } });
 });
@@ -109,12 +134,25 @@ const reorderCohortRoles = async (roleIds) => {
     );
 };
 
-const updateCohortRoleMembers = async (id, userIds = []) => {
-    if (!Array.isArray(userIds)) {
-        throw new Error('User ids must be an array');
+const updateCohortRoleMembers = async (id, membersInput = []) => {
+    if (!Array.isArray(membersInput)) {
+        throw new Error('Members input must be an array');
     }
 
-    const normalizedUserIds = [...new Set(userIds.map((userId) => String(userId || '').trim()).filter(Boolean))];
+    const parsedMembers = membersInput.map((item) => {
+        if (typeof item === 'string') {
+            return { userId: String(item || '').trim(), level: null };
+        }
+        if (item && typeof item === 'object') {
+            return {
+                userId: String(item.userId || item.id || '').trim(),
+                level: item.level ? String(item.level).trim() : null
+            };
+        }
+        return null;
+    }).filter((m) => m && m.userId);
+
+    const normalizedUserIds = [...new Set(parsedMembers.map((m) => m.userId))];
 
     return prisma.$transaction(async (tx) => {
         const role = await tx.cohortRole.findUnique({ where: { id } });
@@ -134,19 +172,52 @@ const updateCohortRoleMembers = async (id, userIds = []) => {
             }
         }
 
-        await tx.$executeRaw`
-            UPDATE "User"
-            SET "roles" = array_remove("roles", ${role.key}), "updatedAt" = NOW()
-            WHERE ${role.key} = ANY("roles")
-        `;
+        const currentMembers = await tx.user.findMany({
+            where: {
+                roles: {
+                    has: role.key
+                }
+            },
+            select: {
+                id: true,
+                roles: true,
+                roleLevels: true
+            }
+        });
 
-        if (normalizedUserIds.length > 0) {
-            await tx.$executeRaw`
-                UPDATE "User"
-                SET "roles" = array_append("roles", ${role.key}), "updatedAt" = NOW()
-                WHERE "id" = ANY(${normalizedUserIds}::text[])
-                    AND NOT (${role.key} = ANY("roles"))
-            `;
+        const currentMemberIds = currentMembers.map((u) => u.id);
+        const allUserIdsToUpdate = [...new Set([...normalizedUserIds, ...currentMemberIds])];
+
+        const usersToUpdate = await tx.user.findMany({
+            where: {
+                id: { in: allUserIdsToUpdate }
+            }
+        });
+
+        for (const user of usersToUpdate) {
+            const isNewMember = normalizedUserIds.includes(user.id);
+            let updatedRoles = [...(user.roles || [])];
+            let updatedRoleLevels = typeof user.roleLevels === 'object' && user.roleLevels ? { ...user.roleLevels } : {};
+
+            if (isNewMember) {
+                if (!updatedRoles.includes(role.key)) {
+                    updatedRoles.push(role.key);
+                }
+                const memberInfo = parsedMembers.find((m) => m.userId === user.id);
+                updatedRoleLevels[role.key] = memberInfo.level;
+            } else {
+                updatedRoles = updatedRoles.filter((r) => r !== role.key);
+                delete updatedRoleLevels[role.key];
+            }
+
+            await tx.user.update({
+                where: { id: user.id },
+                data: {
+                    roles: updatedRoles,
+                    roleLevels: updatedRoleLevels,
+                    updatedAt: new Date()
+                }
+            });
         }
 
         const memberCount = await tx.user.count({
