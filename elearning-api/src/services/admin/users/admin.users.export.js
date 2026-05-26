@@ -126,9 +126,12 @@ const findProfileFileLink = (user, patterns, frontendUrl) => {
     if (fileUrl) {
       const fileKey = fileUrl.replace(/^\/?uploads\//, '');
       const downloadUrl = `${frontendUrl}/download-file?key=${encodeURIComponent(fileKey)}&name=${encodeURIComponent(fileName)}`;
+      const escapedFileName = fileName.replace(/"/g, '""');
+      const escapedUrl = downloadUrl.replace(/"/g, '""');
       return {
+        t: 's',
         v: fileName,
-        l: { Target: downloadUrl, Tooltip: fileName }
+        f: `HYPERLINK("${escapedUrl}", "${escapedFileName}")`
       };
     }
     return '';
@@ -144,9 +147,12 @@ const findProfileFileLink = (user, patterns, frontendUrl) => {
     const fileKey = matched.fileKey || matched.fileUrl || matched.fileName || '';
     const fileName = matched.fileName || matched.title || 'document';
     const downloadUrl = `${frontendUrl}/download-file?key=${encodeURIComponent(fileKey)}&name=${encodeURIComponent(fileName)}`;
+    const escapedFileName = fileName.replace(/"/g, '""');
+    const escapedUrl = downloadUrl.replace(/"/g, '""');
     return {
+      t: 's',
       v: fileName,
-      l: { Target: downloadUrl, Tooltip: fileName }
+      f: `HYPERLINK("${escapedUrl}", "${escapedFileName}")`
     };
   }
 
