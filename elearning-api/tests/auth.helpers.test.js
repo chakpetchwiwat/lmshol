@@ -79,3 +79,27 @@ test('canAccessEntity allows department-scoped published content for matching us
 
     assert.equal(authHelpers.canAccessEntity(actor, entity), true);
 });
+
+test('buildUserManagementWhere maps manager scope to departmentId OR cohort supervisorId', () => {
+    const actor = {
+        id: 'mgr-123',
+        isAdmin: false,
+        isManager: true,
+        departmentId: 'dept-abc'
+    };
+    
+    const query = authHelpers.buildUserManagementWhere(actor);
+    
+    assert.equal(query.permission, 'user');
+    assert.deepEqual(query.OR, [
+        { departmentId: 'dept-abc' },
+        {
+            cohortSupervised: {
+                some: {
+                    supervisorId: 'mgr-123'
+                }
+            }
+        }
+    ]);
+});
+

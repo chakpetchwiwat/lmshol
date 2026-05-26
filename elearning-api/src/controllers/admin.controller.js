@@ -524,6 +524,23 @@ const getAllAssessmentSubmissions = asyncHandler(async (req, res) => {
   res.json({ success: true, data: submissions });
 });
 
+// COHORT SUPERVISORS
+const getEligibleSupervisors = asyncHandler(async (req, res) => {
+  const supervisors = await AdminService.getEligibleSupervisors();
+  res.json({ success: true, data: supervisors });
+});
+
+const getUserCohortSupervisors = asyncHandler(async (req, res) => {
+  const supervisors = await AdminService.getUserCohortSupervisors(req.params.id);
+  res.json({ success: true, data: supervisors });
+});
+
+const saveUserCohortSupervisors = asyncHandler(async (req, res) => {
+  const supervisors = await AdminService.saveUserCohortSupervisors(req.params.id, req.body.assignments);
+  res.json({ success: true, data: supervisors });
+});
+
+
 module.exports = {
   getDashboardStats,
   getAdvancedAnalytics,
@@ -579,6 +596,9 @@ module.exports = {
   reorderCohortRoles,
   updateCohortRoleMembers,
   getTiers,
+  getEligibleSupervisors,
+  getUserCohortSupervisors,
+  saveUserCohortSupervisors,
   createTier,
   updateTier,
   deleteTier,

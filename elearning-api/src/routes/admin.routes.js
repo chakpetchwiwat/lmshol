@@ -17,10 +17,13 @@ router.get('/system/health', verifySuperAdmin, systemController.getSystemHealth)
 router.post('/system/security/reset', verifySuperAdmin, systemController.resetRateLimit);
 
 router.get('/users', adminController.getUsers);
+router.get('/users/supervisors', adminController.getEligibleSupervisors);
 router.get('/users/export-profiles', adminController.exportUserProfiles);
 router.get('/users/export-trainings', adminController.exportUserTrainings);
 router.get('/users/templates/:type', verifySuperAdmin, adminController.downloadTemplate);
 router.post('/users/import/:type', verifySuperAdmin, upload.single('file'), auditRequest('admin.users.imported', { entityType: 'user' }), adminController.importUsers);
+router.get('/users/:id/cohort-supervisors', adminController.getUserCohortSupervisors);
+router.post('/users/:id/cohort-supervisors', verifySuperAdmin, auditRequest('admin.user_cohort_supervisors.updated', { entityType: 'userCohortSupervisor' }), adminController.saveUserCohortSupervisors);
 router.get('/users/:id/details', auditRequest('admin.user_details.viewed', { entityType: 'user', includeBody: false }), adminController.getUserDetails);
 router.get('/users/:id/export', auditRequest('admin.user_export.viewed', { entityType: 'user', includeBody: false }), adminController.exportSingleUser);
 router.get('/users/:id/certificates', verifySuperAdmin, adminController.getUserCertificates);

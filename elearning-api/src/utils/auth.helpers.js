@@ -146,7 +146,16 @@ const buildUserManagementWhere = (actor, extraWhere = {}) => {
     if (actor.isManager) {
         return {
             permission: USER_PERMISSIONS.USER,
-            departmentId: actor.departmentId,
+            OR: [
+                { departmentId: actor.departmentId },
+                {
+                    cohortSupervised: {
+                        some: {
+                            supervisorId: actor.id || actor.userId
+                        }
+                    }
+                }
+            ],
             ...extraWhere
         };
     }
