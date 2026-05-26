@@ -281,7 +281,11 @@ const parseNamePrefix = (fullName = '') => {
 
 const buildTrainingItems = (user) => {
   const { prefix, name } = parseNamePrefix(user.name || '');
-  const position = [(user.position || ''), (user.positionLevel || '')].filter(Boolean).join('');
+  let position = user.position || '';
+  const level = user.positionLevel || '';
+  if (level && !position.includes(level)) {
+    position = position + level;
+  }
   const department = user.departmentRef?.name || user.department || '';
 
   const systemItems = (user.issuedCertificates || []).map((cert) => {
