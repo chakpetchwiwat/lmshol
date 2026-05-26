@@ -48,7 +48,9 @@ const normalizeCertificatePayload = (data = {}) => {
         trainingType: normalizeOptionalText(data.trainingType),
         trainingItem: normalizeOptionalText(data.trainingItem),
         trainingDetails: normalizeOptionalText(data.trainingDetails),
-        trainingVenue: normalizeOptionalText(data.trainingVenue)
+        trainingVenue: normalizeOptionalText(data.trainingVenue),
+        trainingDays: normalizeOptionalText(data.trainingDays),
+        intakeNo: normalizeOptionalText(data.intakeNo)
     };
 };
 

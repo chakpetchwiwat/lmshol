@@ -181,6 +181,16 @@ const UserModal = ({
                   ]}
                 />
               </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-bold text-slate-700">ตำแหน่ง (Position)</label>
+                <input
+                  type="text"
+                  className="form-input w-full"
+                  value={formData.position || ''}
+                  onChange={(event) => setFormData({ ...formData, position: event.target.value })}
+                  placeholder="เช่น เภสัชกรชำนาญการ, เจ้าพนักงานเภสัชกรรม"
+                />
+              </div>
               <div className="md:col-span-2">
                 <label className="mb-1.5 block text-sm font-bold text-slate-700">หัวหน้างาน (Supervisor)</label>
                 <input
@@ -276,7 +286,7 @@ const UserModal = ({
                     />
 
                     <CustomSelect
-                      label="ตำแหน่ง (Position)"
+                      label="ระดับชั้นสิทธิ์ / Tier"
                       value={formData.tierId}
                       onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
                       options={[
@@ -332,27 +342,6 @@ const UserModal = ({
                     )}
                   </div>
                 )}
-              </div>
-
-              <div className="mt-3 grid gap-2 md:grid-cols-2">
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">แผนก</p>
-                  <p className="mt-1 truncate text-sm font-black text-slate-800">{selectedDepartmentName}</p>
-                </div>
-                <div className="hidden rounded-xl border border-slate-200 bg-white px-3 py-2">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Cohort Role</p>
-                  {selectedRoleLabels.length > 0 ? (
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {selectedRoleLabels.map((label) => (
-                        <span key={label} className="rounded-lg bg-slate-100 px-2 py-0.5 text-xs font-black text-slate-700">
-                          {label}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-1 text-sm font-black text-slate-400">ยังไม่ได้กำหนด Role</p>
-                  )}
-                </div>
               </div>
             </div>
 

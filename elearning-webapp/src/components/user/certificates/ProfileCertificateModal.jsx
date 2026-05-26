@@ -96,6 +96,8 @@ const ProfileCertificateModal = ({
                 <option value="">-- เลือกประเภท --</option>
                 <option value="ภายใน">ภายใน</option>
                 <option value="ภายนอก">ภายนอก</option>
+                <option value="การอบรมเพื่อพัฒนา">การอบรมเพื่อพัฒนา</option>
+                <option value="การอบรมตามเงื่อนไข">การอบรมตามเงื่อนไข</option>
               </select>
             </label>
 
@@ -184,6 +186,30 @@ const ProfileCertificateModal = ({
                 className="h-4 w-4 accent-primary"
               />
               <span className="text-sm font-bold text-slate-700">ไม่มีวันหมดอายุเกียรติบัตร</span>
+            </label>
+
+            <label htmlFor="trainingDaysInputId">
+              <span className="mb-2 block text-sm font-bold text-slate-700">จำนวนวัน</span>
+              <input
+                id="trainingDaysInputId"
+                type="text"
+                value={form.trainingDays || ''}
+                onChange={(event) => onFormChange('trainingDays', event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white"
+                placeholder="เช่น 1, 3, 5"
+              />
+            </label>
+
+            <label htmlFor="intakeNoInputId">
+              <span className="mb-2 block text-sm font-bold text-slate-700">ครั้งที่ / รุ่นที่</span>
+              <input
+                id="intakeNoInputId"
+                type="text"
+                value={form.intakeNo || ''}
+                onChange={(event) => onFormChange('intakeNo', event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white"
+                placeholder="เช่น รุ่นที่ 1, ครั้งที่ 12, G1"
+              />
             </label>
 
             <label htmlFor={credentialIdInputId}>

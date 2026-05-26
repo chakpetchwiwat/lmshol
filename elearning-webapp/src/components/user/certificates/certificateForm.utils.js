@@ -15,7 +15,9 @@ export const emptyCertificateForm = {
   trainingType: 'ภายนอก',
   trainingItem: 'อบรม',
   trainingDetails: '',
-  trainingVenue: ''
+  trainingVenue: '',
+  trainingDays: '',
+  intakeNo: ''
 };
 
 const toDateInputValue = (value) => {
@@ -40,7 +42,9 @@ export const buildFormFromCertificate = (certificate) => ({
   trainingType: certificate?.trainingType || 'ภายนอก',
   trainingItem: certificate?.trainingItem || 'อบรม',
   trainingDetails: certificate?.trainingDetails || '',
-  trainingVenue: certificate?.trainingVenue || ''
+  trainingVenue: certificate?.trainingVenue || '',
+  trainingDays: certificate?.trainingDays || '',
+  intakeNo: certificate?.intakeNo || ''
 });
 
 export const formatCertificateDateRange = (certificate, isLms = false) => {
