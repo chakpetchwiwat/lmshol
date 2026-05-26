@@ -181,16 +181,7 @@ const UserModal = ({
                   ]}
                 />
               </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">ตำแหน่ง (Position)</label>
-                <input
-                  type="text"
-                  className="form-input w-full"
-                  value={formData.position || ''}
-                  onChange={(event) => setFormData({ ...formData, position: event.target.value })}
-                  placeholder="เช่น เภสัชกรชำนาญการ, เจ้าพนักงานเภสัชกรรม"
-                />
-              </div>
+              <div className="hidden md:block"></div>
               <div className="md:col-span-2">
                 <label className="mb-1.5 block text-sm font-bold text-slate-700">หัวหน้างาน (Supervisor)</label>
                 <input
@@ -286,7 +277,7 @@ const UserModal = ({
                     />
 
                     <CustomSelect
-                      label="ระดับชั้นสิทธิ์ / Tier"
+                      label="ตำแหน่ง (POSITION)"
                       value={formData.tierId}
                       onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
                       options={[
