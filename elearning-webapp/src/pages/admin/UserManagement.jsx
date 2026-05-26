@@ -599,14 +599,14 @@ const UserManagement = () => {
                   {showExportDropdown && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setShowExportDropdown(false)} />
-                      <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl z-20">
+                      <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl z-20">
                         <button
                           type="button"
                           onClick={() => {
                             setShowExportDropdown(false);
                             handleExportProfiles();
                           }}
-                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-700 hover:bg-slate-50"
                         >
                           Export ประวัติผู้เรียน
                         </button>
@@ -616,7 +616,7 @@ const UserManagement = () => {
                             setShowExportDropdown(false);
                             handleExportTrainings();
                           }}
-                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-700 hover:bg-slate-50"
                         >
                           Export ประวัติอบรม
                         </button>
@@ -639,7 +639,7 @@ const UserManagement = () => {
                   {showImportDropdown && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setShowImportDropdown(false)} />
-                      <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl z-20">
+                      <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-slate-100 bg-white p-1.5 shadow-xl z-20">
                         <button
                           type="button"
                           onClick={() => {
@@ -647,7 +647,7 @@ const UserManagement = () => {
                             setImportModalType('profiles');
                             setImportModalOpen(true);
                           }}
-                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-700 hover:bg-slate-50"
                         >
                           Import ประวัติผู้เรียน
                         </button>
@@ -658,7 +658,7 @@ const UserManagement = () => {
                             setImportModalType('trainings');
                             setImportModalOpen(true);
                           }}
-                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-slate-50"
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-700 hover:bg-slate-50"
                         >
                           Import ประวัติอบรม
                         </button>
@@ -668,22 +668,22 @@ const UserManagement = () => {
                           onClick={async () => {
                             setShowImportDropdown(false);
                             try {
-                              toast.info('กำลังดาวน์โหลดแบบฟอร์ม...');
-                              const response = await adminAPI.downloadTemplate('profiles');
-                              const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                              const url = window.URL.createObjectURL(blob);
-                              const link = document.createElement('a');
-                              link.href = url;
-                              link.setAttribute('download', 'แบบฟอร์ม_ประวัติผู้เรียน.xlsx');
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                              toast.success('ดาวน์โหลดแบบฟอร์มสำเร็จ');
+                                toast.info('กำลังดาวน์โหลดแบบฟอร์ม...');
+                                const response = await adminAPI.downloadTemplate('profiles');
+                                const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                                const url = window.URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.setAttribute('download', 'แบบฟอร์ม_ประวัติผู้เรียน.xlsx');
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                toast.success('ดาวน์โหลดแบบฟอร์มสำเร็จ');
                             } catch (e) {
-                              toast.error('ดาวน์โหลดแบบฟอร์มไม่สำเร็จ');
+                                toast.error('ดาวน์โหลดแบบฟอร์มไม่สำเร็จ');
                             }
                           }}
-                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-500 hover:bg-slate-50"
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-500 hover:bg-slate-50"
                         >
                           <FileDown size={14} className="text-slate-400" />
                           Template ประวัติผู้เรียน
@@ -693,22 +693,22 @@ const UserManagement = () => {
                           onClick={async () => {
                             setShowImportDropdown(false);
                             try {
-                              toast.info('กำลังดาวน์โหลดแบบฟอร์ม...');
-                              const response = await adminAPI.downloadTemplate('trainings');
-                              const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                              const url = window.URL.createObjectURL(blob);
-                              const link = document.createElement('a');
-                              link.href = url;
-                              link.setAttribute('download', 'แบบฟอร์ม_ประวัติอบรม.xlsx');
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                              toast.success('ดาวน์โหลดแบบฟอร์มสำเร็จ');
+                                toast.info('กำลังดาวน์โหลดแบบฟอร์ม...');
+                                const response = await adminAPI.downloadTemplate('trainings');
+                                const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                                const url = window.URL.createObjectURL(blob);
+                                const link = document.createElement('a');
+                                link.href = url;
+                                link.setAttribute('download', 'แบบฟอร์ม_ประวัติอบรม.xlsx');
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                toast.success('ดาวน์โหลดแบบฟอร์มสำเร็จ');
                             } catch (e) {
-                              toast.error('ดาวน์โหลดแบบฟอร์มไม่สำเร็จ');
+                                toast.error('ดาวน์โหลดแบบฟอร์มไม่สำเร็จ');
                             }
                           }}
-                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-500 hover:bg-slate-50"
+                          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-bold text-slate-500 hover:bg-slate-50"
                         >
                           <FileDown size={14} className="text-slate-400" />
                           Template ประวัติอบรม
