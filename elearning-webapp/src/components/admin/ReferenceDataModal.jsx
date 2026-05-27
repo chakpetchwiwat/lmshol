@@ -17,7 +17,6 @@ const ReferenceDataModal = ({
   onDelete,
   onReorder = null,
   memberUsers = [],
-  supervisorUsers = [],
   getMembers = null,
   getMemberIds = null,
   onUpdateMembers = null,
@@ -144,7 +143,7 @@ const ReferenceDataModal = ({
       initialMembers.forEach((m) => {
         map[m.userId] = {
           level: m.level || '',
-          supervisorIds: Array.isArray(m.supervisorIds) ? m.supervisorIds : []
+          isSupervisor: Boolean(m.isSupervisor)
         };
       });
       setSelectedMembersMap(map);
@@ -164,7 +163,7 @@ const ReferenceDataModal = ({
           const roleLevels = memberEditorItem?.levels || [];
           next[userId] = {
             level: roleLevels[0] || '',
-            supervisorIds: []
+            isSupervisor: false
           };
         }
         return next;
@@ -182,43 +181,29 @@ const ReferenceDataModal = ({
     setSelectedMembersMap((current) => ({
       ...current,
       [userId]: {
-        ...(typeof current[userId] === 'object' ? current[userId] : { supervisorIds: [] }),
+        ...(typeof current[userId] === 'object' ? current[userId] : { isSupervisor: false }),
         level: newLevel
       }
     }));
   };
 
-  const handleMemberSupervisorAdd = (userId, supervisorId) => {
-    if (!supervisorId) return;
+  const handleMemberSupervisorToggle = (userId) => {
     setSelectedMembersMap((current) => {
       const currentMember = typeof current[userId] === 'object'
         ? current[userId]
-        : { level: current[userId] || '', supervisorIds: [] };
-      const supervisorIds = Array.isArray(currentMember.supervisorIds) ? currentMember.supervisorIds : [];
+        : { level: current[userId] || '', isSupervisor: false };
       return {
         ...current,
         [userId]: {
           ...currentMember,
-          supervisorIds: supervisorIds.includes(supervisorId) ? supervisorIds : [...supervisorIds, supervisorId]
+          isSupervisor: !currentMember.isSupervisor
         }
       };
     });
   };
 
-  const handleMemberSupervisorRemove = (userId, supervisorId) => {
-    setSelectedMembersMap((current) => {
-      const currentMember = typeof current[userId] === 'object'
-        ? current[userId]
-        : { level: current[userId] || '', supervisorIds: [] };
-      return {
-        ...current,
-        [userId]: {
-          ...currentMember,
-          supervisorIds: (currentMember.supervisorIds || []).filter((id) => id !== supervisorId)
-        }
-      };
-    });
-  };
+  const handleMemberSupervisorAdd = handleMemberSupervisorToggle;
+  const handleMemberSupervisorRemove = handleMemberSupervisorToggle;
 
   const handleSaveMembers = async () => {
     if (!memberEditorItem || !onUpdateMembers) return;
@@ -227,11 +212,11 @@ const ReferenceDataModal = ({
       setSavingMembers(true);
       if (getMembers) {
         const membersPayload = Object.entries(selectedMembersMap).map(([userId, value]) => {
-          const member = typeof value === 'object' ? value : { level: value || '', supervisorIds: [] };
+          const member = typeof value === 'object' ? value : { level: value || '', isSupervisor: false };
           return {
             userId,
             level: member.level || null,
-            supervisorIds: Array.isArray(member.supervisorIds) ? member.supervisorIds : []
+            isSupervisor: Boolean(member.isSupervisor)
           };
         });
         await onUpdateMembers(memberEditorItem.id, membersPayload);
@@ -579,12 +564,12 @@ const ReferenceDataModal = ({
                           const isSelected = getMembers ? (user.id in selectedMembersMap) : selectedMemberIds.includes(user.id);
                           const memberValue = getMembers && typeof selectedMembersMap[user.id] === 'object'
                             ? selectedMembersMap[user.id]
-                            : { level: getMembers ? (selectedMembersMap[user.id] || '') : '', supervisorIds: [] };
+                            : { level: getMembers ? (selectedMembersMap[user.id] || '') : '', isSupervisor: false };
                           const currentLevel = memberValue.level || '';
-                          const currentSupervisorIds = Array.isArray(memberValue.supervisorIds) ? memberValue.supervisorIds : [];
+                          const isRoleSupervisor = Boolean(memberValue.isSupervisor);
+                          const currentSupervisorIds = [];
                           const roleLevels = memberEditorItem?.levels || [];
-                          const supervisorOptions = (supervisorUsers.length ? supervisorUsers : memberUsers)
-                            .filter((candidate) => candidate.id !== user.id);
+                          const supervisorOptions = [];
 
                           return (
                             <div
@@ -637,7 +622,7 @@ const ReferenceDataModal = ({
                                     ))}
                                   </select>
                                   )}
-                                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                                  <div className="hidden">
                                     <select
                                       value=""
                                       onChange={(event) => handleMemberSupervisorAdd(user.id, event.target.value)}
@@ -675,6 +660,19 @@ const ReferenceDataModal = ({
                                       })}
                                     </div>
                                   </div>
+                                  <label className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-all ${
+                                    isRoleSupervisor
+                                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                      : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-white'
+                                  }`}>
+                                    <span className="text-xs font-black">ผู้ดูแลประจำ Role</span>
+                                    <input
+                                      type="checkbox"
+                                      checked={isRoleSupervisor}
+                                      onChange={() => handleMemberSupervisorToggle(user.id)}
+                                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                                    />
+                                  </label>
                                 </div>
                               )}
 

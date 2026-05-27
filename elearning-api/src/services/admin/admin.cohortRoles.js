@@ -65,6 +65,16 @@ const shouldUserKeepManagerPermission = async (tx, user, targetRoleKey = null) =
         return true;
     }
 
+    const roleSupervisorCount = await tx.cohortRoleSupervisor.count({
+        where: {
+            supervisorId: user.id,
+            ...(targetRoleKey ? { cohortRole: { key: { not: targetRoleKey } } } : {})
+        }
+    });
+    if (roleSupervisorCount > 0) {
+        return true;
+    }
+
     const roleKeys = (user.roles || []).filter((roleKey) => roleKey !== targetRoleKey);
     if (!roleKeys.length) {
         return false;
@@ -113,6 +123,11 @@ const syncRoleAdminMemberPermissions = async (tx, role) => {
 
 const getCohortRoles = async () => {
     const roles = await prisma.cohortRole.findMany({
+        include: {
+            roleSupervisors: {
+                select: { supervisorId: true }
+            }
+        },
         orderBy: [{ order: 'asc' }, { name: 'asc' }]
     });
 
@@ -231,22 +246,22 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
 
     const parsedMembers = membersInput.map((item) => {
         if (typeof item === 'string') {
-            return { userId: String(item || '').trim(), level: null, supervisorIds: [] };
+            return { userId: String(item || '').trim(), level: null, isSupervisor: false };
         }
         if (item && typeof item === 'object') {
             return {
                 userId: String(item.userId || item.id || '').trim(),
                 level: item.level ? String(item.level).trim() : null,
-                supervisorIds: Array.isArray(item.supervisorIds)
-                    ? [...new Set(item.supervisorIds.map((supervisorId) => String(supervisorId || '').trim()).filter(Boolean))]
-                    : []
+                isSupervisor: Boolean(item.isSupervisor)
             };
         }
         return null;
     }).filter((m) => m && m.userId);
 
     const normalizedUserIds = [...new Set(parsedMembers.map((m) => m.userId))];
-    const normalizedSupervisorIds = [...new Set(parsedMembers.flatMap((m) => m.supervisorIds))];
+    const normalizedSupervisorIds = [...new Set(parsedMembers
+        .filter((m) => m.isSupervisor)
+        .map((m) => m.userId))];
 
     return prisma.$transaction(async (tx) => {
         const role = await tx.cohortRole.findUnique({ where: { id } });
@@ -263,19 +278,6 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
 
             if (matchedCount !== normalizedUserIds.length) {
                 throw new Error('Invalid user selection');
-            }
-        }
-
-        if (normalizedSupervisorIds.length > 0) {
-            const matchedSupervisorCount = await tx.user.count({
-                where: {
-                    id: { in: normalizedSupervisorIds },
-                    status: 'ACTIVE'
-                }
-            });
-
-            if (matchedSupervisorCount !== normalizedSupervisorIds.length) {
-                throw new Error('Invalid supervisor selection');
             }
         }
 
@@ -341,6 +343,20 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
             });
         }
 
+        await tx.cohortRoleSupervisor.deleteMany({
+            where: { cohortRoleId: role.id }
+        });
+
+        if (normalizedSupervisorIds.length > 0) {
+            await tx.cohortRoleSupervisor.createMany({
+                data: normalizedSupervisorIds.map((supervisorId) => ({
+                    cohortRoleId: role.id,
+                    supervisorId
+                })),
+                skipDuplicates: true
+            });
+        }
+
         await tx.userCohortSupervisor.deleteMany({
             where: {
                 cohortRoleId: role.id,
@@ -349,7 +365,7 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
         });
 
         const supervisorRows = parsedMembers.flatMap((member) => (
-            member.supervisorIds
+            normalizedSupervisorIds
                 .filter((supervisorId) => supervisorId !== member.userId)
                 .map((supervisorId) => ({
                     userId: member.userId,
@@ -385,6 +401,7 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
 
         return {
             ...role,
+            roleSupervisors: normalizedSupervisorIds.map((supervisorId) => ({ supervisorId })),
             memberCount
         };
     });

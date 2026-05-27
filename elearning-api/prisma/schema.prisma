@@ -9,53 +9,54 @@ datasource db {
 }
 
 model User {
-  id                    String                 @id @default(uuid())
-  name                  String
-  email                 String                 @unique
-  password              String
-  permission            String                 @default("user")
-  roles                 String[]               @default([])
-  department            String?
-  pointsBalance         Int                    @default(0)
-  status                String                 @default("ACTIVE")
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
-  departmentId          String?
-  employmentDate        DateTime?
-  tierId                String?
-  profileImageUrl       String?
-  position              String?
-  positionLevel         String?
-  subdivision           String?
-  positionType          String?
-  supervisorName        String?
-  nationalId            String?
-  retirementDateRaw     String?
-  educationHistory      Json?
-  profileFiles          Json?
-  roleLevels            Json?                  @default("{}")
-  signatureImageUrl     String?
-  signatureTitle        String?
-  createdAnnouncements  Announcement[]         @relation("AnnouncementCreator")
-  announcementViews     AnnouncementView[]     @relation("UserAnnouncementViews")
-  gradedAssessments     AssessmentSubmission[] @relation("AssessmentGrader")
-  assessmentSubmissions AssessmentSubmission[] @relation("AssessmentLearner")
-  issuedCertificates    Certificate[]
-  courseStaff           CourseStaff[]
-  pointsLedger          PointsLedger[]
-  QuizAttempt           QuizAttempt[]
-  redeems               RedeemRequest[]
-  departmentRef         Department?            @relation("DepartmentUsers", fields: [departmentId], references: [id])
-  tier                  Tier?                  @relation(fields: [tierId], references: [id])
-  certificates          UserCertificate[]
-  enrollments           UserCourse[]
-  progress              UserLessonProgress[]
-  notifications         UserNotification[]
-  targetedGoals         GoalTargetUser[]
-  courseBookmarks       UserCourseBookmark[]
-  auditLogs             AuditLog[]            @relation("AuditActor")
-  cohortSupervised      UserCohortSupervisor[] @relation("UserCohorts")
-  cohortSupervisors     UserCohortSupervisor[] @relation("SupervisorUsers")
+  id                        String                 @id @default(uuid())
+  name                      String
+  email                     String                 @unique
+  password                  String
+  permission                String                 @default("user")
+  roles                     String[]               @default([])
+  department                String?
+  pointsBalance             Int                    @default(0)
+  status                    String                 @default("ACTIVE")
+  createdAt                 DateTime               @default(now())
+  updatedAt                 DateTime               @updatedAt
+  departmentId              String?
+  employmentDate            DateTime?
+  tierId                    String?
+  profileImageUrl           String?
+  position                  String?
+  positionLevel             String?
+  subdivision               String?
+  positionType              String?
+  supervisorName            String?
+  nationalId                String?
+  retirementDateRaw         String?
+  educationHistory          Json?
+  profileFiles              Json?
+  roleLevels                Json?                  @default("{}")
+  signatureImageUrl         String?
+  signatureTitle            String?
+  createdAnnouncements      Announcement[]         @relation("AnnouncementCreator")
+  announcementViews         AnnouncementView[]     @relation("UserAnnouncementViews")
+  gradedAssessments         AssessmentSubmission[] @relation("AssessmentGrader")
+  assessmentSubmissions     AssessmentSubmission[] @relation("AssessmentLearner")
+  issuedCertificates        Certificate[]
+  courseStaff               CourseStaff[]
+  pointsLedger              PointsLedger[]
+  QuizAttempt               QuizAttempt[]
+  redeems                   RedeemRequest[]
+  departmentRef             Department?            @relation("DepartmentUsers", fields: [departmentId], references: [id])
+  tier                      Tier?                  @relation(fields: [tierId], references: [id])
+  certificates              UserCertificate[]
+  enrollments               UserCourse[]
+  progress                  UserLessonProgress[]
+  notifications             UserNotification[]
+  targetedGoals             GoalTargetUser[]
+  courseBookmarks           UserCourseBookmark[]
+  auditLogs                 AuditLog[]             @relation("AuditActor")
+  cohortSupervised          UserCohortSupervisor[] @relation("UserCohorts")
+  cohortSupervisors         UserCohortSupervisor[] @relation("SupervisorUsers")
+  cohortRoleSupervisorRoles CohortRoleSupervisor[] @relation("CohortRoleSupervisorUsers")
 
   @@index([status, departmentId, tierId])
   @@index([departmentId, status])
@@ -82,28 +83,28 @@ model AuditLog {
 }
 
 model UserCertificate {
-  id             String    @id @default(uuid())
-  userId         String
-  title          String
-  issuer         String
-  issueDate      DateTime?
-  expirationDate DateTime?
-  noExpiration   Boolean   @default(false)
-  credentialId   String?
-  credentialUrl  String?
-  fileUrl        String?
-  fileKey        String?
-  fileName       String?
-  fileMimeType   String?
-  trainingType   String?
-  trainingItem   String?
+  id              String    @id @default(uuid())
+  userId          String
+  title           String
+  issuer          String
+  issueDate       DateTime?
+  expirationDate  DateTime?
+  noExpiration    Boolean   @default(false)
+  credentialId    String?
+  credentialUrl   String?
+  fileUrl         String?
+  fileKey         String?
+  fileName        String?
+  fileMimeType    String?
+  trainingType    String?
+  trainingItem    String?
   trainingDetails String?
-  trainingVenue  String?
-  trainingDays   String?
-  intakeNo       String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingVenue   String?
+  trainingDays    String?
+  intakeNo        String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, issueDate])
   @@index([userId, createdAt])
@@ -253,28 +254,41 @@ model Tier {
 }
 
 model CohortRole {
-  id        String   @id @default(uuid())
-  key       String   @unique
-  name      String   @unique
-  order     Int      @default(0)
-  levels    String[] @default([])
-  adminLevels String[] @default([])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  goalTargets GoalTargetCohortRole[]
-  supervisors UserCohortSupervisor[] @relation("CohortSupervisors")
-  courseAccess CourseCohortRoleAccess[]
+  id              String                   @id @default(uuid())
+  key             String                   @unique
+  name            String                   @unique
+  order           Int                      @default(0)
+  levels          String[]                 @default([])
+  adminLevels     String[]                 @default([])
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  goalTargets     GoalTargetCohortRole[]
+  supervisors     UserCohortSupervisor[]   @relation("CohortSupervisors")
+  roleSupervisors CohortRoleSupervisor[]   @relation("CohortRoleSupervisors")
+  courseAccess    CourseCohortRoleAccess[]
+}
+
+model CohortRoleSupervisor {
+  cohortRoleId String
+  supervisorId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  cohortRole   CohortRole @relation("CohortRoleSupervisors", fields: [cohortRoleId], references: [id], onDelete: Cascade)
+  supervisor   User       @relation("CohortRoleSupervisorUsers", fields: [supervisorId], references: [id], onDelete: Cascade)
+
+  @@id([cohortRoleId, supervisorId])
+  @@index([supervisorId])
 }
 
 model UserCohortSupervisor {
-  userId         String
-  cohortRoleId   String
-  supervisorId   String
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  user           User       @relation("UserCohorts", fields: [userId], references: [id], onDelete: Cascade)
-  cohortRole     CohortRole @relation("CohortSupervisors", fields: [cohortRoleId], references: [id], onDelete: Cascade)
-  supervisor     User       @relation("SupervisorUsers", fields: [supervisorId], references: [id], onDelete: Cascade)
+  userId       String
+  cohortRoleId String
+  supervisorId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  user         User       @relation("UserCohorts", fields: [userId], references: [id], onDelete: Cascade)
+  cohortRole   CohortRole @relation("CohortSupervisors", fields: [cohortRoleId], references: [id], onDelete: Cascade)
+  supervisor   User       @relation("SupervisorUsers", fields: [supervisorId], references: [id], onDelete: Cascade)
 
   @@id([userId, cohortRoleId, supervisorId])
   @@index([userId])
@@ -388,27 +402,27 @@ model QuizAttempt {
 }
 
 model AssessmentSubmission {
-  id           String    @id @default(uuid())
-  lessonId     String
-  userId       String
-  fileUrl      String?
-  fileKey      String?
-  fileName     String?
-  fileMimeType String?
-  note         String?
-  score        Int?
-  maxScore     Int       @default(10)
-  status       String    @default("SUBMITTED")
-  feedback     String?
-  gradedById   String?
-  submittedAt  DateTime  @default(now())
-  gradedAt     DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  gradedBy     User?     @relation("AssessmentGrader", fields: [gradedById], references: [id])
-  lesson       Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  id            String             @id @default(uuid())
+  lessonId      String
+  userId        String
+  fileUrl       String?
+  fileKey       String?
+  fileName      String?
+  fileMimeType  String?
+  note          String?
+  score         Int?
+  maxScore      Int                @default(10)
+  status        String             @default("SUBMITTED")
+  feedback      String?
+  gradedById    String?
+  submittedAt   DateTime           @default(now())
+  gradedAt      DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  gradedBy      User?              @relation("AssessmentGrader", fields: [gradedById], references: [id])
+  lesson        Lesson             @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   notifications UserNotification[]
-  user         User      @relation("AssessmentLearner", fields: [userId], references: [id], onDelete: Cascade)
+  user          User               @relation("AssessmentLearner", fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([lessonId, status, submittedAt])
   @@index([userId, submittedAt])
@@ -515,22 +529,22 @@ model RedeemRequest {
 }
 
 model LearningGoal {
-  id                         String             @id @default(uuid())
+  id                         String                 @id @default(uuid())
   title                      String
   type                       String
-  targetCount                Int                @default(1)
+  targetCount                Int                    @default(1)
   expiryDate                 DateTime?
-  scope                      String             @default("GLOBAL")
+  scope                      String                 @default("GLOBAL")
   departmentId               String?
-  status                     String             @default("ACTIVE")
-  createdAt                  DateTime           @default(now())
-  updatedAt                  DateTime           @updatedAt
+  status                     String                 @default("ACTIVE")
+  createdAt                  DateTime               @default(now())
+  updatedAt                  DateTime               @updatedAt
   postAssignmentReminderDays Int?
   preDeadlineReminderDays    Int?
   postAssignmentReminderTime String?
   preDeadlineReminderTime    String?
   courses                    GoalCourse[]
-  department                 Department?        @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  department                 Department?            @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   targetDepartments          GoalTargetDepartment[]
   targetCohortRoles          GoalTargetCohortRole[]
   targetUsers                GoalTargetUser[]
