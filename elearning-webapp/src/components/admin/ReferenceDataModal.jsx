@@ -40,6 +40,7 @@ const ReferenceDataModal = ({
   const [selectedMemberIds, setSelectedMemberIds] = React.useState([]);
   const [selectedMembersMap, setSelectedMembersMap] = React.useState({});
   const [savingMembers, setSavingMembers] = React.useState(false);
+  const modalScrollRef = React.useRef(null);
   const canManageMembers = Boolean(onUpdateMembers && (getMembers || getMemberIds));
 
   const handleMove = async (index, direction) => {
@@ -121,6 +122,9 @@ const ReferenceDataModal = ({
       setDraftLevelsList(Array.isArray(item.levels) ? item.levels : []);
       setLevelInput('');
     }
+    requestAnimationFrame(() => {
+      modalScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   };
 
   const addDraftLevel = () => {
@@ -277,7 +281,7 @@ const ReferenceDataModal = ({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5">
+        <div ref={modalScrollRef} className="flex-1 overflow-y-auto px-6 py-5">
           <form 
             onSubmit={handleSubmit} 
             className={`mb-6 flex flex-col gap-4 rounded-3xl border-2 p-5 transition-all duration-300 ${
