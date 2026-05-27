@@ -852,9 +852,13 @@ const UserManagement = () => {
             onDelete={handleCohortRoleDelete}
             onReorder={handleCohortRoleReorder}
             memberUsers={users}
+            supervisorUsers={users}
             getMembers={(role) => users.filter((user) => (user.roles || []).includes(role.key)).map((user) => ({
               userId: user.id,
-              level: user.roleLevels?.[role.key] || ''
+              level: user.roleLevels?.[role.key] || '',
+              supervisorIds: (user.cohortSupervised || [])
+                .filter((assignment) => assignment.cohortRoleId === role.id)
+                .map((assignment) => assignment.supervisorId)
             }))}
             onUpdateMembers={async (id, members) => {
               await adminAPI.updateCohortRoleMembers(id, members);

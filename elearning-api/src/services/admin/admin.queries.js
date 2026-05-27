@@ -51,6 +51,12 @@ const announcementInclude = {
 const userInclude = {
     departmentRef: true,
     tier: true,
+    cohortSupervised: {
+        select: {
+            cohortRoleId: true,
+            supervisorId: true
+        }
+    },
     _count: {
         select: {
             enrollments: {

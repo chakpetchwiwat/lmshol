@@ -55,6 +55,16 @@ const shouldUserKeepManagerPermission = async (tx, user, targetRoleKey = null) =
         }
     }
 
+    const supervisedCount = await tx.userCohortSupervisor.count({
+        where: {
+            supervisorId: user.id,
+            ...(targetRoleKey ? { cohortRole: { key: { not: targetRoleKey } } } : {})
+        }
+    });
+    if (supervisedCount > 0) {
+        return true;
+    }
+
     const roleKeys = (user.roles || []).filter((roleKey) => roleKey !== targetRoleKey);
     if (!roleKeys.length) {
         return false;
@@ -221,18 +231,22 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
 
     const parsedMembers = membersInput.map((item) => {
         if (typeof item === 'string') {
-            return { userId: String(item || '').trim(), level: null };
+            return { userId: String(item || '').trim(), level: null, supervisorIds: [] };
         }
         if (item && typeof item === 'object') {
             return {
                 userId: String(item.userId || item.id || '').trim(),
-                level: item.level ? String(item.level).trim() : null
+                level: item.level ? String(item.level).trim() : null,
+                supervisorIds: Array.isArray(item.supervisorIds)
+                    ? [...new Set(item.supervisorIds.map((supervisorId) => String(supervisorId || '').trim()).filter(Boolean))]
+                    : []
             };
         }
         return null;
     }).filter((m) => m && m.userId);
 
     const normalizedUserIds = [...new Set(parsedMembers.map((m) => m.userId))];
+    const normalizedSupervisorIds = [...new Set(parsedMembers.flatMap((m) => m.supervisorIds))];
 
     return prisma.$transaction(async (tx) => {
         const role = await tx.cohortRole.findUnique({ where: { id } });
@@ -249,6 +263,19 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
 
             if (matchedCount !== normalizedUserIds.length) {
                 throw new Error('Invalid user selection');
+            }
+        }
+
+        if (normalizedSupervisorIds.length > 0) {
+            const matchedSupervisorCount = await tx.user.count({
+                where: {
+                    id: { in: normalizedSupervisorIds },
+                    status: 'ACTIVE'
+                }
+            });
+
+            if (matchedSupervisorCount !== normalizedSupervisorIds.length) {
+                throw new Error('Invalid supervisor selection');
             }
         }
 
@@ -310,6 +337,40 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
                     roleLevels: updatedRoleLevels,
                     permission: nextPermission,
                     updatedAt: new Date()
+                }
+            });
+        }
+
+        await tx.userCohortSupervisor.deleteMany({
+            where: {
+                cohortRoleId: role.id,
+                userId: { in: allUserIdsToUpdate }
+            }
+        });
+
+        const supervisorRows = parsedMembers.flatMap((member) => (
+            member.supervisorIds
+                .filter((supervisorId) => supervisorId !== member.userId)
+                .map((supervisorId) => ({
+                    userId: member.userId,
+                    cohortRoleId: role.id,
+                    supervisorId
+                }))
+        ));
+
+        if (supervisorRows.length > 0) {
+            await tx.userCohortSupervisor.createMany({
+                data: supervisorRows,
+                skipDuplicates: true
+            });
+
+            await tx.user.updateMany({
+                where: {
+                    id: { in: normalizedSupervisorIds },
+                    permission: 'user'
+                },
+                data: {
+                    permission: 'manager'
                 }
             });
         }

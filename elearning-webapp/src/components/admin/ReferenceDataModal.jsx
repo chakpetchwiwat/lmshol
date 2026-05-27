@@ -17,6 +17,7 @@ const ReferenceDataModal = ({
   onDelete,
   onReorder = null,
   memberUsers = [],
+  supervisorUsers = [],
   getMembers = null,
   getMemberIds = null,
   onUpdateMembers = null,
@@ -33,7 +34,6 @@ const ReferenceDataModal = ({
   const [accessAdmin, setAccessAdmin] = React.useState(false);
   const [draftType, setDraftType] = React.useState('FUNCTION');
   const [draftLevelsList, setDraftLevelsList] = React.useState([]);
-  const [draftAdminLevels, setDraftAdminLevels] = React.useState([]);
   const [levelInput, setLevelInput] = React.useState('');
   const [editingItem, setEditingItem] = React.useState(null);
   const [memberEditorItem, setMemberEditorItem] = React.useState(null);
@@ -69,7 +69,6 @@ const ReferenceDataModal = ({
     setAccessAdmin(false);
     setDraftType('FUNCTION');
     setDraftLevelsList([]);
-    setDraftAdminLevels([]);
     setLevelInput('');
     setEditingItem(null);
   };
@@ -94,10 +93,7 @@ const ReferenceDataModal = ({
         name,
         ...(showAccessToggle ? { accessAdmin } : {}),
         ...(showTypeSelection ? { type: draftType } : {}),
-        ...(itemLabel === 'Role' ? {
-          levels: draftLevelsList,
-          adminLevels: draftAdminLevels.filter((level) => draftLevelsList.includes(level))
-        } : {})
+        ...(itemLabel === 'Role' ? { levels: draftLevelsList, adminLevels: [] } : {})
       };
 
       if (editingItem) {
@@ -124,7 +120,6 @@ const ReferenceDataModal = ({
     }
     if (itemLabel === 'Role') {
       setDraftLevelsList(Array.isArray(item.levels) ? item.levels : []);
-      setDraftAdminLevels(Array.isArray(item.adminLevels) ? item.adminLevels : []);
       setLevelInput('');
     }
   };
@@ -139,15 +134,6 @@ const ReferenceDataModal = ({
 
   const removeDraftLevel = (level) => {
     setDraftLevelsList(draftLevelsList.filter((lvl) => lvl !== level));
-    setDraftAdminLevels(draftAdminLevels.filter((lvl) => lvl !== level));
-  };
-
-  const toggleDraftAdminLevel = (level) => {
-    setDraftAdminLevels((current) => (
-      current.includes(level)
-        ? current.filter((lvl) => lvl !== level)
-        : [...current, level]
-    ));
   };
 
   const openMemberEditor = (item) => {
@@ -156,7 +142,10 @@ const ReferenceDataModal = ({
       const initialMembers = getMembers(item) || [];
       const map = {};
       initialMembers.forEach((m) => {
-        map[m.userId] = m.level || '';
+        map[m.userId] = {
+          level: m.level || '',
+          supervisorIds: Array.isArray(m.supervisorIds) ? m.supervisorIds : []
+        };
       });
       setSelectedMembersMap(map);
     } else {
@@ -173,7 +162,10 @@ const ReferenceDataModal = ({
           delete next[userId];
         } else {
           const roleLevels = memberEditorItem?.levels || [];
-          next[userId] = roleLevels[0] || '';
+          next[userId] = {
+            level: roleLevels[0] || '',
+            supervisorIds: []
+          };
         }
         return next;
       });
@@ -189,8 +181,43 @@ const ReferenceDataModal = ({
   const handleMemberLevelChange = (userId, newLevel) => {
     setSelectedMembersMap((current) => ({
       ...current,
-      [userId]: newLevel
+      [userId]: {
+        ...(typeof current[userId] === 'object' ? current[userId] : { supervisorIds: [] }),
+        level: newLevel
+      }
     }));
+  };
+
+  const handleMemberSupervisorAdd = (userId, supervisorId) => {
+    if (!supervisorId) return;
+    setSelectedMembersMap((current) => {
+      const currentMember = typeof current[userId] === 'object'
+        ? current[userId]
+        : { level: current[userId] || '', supervisorIds: [] };
+      const supervisorIds = Array.isArray(currentMember.supervisorIds) ? currentMember.supervisorIds : [];
+      return {
+        ...current,
+        [userId]: {
+          ...currentMember,
+          supervisorIds: supervisorIds.includes(supervisorId) ? supervisorIds : [...supervisorIds, supervisorId]
+        }
+      };
+    });
+  };
+
+  const handleMemberSupervisorRemove = (userId, supervisorId) => {
+    setSelectedMembersMap((current) => {
+      const currentMember = typeof current[userId] === 'object'
+        ? current[userId]
+        : { level: current[userId] || '', supervisorIds: [] };
+      return {
+        ...current,
+        [userId]: {
+          ...currentMember,
+          supervisorIds: (currentMember.supervisorIds || []).filter((id) => id !== supervisorId)
+        }
+      };
+    });
   };
 
   const handleSaveMembers = async () => {
@@ -199,10 +226,14 @@ const ReferenceDataModal = ({
     try {
       setSavingMembers(true);
       if (getMembers) {
-        const membersPayload = Object.entries(selectedMembersMap).map(([userId, level]) => ({
-          userId,
-          level: level || null
-        }));
+        const membersPayload = Object.entries(selectedMembersMap).map(([userId, value]) => {
+          const member = typeof value === 'object' ? value : { level: value || '', supervisorIds: [] };
+          return {
+            userId,
+            level: member.level || null,
+            supervisorIds: Array.isArray(member.supervisorIds) ? member.supervisorIds : []
+          };
+        });
         await onUpdateMembers(memberEditorItem.id, membersPayload);
       } else {
         await onUpdateMembers(memberEditorItem.id, selectedMemberIds);
@@ -365,21 +396,7 @@ const ReferenceDataModal = ({
                               {index + 1}
                             </span>
                             <span>{lvl}</span>
-                            {draftAdminLevels.includes(lvl) && (
-                              <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[9px] font-black uppercase text-emerald-600 ring-1 ring-inset ring-emerald-200">
-                                ADMIN
-                              </span>
-                            )}
                           </span>
-                          <label className="ml-auto flex cursor-pointer items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wide text-slate-500 hover:bg-white">
-                            <input
-                              type="checkbox"
-                              checked={draftAdminLevels.includes(lvl)}
-                              onChange={() => toggleDraftAdminLevel(lvl)}
-                              className="h-3.5 w-3.5 rounded border-slate-300 text-primary focus:ring-primary"
-                            />
-                            Admin/Supervisor
-                          </label>
                           <button
                             type="button"
                             onClick={() => removeDraftLevel(lvl)}
@@ -560,14 +577,19 @@ const ReferenceDataModal = ({
                       <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
                         {filteredMemberUsers.map((user) => {
                           const isSelected = getMembers ? (user.id in selectedMembersMap) : selectedMemberIds.includes(user.id);
-                          const currentLevel = getMembers ? (selectedMembersMap[user.id] || '') : '';
+                          const memberValue = getMembers && typeof selectedMembersMap[user.id] === 'object'
+                            ? selectedMembersMap[user.id]
+                            : { level: getMembers ? (selectedMembersMap[user.id] || '') : '', supervisorIds: [] };
+                          const currentLevel = memberValue.level || '';
+                          const currentSupervisorIds = Array.isArray(memberValue.supervisorIds) ? memberValue.supervisorIds : [];
                           const roleLevels = memberEditorItem?.levels || [];
-                          const roleAdminLevels = memberEditorItem?.adminLevels || [];
+                          const supervisorOptions = (supervisorUsers.length ? supervisorUsers : memberUsers)
+                            .filter((candidate) => candidate.id !== user.id);
 
                           return (
                             <div
                               key={user.id}
-                              className={`flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-all bg-white ${
+                              className={`flex w-full items-start justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-all bg-white ${
                                 isSelected
                                   ? 'border-primary shadow-sm ring-1 ring-primary/20'
                                   : 'border-slate-200 hover:border-slate-300'
@@ -584,8 +606,9 @@ const ReferenceDataModal = ({
                                 </span>
                               </button>
                               
-                              {getMembers && roleLevels.length > 0 && (
-                                <div className="shrink-0 mr-2">
+                              {getMembers && isSelected && (
+                                <div className="flex w-full max-w-md flex-col gap-2">
+                                  {roleLevels.length > 0 && (
                                   <select
                                     value={currentLevel}
                                     onChange={(e) => {
@@ -609,15 +632,49 @@ const ReferenceDataModal = ({
                                     <option value="">เลือกระดับ (Level)...</option>
                                     {roleLevels.map((lvl) => (
                                       <option key={lvl} value={lvl}>
-                                        {roleAdminLevels.includes(lvl) ? `${lvl} (Admin/Supervisor)` : lvl}
+                                        {lvl}
                                       </option>
                                     ))}
                                   </select>
-                                  {currentLevel && roleAdminLevels.includes(currentLevel) && (
-                                    <div className="mt-1 text-[10px] font-black uppercase tracking-wide text-emerald-600">
-                                      Admin/Supervisor
-                                    </div>
                                   )}
+                                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                                    <select
+                                      value=""
+                                      onChange={(event) => handleMemberSupervisorAdd(user.id, event.target.value)}
+                                      className="w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-600 focus:outline-none focus:ring-1 focus:ring-primary"
+                                    >
+                                      <option value="">เพิ่มผู้ดูแลจากชื่อ user...</option>
+                                      {supervisorOptions
+                                        .filter((candidate) => !currentSupervisorIds.includes(candidate.id))
+                                        .map((candidate) => (
+                                          <option key={candidate.id} value={candidate.id}>
+                                            {candidate.department || candidate.departmentRef?.name
+                                              ? `${candidate.name || candidate.email} (${candidate.department || candidate.departmentRef?.name})`
+                                              : candidate.name || candidate.email}
+                                          </option>
+                                        ))}
+                                    </select>
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                      {currentSupervisorIds.length === 0 ? (
+                                        <span className="text-[10px] font-semibold text-slate-400">ยังไม่ได้เลือกผู้ดูแล</span>
+                                      ) : currentSupervisorIds.map((supervisorId) => {
+                                        const supervisor = supervisorOptions.find((candidate) => candidate.id === supervisorId);
+                                        return (
+                                          <span key={supervisorId} className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-black text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                                            {supervisor?.name || supervisor?.email || 'Supervisor'}
+                                            <button
+                                              type="button"
+                                              onClick={() => handleMemberSupervisorRemove(user.id, supervisorId)}
+                                              className="text-emerald-500 hover:text-emerald-800"
+                                              aria-label="ลบผู้ดูแล"
+                                            >
+                                              <X size={11} />
+                                            </button>
+                                          </span>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
                                 </div>
                               )}
 
