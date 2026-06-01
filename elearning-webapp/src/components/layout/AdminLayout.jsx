@@ -38,6 +38,7 @@ const AdminLayout = () => {
                       location.pathname.startsWith('/admin/redeems') ||
                       location.pathname.startsWith('/admin/certificates') ||
                       location.pathname.startsWith('/admin/assessments') ||
+                      location.pathname.startsWith('/admin/cohort-tracking') ||
                       location.pathname.startsWith('/admin/goals');
   const drawerRef = React.useRef(null);
   const mainRef = React.useRef(null);
@@ -70,11 +71,13 @@ const AdminLayout = () => {
 
   const isFullAdmin = canEditAdminUsers(user);
   const isManager = user?.role === USER_ROLES.MANAGER || user?.tier?.accessAdmin;
-  const isCourseStaffOnly = !isFullAdmin && !isManager && user?.isCourseStaff;
+  const isSupervisor = user?.isSupervisor === true;
+  const isCourseStaffOnly = !isFullAdmin && !isManager && !isSupervisor && user?.isCourseStaff;
 
   const menuItems = [
     // Dashboard: Visible to Admin and Managers
     ...(!isCourseStaffOnly ? [{ path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' }] : []),
+    ...((isFullAdmin || isManager || isSupervisor) ? [{ path: '/admin/cohort-tracking', icon: <Activity size={20} />, label: 'Cohort Tracking' }] : []),
     
     // Learning Goals: Visible to Admin and Managers
     ...(!isCourseStaffOnly ? [{ path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' }] : []),
@@ -120,7 +123,7 @@ const AdminLayout = () => {
           <Menu size={24} />
         </button>
         <h1 className="text-lg font-bold">
-          {isFullAdmin ? 'Admin Panel' : isManager ? 'Manager Panel' : 'Staff Panel'}
+          {isFullAdmin ? 'Admin Panel' : isManager ? 'Manager Panel' : isSupervisor ? 'Supervisor Panel' : 'Staff Panel'}
         </h1>
         <div style={{ width: 24 }} />
       </header>

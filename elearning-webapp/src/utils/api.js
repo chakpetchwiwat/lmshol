@@ -205,6 +205,7 @@ export const userAPI = {
 export const adminAPI = {
   getDashboardStats: (params) => api.get('/admin/dashboard', { params }),
   getAdvancedAnalytics: (params) => api.get('/admin/analytics', { params }),
+  getSupervisorTracking: () => api.get('/admin/supervisor-tracking'),
 
   getUsers: () => api.get('/admin/users'),
   exportUserProfiles: () => api.get('/admin/users/export-profiles', { responseType: 'blob' }),

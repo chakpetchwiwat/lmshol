@@ -2,7 +2,7 @@ const prisma = require('../../../utils/prisma');
 const { ENROLLMENT_STATUS, GOAL_STATUS } = require('../../../utils/constants/statuses');
 const { GOAL_SCOPES } = require('../../../utils/constants/scopes');
 const { getActorContext } = require('../admin.helpers');
-const { buildLearnerWhere, buildVisibleCourseWhereForDashboard, buildDateOverlapWhere } = require('../admin.queries');
+const { buildLearnerWhereForActor, buildVisibleCourseWhereForDashboard, buildDateOverlapWhere } = require('../admin.queries');
 
 const {
     getDashboardCacheKey,
@@ -47,7 +47,7 @@ const getDashboardStats = async (authUser, filters = {}) => {
 
     return resolveDashboardCache(cacheKey, async () => {
         const period = buildDashboardPeriod(scopeFilters);
-        const learnerWhere = buildLearnerWhere(scopeFilters.departmentId);
+        const learnerWhere = buildLearnerWhereForActor(actor, scopeFilters.departmentId);
         const visibleCourseWhere = buildVisibleCourseWhereForDashboard(scopeFilters.departmentId);
 
         const [

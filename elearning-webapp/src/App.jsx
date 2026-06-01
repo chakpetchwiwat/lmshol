@@ -38,6 +38,7 @@ const AdminGoals = React.lazy(() => import('./pages/admin/GoalManagement'));
 const AdminHealth = React.lazy(() => import('./pages/admin/SystemHealth'));
 const CertificationMonitor = React.lazy(() => import('./pages/admin/CertificationMonitor'));
 const AssessmentGrading = React.lazy(() => import('./pages/admin/AssessmentGrading'));
+const CohortTracking = React.lazy(() => import('./pages/admin/CohortTracking'));
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -100,6 +101,7 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="cohort-tracking" element={<CohortTracking />} />
             <Route path="courses" element={<AdminCourses />} />
             <Route path="announcements" element={<AdminAnnouncements />} />
             <Route path="users" element={<AdminUsers />} />

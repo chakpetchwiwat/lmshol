@@ -33,7 +33,6 @@ const getDefaultFormData = () => ({
   subdivision: '',
   positionLevel: '',
   positionType: '',
-  supervisorName: '',
   educationHistory: [],
   profileFiles: [],
   profileImageUrl: '',
@@ -117,17 +116,8 @@ const UserManagement = () => {
   const [positionTypes, setPositionTypes] = React.useState([]);
   const [subdivisions, setSubdivisions] = React.useState([]);
   const [cohortRoles, setCohortRoles] = React.useState([]);
-  const [eligibleSupervisors, setEligibleSupervisors] = React.useState([]);
-  const [supervisorAssignments, setSupervisorAssignments] = React.useState({});
   const [loading, setLoading] = React.useState(true);
   const [referenceLoading, setReferenceLoading] = React.useState(true);
-
-  const handleSupervisorChange = (cohortRoleId, selectedSupervisorIds) => {
-    setSupervisorAssignments((prev) => ({
-      ...prev,
-      [cohortRoleId]: selectedSupervisorIds,
-    }));
-  };
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedDepartment, setSelectedDepartment] = React.useState(FILTER_VALUES.ALL);
   const [selectedTier, setSelectedTier] = React.useState(FILTER_VALUES.ALL);
@@ -179,16 +169,14 @@ const UserManagement = () => {
         adminAPI.getSetting('POSITION_LEVELS'),
         adminAPI.getSetting('POSITION_TYPES'),
         adminAPI.getSetting('SUBDIVISIONS'),
-        adminAPI.getEligibleSupervisors(),
       ];
-      const [departmentResponse, tierResponse, cohortRoleResponse, levelsRes, typesRes, subdivRes, supervisorsRes] = await Promise.all(requests);
+      const [departmentResponse, tierResponse, cohortRoleResponse, levelsRes, typesRes, subdivRes] = await Promise.all(requests);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
       setCohortRoles(cohortRoleResponse.data);
       setPositionLevels(Array.isArray(levelsRes.data) ? levelsRes.data : levelsRes.data?.data || []);
       setPositionTypes(Array.isArray(typesRes.data) ? typesRes.data : typesRes.data?.data || []);
       setSubdivisions((Array.isArray(subdivRes.data) ? subdivRes.data : subdivRes.data?.data || []).map(x => (typeof x === 'string' ? { name: x } : x)));
-      setEligibleSupervisors(supervisorsRes.data || []);
     } catch (error) {
       console.error('Fetch reference data error:', error);
     } finally {
@@ -216,35 +204,12 @@ const UserManagement = () => {
         employmentDate: formData.employmentDate || null,
       };
 
-      let savedUser;
       if (editingUser) {
-        const response = await adminAPI.updateUser(editingUser.id, payload);
-        savedUser = response.data;
-        
-        // Save supervisor assignments
-        const assignmentsList = [];
-        Object.entries(supervisorAssignments).forEach(([cohortRoleId, supervisorIds]) => {
-          supervisorIds.forEach((supervisorId) => {
-            assignmentsList.push({ cohortRoleId, supervisorId });
-          });
-        });
-        await adminAPI.saveUserCohortSupervisors(editingUser.id, assignmentsList);
+        await adminAPI.updateUser(editingUser.id, payload);
         
         toast.success('อัปเดตข้อมูลผู้ใช้งานเรียบร้อย');
       } else {
-        const response = await adminAPI.createUser(payload);
-        savedUser = response.data;
-        
-        // Save supervisor assignments for new user
-        if (savedUser?.id) {
-          const assignmentsList = [];
-          Object.entries(supervisorAssignments).forEach(([cohortRoleId, supervisorIds]) => {
-            supervisorIds.forEach((supervisorId) => {
-              assignmentsList.push({ cohortRoleId, supervisorId });
-            });
-          });
-          await adminAPI.saveUserCohortSupervisors(savedUser.id, assignmentsList);
-        }
+        await adminAPI.createUser(payload);
         
         toast.success('เพิ่มผู้ใช้งานเรียบร้อย');
       }
@@ -252,7 +217,6 @@ const UserManagement = () => {
       setShowUserModal(false);
       setEditingUser(null);
       setFormData(getDefaultFormData());
-      setSupervisorAssignments({});
       fetchUsers();
     } catch (error) {
       console.error('Save user error:', error);
@@ -318,7 +282,6 @@ const UserManagement = () => {
       subdivision: user.subdivision || '',
       positionLevel: user.positionLevel || '',
       positionType: user.positionType || '',
-      supervisorName: user.supervisorName || '',
       educationHistory: normalizeEducationHistory(user.educationHistory),
       profileFiles: normalizeProfileFiles(user.profileFiles),
       profileImageUrl: user.profileImageUrl || '',
@@ -326,25 +289,12 @@ const UserManagement = () => {
     setShowUserModal(true);
     setProfileCertificates([]);
     setLmsCertificates([]);
-    setSupervisorAssignments({});
     Promise.all([
       adminAPI.getUserCertificates(user.id),
       adminAPI.getUserDetails(user.id),
-      adminAPI.getUserCohortSupervisors(user.id),
-    ]).then(([certificatesRes, detailsRes, supervisorsRes]) => {
+    ]).then(([certificatesRes, detailsRes]) => {
       setProfileCertificates(Array.isArray(certificatesRes?.data) ? certificatesRes.data : []);
       setLmsCertificates(Array.isArray(detailsRes?.data?.systemCertificates) ? detailsRes.data.systemCertificates : []);
-      
-      const mappings = {};
-      if (Array.isArray(supervisorsRes?.data)) {
-        supervisorsRes.data.forEach((item) => {
-          if (!mappings[item.cohortRoleId]) {
-            mappings[item.cohortRoleId] = [];
-          }
-          mappings[item.cohortRoleId].push(item.supervisorId);
-        });
-      }
-      setSupervisorAssignments(mappings);
     }).catch((error) => {
       console.error('Fetch editable profile extras error:', error);
     });
@@ -806,9 +756,6 @@ const UserManagement = () => {
         onUpdateCertificate={handleUpdateEditableCertificate}
         onDeleteCertificate={handleDeleteEditableCertificate}
         onUploadCertificate={handleUploadEditableCertificateFile}
-        eligibleSupervisors={eligibleSupervisors}
-        supervisorAssignments={supervisorAssignments}
-        onSupervisorChange={handleSupervisorChange}
       />
 
       {canEditUsers && (

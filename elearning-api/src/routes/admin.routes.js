@@ -13,6 +13,7 @@ router.use(verifyToken, verifyAdminPanelAccess); // Admin + manager can access t
 
 router.get('/dashboard', verifyAdminOrManager, adminAnalyticsRateLimiter, adminController.getDashboardStats);
 router.get('/analytics', verifyAdminOrManager, adminAnalyticsRateLimiter, adminController.getAdvancedAnalytics);
+router.get('/supervisor-tracking', verifyAdminOrManager, adminController.getSupervisorTracking);
 router.get('/system/health', verifySuperAdmin, systemController.getSystemHealth);
 router.post('/system/security/reset', verifySuperAdmin, systemController.resetRateLimit);
 

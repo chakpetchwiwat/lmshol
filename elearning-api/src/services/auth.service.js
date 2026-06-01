@@ -14,7 +14,9 @@ const login = async (email, password) => {
         include: {
             departmentRef: true,
             tier: true,
-            courseStaff: { take: 1 }
+            courseStaff: { take: 1 },
+            cohortSupervisors: { take: 1 },
+            cohortRoleSupervisorRoles: { take: 1 }
         }
     });
 
@@ -49,7 +51,9 @@ const getCurrentUser = async (userId) => {
         include: {
             departmentRef: true,
             tier: true,
-            courseStaff: { take: 1 }
+            courseStaff: { take: 1 },
+            cohortSupervisors: { take: 1 },
+            cohortRoleSupervisorRoles: { take: 1 }
         }
     });
 

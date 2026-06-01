@@ -266,7 +266,7 @@ const UserLayout = () => {
           </NavLink>
 
           {canAccessAdminPanel(user) && (
-            <NavLink to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 text-rose-500 hover:bg-rose-50 hover:translate-x-1 mt-auto bg-rose-50/30">
+            <NavLink to={user?.isSupervisor && user?.role === 'user' ? '/admin/cohort-tracking' : '/admin/dashboard'} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 text-rose-500 hover:bg-rose-50 hover:translate-x-1 mt-auto bg-rose-50/30">
               <Settings size={20} /> <span className="font-bold">จัดการระบบ</span>
             </NavLink>
           )}

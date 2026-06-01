@@ -48,7 +48,7 @@ const verifySuperAdmin = (req, res, next) => {
 };
 
 const verifyAdminOrManager = (req, res, next) => {
-  if (req.user && (req.user.permission === USER_PERMISSIONS.SUPERADMIN || req.user.permission === USER_PERMISSIONS.ADMIN || req.user.permission === USER_PERMISSIONS.MANAGER || req.user.tier?.accessAdmin)) {
+  if (req.user && (req.user.permission === USER_PERMISSIONS.SUPERADMIN || req.user.permission === USER_PERMISSIONS.ADMIN || req.user.permission === USER_PERMISSIONS.MANAGER || req.user.tier?.accessAdmin || req.user.isSupervisor)) {
     next();
   } else {
     res.status(403).json({ message: 'สิทธิ์ระดับผู้ดูแลแผนกหรือแอดมินเท่านั้น (Manager or Admin access required)' });
@@ -67,16 +67,27 @@ const verifyAdminPanelAccess = async (req, res, next) => {
       where: { id: req.user.userId },
       include: { 
         tier: true,
-        courseStaff: { take: 1 }
+        courseStaff: { take: 1 },
+        cohortSupervisors: {
+          take: 1,
+          select: { supervisorId: true }
+        },
+        cohortRoleSupervisorRoles: {
+          take: 1,
+          select: { supervisorId: true }
+        }
       }
     });
 
-    if (user && (ADMIN_PANEL_PERMISSIONS.includes(user.permission) || user.tier?.accessAdmin || (user.courseStaff && user.courseStaff.length > 0))) {
+    const isSupervisor = (user?.cohortSupervisors?.length || 0) > 0 || (user?.cohortRoleSupervisorRoles?.length || 0) > 0;
+
+    if (user && (ADMIN_PANEL_PERMISSIONS.includes(user.permission) || user.tier?.accessAdmin || (user.courseStaff && user.courseStaff.length > 0) || isSupervisor)) {
       // Update req.user with latest data for downstream use
       req.user.permission = user.permission;
       req.user.role = user.permission; // Compatibility alias
       req.user.tier = user.tier;
       req.user.isCourseStaff = (user.courseStaff && user.courseStaff.length > 0);
+      req.user.isSupervisor = isSupervisor;
       next();
     } else {
       res.status(403).json({ message: 'Admin panel access required' });

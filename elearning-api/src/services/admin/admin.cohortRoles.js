@@ -379,7 +379,9 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
                 data: supervisorRows,
                 skipDuplicates: true
             });
+        }
 
+        if (normalizedSupervisorIds.length > 0) {
             await tx.user.updateMany({
                 where: {
                     id: { in: normalizedSupervisorIds },

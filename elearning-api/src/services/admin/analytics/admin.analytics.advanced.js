@@ -1,7 +1,7 @@
 const prisma = require('../../../utils/prisma');
 const { ENROLLMENT_STATUS } = require('../../../utils/constants/statuses');
 const { getActorContext } = require('../admin.helpers');
-const { buildLearnerWhere, buildVisibleCourseWhereForDashboard, buildDateOverlapWhere } = require('../admin.queries');
+const { buildLearnerWhereForActor, buildVisibleCourseWhereForDashboard, buildDateOverlapWhere } = require('../admin.queries');
 const { getDashboardUserSummary } = require('../admin.serializers');
 
 const {
@@ -26,7 +26,7 @@ const getAdvancedAnalytics = async (authUser, filters = {}) => {
 
     return resolveDashboardCache(cacheKey, async () => {
         const period = buildDashboardPeriod(scopeFilters);
-        const learnerWhere = buildLearnerWhere(scopeFilters.departmentId);
+        const learnerWhere = buildLearnerWhereForActor(actor, scopeFilters.departmentId);
         const visibleCourseWhere = buildVisibleCourseWhereForDashboard(scopeFilters.departmentId);
 
         try {

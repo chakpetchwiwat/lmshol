@@ -540,6 +540,11 @@ const saveUserCohortSupervisors = asyncHandler(async (req, res) => {
   res.json({ success: true, data: supervisors });
 });
 
+const getSupervisorTracking = asyncHandler(async (req, res) => {
+  const tracking = await AdminService.getSupervisorTracking(req.user);
+  res.json({ success: true, data: tracking });
+});
+
 
 module.exports = {
   getDashboardStats,
@@ -599,6 +604,7 @@ module.exports = {
   getEligibleSupervisors,
   getUserCohortSupervisors,
   saveUserCohortSupervisors,
+  getSupervisorTracking,
   createTier,
   updateTier,
   deleteTier,

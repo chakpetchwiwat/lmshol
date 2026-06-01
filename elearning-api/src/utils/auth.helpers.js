@@ -63,6 +63,11 @@ const mapUserRecord = (user) => {
     if (!user) return null;
     const { departmentRef, tier, ...rest } = user;
     const resolvedPermission = rest.permission || rest.role;
+    const isCourseStaff = (rest.courseStaff?.length || 0) > 0;
+    const isSupervisor = (rest.cohortSupervisors?.length || 0) > 0 ||
+        (rest.cohortRoleSupervisorRoles?.length || 0) > 0 ||
+        (rest._count?.cohortSupervisors || 0) > 0 ||
+        (rest._count?.cohortRoleSupervisorRoles || 0) > 0;
 
     return {
         ...rest,
@@ -78,7 +83,8 @@ const mapUserRecord = (user) => {
             order: tier.order
         } : null,
         employmentDate: rest.employmentDate || rest.createdAt,
-        isCourseStaff: (rest.courseStaff?.length || 0) > 0
+        isCourseStaff,
+        isSupervisor
     };
 };
 
@@ -95,7 +101,15 @@ const getActorContext = async (prisma, authUser) => {
         where: { id: authUser.userId },
         include: {
             departmentRef: true,
-            tier: true
+            tier: true,
+            cohortSupervisors: {
+                take: 1,
+                select: { supervisorId: true }
+            },
+            cohortRoleSupervisorRoles: {
+                take: 1,
+                select: { supervisorId: true }
+            }
         }
     });
 
@@ -107,9 +121,11 @@ const getActorContext = async (prisma, authUser) => {
     // Manager stays Manager. 
     // User can become effective Manager if their Tier has accessAdmin: true.
     const actorPermission = actor.permission || actor.role;
+    const isSupervisor = (actor.cohortSupervisors?.length || 0) > 0 ||
+        (actor.cohortRoleSupervisorRoles?.length || 0) > 0;
     const effectivePermission = actorPermission === USER_PERMISSIONS.ADMIN
         ? USER_PERMISSIONS.ADMIN
-        : (actorPermission === USER_PERMISSIONS.MANAGER || actor.tier?.accessAdmin)
+        : (actorPermission === USER_PERMISSIONS.MANAGER || actor.tier?.accessAdmin || isSupervisor)
             ? USER_PERMISSIONS.MANAGER
             : USER_PERMISSIONS.USER;
 
@@ -119,11 +135,12 @@ const getActorContext = async (prisma, authUser) => {
         effectiveRole: effectivePermission, // Compatibility alias
         isAdmin: effectivePermission === USER_PERMISSIONS.ADMIN,
         isManager: effectivePermission === USER_PERMISSIONS.MANAGER,
+        isSupervisor,
         canAccessAdminPanel: ADMIN_PANEL_PERMISSIONS.includes(effectivePermission)
     };
 
     // Strict validation for managers
-    if (mappedActor.isManager && !mappedActor.departmentId) {
+    if (mappedActor.isManager && !mappedActor.departmentId && !mappedActor.isSupervisor) {
         throw new Error('Manager account must belong to a department to determine scope');
     }
 
@@ -144,18 +161,23 @@ const buildUserManagementWhere = (actor, extraWhere = {}) => {
     }
 
     if (actor.isManager) {
-        return {
-            permission: USER_PERMISSIONS.USER,
-            OR: [
-                { departmentId: actor.departmentId },
-                {
-                    cohortSupervised: {
-                        some: {
-                            supervisorId: actor.id || actor.userId
-                        }
+        const scopeConditions = [];
+        if (actor.departmentId) {
+            scopeConditions.push({ departmentId: actor.departmentId });
+        }
+        if (actor.id || actor.userId) {
+            scopeConditions.push({
+                cohortSupervised: {
+                    some: {
+                        supervisorId: actor.id || actor.userId
                     }
                 }
-            ],
+            });
+        }
+
+        return {
+            permission: USER_PERMISSIONS.USER,
+            OR: scopeConditions.length > 0 ? scopeConditions : [{ id: '__no_manager_scope__' }],
             ...extraWhere
         };
     }

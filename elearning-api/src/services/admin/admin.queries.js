@@ -99,6 +99,19 @@ const buildLearnerWhere = (departmentId = null) => ({
     ...(departmentId ? { departmentId } : {})
 });
 
+const buildLearnerWhereForActor = (actor, departmentId = null) => {
+    if (actor.isAdmin) {
+        return buildLearnerWhere(departmentId);
+    }
+
+    return {
+        AND: [
+            buildLearnerWhere(),
+            authHelpers.buildUserManagementWhere(actor)
+        ]
+    };
+};
+
 const buildVisibleCourseWhereForDashboard = (departmentId = null) => (
     departmentId
         ? buildDepartmentVisibleCourseWhere(departmentId)
@@ -132,6 +145,7 @@ module.exports = {
     buildDepartmentVisibleCourseWhere,
     buildScopedUserWhere,
     buildLearnerWhere,
+    buildLearnerWhereForActor,
     buildVisibleCourseWhereForDashboard,
     buildDateOverlapWhere,
     buildAnnouncementWhereForActor
