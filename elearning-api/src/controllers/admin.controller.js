@@ -197,7 +197,7 @@ const deleteDepartment = asyncHandler(async (req, res) => {
 
 // COHORT ROLES
 const getCohortRoles = asyncHandler(async (req, res) => {
-  const roles = await AdminService.getCohortRoles();
+  const roles = await AdminService.getCohortRoles(req.user);
   res.json({ success: true, data: roles });
 });
 

@@ -82,8 +82,8 @@ const AdminLayout = () => {
     // Learning Goals: Visible to Admin and Managers
     ...(!isCourseStaffOnly ? [{ path: '/admin/goals', icon: <Target size={20} />, label: 'เป้าหมายการเรียน' }] : []),
     
-    // Course Management: Visible to EVERYONE in Admin Panel (Admins, Managers, Staff)
-    { path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' },
+    // Course Management: Visible to Admin, Managers, Staff, but NOT Supervisors
+    ...(!isSupervisor ? [{ path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' }] : []),
     
     // Announcements: Visible to Admin and Managers
     ...(!isCourseStaffOnly ? [{ path: '/admin/announcements', icon: <BellRing size={20} />, label: 'จัดการประกาศแผนก' }] : []),
@@ -93,14 +93,13 @@ const AdminLayout = () => {
       ? [{ path: '/admin/rewards', icon: <Gift size={20} />, label: 'จัดการของรางวัล' }]
       : []),
     
-    // Reduems: Visible to Admin and Managers
-    ...(!isCourseStaffOnly ? [{ path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายการ Redeem' }] : []),
+    // Reduems: Visible to Admin and Managers, but NOT Supervisors
+    ...((!isCourseStaffOnly && !isSupervisor) ? [{ path: '/admin/redeems', icon: <ClipboardList size={20} />, label: 'รายการ Redeem' }] : []),
     
     // Users: Admin and Managers (Backend will filter the data)
     ...(!isCourseStaffOnly ? [{ path: '/admin/users', icon: <Users size={20} />, label: 'ผู้ใช้งาน' }] : []),
     
     // Certificates: SuperAdmin/Admin Only
-
     ...(isFullAdmin
       ? [{ path: '/admin/certificates', icon: <Award size={20} />, label: 'ภาพรวมเกียรติบัตร' }]
       : []),

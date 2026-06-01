@@ -113,7 +113,20 @@ const getGoalReport = async (goalId, authUser) => {
             userWhere.departmentId = goal.departmentId;
         }
 
-        if (!actor.isAdmin && actor.departmentId) {
+        if (!actor.isAdmin && actor.isSupervisor) {
+            const supervisedUserRecords = await prisma.userCohortSupervisor.findMany({
+                where: { supervisorId: actor.id || actor.userId },
+                select: { userId: true }
+            });
+            const supervisedUserIds = supervisedUserRecords.map(r => r.userId);
+            
+            if (userWhere.id && userWhere.id.in) {
+                const targetedIds = userWhere.id.in;
+                userWhere.id = { in: targetedIds.filter(id => supervisedUserIds.includes(id)) };
+            } else {
+                userWhere.id = { in: supervisedUserIds };
+            }
+        } else if (!actor.isAdmin && actor.departmentId) {
             userWhere.departmentId = actor.departmentId;
         }
 

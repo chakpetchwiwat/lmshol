@@ -5,7 +5,7 @@ const { ANNOUNCEMENT_SCOPES } = require('../../utils/constants/scopes');
 
 const getUserVisibilityContext = (userId) => authHelpers.getActorContext(prisma, { userId });
 
-const buildCategoryVisibilityWhere = (userContext, referenceDate = new Date()) => authHelpers.buildVisibilityWhere(userContext, { status: null, referenceDate });
+const buildCategoryVisibilityWhere = (userContext, referenceDate = new Date()) => authHelpers.buildVisibilityWhere(userContext, { status: null, referenceDate, isCategory: true });
 
 const buildCourseVisibilityWhere = (userContext, referenceDate = new Date()) => authHelpers.buildVisibilityWhere(
     userContext,

@@ -23,6 +23,12 @@ const CreateGoalModal = ({
   toggleCourse
 }) => {
   const isAdmin = currentUser?.role === 'admin';
+  const isManager = currentUser?.role === 'manager' || currentUser?.tier?.accessAdmin;
+  const isSupervisor = currentUser?.isSupervisor === true;
+  const showTargetToggle = isAdmin || isManager;
+  const showCohortRoleSection = isAdmin || isManager || isSupervisor;
+  const showDepartmentSection = isAdmin || isManager;
+
   const selectedDepartmentIds = React.useMemo(() => (
     Array.isArray(formData.departmentIds)
       ? formData.departmentIds
@@ -52,8 +58,12 @@ const CreateGoalModal = ({
   }, [selectedDepartmentIds, userSearch, users]);
 
   React.useEffect(() => {
-    setTargetMode(selectedCohortRoleIds.length > 0 ? 'cohortRole' : 'department');
-  }, [isOpen, selectedCohortRoleIds.length]);
+    if (!showTargetToggle && isSupervisor) {
+      setTargetMode('cohortRole');
+    } else {
+      setTargetMode(selectedCohortRoleIds.length > 0 ? 'cohortRole' : 'department');
+    }
+  }, [isOpen, selectedCohortRoleIds.length, showTargetToggle, isSupervisor]);
 
   const setAllOrganization = () => {
     setFormData({
@@ -173,7 +183,7 @@ const CreateGoalModal = ({
                 </button>
               )}
 
-              {isAdmin && (
+              {showTargetToggle && (
                 <div className="inline-flex w-full rounded-2xl border border-slate-200 bg-white p-1 sm:w-auto">
                   <button
                     type="button"
@@ -204,15 +214,15 @@ const CreateGoalModal = ({
                   </button>
                 </div>
               )}
-
-              <div className={targetMode === 'department' ? 'space-y-2' : 'hidden'}>
+ 
+              <div className={targetMode === 'department' && showDepartmentSection ? 'space-y-2' : 'hidden'}>
                 <div className="flex items-center justify-between gap-3">
                   <label className="text-sm font-bold text-slate-700">เลือกแผนก</label>
                   {selectedDepartmentIds.length > 0 && (
                     <span className="text-xs font-bold text-primary">{selectedDepartmentIds.length} แผนก</span>
                   )}
                 </div>
-
+ 
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {availableDepartments.map((dept) => {
                     const isSelected = selectedDepartmentIds.includes(dept.id);
@@ -237,8 +247,8 @@ const CreateGoalModal = ({
                   })}
                 </div>
               </div>
-
-              {targetMode === 'cohortRole' && (
+ 
+              {targetMode === 'cohortRole' && showCohortRoleSection && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
                     <label className="text-sm font-bold text-slate-700">เลือก Cohort Role</label>

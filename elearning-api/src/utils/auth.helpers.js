@@ -190,7 +190,7 @@ const buildUserManagementWhere = (actor, extraWhere = {}) => {
  * Admins see everything (all statuses).
  * End users (and managers) see only PUBLISHED and within scope.
  */
-const buildVisibilityWhere = (actor, { status = ENTITY_STATUS.PUBLISHED, referenceDate = new Date() } = {}) => {
+const buildVisibilityWhere = (actor, { status = ENTITY_STATUS.PUBLISHED, referenceDate = new Date(), isCategory = false } = {}) => {
     // Temporary items visibility logic
     const temporaryWhere = buildTimedVisibilityWhere({ referenceDate });
 
@@ -233,7 +233,9 @@ const buildVisibilityWhere = (actor, { status = ENTITY_STATUS.PUBLISHED, referen
                     { visibleToAll: true },
                     {
                         visibleToAll: false,
-                        AND: [
+                        AND: isCategory ? [
+                            { OR: departmentConditions }
+                        ] : [
                             { OR: departmentConditions },
                             { OR: cohortConditions }
                         ]

@@ -28,20 +28,44 @@ const resolveGoalAudience = async (tx, data, actor, existingGoal = null) => {
     }
 
     if (!actor.isAdmin) {
-        departmentIds = actor.departmentId ? [actor.departmentId] : [];
-        cohortRoleIds = [];
-        if (userIds.length > 0 && actor.departmentId) {
-            const scopedUsers = await tx.user.findMany({
-                where: {
-                    id: { in: userIds },
-                    departmentId: actor.departmentId
-                },
-                select: { id: true }
+        let supervisedRoleIds = new Set();
+        let supervisedUserIds = new Set();
+        
+        if (actor.isSupervisor) {
+            const supervisedRoles = await tx.cohortRoleSupervisor.findMany({
+                where: { supervisorId: actor.id || actor.userId },
+                select: { cohortRoleId: true }
             });
-            userIds = scopedUsers.map((user) => user.id);
+            supervisedRoleIds = new Set(supervisedRoles.map(r => r.cohortRoleId));
+
+            const supervisedUsers = await tx.userCohortSupervisor.findMany({
+                where: { supervisorId: actor.id || actor.userId },
+                select: { userId: true }
+            });
+            supervisedUserIds = new Set(supervisedUsers.map(r => r.userId));
+        }
+
+        cohortRoleIds = cohortRoleIds.filter(id => supervisedRoleIds.has(id));
+
+        if (userIds.length > 0) {
+            const allowedUserIds = new Set();
+            
+            supervisedUserIds.forEach(id => allowedUserIds.add(id));
+            
+            if (actor.isManager && actor.departmentId) {
+                const deptUsers = await tx.user.findMany({
+                    where: { departmentId: actor.departmentId },
+                    select: { id: true }
+                });
+                deptUsers.forEach(u => allowedUserIds.add(u.id));
+            }
+            
+            userIds = userIds.filter(id => allowedUserIds.has(id));
         } else {
             userIds = [];
         }
+
+        departmentIds = actor.departmentId ? [actor.departmentId] : [];
     }
 
     if (userIds.length > 0) {
@@ -54,7 +78,7 @@ const resolveGoalAudience = async (tx, data, actor, existingGoal = null) => {
         };
     }
 
-    if (cohortRoleIds.length > 0 && actor.isAdmin) {
+    if (cohortRoleIds.length > 0 && (actor.isAdmin || actor.isSupervisor)) {
         const matchedCount = await tx.cohortRole.count({
             where: {
                 id: { in: cohortRoleIds }
@@ -215,11 +239,56 @@ const getGoals = async (authUser, options = {}) => {
     const includeAllScopes = options.includeAllScopes !== undefined 
         ? Boolean(options.includeAllScopes && actor.isAdmin)
         : Boolean(options.includeExpired && actor.isAdmin);
-    const where = authHelpers.buildGoalVisibilityWhere(actor, {
-        referenceDate,
-        includeExpired,
-        includeAllScopes
-    });
+
+    let where;
+    if (actor.isSupervisor && !actor.isAdmin) {
+        const supervisedRoles = await prisma.cohortRoleSupervisor.findMany({
+            where: { supervisorId: actor.id || actor.userId },
+            select: { cohortRoleId: true }
+        });
+        const supervisedCohortRoleIds = supervisedRoles.map(r => r.cohortRoleId);
+
+        const supervisedUsers = await prisma.userCohortSupervisor.findMany({
+            where: { supervisorId: actor.id || actor.userId },
+            select: { userId: true }
+        });
+        const supervisedUserIds = supervisedUsers.map(r => r.userId);
+
+        where = {
+            AND: [
+                !includeExpired ? { status: GOAL_STATUS.ACTIVE } : {},
+                !includeExpired ? authHelpers.buildTimedVisibilityWhere({
+                    referenceDate,
+                    expiresAtField: 'expiryDate',
+                    temporaryFlagField: null
+                }) : {},
+                {
+                    OR: [
+                        {
+                            targetCohortRoles: {
+                                some: {
+                                    cohortRoleId: { in: supervisedCohortRoleIds }
+                                }
+                            }
+                        },
+                        {
+                            targetUsers: {
+                                some: {
+                                    userId: { in: supervisedUserIds }
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+    } else {
+        where = authHelpers.buildGoalVisibilityWhere(actor, {
+            referenceDate,
+            includeExpired,
+            includeAllScopes
+        });
+    }
 
     return await prisma.learningGoal.findMany({
         where,

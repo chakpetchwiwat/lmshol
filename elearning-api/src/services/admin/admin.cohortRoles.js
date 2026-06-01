@@ -121,8 +121,24 @@ const syncRoleAdminMemberPermissions = async (tx, role) => {
     }
 };
 
-const getCohortRoles = async () => {
+const getCohortRoles = async (authUser) => {
+    let where = {};
+    if (authUser) {
+        const authHelpers = require('../../utils/auth.helpers');
+        const actor = await authHelpers.getActorContext(prisma, authUser);
+        if (actor.isSupervisor && !actor.isAdmin) {
+            where = {
+                roleSupervisors: {
+                    some: {
+                        supervisorId: actor.id || actor.userId
+                    }
+                }
+            };
+        }
+    }
+
     const roles = await prisma.cohortRole.findMany({
+        where,
         include: {
             roleSupervisors: {
                 select: { supervisorId: true }
