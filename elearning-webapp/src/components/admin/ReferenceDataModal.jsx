@@ -301,7 +301,7 @@ const ReferenceDataModal = ({
           <div className="flex flex-1 flex-col md:flex-row overflow-hidden min-h-0 bg-slate-50/20">
             
             {/* LEFT WORKSPACE PANEL: Form or Member Manager */}
-            <div ref={modalScrollRef} className="w-full md:w-[38%] border-r border-slate-100/85 flex flex-col bg-white overflow-y-auto p-6">
+            <div ref={modalScrollRef} className="w-full md:w-[38%] border-r border-slate-100/85 flex flex-col bg-white overflow-y-auto overflow-x-hidden p-6">
               {memberEditorItem ? (
                 /* SECTION A: Member Editor Workspace */
                 <div className="flex flex-col flex-1 animate-in fade-in slide-in-from-left-2 duration-200">
@@ -561,7 +561,7 @@ const ReferenceDataModal = ({
                               }
                             }}
                             placeholder="พิมพ์ชื่อระดับแล้วกด Add..."
-                            className="form-input flex-1 bg-white px-3 py-2 text-xs font-bold border-slate-200/80 focus:border-indigo-500"
+                            className="form-input flex-1 min-w-0 bg-white px-3 py-2 text-xs font-bold border-slate-200/80 focus:border-indigo-500"
                           />
                           <button
                             type="button"
@@ -632,7 +632,7 @@ const ReferenceDataModal = ({
             </div>
 
             {/* RIGHT SCROLLABLE LIST PANEL: Roles List */}
-            <div className="flex-1 flex flex-col overflow-y-auto p-6">
+            <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden p-6">
               <div className="mb-4 flex items-center justify-between shrink-0">
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">
                   รายการ {itemLabel} ทั้งหมด ({items.length || 0})
