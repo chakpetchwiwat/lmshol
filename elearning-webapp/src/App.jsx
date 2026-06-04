@@ -8,6 +8,7 @@ const AdminLayout = React.lazy(() => import('./components/layout/AdminLayout'));
 
 // Auth Pages
 const Login = React.lazy(() => import('./pages/auth/Login'));
+const Logout = React.lazy(() => import('./pages/auth/Logout'));
 
 // User Pages
 const Home = React.lazy(() => import('./pages/user/Home'));
@@ -29,6 +30,7 @@ const DownloadFilePage = React.lazy(() => import('./pages/common/DownloadFilePag
 // Admin Pages
 const AdminDashboard = React.lazy(() => import('./pages/admin/Dashboard'));
 const AdminCourses = React.lazy(() => import('./pages/admin/CourseManagement'));
+const AdminCompetencies = React.lazy(() => import('./pages/admin/CompetencyManagement'));
 const AdminAnnouncements = React.lazy(() => import('./pages/admin/AnnouncementManagement'));
 const AdminUsers = React.lazy(() => import('./pages/admin/UserManagement'));
 const AdminRewards = React.lazy(() => import('./pages/admin/RewardsManagement'));
@@ -73,6 +75,7 @@ function App() {
         
         {/* Auth */}
         <Route path="/login" element={<Login />} />
+        <Route path="/logout" element={<Logout />} />
         <Route path="/print/report/:reportId" element={<PrintReportPage />} />
         <Route path="/certificates/verify/:token" element={<CertificateVerification />} />
 
@@ -103,6 +106,7 @@ function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="cohort-tracking" element={<CohortTracking />} />
             <Route path="courses" element={<AdminCourses />} />
+            <Route path="competencies" element={<AdminCompetencies />} />
             <Route path="announcements" element={<AdminAnnouncements />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="rewards" element={<AdminRewards />} />

@@ -44,6 +44,50 @@ const TRAINING_HEADERS = [
   'หมายเหตุ'
 ];
 
+const IMPORT_COMPAT_PROFILE_HEADERS = [
+  'Username',
+  'Email',
+  'First Name',
+  'Last Name',
+  'Position',
+  'Position Level',
+  'Division',
+  'Sub-division',
+  'Educational Level',
+  'Qualification Degree Name',
+  'Field of Study',
+  'Educational Institution',
+  'Highest Education Level',
+  'Highest Degree Name',
+  'Highest Field of Study',
+  'Highest Educational Institution',
+  'Retirement Date',
+  'National Identification Number',
+  'Position Type',
+  'Supervisor Name',
+  'Password',
+  'CV',
+  'Job Description'
+];
+
+const IMPORT_COMPAT_TRAINING_HEADERS = [
+  'Email',
+  'Full Name',
+  'Course Name',
+  'Organizing Agency',
+  'Completion Date',
+  'Number of Days',
+  'Intake No.',
+  'Venue',
+  'Course Group',
+  'Course Type',
+  'Training Details',
+  'Competency Codes',
+  'Competency Levels',
+  'Competency Notes',
+  'Remarks'
+];
+
 const empty = (value, fallback = '-') => {
   if (value === undefined || value === null || value === '') return fallback;
   return value;
@@ -237,6 +281,7 @@ const exportUserProfiles = async (actor, frontendUrl = 'http://localhost:3000') 
       empty(user.nationalId, ''),
       empty(user.positionType, ''),
       empty(user.supervisorName, ''),
+      '',
       findProfileFileLink(user, ['cv', 'resume', 'ประวัติ'], frontendUrl),
       findProfileFileLink(user, ['job description', 'jd', 'description', 'หน้าที่'], frontendUrl)
     ];
@@ -244,9 +289,9 @@ const exportUserProfiles = async (actor, frontendUrl = 'http://localhost:3000') 
 
   return createWorkbook(
     'users profile',
-    PROFILE_HEADERS,
+    IMPORT_COMPAT_PROFILE_HEADERS,
     rows,
-    [24, 32, 18, 18, 30, 22, 28, 28, 28, 30, 28, 36, 28, 30, 28, 36, 18, 24, 22, 28, 36, 36]
+    [24, 32, 18, 18, 30, 22, 28, 28, 28, 30, 28, 36, 28, 30, 28, 36, 18, 24, 22, 28, 18, 36, 36]
   );
 };
 
@@ -279,6 +324,21 @@ const parseNamePrefix = (fullName = '') => {
   return { prefix, name };
 };
 
+const formatCompetencyCodes = (mappings = []) => mappings
+  .map((mapping) => mapping.competency?.code)
+  .filter(Boolean)
+  .join('; ');
+
+const formatCompetencyLevels = (mappings = []) => mappings
+  .map((mapping) => mapping.requiredLevel)
+  .filter((level) => level !== undefined && level !== null && level !== '')
+  .join('; ');
+
+const formatCompetencyNotes = (mappings = []) => mappings
+  .map((mapping) => mapping.note)
+  .filter(Boolean)
+  .join('; ');
+
 const buildTrainingItems = (user) => {
   const { prefix, name } = parseNamePrefix(user.name || '');
   let position = user.position || '';
@@ -290,7 +350,10 @@ const buildTrainingItems = (user) => {
 
   const systemItems = (user.issuedCertificates || []).map((cert) => {
     const formattedDate = formatDate(cert.issuedAt);
+    const courseCompetencies = cert.course?.competencies || [];
     return {
+      email: user.email || '',
+      fullName: user.name || '',
       prefix,
       name,
       position,
@@ -304,6 +367,9 @@ const buildTrainingItems = (user) => {
       intake: '',
       venue: 'Online (e-Learning)',
       organizer: 'LMS System',
+      competencyCodes: formatCompetencyCodes(courseCompetencies),
+      competencyLevels: formatCompetencyLevels(courseCompetencies),
+      competencyNotes: formatCompetencyNotes(courseCompetencies),
       remarks: cert.certificateNo ? `Certificate No. ${cert.certificateNo}` : ''
     };
   });
@@ -311,6 +377,8 @@ const buildTrainingItems = (user) => {
   const externalItems = (user.certificates || []).map((cert) => {
     const formattedDate = formatDate(cert.issueDate);
     return {
+      email: user.email || '',
+      fullName: user.name || '',
       prefix,
       name,
       position,
@@ -324,6 +392,9 @@ const buildTrainingItems = (user) => {
       intake: cert.intakeNo || '',
       venue: cert.trainingVenue || '',
       organizer: cert.issuer || '',
+      competencyCodes: formatCompetencyCodes(cert.competencies || []),
+      competencyLevels: formatCompetencyLevels(cert.competencies || []),
+      competencyNotes: formatCompetencyNotes(cert.competencies || []),
       remarks: cert.credentialId || cert.credentialUrl || ''
     };
   });
@@ -341,7 +412,14 @@ const exportUserTrainings = async (actor) => {
         course: {
           select: {
             title: true,
-            category: { select: { name: true } }
+            category: { select: { name: true } },
+            competencies: {
+              select: {
+                requiredLevel: true,
+                note: true,
+                competency: { select: { code: true, name: true } }
+              }
+            }
           }
         }
       },
@@ -360,7 +438,14 @@ const exportUserTrainings = async (actor) => {
         trainingDetails: true,
         trainingVenue: true,
         trainingDays: true,
-        intakeNo: true
+        intakeNo: true,
+        competencies: {
+          select: {
+            requiredLevel: true,
+            note: true,
+            competency: { select: { code: true, name: true } }
+          }
+        }
       },
       orderBy: { issueDate: 'desc' }
     }
@@ -373,10 +458,10 @@ const exportUserTrainings = async (actor) => {
     if (items.length === 0) {
       const { prefix, name } = parseNamePrefix(user.name || '');
       noTrainingRows.push([
-        prefix,
-        name,
-        [(user.position || ''), (user.positionLevel || '')].filter(Boolean).join(''),
-        user.departmentRef?.name || user.department || '',
+        user.email || '',
+        user.name || [prefix, name].filter(Boolean).join(' '),
+        '',
+        '',
         '',
         '',
         '',
@@ -391,32 +476,44 @@ const exportUserTrainings = async (actor) => {
     } else {
       items.forEach((item) => {
         hasTrainingRows.push([
-          item.prefix,
-          item.name,
-          item.position,
-          item.department,
-          item.type,
-          item.item,
-          item.details,
+          item.email,
+          item.fullName,
           item.courseName,
+          item.organizer,
           item.date,
           item.days,
           item.intake,
           item.venue,
-          item.organizer,
+          item.item,
+          item.type,
+          item.details,
+          item.competencyCodes,
+          item.competencyLevels,
+          item.competencyNotes,
           item.remarks
         ]);
       });
     }
   });
 
-  const rows = [...hasTrainingRows, ...noTrainingRows];
+  const rows = [
+    ...hasTrainingRows,
+    ...noTrainingRows.map((row) => {
+      const normalized = [...row];
+      while (normalized.length < IMPORT_COMPAT_TRAINING_HEADERS.length) {
+        normalized.push('');
+      }
+      normalized[7] = '';
+      normalized[14] = 'ยังไม่มีประวัติการอบรม';
+      return normalized;
+    })
+  ];
 
   return createWorkbook(
     'Training Report',
-    TRAINING_HEADERS,
+    IMPORT_COMPAT_TRAINING_HEADERS,
     rows,
-    [15, 30, 25, 25, 15, 15, 20, 50, 15, 15, 15, 25, 25, 25]
+    [15, 30, 50, 25, 15, 15, 15, 25, 18, 18, 25, 20, 18, 25, 25]
   );
 };
 

@@ -1,5 +1,8 @@
 const prisma = require('../../utils/prisma');
 const jwt = require('jsonwebtoken');
+const { certificateCompetencyInclude, saveUserCertificateCompetencies } = require('../admin/admin.competencies');
+
+const UNCLASSIFIED_TRAINING_ITEM = 'unclassified';
 
 const normalizeOptionalText = (value) => {
     if (value === undefined || value === null) return null;
@@ -46,7 +49,7 @@ const normalizeCertificatePayload = (data = {}) => {
         fileName: normalizeOptionalText(data.fileName),
         fileMimeType: normalizeOptionalText(data.fileMimeType),
         trainingType: normalizeOptionalText(data.trainingType),
-        trainingItem: normalizeOptionalText(data.trainingItem),
+        trainingItem: normalizeOptionalText(data.trainingItem) || UNCLASSIFIED_TRAINING_ITEM,
         trainingDetails: normalizeOptionalText(data.trainingDetails),
         trainingVenue: normalizeOptionalText(data.trainingVenue),
         trainingDays: normalizeOptionalText(data.trainingDays),
@@ -57,6 +60,14 @@ const normalizeCertificatePayload = (data = {}) => {
 const getCertificates = async (userId) => {
     return prisma.userCertificate.findMany({
         where: { userId },
+        include: {
+            competencies: {
+                include: certificateCompetencyInclude,
+                orderBy: {
+                    createdAt: 'asc'
+                }
+            }
+        },
         orderBy: [
             { issueDate: 'desc' },
             { createdAt: 'desc' }
@@ -64,14 +75,33 @@ const getCertificates = async (userId) => {
     });
 };
 
-const createCertificate = async (userId, data) => {
-    return prisma.userCertificate.create({
+const createCertificate = async (userId, data) => prisma.$transaction(async (tx) => {
+    const certificate = await tx.userCertificate.create({
         data: {
             userId,
             ...normalizeCertificatePayload(data)
+        },
+        include: {
+            competencies: {
+                include: certificateCompetencyInclude
+            }
         }
     });
-};
+
+    await saveUserCertificateCompetencies(tx, certificate.id, data.competencies);
+
+    return tx.userCertificate.findUnique({
+        where: { id: certificate.id },
+        include: {
+            competencies: {
+                include: certificateCompetencyInclude,
+                orderBy: {
+                    createdAt: 'asc'
+                }
+            }
+        }
+    });
+});
 
 const updateCertificate = async (userId, certificateId, data) => {
     const existingCertificate = await prisma.userCertificate.findFirst({
@@ -85,9 +115,25 @@ const updateCertificate = async (userId, certificateId, data) => {
         throw new Error('ไม่พบ certificate ที่ต้องการแก้ไข');
     }
 
-    return prisma.userCertificate.update({
-        where: { id: certificateId },
-        data: normalizeCertificatePayload(data)
+    return prisma.$transaction(async (tx) => {
+        await tx.userCertificate.update({
+            where: { id: certificateId },
+            data: normalizeCertificatePayload(data)
+        });
+
+        await saveUserCertificateCompetencies(tx, certificateId, data.competencies);
+
+        return tx.userCertificate.findUnique({
+            where: { id: certificateId },
+            include: {
+                competencies: {
+                    include: certificateCompetencyInclude,
+                    orderBy: {
+                        createdAt: 'asc'
+                    }
+                }
+            }
+        });
     });
 };
 

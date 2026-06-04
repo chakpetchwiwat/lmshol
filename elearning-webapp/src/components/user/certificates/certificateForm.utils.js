@@ -12,12 +12,13 @@ export const emptyCertificateForm = {
   fileKey: '',
   fileName: '',
   fileMimeType: '',
-  trainingType: 'ภายนอก',
-  trainingItem: 'อบรม',
+  trainingType: 'external',
+  trainingItem: 'unclassified',
   trainingDetails: '',
   trainingVenue: '',
   trainingDays: '',
-  intakeNo: ''
+  intakeNo: '',
+  competencies: []
 };
 
 const toDateInputValue = (value) => {
@@ -39,12 +40,17 @@ export const buildFormFromCertificate = (certificate) => ({
   fileKey: certificate?.fileKey || '',
   fileName: certificate?.fileName || '',
   fileMimeType: certificate?.fileMimeType || '',
-  trainingType: certificate?.trainingType || 'ภายนอก',
-  trainingItem: certificate?.trainingItem || 'อบรม',
+  trainingType: certificate?.trainingType || 'external',
+  trainingItem: certificate?.trainingItem || 'unclassified',
   trainingDetails: certificate?.trainingDetails || '',
   trainingVenue: certificate?.trainingVenue || '',
   trainingDays: certificate?.trainingDays || '',
-  intakeNo: certificate?.intakeNo || ''
+  intakeNo: certificate?.intakeNo || '',
+  competencies: (certificate?.competencies || []).map((mapping) => ({
+    competencyId: mapping.competencyId,
+    requiredLevel: mapping.requiredLevel || '',
+    note: mapping.note || ''
+  }))
 });
 
 export const formatCertificateDateRange = (certificate, isLms = false) => {

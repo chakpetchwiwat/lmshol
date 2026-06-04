@@ -3,6 +3,7 @@ const { USER_ROLES } = require('../../../utils/constants/roles');
 const { TRANSACTION_TIMEOUTS } = require('../../../utils/constants/config');
 const { mapCourseRecord } = require('../admin.serializers');
 const { courseInclude } = require('../admin.queries');
+const { saveCourseCompetencies } = require('../admin.competencies');
 const { 
     parseInteger, 
     normalizeNullableId, 
@@ -152,6 +153,7 @@ const createCourse = async (input) => prisma.$transaction(async (tx) => {
     const { data, visibleDepartmentIds, visibleTierIds, visibleCohortRoleIds, certificateEnabled, certificatePassingScore, certificateTemplateId, certificateSignatureSlots } = await buildCourseMutationPayload(tx, input);
     const course = await tx.course.create({ data });
     await saveCourseVisibility(tx, course.id, data.visibleToAll, visibleDepartmentIds, visibleTierIds, visibleCohortRoleIds);
+    await saveCourseCompetencies(tx, course.id, input.competencies);
 
     if (certificateEnabled !== undefined) {
         const defaultTemplate = certificateTemplateId
@@ -192,6 +194,7 @@ const updateCourse = async (id, input) => prisma.$transaction(async (tx) => {
     const { data, visibleDepartmentIds, visibleTierIds, visibleCohortRoleIds, certificateEnabled, certificatePassingScore, certificateTemplateId, certificateSignatureSlots } = await buildCourseMutationPayload(tx, input);
     await tx.course.update({ where: { id }, data });
     await saveCourseVisibility(tx, id, data.visibleToAll, visibleDepartmentIds, visibleTierIds, visibleCohortRoleIds);
+    await saveCourseCompetencies(tx, id, input.competencies);
 
     if (certificateEnabled !== undefined) {
         const defaultTemplate = certificateTemplateId

@@ -15,6 +15,7 @@ import {
   Activity,
   Award,
   ClipboardCheck,
+  Network,
 } from 'lucide-react';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 import { canEditAdminUsers, getRoleLabel } from '../../utils/roles';
@@ -35,6 +36,7 @@ const AdminLayout = () => {
   const location = useLocation();
   const isWiderPage = location.pathname.startsWith('/admin/users') ||
                       location.pathname.startsWith('/admin/courses') ||
+                      location.pathname.startsWith('/admin/competencies') ||
                       location.pathname.startsWith('/admin/redeems') ||
                       location.pathname.startsWith('/admin/certificates') ||
                       location.pathname.startsWith('/admin/assessments') ||
@@ -84,6 +86,7 @@ const AdminLayout = () => {
     
     // Course Management: Visible to Admin, Managers, Staff, but NOT Supervisors
     ...(!isSupervisor ? [{ path: '/admin/courses', icon: <Book size={20} />, label: 'จัดการคอร์สเรียน' }] : []),
+    ...(isFullAdmin ? [{ path: '/admin/competencies', icon: <Network size={20} />, label: 'Competency' }] : []),
     
     // Announcements: Visible to Admin and Managers
     ...(!isCourseStaffOnly ? [{ path: '/admin/announcements', icon: <BellRing size={20} />, label: 'จัดการประกาศแผนก' }] : []),

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link as LinkIcon, Upload, X } from 'lucide-react';
 import ModalPortal from '../../common/ModalPortal';
 import useAccessibleOverlay from '../../../hooks/useAccessibleOverlay';
+import CompetencyMappingSelector from '../../admin/CompetencyMappingSelector';
 
 const ProfileCertificateModal = ({
   isOpen,
@@ -9,6 +10,7 @@ const ProfileCertificateModal = ({
   form,
   saving,
   uploading,
+  competencies = [],
   onClose,
   onFormChange,
   onFileChange,
@@ -238,6 +240,16 @@ const ProfileCertificateModal = ({
                 />
               </div>
             </label>
+          </div>
+
+          <div className="mt-5">
+            <CompetencyMappingSelector
+              competencies={competencies}
+              value={form.competencies || []}
+              onChange={(nextCompetencies) => onFormChange('competencies', nextCompetencies)}
+              title="Competency Mapping"
+              description="เลือก competency ที่อบรมภายนอกนี้ครอบคลุม และกำหนดระดับที่เกี่ยวข้อง"
+            />
           </div>
 
           <div className="mt-5 rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50/70 p-4">

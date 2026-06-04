@@ -159,6 +159,39 @@ const getUserCertificates = asyncHandler(async (req, res) => {
   res.json({ success: true, data: certificates });
 });
 
+const getCompetencies = asyncHandler(async (req, res) => {
+  const competencies = await AdminService.getCompetencies();
+  res.json({ success: true, data: competencies });
+});
+
+const getCompetencyTree = asyncHandler(async (req, res) => {
+  const tree = await AdminService.getCompetencyTree();
+  res.json({ success: true, data: tree });
+});
+
+const createCompetencyGroup = asyncHandler(async (req, res) => {
+  const group = await AdminService.createCompetencyGroup(req.body);
+  res.status(201).json({ success: true, data: group });
+});
+
+const createCompetencyCategory = asyncHandler(async (req, res) => {
+  const category = await AdminService.createCompetencyCategory(req.body);
+  res.status(201).json({ success: true, data: category });
+});
+
+const createCompetency = asyncHandler(async (req, res) => {
+  const competency = await AdminService.createCompetency(req.body);
+  res.status(201).json({ success: true, data: competency });
+});
+
+const importGbtCompetencies = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: 'Please upload a GBT Excel file.' });
+  }
+  const result = await AdminService.importGbtCompetencies(req.file.buffer);
+  res.json({ success: true, data: result });
+});
+
 const createUserCertificate = asyncHandler(async (req, res) => {
   const certificate = await AdminService.createUserCertificate(req.params.id, req.body);
   res.status(201).json({ success: true, data: certificate });
@@ -582,6 +615,12 @@ module.exports = {
   exportSingleUser,
   downloadTemplate,
   importUsers,
+  getCompetencies,
+  getCompetencyTree,
+  createCompetencyGroup,
+  createCompetencyCategory,
+  createCompetency,
+  importGbtCompetencies,
   getUserDetails,
   createUser,
   updateUser,

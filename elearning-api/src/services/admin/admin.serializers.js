@@ -3,7 +3,7 @@ const authHelpers = require('../../utils/auth.helpers');
 const mapUserRecord = authHelpers.mapUserRecord;
 
 const mapCourseRecord = (course) => {
-    const { departmentAccess, tierAccess, cohortRoleAccess, instructorPreset, ...rest } = course;
+    const { departmentAccess, tierAccess, cohortRoleAccess, instructorPreset, competencies, ...rest } = course;
     const visibleDepartments = departmentAccess?.map((item) => item.department) || [];
     const visibleTiers = tierAccess?.map((item) => item.tier) || [];
     const visibleCohortRoles = cohortRoleAccess?.map((item) => item.cohortRole) || [];
@@ -22,7 +22,14 @@ const mapCourseRecord = (course) => {
         certificateEnabled: rest.certificateSetting?.enabled || false,
         certificatePassingScore: rest.certificateSetting?.passingScore || 80,
         certificateTemplateId: rest.certificateSetting?.templateId || '',
-        certificateSignatureSlots: rest.certificateSetting?.signatureSlots || null
+        certificateSignatureSlots: rest.certificateSetting?.signatureSlots || null,
+        competencies: (competencies || []).map((mapping) => ({
+            id: mapping.id,
+            competencyId: mapping.competencyId,
+            requiredLevel: mapping.requiredLevel,
+            note: mapping.note || '',
+            competency: mapping.competency || null
+        }))
     };
 };
 

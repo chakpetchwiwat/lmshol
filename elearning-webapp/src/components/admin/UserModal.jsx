@@ -23,6 +23,7 @@ const UserModal = ({
   canEditRole = true,
   profileCertificates = [],
   lmsCertificates = [],
+  competencies = [],
   savingProfileDetails = false,
   uploadingProfileFile = false,
   savingCertificate = false,
@@ -175,11 +176,23 @@ const UserModal = ({
               <input
                 required={!editingUser}
                 type="password"
-                placeholder="อย่างน้อย 6 ตัวอักษร"
+                placeholder="อย่างน้อย 8 ตัวอักษร"
                 className="form-input w-full"
                 value={formData.password}
                 onChange={(event) => setFormData({ ...formData, password: event.target.value })}
               />
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="checkbox"
+                  id="mustChangePassword"
+                  checked={formData.mustChangePassword || false}
+                  onChange={(event) => setFormData({ ...formData, mustChangePassword: event.target.checked })}
+                  className="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                />
+                <label htmlFor="mustChangePassword" className="text-sm font-semibold text-slate-700 cursor-pointer select-none">
+                  บังคับเปลี่ยนรหัสผ่านในการเข้าสู่ระบบครั้งแรก
+                </label>
+              </div>
             </div>
 
             {canEditRole && (
@@ -408,6 +421,7 @@ const UserModal = ({
                 <ProfileCertificates
                   certificates={profileCertificates}
                   lmsCertificates={lmsCertificates}
+                  competencies={competencies}
                   saving={savingCertificate}
                   uploading={uploadingCertificate}
                   onCreate={onCreateCertificate}

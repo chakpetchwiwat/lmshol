@@ -11,6 +11,7 @@ const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
   const displayId = isLms ? certificate.certificateNo : certificate.credentialId;
   const fileUrl = isLms ? certificate.pdfUrl : certificate.fileUrl;
   const dateLabel = formatCertificateDateRange(certificate, isLms);
+  const competencyMappings = Array.isArray(certificate.competencies) ? certificate.competencies : [];
 
   const handleDownload = async () => {
     if (!certificate.id) return;
@@ -119,6 +120,20 @@ const ProfileCertificateCard = ({ certificate, isLms, onEdit, onDelete }) => {
             <Calendar size={14} />
             {dateLabel}
           </p>
+
+          {!isLms && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-bold text-slate-600">
+                Category: {certificate.trainingItem || 'unclassified'}
+              </span>
+              {competencyMappings.map((mapping) => (
+                <span key={mapping.id || mapping.competencyId} className="inline-flex items-center rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-700">
+                  {mapping.competency?.code || mapping.competency?.name || mapping.competencyId}
+                  {mapping.requiredLevel ? ` · L${mapping.requiredLevel}` : ''}
+                </span>
+              ))}
+            </div>
+          )}
 
           {(displayId || certificate.credentialUrl || fileUrl) && (
             <div className="mt-4 flex flex-wrap gap-2">

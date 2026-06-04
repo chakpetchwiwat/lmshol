@@ -23,6 +23,7 @@ const getDefaultFormData = () => ({
   name: '',
   email: '',
   password: '',
+  mustChangePassword: false,
   role: USER_ROLES.USER,
   roles: [],
   roleLevels: {},
@@ -135,6 +136,7 @@ const UserManagement = () => {
   const [selectedUserDetail, setSelectedUserDetail] = React.useState(null);
   const [profileCertificates, setProfileCertificates] = React.useState([]);
   const [lmsCertificates, setLmsCertificates] = React.useState([]);
+  const [competencies, setCompetencies] = React.useState([]);
   const [savingProfileDetails] = React.useState(false);
   const [uploadingProfileFile, setUploadingProfileFile] = React.useState(false);
   const [savingCertificate, setSavingCertificate] = React.useState(false);
@@ -170,13 +172,17 @@ const UserManagement = () => {
         adminAPI.getSetting('POSITION_TYPES'),
         adminAPI.getSetting('SUBDIVISIONS'),
       ];
-      const [departmentResponse, tierResponse, cohortRoleResponse, levelsRes, typesRes, subdivRes] = await Promise.all(requests);
+      const [departmentResponse, tierResponse, cohortRoleResponse, levelsRes, typesRes, subdivRes, competenciesRes] = await Promise.all([
+        ...requests,
+        adminAPI.getCompetencies()
+      ]);
       setDepartments(departmentResponse.data);
       setTiers(tierResponse.data);
       setCohortRoles(cohortRoleResponse.data);
       setPositionLevels(Array.isArray(levelsRes.data) ? levelsRes.data : levelsRes.data?.data || []);
       setPositionTypes(Array.isArray(typesRes.data) ? typesRes.data : typesRes.data?.data || []);
       setSubdivisions((Array.isArray(subdivRes.data) ? subdivRes.data : subdivRes.data?.data || []).map(x => (typeof x === 'string' ? { name: x } : x)));
+      setCompetencies(Array.isArray(competenciesRes.data) ? competenciesRes.data : []);
     } catch (error) {
       console.error('Fetch reference data error:', error);
     } finally {
@@ -195,6 +201,11 @@ const UserManagement = () => {
   const handleSaveUser = async (event) => {
     event.preventDefault();
 
+    if (formData.password && formData.password.length < 8) {
+      toast.warning('รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร');
+      return;
+    }
+
     try {
       const payload = {
         ...formData,
@@ -202,6 +213,7 @@ const UserManagement = () => {
         roles: formData.roles || [],
         roleLevels: formData.roleLevels || {},
         employmentDate: formData.employmentDate || null,
+        mustChangePassword: formData.mustChangePassword,
       };
 
       if (editingUser) {
@@ -272,6 +284,7 @@ const UserManagement = () => {
       name: user.name,
       email: user.email,
       password: '',
+      mustChangePassword: !!user.mustChangePassword,
       role: user.permission || user.role || USER_ROLES.USER,
       roles: user.roles || [],
       roleLevels: user.roleLevels || {},
@@ -746,6 +759,7 @@ const UserManagement = () => {
         canEditRole={canEditUsers}
         profileCertificates={profileCertificates}
         lmsCertificates={lmsCertificates}
+        competencies={competencies}
         savingProfileDetails={savingProfileDetails}
         uploadingProfileFile={uploadingProfileFile}
         savingCertificate={savingCertificate}

@@ -14,6 +14,7 @@ model User {
   email                     String                 @unique
   password                  String
   permission                String                 @default("user")
+  mustChangePassword        Boolean                @default(false)
   roles                     String[]               @default([])
   department                String?
   pointsBalance             Int                    @default(0)
@@ -97,7 +98,7 @@ model UserCertificate {
   fileName        String?
   fileMimeType    String?
   trainingType    String?
-  trainingItem    String?
+  trainingItem    String?   @default("unclassified")
   trainingDetails String?
   trainingVenue   String?
   trainingDays    String?
@@ -105,6 +106,7 @@ model UserCertificate {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competencies    UserCertificateCompetency[]
 
   @@index([userId, issueDate])
   @@index([userId, createdAt])
@@ -147,6 +149,109 @@ model Course {
   lessons            Lesson[]
   enrollments        UserCourse[]
   bookmarks          UserCourseBookmark[]
+  competencies       CourseCompetency[]
+}
+
+model CompetencyGroup {
+  id          String               @id @default(uuid())
+  code        String               @unique
+  name        String
+  description String?
+  displayOrder Int                 @default(0)
+  status      String               @default("ACTIVE")
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  categories  CompetencyCategory[]
+
+  @@index([status, displayOrder])
+}
+
+model CompetencyCategory {
+  id           String            @id @default(uuid())
+  groupId      String
+  code         String            @unique
+  name         String
+  description  String?
+  displayOrder Int               @default(0)
+  status       String            @default("ACTIVE")
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  group        CompetencyGroup   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  competencies Competency[]
+
+  @@index([groupId, status, displayOrder])
+}
+
+model Competency {
+  id                     String                      @id @default(uuid())
+  categoryId             String
+  gbtLevel               String?
+  competencyType         String?
+  code                   String                      @unique
+  legacyCode             String?
+  sourceRole             String?
+  name                   String
+  description            String?
+  conditionsNote         String?
+  measurementLevelCount  Int?
+  measurementDescription String?
+  sourceColumnK          String?
+  displayOrder           Int                         @default(0)
+  status                 String                      @default("ACTIVE")
+  createdAt              DateTime                    @default(now())
+  updatedAt              DateTime                    @updatedAt
+  category               CompetencyCategory          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  levels                 CompetencyLevel[]
+  courseMappings         CourseCompetency[]
+  certificateMappings    UserCertificateCompetency[]
+
+  @@index([categoryId, status, displayOrder])
+}
+
+model CompetencyLevel {
+  id                  String     @id @default(uuid())
+  competencyId        String
+  level               Int
+  label               String?
+  description         String?
+  measurementCriteria String?
+  displayOrder        Int        @default(0)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  competency          Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+
+  @@unique([competencyId, level])
+  @@index([competencyId, displayOrder])
+}
+
+model CourseCompetency {
+  id           String     @id @default(uuid())
+  courseId     String
+  competencyId String
+  requiredLevel Int?
+  note         String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  course       Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  competency   Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, competencyId])
+  @@index([competencyId])
+}
+
+model UserCertificateCompetency {
+  id                String          @id @default(uuid())
+  userCertificateId String
+  competencyId      String
+  requiredLevel     Int?
+  note              String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  userCertificate   UserCertificate @relation(fields: [userCertificateId], references: [id], onDelete: Cascade)
+  competency        Competency      @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+
+  @@unique([userCertificateId, competencyId])
+  @@index([competencyId])
 }
 
 model CourseStaff {

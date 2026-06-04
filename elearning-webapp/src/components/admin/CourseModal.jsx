@@ -37,6 +37,7 @@ const CourseModal = ({
   departments,
   tiers,
   cohortRoles = [],
+  competencies = [],
   lessons,
   loadingReports,
   quizReports,
@@ -209,6 +210,7 @@ const CourseModal = ({
                 departments={departments}
                 tiers={tiers}
                 cohortRoles={cohortRoles}
+                competencies={competencies}
                 onSaveCourse={onSaveCourse}
                 onImageUpload={onImageUpload}
                 uploading={uploading}

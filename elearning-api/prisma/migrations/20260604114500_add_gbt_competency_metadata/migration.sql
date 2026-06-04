@@ -1,0 +1,6 @@
+ALTER TABLE "Competency" ADD COLUMN IF NOT EXISTS "gbtLevel" TEXT;
+ALTER TABLE "Competency" ADD COLUMN IF NOT EXISTS "competencyType" TEXT;
+ALTER TABLE "Competency" ADD COLUMN IF NOT EXISTS "legacyCode" TEXT;
+ALTER TABLE "Competency" ADD COLUMN IF NOT EXISTS "sourceRole" TEXT;
+ALTER TABLE "Competency" ADD COLUMN IF NOT EXISTS "conditionsNote" TEXT;
+ALTER TABLE "Competency" ADD COLUMN IF NOT EXISTS "measurementLevelCount" INTEGER;

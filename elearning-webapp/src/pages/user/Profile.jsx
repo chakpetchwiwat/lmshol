@@ -1,6 +1,6 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 import Skeleton from '../../components/common/Skeleton';
@@ -17,6 +17,7 @@ import PrivacyPolicyModal from '../../components/user/PrivacyPolicyModal';
 
 const Profile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
 
   const [user, setUser] = React.useState(null);
@@ -44,6 +45,14 @@ const Profile = () => {
   const currentPasswordId = React.useId();
   const newPasswordId = React.useId();
   const confirmNewPasswordId = React.useId();
+
+  const isForced = !!(user?.mustChangePassword) || !!(location.state?.forcePasswordChange);
+
+  React.useEffect(() => {
+    if (isForced) {
+      setShowEditModal(true);
+    }
+  }, [isForced]);
 
   React.useEffect(() => {
     const fetchProfile = async () => {
@@ -80,8 +89,18 @@ const Profile = () => {
       return;
     }
 
-    if (newPassword.length < 6) {
-      toast.warning('รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
+    if (newPassword.length < 8) {
+      toast.warning('รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 8 ตัวอักษร');
+      return;
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+      toast.warning('รหัสผ่านใหม่ต้องมีตัวอักษรภาษาอังกฤษพิมพ์ใหญ่อย่างน้อย 1 ตัว (A-Z)');
+      return;
+    }
+
+    if (!/[^A-Za-z0-9]/.test(newPassword)) {
+      toast.warning('รหัสผ่านใหม่ต้องมีอักขระพิเศษอย่างน้อย 1 ตัว (เช่น @, $, !, %, *, ?, &, #)');
       return;
     }
 
@@ -363,6 +382,7 @@ const Profile = () => {
 
       <UpdatePasswordModal 
         isOpen={showEditModal}
+        preventClose={isForced}
         onClose={() => {
           setShowEditModal(false);
           setCurrentPassword('');

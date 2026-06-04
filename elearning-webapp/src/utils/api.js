@@ -285,6 +285,15 @@ export const adminAPI = {
   deleteCategory: (id) => api.delete(`/admin/categories/${id}`),
   reorderCategories: (data) => api.put('/admin/categories/reorder', data),
 
+  getCompetencies: () => api.get('/admin/competencies'),
+  getCompetencyTree: () => api.get('/admin/competencies/tree'),
+  createCompetencyGroup: (data) => api.post('/admin/competency-groups', data),
+  createCompetencyCategory: (data) => api.post('/admin/competency-categories', data),
+  createCompetency: (data) => api.post('/admin/competencies', data),
+  importGbtCompetencies: (formData) => api.post('/admin/competencies/import-gbt', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+
   getLessons: (courseId) => api.get(`/admin/courses/${courseId}/lessons`),
   createLesson: (data) => api.post('/admin/lessons', data),
   updateLesson: (id, data) => api.put(`/admin/lessons/${id}`, data),

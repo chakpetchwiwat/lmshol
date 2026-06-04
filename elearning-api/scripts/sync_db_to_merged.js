@@ -189,6 +189,8 @@ async function run() {
       noExpiration: true,
       trainingType: String(row[courseGroupColIdx] || 'ภายนอก').trim(),
       trainingItem: String(row[courseTypeColIdx] || 'อบรม').trim(),
+      trainingType: String(row[courseTypeColIdx] || 'external').trim(),
+      trainingItem: String(row[courseGroupColIdx] || 'unclassified').trim(),
       trainingVenue: row[venueColIdx] ? String(row[venueColIdx]).trim() : null,
       trainingDetails: row[remarksColIdx] ? String(row[remarksColIdx]).trim() : null,
       trainingDays: trainingDaysVal,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Check } from 'lucide-react';
 import ModalPortal from '../../components/common/ModalPortal';
 import useAccessibleOverlay from '../../hooks/useAccessibleOverlay';
 
@@ -46,6 +46,7 @@ const PasswordInput = ({
 const UpdatePasswordModal = ({
   isOpen,
   onClose,
+  preventClose,
   currentPassword,
   setCurrentPassword,
   newPassword,
@@ -64,7 +65,7 @@ const UpdatePasswordModal = ({
 
   useAccessibleOverlay({
     isOpen,
-    onClose,
+    onClose: preventClose ? undefined : onClose,
     containerRef: editDialogRef,
     initialFocusRef: editInputRef,
   });
@@ -77,8 +78,9 @@ const UpdatePasswordModal = ({
         <button
           type="button"
           className="absolute inset-0 bg-slate-950/65 backdrop-blur-md"
-          onClick={onClose}
+          onClick={preventClose ? undefined : onClose}
           aria-label="ปิดหน้าต่างเปลี่ยนรหัสผ่าน"
+          style={preventClose ? { cursor: 'default' } : undefined}
         />
         <div
           ref={editDialogRef}
@@ -106,10 +108,28 @@ const UpdatePasswordModal = ({
             label="รหัสผ่านใหม่"
             value={newPassword}
             onChange={setNewPassword}
-            placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
+            placeholder="กรอกรหัสผ่านใหม่"
           />
 
-          <div className="mb-2 w-full">
+          <div className="mt-1 mb-5 w-full text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-100/80">
+            <p className="font-bold text-slate-700 mb-2">เงื่อนไขรหัสผ่านใหม่:</p>
+            <div className="flex flex-col gap-1.5">
+              <div className={`flex items-center gap-1.5 font-medium transition-colors ${newPassword.length >= 8 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                {newPassword.length >= 8 ? <Check size={14} className="stroke-[3]" /> : <div className="h-1.5 w-1.5 rounded-full bg-slate-300 ml-1.5 mr-1" />}
+                <span>ความยาวขั้นต่ำ 8 ตัวอักษร</span>
+              </div>
+              <div className={`flex items-center gap-1.5 font-medium transition-colors ${/[A-Z]/.test(newPassword) ? 'text-emerald-600' : 'text-slate-400'}`}>
+                {/[A-Z]/.test(newPassword) ? <Check size={14} className="stroke-[3]" /> : <div className="h-1.5 w-1.5 rounded-full bg-slate-300 ml-1.5 mr-1" />}
+                <span>มีตัวอักษรภาษาอังกฤษพิมพ์ใหญ่ (A-Z) อย่างน้อย 1 ตัว</span>
+              </div>
+              <div className={`flex items-center gap-1.5 font-medium transition-colors ${/[^A-Za-z0-9]/.test(newPassword) ? 'text-emerald-600' : 'text-slate-400'}`}>
+                {/[^A-Za-z0-9]/.test(newPassword) ? <Check size={14} className="stroke-[3]" /> : <div className="h-1.5 w-1.5 rounded-full bg-slate-300 ml-1.5 mr-1" />}
+                <span>มีอักขระพิเศษอย่างน้อย 1 ตัว (เช่น @, $, !, %, *, ?, &, #)</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-4 w-full">
             <PasswordInput
               id={confirmNewPasswordId}
               label="ยืนยันรหัสผ่านใหม่"
@@ -120,14 +140,16 @@ const UpdatePasswordModal = ({
           </div>
 
           <div className="flex w-full gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-xl bg-slate-100 px-4 py-3 font-bold text-slate-600 transition-colors hover:bg-slate-200 focus:outline-none"
-              disabled={savingPassword}
-            >
-              ยกเลิก
-            </button>
+            {!preventClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 rounded-xl bg-slate-100 px-4 py-3 font-bold text-slate-600 transition-colors hover:bg-slate-200 focus:outline-none"
+                disabled={savingPassword}
+              >
+                ยกเลิก
+              </button>
+            )}
             <button
               type="button"
               onClick={onSave}

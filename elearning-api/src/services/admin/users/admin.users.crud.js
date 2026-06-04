@@ -54,6 +54,12 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
         data.roleLevels = baseData.roleLevels || {};
     }
 
+    if (baseData.mustChangePassword !== undefined) {
+        data.mustChangePassword = !!baseData.mustChangePassword;
+    } else if (isCreate) {
+        data.mustChangePassword = false;
+    }
+
     if (password) {
         if (String(password).length < 8) {
             throw new Error('Password must be at least 8 characters');

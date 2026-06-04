@@ -1,9 +1,11 @@
-const { PrismaClient } = require('@prisma/client');
 const xlsx = require('xlsx');
 const fs = require('fs');
 const path = require('path');
-
-const prisma = new PrismaClient();
+const prisma = require('../src/utils/prisma');
+const {
+  resolveImportedCompetencyMappings,
+  saveUserCertificateCompetencies
+} = require('../src/services/admin/admin.competencies');
 
 const THAI_MONTHS = {
   'มกราคม': 1,
@@ -70,6 +72,10 @@ const OUTPUT_HEADERS = [
   'Completion Date',
   'Organizing Agency',
   'Venue',
+  'Competency Codes',
+  'Competency Names',
+  'Competency Levels',
+  'Competency Notes',
   'Remarks',
   'Source File',
   'Source Sheet'
@@ -202,6 +208,32 @@ const getFirst = (row, keys) => {
   return '';
 };
 
+const getCompetencyFields = (row) => ({
+  competencyCodes: cleanText(getFirst(row, [
+    'Competency Codes',
+    'Competency Code',
+    'GBT Competency Code',
+    'GBT Code'
+  ])),
+  competencyNames: cleanText(getFirst(row, [
+    'Competency Names',
+    'Competency Name',
+    'GBT Competency Name'
+  ])),
+  competencyLevels: cleanText(getFirst(row, [
+    'Competency Levels',
+    'Competency Level',
+    'Required Level',
+    'GBT Level',
+    'Level'
+  ])),
+  competencyNotes: cleanText(getFirst(row, [
+    'Competency Notes',
+    'Competency Note',
+    'GBT Note'
+  ]))
+});
+
 const inferCourseType = (row) => {
   const explicitType = cleanText(getFirst(row, ['Course Type', 'ประเภท']));
   if (explicitType) return explicitType;
@@ -228,6 +260,7 @@ const mapStandardRow = (row, source) => {
     issueDate: parseDateText(row['Completion Date']) || parseDateText(row['Enrolment Date']),
     organizingAgency: normalizeIssuer(row['Organizing Agency']),
     venue: cleanText(row.Venue),
+    ...getCompetencyFields(row),
     remarks: cleanText(row.Remarks),
     sourceFile: source.file,
     sourceSheet: source.sheet
@@ -341,6 +374,10 @@ const writeMappedWorkbook = (records, outputPath, userMap = null) => {
     formatDateForExcel(record.issueDate),
     record.organizingAgency,
     record.venue,
+    record.competencyCodes,
+    record.competencyNames,
+    record.competencyLevels,
+    record.competencyNotes,
     record.remarks,
     record.sourceFile,
     record.sourceSheet
@@ -348,7 +385,7 @@ const writeMappedWorkbook = (records, outputPath, userMap = null) => {
 
   const wb = xlsx.utils.book_new();
   const ws = xlsx.utils.aoa_to_sheet([OUTPUT_HEADERS, ...rows]);
-  ws['!cols'] = [16, 28, 26, 24, 16, 22, 70, 18, 34, 34, 34, 34, 18].map((wch) => ({ wch }));
+  ws['!cols'] = [16, 28, 26, 24, 16, 22, 70, 18, 34, 34, 24, 30, 18, 34, 34, 34, 18].map((wch) => ({ wch }));
   xlsx.utils.book_append_sheet(wb, ws, 'Mapped Training Records');
   xlsx.writeFile(wb, outputPath);
 };
@@ -400,14 +437,84 @@ const importRecords = async (records, userMap) => {
       continue;
     }
 
-    await prisma.userCertificate.create({
-      data: {
-        userId,
-        title: record.courseName,
-        issuer: record.organizingAgency,
-        issueDate: record.issueDate,
-        noExpiration: true
+    await prisma.$transaction(async (tx) => {
+      const certificate = await tx.userCertificate.create({
+        data: {
+          userId,
+          title: record.courseName,
+          issuer: record.organizingAgency,
+          issueDate: record.issueDate,
+          noExpiration: true,
+          trainingType: record.courseType || 'external',
+          trainingItem: record.courseGroup || 'unclassified',
+          trainingDetails: record.remarks || null,
+          trainingVenue: record.venue || null
+        }
+      });
+
+      let { mappings } = await resolveImportedCompetencyMappings(tx, {
+        codes: record.competencyCodes,
+        names: record.competencyNames,
+        levels: record.competencyLevels,
+        notes: record.competencyNotes
+      });
+
+      if (mappings.length === 0) {
+        // Find or create group UNCLASSIFIED
+        let group = await tx.competencyGroup.findUnique({ where: { code: 'UNCLASSIFIED' } });
+        if (!group) {
+          group = await tx.competencyGroup.create({
+            data: {
+              code: 'UNCLASSIFIED',
+              name: 'Unclassified Group',
+              description: 'Group for unclassified competency mappings'
+            }
+          });
+        }
+        
+        // Find or create category UNCLASSIFIED
+        let category = await tx.competencyCategory.findUnique({ where: { code: 'UNCLASSIFIED' } });
+        if (!category) {
+          category = await tx.competencyCategory.create({
+            data: {
+              groupId: group.id,
+              code: 'UNCLASSIFIED',
+              name: 'Unclassified Category',
+              description: 'Category for unclassified competency mappings'
+            }
+          });
+        }
+
+        // Find or create competency UNCLASSIFIED
+        let competency = await tx.competency.findUnique({ where: { code: 'UNCLASSIFIED' } });
+        if (!competency) {
+          competency = await tx.competency.create({
+            data: {
+              categoryId: category.id,
+              code: 'UNCLASSIFIED',
+              name: 'Unclassified',
+              description: 'Unclassified competency mapping'
+            }
+          });
+          
+          await tx.competencyLevel.create({
+            data: {
+              competencyId: competency.id,
+              level: 1,
+              label: 'Level 1',
+              description: 'Default Level'
+            }
+          });
+        }
+
+        mappings.push({
+          competencyId: competency.id,
+          requiredLevel: 1,
+          note: 'Auto-mapped unclassified training record'
+        });
       }
+
+      await saveUserCertificateCompetencies(tx, certificate.id, mappings);
     });
 
     insertedCount++;

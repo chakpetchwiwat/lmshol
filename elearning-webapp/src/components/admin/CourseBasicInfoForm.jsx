@@ -10,6 +10,7 @@ import CustomSelect from '../common/CustomSelect';
 import { adminAPI, getFullUrl, DEFAULT_COURSE_IMAGE } from '../../utils/api';
 import CourseBuilderFooter from './course-builder/CourseBuilderFooter';
 import SignatureImage from '../common/SignatureImage';
+import CompetencyMappingSelector from './CompetencyMappingSelector';
 
 const CourseBasicInfoForm = ({
   isPersisted,
@@ -22,6 +23,7 @@ const CourseBasicInfoForm = ({
   departments,
   tiers,
   cohortRoles = [],
+  competencies = [],
   onSaveCourse,
   onImageUpload,
   uploading,
@@ -109,6 +111,15 @@ const CourseBasicInfoForm = ({
           </div>
         </div>
       </div>
+
+      <CompetencyMappingSelector
+        competencies={competencies}
+        value={courseForm.competencies || []}
+        onChange={(nextCompetencies) => setCourseForm({ ...courseForm, competencies: nextCompetencies })}
+        readOnly={readOnly}
+        title="Competency Mapping"
+        description="เลือกหัวข้อ competency ที่คอร์สนี้เกี่ยวข้อง และกำหนดระดับที่ต้องการต่อหัวข้อ"
+      />
 
       <div>
         <div className="relative mb-6 overflow-hidden rounded-[2rem] border border-amber-200/50 bg-gradient-to-br from-amber-50/80 to-amber-100/40 p-6 shadow-sm backdrop-blur-md transition-all hover:shadow-md">

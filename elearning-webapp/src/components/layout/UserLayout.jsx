@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Home, BookOpen, Gift, User, Bookmark, LogOut, Settings, Bell, Target, ClipboardCheck } from 'lucide-react';
-import { userAPI } from '../../utils/api';
+import { authAPI, userAPI } from '../../utils/api';
 import { canAccessAdminPanel } from '../../utils/roles';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 import AppLogo from '../common/AppLogo';
@@ -26,10 +26,22 @@ const UserLayout = () => {
         const storedUser = JSON.parse(localStorage.getItem('user'));
         if (storedUser) setUser(storedUser);
 
-        const [pointsRes, notificationsRes] = await Promise.all([
+        const [userRes, pointsRes, notificationsRes] = await Promise.all([
+          authAPI.getCurrentUser(),
           userAPI.getPoints(),
           userAPI.getNotifications()
         ]);
+
+        const freshUser = userRes?.data || userRes;
+        if (freshUser) {
+          setUser(freshUser);
+          localStorage.setItem('user', JSON.stringify(freshUser));
+
+          if (freshUser.mustChangePassword && location.pathname !== '/user/profile') {
+            navigate('/user/profile', { replace: true, state: { forcePasswordChange: true } });
+            return;
+          }
+        }
 
         setPoints(pointsRes.data.balance || 0);
         setNotifications(notificationsRes.data.items || []);
@@ -43,7 +55,7 @@ const UserLayout = () => {
     const intervalId = window.setInterval(fetchUser, 60000);
 
     return () => window.clearInterval(intervalId);
-  }, [location.pathname]);
+  }, [location.pathname, navigate]);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {

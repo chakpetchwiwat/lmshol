@@ -56,6 +56,13 @@ router.delete('/tiers/:id', verifySuperAdmin, auditRequest('admin.tier.deleted',
 router.get('/settings/:key', adminController.getSetting);
 router.put('/settings/:key', verifySuperAdmin, auditRequest('admin.setting.updated', { entityType: 'systemSetting' }), adminController.updateSetting);
 
+router.get('/competencies', adminController.getCompetencies);
+router.get('/competencies/tree', adminController.getCompetencyTree);
+router.post('/competency-groups', verifySuperAdmin, auditRequest('admin.competency_group.created', { entityType: 'competencyGroup' }), adminController.createCompetencyGroup);
+router.post('/competency-categories', verifySuperAdmin, auditRequest('admin.competency_category.created', { entityType: 'competencyCategory' }), adminController.createCompetencyCategory);
+router.post('/competencies', verifySuperAdmin, auditRequest('admin.competency.created', { entityType: 'competency' }), adminController.createCompetency);
+router.post('/competencies/import-gbt', verifySuperAdmin, upload.single('file'), auditRequest('admin.competency.imported', { entityType: 'competency' }), adminController.importGbtCompetencies);
+
 router.get('/instructor-presets', adminController.getInstructorPresets);
 router.post('/instructor-presets', verifySuperAdmin, adminController.createInstructorPreset);
 router.put('/instructor-presets/:id', verifySuperAdmin, adminController.updateInstructorPreset);

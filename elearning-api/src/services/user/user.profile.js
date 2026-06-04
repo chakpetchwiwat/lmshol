@@ -70,6 +70,10 @@ const updateProfile = async (userId, data) => {
     const dataToUpdate = {};
 
     if (currentPassword && newPassword) {
+        if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[^A-Za-z0-9]/.test(newPassword)) {
+            throw new Error('รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 8 ตัวอักษร มีตัวอักษรพิมพ์ใหญ่ภาษาอังกฤษอย่างน้อย 1 ตัว (A-Z) และอักขระพิเศษอย่างน้อย 1 ตัว');
+        }
+
         const user = await prisma.user.findUnique({ where: { id: userId } });
         const validPassword = await bcrypt.compare(currentPassword, user.password);
 
@@ -78,6 +82,7 @@ const updateProfile = async (userId, data) => {
         }
 
         dataToUpdate.password = await bcrypt.hash(newPassword, 10);
+        dataToUpdate.mustChangePassword = false;
     }
 
     if (Object.prototype.hasOwnProperty.call(data, 'signatureImageUrl')) {

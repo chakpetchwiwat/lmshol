@@ -13,6 +13,7 @@ const ProfileCertificates = ({
   lmsCertificates = [],
   saving,
   uploading,
+  competencies = [],
   onCreate,
   onUpdate,
   onDelete,
@@ -191,6 +192,7 @@ const ProfileCertificates = ({
         form={form}
         saving={saving}
         uploading={uploading}
+        competencies={competencies}
         onClose={closeModal}
         onFormChange={updateForm}
         onFileChange={handleFileChange}

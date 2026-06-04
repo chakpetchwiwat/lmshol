@@ -1,6 +1,10 @@
 const prisma = require('../../../utils/prisma');
 const bcrypt = require('bcryptjs');
 const xlsx = require('xlsx');
+const {
+  resolveImportedCompetencyMappings,
+  saveUserCertificateCompetencies
+} = require('../admin.competencies');
 
 const PROFILE_MAPPING = {
   username: ['username', 'ชื่อผู้ใช้', 'user name', 'user'],
@@ -40,6 +44,15 @@ const TRAINING_MAPPING = {
   courseType: ['course type', 'รายละเอียด', 'ประเภทหลักสูตร', 'coursetype'],
   remarks: ['remarks', 'หมายเหตุ', 'remark']
 };
+
+Object.assign(TRAINING_MAPPING, {
+  courseType: ['course type', 'รายการ', 'ประเภทหลักสูตร', 'coursetype'],
+  trainingDetails: ['training details', 'details', 'รายละเอียด', 'trainingdetails'],
+  competencyCodes: ['competency codes', 'competency code', 'competency_code', 'competencycode', 'gbt competency code', 'gbt code'],
+  competencyNames: ['competency names', 'competency name', 'competency_name', 'competencyname', 'gbt competency name'],
+  competencyLevels: ['competency levels', 'competency level', 'required level', 'level', 'competencylevel', 'gbt level'],
+  competencyNotes: ['competency notes', 'competency note', 'competency_note', 'note']
+});
 
 const namePrefixes = [
   'นางสาว', 'นาง', 'นาย', 'นายแพทย์', 'แพทย์หญิง', 'ดร.', 'นพ.', 'พญ.',
@@ -126,7 +139,7 @@ const downloadTemplate = (type) => {
       'Field of Study', 'Educational Institution', 'Highest Education Level',
       'Highest Degree Name', 'Highest Field of Study', 'Highest Educational Institution',
       'Retirement Date', 'National Identification Number', 'Position Type',
-      'Supervisor Name', 'Password'
+      'Supervisor Name', 'Password', 'CV', 'Job Description'
     ];
     sampleData = [
       [
@@ -140,7 +153,8 @@ const downloadTemplate = (type) => {
     sheetName = 'Template ประวัติอบรม';
     headers = [
       'Email', 'Full Name', 'Course Name', 'Organizing Agency', 'Completion Date',
-      'Number of Days', 'Intake No.', 'Venue', 'Course Group', 'Course Type', 'Remarks'
+      'Number of Days', 'Intake No.', 'Venue', 'Course Group', 'Course Type',
+      'Training Details', 'Competency Codes', 'Competency Levels', 'Competency Notes', 'Remarks'
     ];
     sampleData = [
       [
@@ -150,6 +164,27 @@ const downloadTemplate = (type) => {
     ];
   } else {
     throw new Error('Invalid template type');
+  }
+
+  if (type === 'trainings') {
+    sampleData = sampleData.map((row) => {
+      if (row.length !== 11) return row;
+      return [
+        ...row.slice(0, 10),
+        '',
+        'GBT-001; GBT-002',
+        '2; 3',
+        'Column K measurement refs',
+        row[10]
+      ];
+    });
+  }
+
+  if (type === 'profiles') {
+    sampleData = sampleData.map((row) => {
+      if (row.length !== 21) return row;
+      return [...row, '', ''];
+    });
   }
 
   const ws = xlsx.utils.aoa_to_sheet([headers, ...sampleData]);
@@ -410,6 +445,16 @@ const importTrainings = async (fileBuffer) => {
     const trainingVenue = findMappedValue(row, TRAINING_MAPPING.venue) ? String(findMappedValue(row, TRAINING_MAPPING.venue)).trim() : null;
     const trainingType = findMappedValue(row, TRAINING_MAPPING.courseGroup) ? String(findMappedValue(row, TRAINING_MAPPING.courseGroup)).trim() : 'ภายนอก';
     const trainingDetails = findMappedValue(row, TRAINING_MAPPING.courseType) ? String(findMappedValue(row, TRAINING_MAPPING.courseType)).trim() : null;
+    const importedCourseGroup = findMappedValue(row, TRAINING_MAPPING.courseGroup) ? String(findMappedValue(row, TRAINING_MAPPING.courseGroup)).trim() : null;
+    const importedCourseType = findMappedValue(row, TRAINING_MAPPING.courseType) ? String(findMappedValue(row, TRAINING_MAPPING.courseType)).trim() : null;
+    const importedTrainingDetails = findMappedValue(row, TRAINING_MAPPING.trainingDetails) ? String(findMappedValue(row, TRAINING_MAPPING.trainingDetails)).trim() : null;
+    const externalTrainingType = importedCourseType || 'external';
+    const externalTrainingItem = importedCourseGroup || 'unclassified';
+    const externalTrainingDetails = importedTrainingDetails || trainingDetails || null;
+    const competencyCodes = findMappedValue(row, TRAINING_MAPPING.competencyCodes);
+    const competencyNames = findMappedValue(row, TRAINING_MAPPING.competencyNames);
+    const competencyLevels = findMappedValue(row, TRAINING_MAPPING.competencyLevels);
+    const competencyNotes = findMappedValue(row, TRAINING_MAPPING.competencyNotes);
     const remarks = findMappedValue(row, TRAINING_MAPPING.remarks) ? String(findMappedValue(row, TRAINING_MAPPING.remarks)).trim() : null;
 
     try {
@@ -428,19 +473,33 @@ const importTrainings = async (fileBuffer) => {
         continue;
       }
 
-      // Create new certificate
-      await prisma.userCertificate.create({
-        data: {
-          userId: matchedUser.id,
-          title,
-          issuer,
-          issueDate,
-          trainingDays,
-          intakeNo,
-          trainingVenue,
-          trainingType,
-          trainingDetails,
-          credentialId: remarks
+      await prisma.$transaction(async (tx) => {
+        const certificate = await tx.userCertificate.create({
+          data: {
+            userId: matchedUser.id,
+            title,
+            issuer,
+            issueDate,
+            trainingDays,
+            intakeNo,
+            trainingVenue,
+            trainingType: externalTrainingType,
+            trainingItem: externalTrainingItem,
+            trainingDetails: externalTrainingDetails,
+            credentialId: remarks
+          }
+        });
+
+        const { mappings, unmatched } = await resolveImportedCompetencyMappings(tx, {
+          codes: competencyCodes,
+          names: competencyNames,
+          levels: competencyLevels,
+          notes: competencyNotes
+        });
+
+        await saveUserCertificateCompetencies(tx, certificate.id, mappings);
+        if (unmatched.length > 0) {
+          logs.push(`[Row ${rowNum}] Warning: Competency not found (${unmatched.join(', ')}).`);
         }
       });
       successCount++;

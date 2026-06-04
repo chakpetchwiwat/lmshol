@@ -21,6 +21,28 @@ const courseInclude = {
         }
     },
     certificateSetting: true,
+    competencies: {
+        include: {
+            competency: {
+                include: {
+                    category: {
+                        include: {
+                            group: true
+                        }
+                    },
+                    levels: {
+                        orderBy: [
+                            { displayOrder: 'asc' },
+                            { level: 'asc' }
+                        ]
+                    }
+                }
+            }
+        },
+        orderBy: {
+            createdAt: 'asc'
+        }
+    },
     _count: {
         select: {
             enrollments: true,
