@@ -174,14 +174,44 @@ const createCompetencyGroup = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, data: group });
 });
 
+const updateCompetencyGroup = asyncHandler(async (req, res) => {
+  const group = await AdminService.updateCompetencyGroup(req.params.id, req.body);
+  res.json({ success: true, data: group });
+});
+
+const deleteCompetencyGroup = asyncHandler(async (req, res) => {
+  await AdminService.deleteCompetencyGroup(req.params.id);
+  res.json({ success: true, message: 'Competency group deleted successfully' });
+});
+
 const createCompetencyCategory = asyncHandler(async (req, res) => {
   const category = await AdminService.createCompetencyCategory(req.body);
   res.status(201).json({ success: true, data: category });
 });
 
+const updateCompetencyCategory = asyncHandler(async (req, res) => {
+  const category = await AdminService.updateCompetencyCategory(req.params.id, req.body);
+  res.json({ success: true, data: category });
+});
+
+const deleteCompetencyCategory = asyncHandler(async (req, res) => {
+  await AdminService.deleteCompetencyCategory(req.params.id);
+  res.json({ success: true, message: 'Competency category deleted successfully' });
+});
+
 const createCompetency = asyncHandler(async (req, res) => {
   const competency = await AdminService.createCompetency(req.body);
   res.status(201).json({ success: true, data: competency });
+});
+
+const updateCompetency = asyncHandler(async (req, res) => {
+  const competency = await AdminService.updateCompetency(req.params.id, req.body);
+  res.json({ success: true, data: competency });
+});
+
+const deleteCompetency = asyncHandler(async (req, res) => {
+  await AdminService.deleteCompetency(req.params.id);
+  res.json({ success: true, message: 'Competency deleted successfully' });
 });
 
 const importGbtCompetencies = asyncHandler(async (req, res) => {
@@ -618,8 +648,14 @@ module.exports = {
   getCompetencies,
   getCompetencyTree,
   createCompetencyGroup,
+  updateCompetencyGroup,
+  deleteCompetencyGroup,
   createCompetencyCategory,
+  updateCompetencyCategory,
+  deleteCompetencyCategory,
   createCompetency,
+  updateCompetency,
+  deleteCompetency,
   importGbtCompetencies,
   getUserDetails,
   createUser,

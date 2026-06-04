@@ -12,6 +12,12 @@ CREATE TABLE "UserCertificate" (
     "fileKey" TEXT,
     "fileName" TEXT,
     "fileMimeType" TEXT,
+    "trainingType" TEXT,
+    "trainingItem" TEXT DEFAULT 'unclassified',
+    "trainingDetails" TEXT,
+    "trainingVenue" TEXT,
+    "trainingDays" TEXT,
+    "intakeNo" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

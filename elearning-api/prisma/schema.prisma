@@ -189,6 +189,7 @@ model Competency {
   competencyType         String?
   code                   String                      @unique
   legacyCode             String?
+  legacyCodes            CompetencyLegacyCode[]
   sourceRole             String?
   name                   String
   description            String?
@@ -207,6 +208,20 @@ model Competency {
 
   @@index([categoryId, status, displayOrder])
 }
+
+model CompetencyLegacyCode {
+  id           String     @id @default(uuid())
+  competencyId String
+  code         String     // e.g. DCSC-C1
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  competency   Competency @relation(fields: [competencyId], references: [id], onDelete: Cascade)
+
+  @@unique([competencyId, code])
+  @@index([competencyId])
+  @@index([code])
+}
+
 
 model CompetencyLevel {
   id                  String     @id @default(uuid())

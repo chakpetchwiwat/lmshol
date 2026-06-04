@@ -288,8 +288,14 @@ export const adminAPI = {
   getCompetencies: () => api.get('/admin/competencies'),
   getCompetencyTree: () => api.get('/admin/competencies/tree'),
   createCompetencyGroup: (data) => api.post('/admin/competency-groups', data),
+  updateCompetencyGroup: (id, data) => api.put(`/admin/competency-groups/${id}`, data),
+  deleteCompetencyGroup: (id) => api.delete(`/admin/competency-groups/${id}`),
   createCompetencyCategory: (data) => api.post('/admin/competency-categories', data),
+  updateCompetencyCategory: (id, data) => api.put(`/admin/competency-categories/${id}`, data),
+  deleteCompetencyCategory: (id) => api.delete(`/admin/competency-categories/${id}`),
   createCompetency: (data) => api.post('/admin/competencies', data),
+  updateCompetency: (id, data) => api.put(`/admin/competencies/${id}`, data),
+  deleteCompetency: (id) => api.delete(`/admin/competencies/${id}`),
   importGbtCompetencies: (formData) => api.post('/admin/competencies/import-gbt', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),

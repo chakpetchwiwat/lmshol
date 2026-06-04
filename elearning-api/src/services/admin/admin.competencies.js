@@ -148,7 +148,8 @@ const resolveImportedCompetencyMappings = async (tx, input = {}) => {
 
     const competencies = await tx.competency.findMany({
         include: {
-            levels: true
+            levels: true,
+            legacyCodes: true
         }
     });
 
@@ -157,6 +158,23 @@ const resolveImportedCompetencyMappings = async (tx, input = {}) => {
     competencies.forEach((competency) => {
         byCode.set(normalizeLookupKey(competency.code), competency);
         byName.set(normalizeLookupKey(competency.name), competency);
+        
+        // Match by any of the legacy codes in the new table relation
+        if (competency.legacyCodes && Array.isArray(competency.legacyCodes)) {
+            competency.legacyCodes.forEach(lc => {
+                byCode.set(normalizeLookupKey(lc.code), competency);
+            });
+        }
+        
+        // Backward compatibility: match by legacyCode string
+        if (competency.legacyCode) {
+            competency.legacyCode.split(',').forEach(c => {
+                const trimmed = c.trim();
+                if (trimmed) {
+                    byCode.set(normalizeLookupKey(trimmed), competency);
+                }
+            });
+        }
     });
 
     const seen = new Set();
@@ -198,6 +216,7 @@ const competencyInclude = {
             group: true
         }
     },
+    legacyCodes: true,
     levels: {
         orderBy: [
             { displayOrder: 'asc' },
@@ -214,13 +233,19 @@ const courseCompetencyInclude = {
 
 const certificateCompetencyInclude = courseCompetencyInclude;
 
-const serializeCompetency = (competency) => ({
-    ...competency,
-    group: competency.category?.group || null,
-    groupId: competency.category?.groupId || null,
-    categoryName: competency.category?.name || null,
-    groupName: competency.category?.group?.name || null
-});
+const serializeCompetency = (competency) => {
+    if (!competency) return null;
+    return {
+        ...competency,
+        group: competency.category?.group || null,
+        groupId: competency.category?.groupId || null,
+        categoryName: competency.category?.name || null,
+        groupName: competency.category?.group?.name || null,
+        legacyCodes: Array.isArray(competency.legacyCodes)
+            ? competency.legacyCodes.map(lc => lc.code)
+            : []
+    };
+};
 
 const serializeMapping = (mapping) => ({
     id: mapping.id,
@@ -296,36 +321,217 @@ const createCompetencyCategory = async (input = {}) => prisma.competencyCategory
     }
 });
 
-const createCompetency = async (input = {}) => prisma.competency.create({
-    data: {
-        categoryId: normalizeText(input.categoryId),
-        gbtLevel: normalizeText(input.gbtLevel),
-        competencyType: normalizeText(input.competencyType),
-        code: normalizeCode(input.code, input.name),
-        legacyCode: normalizeText(input.legacyCode),
-        sourceRole: normalizeText(input.sourceRole),
-        name: normalizeText(input.name),
-        description: normalizeText(input.description),
-        conditionsNote: normalizeText(input.conditionsNote),
-        measurementLevelCount: input.measurementLevelCount ? parseInt(input.measurementLevelCount, 10) : null,
-        measurementDescription: normalizeText(input.measurementDescription),
-        sourceColumnK: normalizeText(input.sourceColumnK),
-        displayOrder: parseInt(input.displayOrder || 0, 10),
-        status: input.status || 'ACTIVE',
-        levels: Array.isArray(input.levels) && input.levels.length > 0
-            ? {
-                create: input.levels.map((level, index) => ({
-                    level: normalizeRequiredLevel(level.level || index + 1),
-                    label: normalizeText(level.label),
-                    description: normalizeText(level.description),
-                    measurementCriteria: normalizeText(level.measurementCriteria),
-                    displayOrder: parseInt(level.displayOrder ?? index, 10)
-                }))
+const createCompetency = async (input = {}) => {
+    const mainCode = normalizeCode(input.code, input.name);
+    // Validate main code uniqueness
+    const existing = await prisma.competency.findUnique({ where: { code: mainCode } });
+    if (existing) {
+        throw new Error(`รหัสสมรรถนะหลัก (Code) '${mainCode}' มีอยู่แล้วในระบบ กรุณาใช้รหัสอื่น`);
+    }
+
+    const legacyCodesList = Array.isArray(input.legacyCodes)
+        ? input.legacyCodes.map(c => normalizeText(c)).filter(Boolean)
+        : [];
+    const legacyCodeStr = legacyCodesList.join(', ');
+
+    return prisma.$transaction(async (tx) => {
+        const competency = await tx.competency.create({
+            data: {
+                categoryId: normalizeText(input.categoryId),
+                gbtLevel: normalizeText(input.gbtLevel),
+                competencyType: normalizeText(input.competencyType),
+                code: mainCode,
+                legacyCode: legacyCodeStr,
+                sourceRole: normalizeText(input.sourceRole),
+                name: normalizeText(input.name),
+                description: normalizeText(input.description),
+                conditionsNote: normalizeText(input.conditionsNote),
+                measurementLevelCount: input.measurementLevelCount ? parseInt(input.measurementLevelCount, 10) : null,
+                measurementDescription: normalizeText(input.measurementDescription),
+                sourceColumnK: normalizeText(input.sourceColumnK),
+                displayOrder: parseInt(input.displayOrder || 0, 10),
+                status: input.status || 'ACTIVE',
+                levels: Array.isArray(input.levels) && input.levels.length > 0
+                    ? {
+                        create: input.levels.map((level, index) => ({
+                            level: normalizeRequiredLevel(level.level || index + 1),
+                            label: normalizeText(level.label),
+                            description: normalizeText(level.description),
+                            measurementCriteria: normalizeText(level.measurementCriteria),
+                            displayOrder: parseInt(level.displayOrder ?? index, 10)
+                        }))
+                    }
+                    : undefined
+            },
+            include: competencyInclude
+        });
+
+        for (const code of legacyCodesList) {
+            await tx.competencyLegacyCode.create({
+                data: {
+                    competencyId: competency.id,
+                    code
+                }
+            });
+        }
+
+        return tx.competency.findUnique({
+            where: { id: competency.id },
+            include: competencyInclude
+        });
+    });
+};
+
+const updateCompetency = async (id, input = {}) => {
+    const mainCode = normalizeCode(input.code, input.name);
+    const existing = await prisma.competency.findUnique({ where: { code: mainCode } });
+    if (existing && existing.id !== id) {
+        throw new Error(`รหัสสมรรถนะหลัก (Code) '${mainCode}' มีอยู่แล้วในระบบ กรุณาใช้รหัสอื่น`);
+    }
+
+    const legacyCodesList = Array.isArray(input.legacyCodes)
+        ? input.legacyCodes.map(c => normalizeText(c)).filter(Boolean)
+        : [];
+    const legacyCodeStr = legacyCodesList.join(', ');
+
+    return prisma.$transaction(async (tx) => {
+        const competency = await tx.competency.update({
+            where: { id },
+            data: {
+                categoryId: normalizeText(input.categoryId),
+                gbtLevel: normalizeText(input.gbtLevel),
+                competencyType: normalizeText(input.competencyType),
+                code: mainCode,
+                legacyCode: legacyCodeStr,
+                sourceRole: normalizeText(input.sourceRole),
+                name: normalizeText(input.name),
+                description: normalizeText(input.description),
+                conditionsNote: normalizeText(input.conditionsNote),
+                measurementLevelCount: input.measurementLevelCount ? parseInt(input.measurementLevelCount, 10) : null,
+                measurementDescription: normalizeText(input.measurementDescription),
+                sourceColumnK: normalizeText(input.sourceColumnK),
+                displayOrder: parseInt(input.displayOrder || 0, 10),
+                status: input.status || 'ACTIVE'
             }
-            : undefined
-    },
-    include: competencyInclude
-});
+        });
+
+        // Sync legacy codes
+        await tx.competencyLegacyCode.deleteMany({
+            where: {
+                competencyId: id,
+                code: {
+                    notIn: legacyCodesList
+                }
+            }
+        });
+
+        for (const code of legacyCodesList) {
+            await tx.competencyLegacyCode.upsert({
+                where: {
+                    competencyId_code: {
+                        competencyId: id,
+                        code
+                    }
+                },
+                update: {},
+                create: {
+                    competencyId: id,
+                    code
+                }
+            });
+        }
+
+        // Sync levels
+        if (Array.isArray(input.levels)) {
+            const inputLevels = input.levels.map((level, index) => normalizeRequiredLevel(level.level || index + 1));
+            await tx.competencyLevel.deleteMany({
+                where: {
+                    competencyId: id,
+                    level: {
+                        notIn: inputLevels
+                    }
+                }
+            });
+
+            for (let index = 0; index < input.levels.length; index++) {
+                const levelData = input.levels[index];
+                const levelNum = normalizeRequiredLevel(levelData.level || index + 1);
+                await tx.competencyLevel.upsert({
+                    where: {
+                        competencyId_level: {
+                            competencyId: id,
+                            level: levelNum
+                        }
+                    },
+                    update: {
+                        label: normalizeText(levelData.label),
+                        description: normalizeText(levelData.description),
+                        measurementCriteria: normalizeText(levelData.measurementCriteria),
+                        displayOrder: parseInt(levelData.displayOrder ?? index, 10)
+                    },
+                    create: {
+                        competencyId: id,
+                        level: levelNum,
+                        label: normalizeText(levelData.label),
+                        description: normalizeText(levelData.description),
+                        measurementCriteria: normalizeText(levelData.measurementCriteria),
+                        displayOrder: parseInt(levelData.displayOrder ?? index, 10)
+                    }
+                });
+            }
+        }
+
+        return tx.competency.findUnique({
+            where: { id },
+            include: competencyInclude
+        });
+    });
+};
+
+const deleteCompetency = async (id) => {
+    return prisma.competency.delete({
+        where: { id }
+    });
+};
+
+const updateCompetencyGroup = async (id, input = {}) => {
+    return prisma.competencyGroup.update({
+        where: { id },
+        data: {
+            code: normalizeCode(input.code, input.name),
+            name: normalizeText(input.name),
+            description: normalizeText(input.description),
+            displayOrder: parseInt(input.displayOrder || 0, 10),
+            status: input.status || 'ACTIVE'
+        }
+    });
+};
+
+const deleteCompetencyGroup = async (id) => {
+    return prisma.competencyGroup.delete({
+        where: { id }
+    });
+};
+
+const updateCompetencyCategory = async (id, input = {}) => {
+    return prisma.competencyCategory.update({
+        where: { id },
+        data: {
+            groupId: normalizeText(input.groupId),
+            code: normalizeCode(input.code, input.name),
+            name: normalizeText(input.name),
+            description: normalizeText(input.description),
+            displayOrder: parseInt(input.displayOrder || 0, 10),
+            status: input.status || 'ACTIVE'
+        }
+    });
+};
+
+const deleteCompetencyCategory = async (id) => {
+    return prisma.competencyCategory.delete({
+        where: { id }
+    });
+};
 
 const importGbtCompetencies = async (fileBuffer) => {
     if (!fileBuffer) {
@@ -455,6 +661,36 @@ const importGbtCompetencies = async (fileBuffer) => {
             if (existingCompetency) summary.competenciesUpdated++;
             else summary.competenciesCreated++;
 
+            // Handle legacy codes for this imported competency
+            const legacyCodesList = row.legacyCode
+                ? row.legacyCode.split(',').map(c => c.trim()).filter(Boolean)
+                : [];
+            
+            await tx.competencyLegacyCode.deleteMany({
+                where: {
+                    competencyId: competency.id,
+                    code: {
+                        notIn: legacyCodesList
+                    }
+                }
+            });
+
+            for (const code of legacyCodesList) {
+                await tx.competencyLegacyCode.upsert({
+                    where: {
+                        competencyId_code: {
+                            competencyId: competency.id,
+                            code: code
+                        }
+                    },
+                    update: {},
+                    create: {
+                        competencyId: competency.id,
+                        code: code
+                    }
+                });
+            }
+
             for (const levelInput of levels) {
                 await tx.competencyLevel.upsert({
                     where: {
@@ -566,8 +802,14 @@ module.exports = {
     getCompetencies,
     getCompetencyTree,
     createCompetencyGroup,
+    updateCompetencyGroup,
+    deleteCompetencyGroup,
     createCompetencyCategory,
+    updateCompetencyCategory,
+    deleteCompetencyCategory,
     createCompetency,
+    updateCompetency,
+    deleteCompetency,
     importGbtCompetencies,
     serializeMapping,
     resolveImportedCompetencyMappings,

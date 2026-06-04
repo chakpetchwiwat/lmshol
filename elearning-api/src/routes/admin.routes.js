@@ -59,8 +59,17 @@ router.put('/settings/:key', verifySuperAdmin, auditRequest('admin.setting.updat
 router.get('/competencies', adminController.getCompetencies);
 router.get('/competencies/tree', adminController.getCompetencyTree);
 router.post('/competency-groups', verifySuperAdmin, auditRequest('admin.competency_group.created', { entityType: 'competencyGroup' }), adminController.createCompetencyGroup);
+router.put('/competency-groups/:id', verifySuperAdmin, auditRequest('admin.competency_group.updated', { entityType: 'competencyGroup' }), adminController.updateCompetencyGroup);
+router.delete('/competency-groups/:id', verifySuperAdmin, auditRequest('admin.competency_group.deleted', { entityType: 'competencyGroup', includeBody: false }), adminController.deleteCompetencyGroup);
+
 router.post('/competency-categories', verifySuperAdmin, auditRequest('admin.competency_category.created', { entityType: 'competencyCategory' }), adminController.createCompetencyCategory);
+router.put('/competency-categories/:id', verifySuperAdmin, auditRequest('admin.competency_category.updated', { entityType: 'competencyCategory' }), adminController.updateCompetencyCategory);
+router.delete('/competency-categories/:id', verifySuperAdmin, auditRequest('admin.competency_category.deleted', { entityType: 'competencyCategory', includeBody: false }), adminController.deleteCompetencyCategory);
+
 router.post('/competencies', verifySuperAdmin, auditRequest('admin.competency.created', { entityType: 'competency' }), adminController.createCompetency);
+router.put('/competencies/:id', verifySuperAdmin, auditRequest('admin.competency.updated', { entityType: 'competency' }), adminController.updateCompetency);
+router.delete('/competencies/:id', verifySuperAdmin, auditRequest('admin.competency.deleted', { entityType: 'competency', includeBody: false }), adminController.deleteCompetency);
+
 router.post('/competencies/import-gbt', verifySuperAdmin, upload.single('file'), auditRequest('admin.competency.imported', { entityType: 'competency' }), adminController.importGbtCompetencies);
 
 router.get('/instructor-presets', adminController.getInstructorPresets);

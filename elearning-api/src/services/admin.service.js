@@ -24,7 +24,7 @@ const { getDashboardStats, getAdvancedAnalytics } = require('./admin/admin.analy
 const { getAdminAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, archiveAnnouncement, republishAnnouncement, getAnnouncementHistory } = require('./admin/admin.announcements');
 const { getInstructorPresets, createInstructorPreset, updateInstructorPreset, deleteInstructorPreset } = require('./admin/admin.instructors');
 const { getOrganizationPresets, createOrganizationPreset, updateOrganizationPreset, deleteOrganizationPreset } = require('./admin/admin.organizations');
-const { getCompetencies, getCompetencyTree, createCompetencyGroup, createCompetencyCategory, createCompetency, importGbtCompetencies } = require('./admin/admin.competencies');
+const { getCompetencies, getCompetencyTree, createCompetencyGroup, updateCompetencyGroup, deleteCompetencyGroup, createCompetencyCategory, updateCompetencyCategory, deleteCompetencyCategory, createCompetency, updateCompetency, deleteCompetency, importGbtCompetencies } = require('./admin/admin.competencies');
 
 const {
     courseInclude,
@@ -97,8 +97,14 @@ module.exports = {
     getCompetencies,
     getCompetencyTree,
     createCompetencyGroup,
+    updateCompetencyGroup,
+    deleteCompetencyGroup,
     createCompetencyCategory,
+    updateCompetencyCategory,
+    deleteCompetencyCategory,
     createCompetency,
+    updateCompetency,
+    deleteCompetency,
     importGbtCompetencies,
     getAdminCourses: (user) => getAdminCourses(user),
     createCourse,
