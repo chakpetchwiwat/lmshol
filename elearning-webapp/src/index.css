@@ -55,7 +55,7 @@
   }
 
   input, select, textarea {
-    font-size: 18px !important;
+    font-size: 18px;
   }
 
   /* The Ultimate Focus Reset - Kill all default rings/outlines everywhere */
@@ -180,6 +180,17 @@
   .form-input {
     @apply rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-bold transition-all;
     @apply outline-none focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 text-slate-900;
+  }
+
+  .form-select {
+    @apply rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-2 text-sm font-bold transition-all;
+    @apply outline-none focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 text-slate-900;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25rem;
+    padding-right: 2.5rem;
   }
 
   /* Density & Breathing Room Overrides for Desktop */

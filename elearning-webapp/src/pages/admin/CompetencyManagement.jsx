@@ -548,7 +548,7 @@ const CompetencyManagement = () => {
             
             <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
               <select 
-                className="form-input h-10 text-sm focus:border-indigo-500 min-w-44"
+                className="form-select h-10 text-sm focus:border-indigo-500 min-w-44"
                 value={filterGroup} 
                 onChange={(e) => { setFilterGroup(e.target.value); setFilterCategory(''); }}
               >
@@ -557,7 +557,7 @@ const CompetencyManagement = () => {
               </select>
 
               <select 
-                className="form-input h-10 text-sm focus:border-indigo-500 min-w-44"
+                className="form-select h-10 text-sm focus:border-indigo-500 min-w-44"
                 value={filterCategory} 
                 onChange={(e) => setFilterCategory(e.target.value)}
                 disabled={!filterGroup}
@@ -973,7 +973,7 @@ const CompetencyManagement = () => {
                   <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">หมวดหมู่ย่อย (Category)</label>
                   <select 
                     required 
-                    className="form-input w-full focus:border-indigo-500 h-10 text-sm" 
+                    className="form-select w-full focus:border-indigo-500 h-10 text-sm" 
                     value={competencyDrawer.form.categoryId} 
                     onChange={(e) => setCompetencyDrawer(prev => ({
                       ...prev,
@@ -1290,7 +1290,7 @@ const CompetencyManagement = () => {
             <form onSubmit={handleSaveCategory} className="p-5 space-y-4">
               <div className="space-y-1">
                 <label className="text-xs font-black text-slate-600 block">กลุ่มสมรรถนะ (Group)</label>
-                <select required className="form-input w-full" value={categoryModal.form.groupId} onChange={(e) => setCategoryModal({ ...categoryModal, form: { ...categoryModal.form, groupId: e.target.value } })}>
+                <select required className="form-select w-full" value={categoryModal.form.groupId} onChange={(e) => setCategoryModal({ ...categoryModal, form: { ...categoryModal.form, groupId: e.target.value } })}>
                   <option value="">เลือกกลุ่มสมรรถนะ</option>
                   {tree.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                 </select>
