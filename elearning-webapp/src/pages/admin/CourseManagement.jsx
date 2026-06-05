@@ -105,7 +105,6 @@ const CourseManagement = () => {
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedCategory, setSelectedCategory] = React.useState(FILTER_VALUES.ALL);
-  const [selectedModuleGroup, setSelectedModuleGroup] = React.useState(FILTER_VALUES.ALL);
   const [courseView, setCourseView] = React.useState(ENTITY_VIEW_STATUS.ACTIVE);
 
   const [showModal, setShowModal] = React.useState(false);
@@ -456,29 +455,10 @@ const CourseManagement = () => {
     (courses || []).filter((course) => {
       const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === FILTER_VALUES.ALL || course.categoryId === selectedCategory;
-      const matchesModuleGroup = selectedModuleGroup === FILTER_VALUES.ALL || course.category?.type === selectedModuleGroup;
       const matchesView = courseView === ENTITY_VIEW_STATUS.ARCHIVED ? Boolean(course.isArchived) : !course.isArchived;
-      return matchesSearch && matchesCategory && matchesModuleGroup && matchesView;
+      return matchesSearch && matchesCategory && matchesView;
     })
-  ), [courseView, courses, searchTerm, selectedCategory, selectedModuleGroup]);
-
-  const moduleGroupOptions = React.useMemo(() => {
-    const visibleTypes = Array.from(
-      new Set(
-        (categories || [])
-          .filter((category) => !category.isArchived && category.type)
-          .map((category) => category.type)
-      )
-    );
-
-    return [
-      { value: FILTER_VALUES.ALL, label: 'ทุกกลุ่มโมดูล' },
-      ...visibleTypes.map((type) => ({
-        value: type,
-        label: MODULE_GROUP_LABELS[type] || type,
-      })),
-    ];
-  }, [categories]);
+  ), [courseView, courses, searchTerm, selectedCategory]);
 
   const selectableCategories = React.useMemo(() => (
     (categories || []).filter((category) => !category.isArchived || category.id === courseForm.categoryId)
@@ -521,10 +501,7 @@ const CourseManagement = () => {
         setSearchTerm={setSearchTerm}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
-        selectedModuleGroup={selectedModuleGroup}
-        setSelectedModuleGroup={setSelectedModuleGroup}
         categories={categories}
-        moduleGroupOptions={moduleGroupOptions}
         activeCount={courses.filter(c => !c.isArchived).length}
         archivedCount={courses.filter(c => c.isArchived).length}
       />

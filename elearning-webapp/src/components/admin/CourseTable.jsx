@@ -5,24 +5,7 @@ import { formatThaiDateTime } from '../../utils/dateUtils';
 import AdminActionMenu from './AdminActionMenu';
 import { ENTITY_STATUS } from '../../utils/constants/statuses';
 
-const MODULE_GROUP_LABELS = {
-  STRAT_BUSINESS: 'Business / Corporate',
-  STRAT_CORE: 'Core / Soft Skills',
-  STRAT_FUNCTIONAL: 'Functional Skills',
-  STRAT_LEADERSHIP: 'Leadership Skills',
-  STRAT_COMPLIANCE: 'Compliance',
-  STRAT_DIGITAL: 'Digital / Future Skills',
-};
 
-const getModuleGroupBadgeClass = (type) => {
-  if (type === 'STRAT_BUSINESS') return 'bg-indigo-50 text-indigo-700 ring-indigo-200';
-  if (type === 'STRAT_CORE') return 'bg-sky-50 text-sky-700 ring-sky-200';
-  if (type === 'STRAT_FUNCTIONAL') return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
-  if (type === 'STRAT_LEADERSHIP') return 'bg-violet-50 text-violet-700 ring-violet-200';
-  if (type === 'STRAT_COMPLIANCE') return 'bg-amber-50 text-amber-700 ring-amber-200';
-  if (type === 'STRAT_DIGITAL') return 'bg-cyan-50 text-cyan-700 ring-cyan-200';
-  return 'bg-slate-100 text-slate-600 ring-slate-200';
-};
 
 const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHistory, onArchive }) => {
   const [openDropdownId, setOpenDropdownId] = React.useState(null);
@@ -45,7 +28,7 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
         <thead>
           <tr className="border-b border-border bg-gray-50 text-sm text-muted">
             <th className="p-4 font-medium">ชื่อคอร์ส</th>
-            <th className="p-4 font-medium">กลุ่มโมดูล / หมวดหมู่</th>
+            <th className="p-4 font-medium">หมวดหมู่</th>
             <th className="p-4 font-medium">สิทธิ์การเห็น</th>
             <th className="p-4 font-medium text-center">จัดการ</th>
           </tr>
@@ -75,13 +58,7 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
 
               <td className="p-4 text-sm text-muted">
                 <div className="flex flex-col gap-2 text-left">
-                  {course.category?.type ? (
-                    <span
-                      className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ring-1 ring-inset ${getModuleGroupBadgeClass(course.category.type)}`}
-                    >
-                      {MODULE_GROUP_LABELS[course.category.type] || course.category.type}
-                    </span>
-                  ) : null}
+
 
                   <span className="font-medium text-slate-700">{course.category?.name || 'Uncategorized'}</span>
 

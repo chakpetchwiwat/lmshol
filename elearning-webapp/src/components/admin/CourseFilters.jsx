@@ -12,10 +12,7 @@ const CourseFilters = ({
   setSearchTerm,
   selectedCategory,
   setSelectedCategory,
-  selectedModuleGroup,
-  setSelectedModuleGroup,
   categories,
-  moduleGroupOptions,
   activeCount,
   archivedCount,
 }) => {
@@ -43,15 +40,7 @@ const CourseFilters = ({
             />
           </div>
 
-          <div className="grid w-full gap-4 sm:grid-cols-2 lg:w-auto">
-            <CustomSelect
-              size="sm"
-              className="w-full sm:w-64"
-              value={selectedModuleGroup}
-              onChange={(event) => setSelectedModuleGroup(event.target.value)}
-              options={moduleGroupOptions}
-            />
-
+          <div className="flex w-full sm:w-auto">
             <CustomSelect
               size="sm"
               className="w-full sm:w-64"

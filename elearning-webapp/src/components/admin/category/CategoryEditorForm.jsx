@@ -40,12 +40,7 @@ const CategoryEditorForm = ({
       )}
     </div>
 
-    <CustomSelect
-      label="กลุ่มหลัก (Module)"
-      value={categoryForm.type}
-      onChange={(event) => setCategoryForm({ ...categoryForm, type: event.target.value })}
-      options={CATEGORY_TYPE_OPTIONS}
-    />
+
 
     <div className="flex flex-col gap-3 md:flex-row md:items-end">
       <div className="flex-1 space-y-1.5">

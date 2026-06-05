@@ -259,11 +259,38 @@ const CompetencyManagement = () => {
   };
 
   // --- CRUD Functions for Competency Items ---
-  const handleLevelCountChange = (count) => {
-    const newCount = Math.max(1, Math.min(10, parseInt(count, 10) || 0));
+  const handleLevelCountChange = (value) => {
     setCompetencyDrawer(prev => {
+      const updatedForm = { ...prev.form, measurementLevelCount: value };
+      
+      const numVal = parseInt(value, 10);
+      if (!isNaN(numVal) && numVal >= 1 && numVal <= 10) {
+        const currentLevels = prev.form.levels || [];
+        updatedForm.levels = Array.from({ length: numVal }, (_, i) => {
+          const levelNum = i + 1;
+          const existing = currentLevels.find(l => l.level === levelNum);
+          return existing || {
+            level: levelNum,
+            label: `Level ${levelNum}`,
+            description: '',
+            displayOrder: i
+          };
+        });
+      }
+      return {
+        ...prev,
+        form: updatedForm
+      };
+    });
+  };
+
+  const handleLevelCountBlur = () => {
+    setCompetencyDrawer(prev => {
+      const currentVal = parseInt(prev.form.measurementLevelCount, 10);
+      const clampedVal = isNaN(currentVal) ? 3 : Math.max(1, Math.min(10, currentVal));
+      
       const currentLevels = prev.form.levels || [];
-      const updatedLevels = Array.from({ length: newCount }, (_, i) => {
+      const updatedLevels = Array.from({ length: clampedVal }, (_, i) => {
         const levelNum = i + 1;
         const existing = currentLevels.find(l => l.level === levelNum);
         return existing || {
@@ -273,16 +300,18 @@ const CompetencyManagement = () => {
           displayOrder: i
         };
       });
+
       return {
         ...prev,
         form: {
           ...prev.form,
-          measurementLevelCount: newCount,
+          measurementLevelCount: clampedVal,
           levels: updatedLevels
         }
       };
     });
   };
+
 
   const addLegacyCode = () => {
     const trimmed = legacyInput.trim().toUpperCase();
@@ -818,14 +847,24 @@ const CompetencyManagement = () => {
           {/* Upload card */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between">
             <div>
-              <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
-                  <FileSpreadsheet size={24} />
+              <div className="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+                    <FileSpreadsheet size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900">นำเข้า GBT Excel Master Data</h3>
+                    <p className="text-xs font-semibold text-slate-500 mt-0.5">นำเข้าชุดข้อมูลโครงสร้างสมรรถนะและรูบริคระดับ (คอลัมน์ A ถึง K)</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-black text-slate-900">นำเข้า GBT Excel Master Data</h3>
-                  <p className="text-xs font-semibold text-slate-500 mt-0.5">นำเข้าชุดข้อมูลโครงสร้างสมรรถนะและรูบริคระดับ (คอลัมน์ A ถึง K)</p>
-                </div>
+                <a
+                  href="/templates/gbt_competency_template.xlsx"
+                  download="gbt_competency_template.xlsx"
+                  className="btn btn-outline h-9 px-3 text-xs font-black flex items-center gap-1.5 hover:bg-slate-50 shrink-0 shadow-sm"
+                >
+                  <FileSpreadsheet size={15} className="text-emerald-600" />
+                  ดาวน์โหลด Template
+                </a>
               </div>
               
               <div className="border border-slate-100 rounded-xl bg-slate-50/50 p-4 space-y-2 mb-6">
@@ -1151,16 +1190,43 @@ const CompetencyManagement = () => {
                 <div className="space-y-3 pt-3 border-t border-slate-100">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">การกำหนดเกณฑ์ในแต่ละระดับ (Rubrics)</label>
-                    <div className="flex items-center gap-1 text-xs">
+                    <div className="flex items-center gap-1.5 text-xs">
                       <span className="font-semibold text-slate-500">จำนวนระดับ:</span>
-                      <input 
-                        type="number" 
-                        min="1" 
-                        max="10" 
-                        className="form-input w-14 h-7 text-center text-xs p-1 focus:border-indigo-500 font-bold" 
-                        value={competencyDrawer.form.measurementLevelCount}
-                        onChange={(e) => handleLevelCountChange(e.target.value)}
-                      />
+                      <div className="flex items-center rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const currentVal = parseInt(competencyDrawer.form.measurementLevelCount, 10) || 1;
+                            if (currentVal > 1) {
+                              handleLevelCountChange(String(currentVal - 1));
+                            }
+                          }}
+                          className="w-6 h-6 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 transition-colors font-bold text-sm"
+                        >
+                          -
+                        </button>
+                        <input 
+                          type="number" 
+                          min="1" 
+                          max="10" 
+                          className="w-8 h-6 text-center text-xs p-0 focus:outline-none focus:ring-0 font-bold border-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                          value={competencyDrawer.form.measurementLevelCount}
+                          onChange={(e) => handleLevelCountChange(e.target.value)}
+                          onBlur={handleLevelCountBlur}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const currentVal = parseInt(competencyDrawer.form.measurementLevelCount, 10) || 1;
+                            if (currentVal < 10) {
+                              handleLevelCountChange(String(currentVal + 1));
+                            }
+                          }}
+                          className="w-6 h-6 flex items-center justify-center rounded text-slate-500 hover:bg-slate-100 transition-colors font-bold text-sm"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
 

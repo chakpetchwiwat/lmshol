@@ -10,10 +10,7 @@ import {
 } from 'lucide-react';
 import { ICON_LIST } from '../../../utils/icons';
 import { toLocalInputValue, formatThaiDateTime } from '../../../utils/dateUtils';
-import {
-  categoryTypeBadgeClass,
-  categoryTypeLabel,
-} from './categoryForm.utils';
+
 
 const CategoryListItem = ({
   category,
@@ -45,11 +42,7 @@ const CategoryListItem = ({
           <div className={`text-base font-black tracking-tight ${isEditing ? 'text-primary' : 'text-slate-900'}`}>
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="truncate">{category.name}</span>
-              {category.type && (
-                <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ring-1 ring-inset ${categoryTypeBadgeClass(category.type)}`}>
-                  {categoryTypeLabel(category.type)}
-                </span>
-              )}
+
             </div>
           </div>
 
