@@ -524,16 +524,32 @@ const exportSingleUser = async (id, authUser) => {
 
   // Sheet 1: ข้อมูลทั่วไป (General Info)
   const profileHeaders = ['หัวข้อ', 'ข้อมูล'];
+  const firstEdu = getFirstEducation(detail);
+  const highestEdu = getHighestEducation(detail);
+
   const profileRows = [
     ['ชื่อ-นามสกุล', detail.name || '-'],
     ['อีเมล', detail.email || '-'],
+    ['เลขประจำตัวประชาชน', detail.nationalId || '-'],
     ['แผนก', detail.department || '-'],
+    ['กลุ่มงาน', detail.subdivision || '-'],
     ['ตำแหน่ง', detail.position || '-'],
     ['ระดับ', detail.tier?.name || detail.tier || '-'],
     ['ประเภทตำแหน่ง', detail.positionType || '-'],
     ['หัวหน้างาน', detail.supervisorName || '-'],
     ['วันเริ่มงาน', formatDate(detail.employmentDate)],
-    ['แต้มคงเหลือ', String(detail.pointsBalance || 0)]
+    ['วันเกษียณอายุ', detail.retirementDateRaw || '-'],
+    ['แต้มคงเหลือ', String(detail.pointsBalance || 0)],
+    // ประวัติการศึกษา
+    ['ระดับการศึกษา', firstEdu.degree || firstEdu.degreeName || '-'],
+    ['วุฒิการศึกษา', firstEdu.degreeName || firstEdu.degree || '-'],
+    ['สาขาวิชา', firstEdu.major || firstEdu.faculty || '-'],
+    ['สถาบันการศึกษา', firstEdu.institution || '-'],
+    // ประวัติการศึกษาสูงสุด
+    ['ระดับการศึกษาสูงสุด', highestEdu.degree || highestEdu.highestLevel || '-'],
+    ['วุฒิการศึกษาสูงสุด', highestEdu.degreeName || highestEdu.highestDegreeName || '-'],
+    ['สาขาวิชาสูงสุด', highestEdu.major || highestEdu.highestFieldOfStudy || '-'],
+    ['สถาบันการศึกษาสูงสุด', highestEdu.institution || highestEdu.highestInstitution || '-']
   ];
 
   // Sheet 2: ประวัติการเรียน (Learning History)
