@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แจ้งเตือน: ผลการตรวจประเมิน Assessment ของคุณ</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02); border: 1px solid #e2e8f0;">
+          
+          <!-- Header (FDA Theme with Dynamic Color based on status) -->
+          <tr>
+            <td align="center" style="background: linear-gradient(135deg, #0f2c59 0%, #1e40af 100%); padding: 40px 40px 30px 40px;">
+              <img src="cid:fdalogo" alt="FDA Logo" style="height: 70px; width: auto; margin-bottom: 20px; display: block;" />
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.3;">{{title}}</h1>
+              <p style="color: #93c5fd; margin: 5px 0 0 0; font-size: 14px;">ระบบจัดการความรู้และพัฒนาศักยภาพผู้เรียน</p>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding: 40px 40px 30px 40px;">
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #334155;">เรียน คุณ <strong style="color: #0f2c59;">{{name}}</strong>,</p>
+              <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #475569;">{{message}}</p>
+              
+              <!-- Result Details Card -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; border-radius: 16px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
+                <tr>
+                  <td style="padding: 24px;">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td width="35%" style="padding-bottom: 12px; font-size: 14px; font-weight: bold; color: #64748b;">วิชา / Course:</td>
+                        <td width="65%" style="padding-bottom: 12px; font-size: 14px; color: #0f2c59; font-weight: 600;">{{courseTitle}}</td>
+                      </tr>
+                      <tr>
+                        <td width="35%" style="padding-bottom: 12px; font-size: 14px; font-weight: bold; color: #64748b;">การประเมิน / Lesson:</td>
+                        <td width="65%" style="padding-bottom: 12px; font-size: 14px; color: #0f2c59; font-weight: 600;">{{lessonTitle}}</td>
+                      </tr>
+                      <tr>
+                        <td width="35%" style="padding-bottom: 12px; font-size: 14px; font-weight: bold; color: #64748b;">ผลการประเมิน:</td>
+                        <td width="65%" style="padding-bottom: 12px; font-size: 14px; font-weight: 700;">
+                          {{#if isPassed}}
+                            <span style="color: #16a34a;">ผ่านการประเมิน (PASSED)</span>
+                          {{else}}
+                            {{#if isNeedsRevision}}
+                              <span style="color: #ca8a04;">ต้องแก้ไขเพิ่มเติม (NEEDS REVISION)</span>
+                            {{else}}
+                              <span style="color: #dc2626;">ไม่ผ่านการประเมิน (FAILED)</span>
+                            {{/if}}
+                          {{/if}}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td width="35%" style="font-size: 14px; font-weight: bold; color: #64748b; padding-bottom: {{#if feedback}}12px{{else}}0px{{/if}};">คะแนนที่คุณได้ / Score:</td>
+                        <td width="65%" style="font-size: 15px; color: #0f2c59; font-weight: 700; padding-bottom: {{#if feedback}}12px{{else}}0px{{/if}};">{{score}} / {{maxScore}}</td>
+                      </tr>
+                      {{#if feedback}}
+                      <tr>
+                        <td colspan="2" style="border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+                          <div style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 6px;">ความคิดเห็นจากผู้ตรวจ / Reviewer Feedback:</div>
+                          <div style="font-size: 14px; color: #475569; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; line-height: 1.5;">{{feedback}}</div>
+                        </td>
+                      </tr>
+                      {{/if}}
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Button CTA -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 30px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{actionUrl}}" target="_blank" style="background-color: #1e40af; color: #ffffff; padding: 14px 32px; border-radius: 12px; font-weight: bold; text-decoration: none; display: inline-block; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2); transition: background-color 0.2s;">ดูรายละเอียดและงานที่ส่ง / View Submission</a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #64748b;">ขอบคุณที่ตั้งใจศึกษาและเรียนรู้กับระบบ LMSFDA</p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="background-color: #f8fafc; padding: 24px; border-top: 1px solid #f1f5f9;">
+              <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5;">อีเมลนี้ถูกส่งโดยระบบอัตโนมัติ กรุณาอย่าตอบกลับอีเมลนี้<br>&copy; 2026 สำนักงานคณะกรรมการอาหารและยา (อย.)</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

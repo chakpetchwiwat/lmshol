@@ -2,6 +2,17 @@ const { USER_STATUS } = require('../../utils/constants/statuses');
 const { GOAL_SCOPES } = require('../../utils/constants/scopes');
 const { DEFAULT_REMINDER_TIME, normalizeReminderTime, addThailandDays, subtractThailandDays } = require('../../utils/thailandTime');
 const ErrorResponse = require('../../utils/errorResponse');
+const EmailService = require('../email.service');
+
+const formatDate = (date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  return d.toLocaleDateString('th-TH', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
 
 const GOAL_REMINDER_DAY_OPTIONS = new Set([0, 3, 7]); // Added 0 based on recent objective
 
@@ -49,7 +60,7 @@ const buildGoalTargetUsersWhere = (goal) => ({
 const createGoalReminderNotifications = async (tx, goal, assignmentBaseDate = new Date()) => {
     const targetUsers = await tx.user.findMany({
         where: buildGoalTargetUsersWhere(goal),
-        select: { id: true }
+        select: { id: true, name: true, email: true }
     });
 
     if (!targetUsers.length) {
@@ -58,6 +69,7 @@ const createGoalReminderNotifications = async (tx, goal, assignmentBaseDate = ne
 
     const notifications = [];
     const now = new Date();
+    const immediateEmailSends = [];
 
     if (goal.postAssignmentReminderDays !== null && goal.postAssignmentReminderDays !== undefined) {
         const scheduledFor = goal.postAssignmentReminderDays === 0
@@ -68,14 +80,35 @@ const createGoalReminderNotifications = async (tx, goal, assignmentBaseDate = ne
                 goal.postAssignmentReminderTime || DEFAULT_REMINDER_TIME
             ).date;
 
-        notifications.push(...targetUsers.map((user) => ({
-            userId: user.id,
-            goalId: goal.id,
-            type: 'GOAL_POST_ASSIGNMENT_REMINDER',
-            title: 'มีการแจ้งเตือนเป้าหมายการเรียน',
-            message: `เป้าหมาย "${goal.title}" ถูกมอบหมายให้คุณแล้ว กดเพื่อดูรายละเอียด`,
-            scheduledFor
-        })));
+        const isImmediate = scheduledFor <= now;
+
+        targetUsers.forEach((user) => {
+            notifications.push({
+                userId: user.id,
+                goalId: goal.id,
+                type: 'GOAL_POST_ASSIGNMENT_REMINDER',
+                title: 'มีการแจ้งเตือนเป้าหมายการเรียน',
+                message: `เป้าหมาย "${goal.title}" ถูกมอบหมายให้คุณแล้ว กดเพื่อดูรายละเอียด`,
+                scheduledFor,
+                emailSentAt: isImmediate ? now : null
+            });
+
+            if (isImmediate && user.email) {
+                immediateEmailSends.push({
+                    to: user.email,
+                    subject: 'มีการแจ้งเตือนเป้าหมายการเรียน',
+                    templateName: 'goal_assigned',
+                    data: {
+                        name: user.name,
+                        goalTitle: goal.title,
+                        goalDescription: goal.description,
+                        startDate: formatDate(goal.startDate),
+                        expiryDate: formatDate(goal.expiryDate),
+                        goalUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/user/goals/${goal.id}`
+                    }
+                });
+            }
+        });
     }
 
     if (goal.preDeadlineReminderDays && goal.expiryDate) {
@@ -85,20 +118,49 @@ const createGoalReminderNotifications = async (tx, goal, assignmentBaseDate = ne
             goal.preDeadlineReminderTime || DEFAULT_REMINDER_TIME
         );
         const scheduledFor = preDeadlineDate < now ? now : preDeadlineDate;
+        const isImmediate = scheduledFor <= now;
 
-        notifications.push(...targetUsers.map((user) => ({
-            userId: user.id,
-            goalId: goal.id,
-            type: 'GOAL_PRE_DEADLINE_REMINDER',
-            title: 'เป้าหมายการเรียนใกล้ครบกำหนด',
-            message: `เป้าหมาย "${goal.title}" จะครบกำหนดใน ${goal.preDeadlineReminderDays} วัน กดเพื่อดูเป้าหมายนี้`,
-            scheduledFor
-        })));
+        targetUsers.forEach((user) => {
+            notifications.push({
+                userId: user.id,
+                goalId: goal.id,
+                type: 'GOAL_PRE_DEADLINE_REMINDER',
+                title: 'เป้าหมายการเรียนใกล้ครบกำหนด',
+                message: `เป้าหมาย "${goal.title}" จะครบกำหนดใน ${goal.preDeadlineReminderDays} วัน กดเพื่อดูเป้าหมายนี้`,
+                scheduledFor,
+                emailSentAt: isImmediate ? now : null
+            });
+
+            if (isImmediate && user.email) {
+                const diffTime = Math.abs(goal.expiryDate - now);
+                const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                immediateEmailSends.push({
+                    to: user.email,
+                    subject: 'เป้าหมายการเรียนใกล้ครบกำหนด',
+                    templateName: 'goal_reminder',
+                    data: {
+                        name: user.name,
+                        goalTitle: goal.title,
+                        goalDescription: goal.description,
+                        daysRemaining,
+                        expiryDate: formatDate(goal.expiryDate),
+                        goalUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/user/goals/${goal.id}`
+                    }
+                });
+            }
+        });
     }
 
     if (notifications.length > 0) {
         await tx.userNotification.createMany({
             data: notifications
+        });
+    }
+
+    // Trigger emails asynchronously
+    if (immediateEmailSends.length > 0) {
+        immediateEmailSends.forEach(mail => {
+            EmailService.sendEmail(mail).catch(err => console.error('[EmailService] Async send failed:', err));
         });
     }
 };

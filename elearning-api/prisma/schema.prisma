@@ -734,6 +734,7 @@ model UserNotification {
   actionUrl              String?
   scheduledFor           DateTime
   readAt                 DateTime?
+  emailSentAt            DateTime?
   createdAt              DateTime              @default(now())
   updatedAt              DateTime              @updatedAt
   assessmentSubmission   AssessmentSubmission? @relation(fields: [assessmentSubmissionId], references: [id], onDelete: Cascade)

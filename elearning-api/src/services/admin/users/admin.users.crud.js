@@ -229,6 +229,21 @@ const createUser = async (inputData) => prisma.$transaction(async (tx) => {
             }
         });
     }
+
+    // Send Welcome Email
+    const EmailService = require('../../email.service');
+    EmailService.sendEmail({
+      to: user.email,
+      subject: 'ยินดีต้อนรับสู่ระบบการเรียนรู้ LMSFDA',
+      templateName: 'welcome',
+      data: {
+        name: user.name,
+        email: user.email,
+        username: user.email.split('@')[0],
+        mustChangePassword: !!data.mustChangePassword
+      }
+    }).catch(err => console.error('[EmailService] Manual creation welcome email failed:', err));
+
     return mapUserRecord(user);
 }, { maxWait: TRANSACTION_TIMEOUTS.DEFAULT_MAX_WAIT, timeout: TRANSACTION_TIMEOUTS.DEFAULT_TIMEOUT });
 

@@ -361,6 +361,20 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = false) => {
         await prisma.user.create({ data: createData });
         successCount++;
         logs.push(`[Row ${rowNum}] Created new user: ${name} (${email}).`);
+
+        // Send Welcome Email
+        const EmailService = require('../../email.service');
+        EmailService.sendEmail({
+          to: email,
+          subject: 'ยินดีต้อนรับสู่ระบบการเรียนรู้ LMSFDA',
+          templateName: 'welcome',
+          data: {
+            name: name || username,
+            email: email,
+            username: username,
+            mustChangePassword: forceMustChangePassword
+          }
+        }).catch(err => console.error('[EmailService] Welcome email failed:', err));
       }
     } catch (err) {
       errorCount++;

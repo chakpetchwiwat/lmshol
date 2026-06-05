@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>คุณได้รับมอบหมายเป้าหมายการเรียนรู้ใหม่</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02); border: 1px solid #e2e8f0;">
+          
+          <!-- Header (FDA Theme) -->
+          <tr>
+            <td align="center" style="background: linear-gradient(135deg, #0f2c59 0%, #1e40af 100%); padding: 40px 40px 30px 40px;">
+              <img src="cid:fdalogo" alt="FDA Logo" style="height: 70px; width: auto; margin-bottom: 20px; display: block;" />
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.3;">เป้าหมายการเรียนรู้ใหม่ของคุณ</h1>
+              <p style="color: #93c5fd; margin: 5px 0 0 0; font-size: 14px;">ระบบจัดการความรู้และพัฒนาศักยภาพผู้เรียน</p>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding: 40px 40px 30px 40px;">
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #334155;">เรียน คุณ <strong style="color: #0f2c59;">{{name}}</strong>,</p>
+              <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #475569;">คุณได้รับการมอบหมายเป้าหมายการเรียนรู้ (Learning Goal) ใหม่จากระบบ ซึ่งมีรายละเอียดของเป้าหมายดังนี้ครับ:</p>
+              
+              <!-- Goal Card -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; border-radius: 16px; margin-bottom: 30px; border: 1px solid #e2e8f0; border-left: 5px solid #1e40af;">
+                <tr>
+                  <td style="padding: 24px;">
+                    <h2 style="margin: 0 0 10px 0; font-size: 18px; color: #0f2c59; font-weight: 800;">{{goalTitle}}</h2>
+                    {{#if goalDescription}}
+                    <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.5; color: #475569;">{{goalDescription}}</p>
+                    {{/if}}
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td width="35%" style="padding-bottom: 8px; font-size: 13px; font-weight: bold; color: #64748b;">วันที่เริ่มอบรม:</td>
+                        <td width="65%" style="padding-bottom: 8px; font-size: 13px; color: #334155; font-weight: 600;">{{startDate}}</td>
+                      </tr>
+                      <tr>
+                        <td width="35%" style="font-size: 13px; font-weight: bold; color: #64748b;">วันครบกำหนด / Deadline:</td>
+                        <td width="65%" style="font-size: 13px; color: #b45309; font-weight: 700;">{{expiryDate}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Button CTA -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 30px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{goalUrl}}" target="_blank" style="background-color: #1e40af; color: #ffffff; padding: 14px 32px; border-radius: 12px; font-weight: bold; text-decoration: none; display: inline-block; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2); transition: background-color 0.2s;">ดูรายละเอียดเป้าหมาย / View Goal</a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #64748b;">กรุณาเข้าศึกษาคอร์สเรียนที่เกี่ยวข้องให้เสร็จสิ้นภายในช่วงเวลาดังกล่าวเพื่อพัฒนาศักยภาพการปฏิบัติงานของคุณ</p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="background-color: #f8fafc; padding: 24px; border-top: 1px solid #f1f5f9;">
+              <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5;">อีเมลนี้ถูกส่งโดยระบบอัตโนมัติ กรุณาอย่าตอบกลับอีเมลนี้<br>&copy; 2026 สำนักงานคณะกรรมการอาหารและยา (อย.)</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,5 +1,6 @@
 const prisma = require('../utils/prisma');
 const jwt = require('jsonwebtoken');
+const EmailService = require('./email.service');
 const { POINT_SOURCE_TYPES } = require('../utils/constants/ledger');
 const { ASSESSMENT_SUBMISSION_STATUS } = require('../utils/constants/statuses');
 const { completeLessonAndRefreshCourse } = require('./user/user.progress');
@@ -508,9 +509,33 @@ const gradeAssessmentSubmission = async (actor, submissionId, data = {}) => {
       title: notificationCopy.title,
       message: notificationCopy.message,
       actionUrl: `/user/courses/${submission.lesson.courseId}/lesson/${submission.lesson.id}?assessmentResult=${submission.id}`,
-      scheduledFor: new Date()
+      scheduledFor: new Date(),
+      emailSentAt: new Date()
     }
   });
+
+  const isPassed = submission.status === ASSESSMENT_SUBMISSION_STATUS.PASSED;
+  const isNeedsRevision = submission.status === ASSESSMENT_SUBMISSION_STATUS.NEEDS_REVISION;
+
+  EmailService.sendEmail({
+    to: submission.user.email,
+    subject: notificationCopy.title,
+    templateName: 'assessment_reviewed',
+    data: {
+      name: submission.user.name,
+      title: notificationCopy.title,
+      message: notificationCopy.message,
+      courseTitle: submission.lesson.course?.title || 'คอร์สของคุณ',
+      lessonTitle: submission.lesson.title,
+      isPassed,
+      isNeedsRevision,
+      isFailed: !isPassed && !isNeedsRevision,
+      score: submission.score,
+      maxScore: submission.maxScore,
+      feedback: submission.feedback,
+      actionUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/user/courses/${submission.lesson.courseId}/lesson/${submission.lesson.id}?assessmentResult=${submission.id}`
+    }
+  }).catch(err => console.error('[EmailService] Async send failed:', err));
 
   return {
     submission: serializeSubmission(submission),
