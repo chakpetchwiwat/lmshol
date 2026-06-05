@@ -8,6 +8,7 @@ const ImportModal = ({ isOpen, onClose, type = 'profiles', onImportSuccess }) =>
   const [file, setFile] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState(null);
+  const [mustChangePassword, setMustChangePassword] = React.useState(false);
   const fileInputRef = React.useRef(null);
 
   if (!isOpen) return null;
@@ -74,6 +75,9 @@ const ImportModal = ({ isOpen, onClose, type = 'profiles', onImportSuccess }) =>
 
     const formData = new FormData();
     formData.append('file', file);
+    if (isProfiles) {
+      formData.append('mustChangePassword', mustChangePassword);
+    }
 
     setLoading(true);
     setResults(null);
@@ -97,6 +101,7 @@ const ImportModal = ({ isOpen, onClose, type = 'profiles', onImportSuccess }) =>
   const handleReset = () => {
     setFile(null);
     setResults(null);
+    setMustChangePassword(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -211,6 +216,21 @@ const ImportModal = ({ isOpen, onClose, type = 'profiles', onImportSuccess }) =>
                   </div>
                 )}
               </div>
+
+              {isProfiles && (
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+                  <input
+                    type="checkbox"
+                    id="mustChangePassword"
+                    checked={mustChangePassword}
+                    onChange={(e) => setMustChangePassword(e.target.checked)}
+                    className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                  />
+                  <label htmlFor="mustChangePassword" className="text-sm font-bold text-slate-700 cursor-pointer select-none">
+                    ให้เปลี่ยนรหัสผ่านเมื่อเข้าใช้งานครั้งแรก (Force password change on first login)
+                  </label>
+                </div>
+              )}
 
               {/* Submit Buttons */}
               <div className="flex justify-end gap-3 border-t border-slate-100 pt-5">

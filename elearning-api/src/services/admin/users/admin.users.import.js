@@ -192,7 +192,7 @@ const downloadTemplate = (type) => {
   return xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
 };
 
-const importProfiles = async (fileBuffer) => {
+const importProfiles = async (fileBuffer, forceMustChangePassword = false) => {
   const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
@@ -328,6 +328,9 @@ const importProfiles = async (fileBuffer) => {
         if (password) {
           updateData.password = await bcrypt.hash(String(password), 10);
         }
+        if (forceMustChangePassword) {
+          updateData.mustChangePassword = true;
+        }
 
         await prisma.user.update({
           where: { id: existingUser.id },
@@ -341,6 +344,7 @@ const importProfiles = async (fileBuffer) => {
           name: name || username,
           email,
           password: await bcrypt.hash(password ? String(password) : 'P@ssword123', 10),
+          mustChangePassword: forceMustChangePassword,
           departmentId,
           department: division ? String(division).trim() : null,
           tierId,

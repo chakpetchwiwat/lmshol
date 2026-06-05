@@ -117,7 +117,8 @@ const importUsers = asyncHandler(async (req, res) => {
 
   let result;
   if (type === 'profiles') {
-    result = await AdminService.importProfiles(req.file.buffer);
+    const mustChangePassword = req.body.mustChangePassword === 'true' || req.body.mustChangePassword === true;
+    result = await AdminService.importProfiles(req.file.buffer, mustChangePassword);
   } else if (type === 'trainings') {
     result = await AdminService.importTrainings(req.file.buffer);
   } else {
