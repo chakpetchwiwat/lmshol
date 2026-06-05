@@ -138,7 +138,7 @@ const UserLayout = () => {
   }, [notifications]);
 
   const getNotificationIcon = (notification) => {
-    if (notification.type === 'ASSESSMENT_REVIEWED') {
+    if (notification.type === 'ASSESSMENT_REVIEWED' || notification.type === 'ASSESSMENT_SUBMITTED') {
       return <ClipboardCheck size={18} />;
     }
 

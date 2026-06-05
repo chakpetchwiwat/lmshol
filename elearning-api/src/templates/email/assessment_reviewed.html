@@ -14,7 +14,7 @@
           <!-- Header (FDA Theme with Dynamic Color based on status) -->
           <tr>
             <td align="center" style="background: linear-gradient(135deg, #0f2c59 0%, #1e40af 100%); padding: 40px 40px 30px 40px;">
-              <img src="cid:fdalogo" alt="FDA Logo" style="height: 70px; width: auto; margin-bottom: 20px; display: block;" />
+              <img src="cid:fdalogo" alt="FDA Logo" width="220" style="height: auto; max-width: 220px; display: block; margin: 0 auto 20px auto; background-color: #ffffff; padding: 10px 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 0;" />
               <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.3;">{{title}}</h1>
               <p style="color: #93c5fd; margin: 5px 0 0 0; font-size: 14px;">ระบบจัดการความรู้และพัฒนาศักยภาพผู้เรียน</p>
             </td>
@@ -54,8 +54,8 @@
                         </td>
                       </tr>
                       <tr>
-                        <td width="35%" style="font-size: 14px; font-weight: bold; color: #64748b; padding-bottom: {{#if feedback}}12px{{else}}0px{{/if}};">คะแนนที่คุณได้ / Score:</td>
-                        <td width="65%" style="font-size: 15px; color: #0f2c59; font-weight: 700; padding-bottom: {{#if feedback}}12px{{else}}0px{{/if}};">{{score}} / {{maxScore}}</td>
+                        <td width="35%" style="font-size: 14px; font-weight: bold; color: #64748b; padding-bottom: 8px;">คะแนนที่คุณได้ / Score:</td>
+                        <td width="65%" style="font-size: 15px; color: #0f2c59; font-weight: 700; padding-bottom: 8px;">{{score}} / {{maxScore}}</td>
                       </tr>
                       {{#if feedback}}
                       <tr>

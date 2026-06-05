@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แจ้งเตือน: มีการส่งงานใหม่รอการตรวจประเมิน</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02); border: 1px solid #e2e8f0;">
+          
+          <!-- Header (FDA Theme) -->
+          <tr>
+            <td align="center" style="background: linear-gradient(135deg, #0f2c59 0%, #1e40af 100%); padding: 40px 40px 30px 40px;">
+              <img src="cid:fdalogo" alt="FDA Logo" width="220" style="height: auto; max-width: 220px; display: block; margin: 0 auto 20px auto; background-color: #ffffff; padding: 10px 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 0;" />
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.3;">{{title}}</h1>
+              <p style="color: #93c5fd; margin: 5px 0 0 0; font-size: 14px;">ระบบจัดการความรู้และพัฒนาศักยภาพผู้เรียน</p>
+            </td>
+          </tr>
+
+          <!-- Content Body -->
+          <tr>
+            <td style="padding: 40px 40px 30px 40px;">
+              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #334155;">เรียน คุณ <strong style="color: #0f2c59;">{{staffName}}</strong> (ผู้ดูแลรายวิชา),</p>
+              <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.6; color: #475569;">มีผู้เรียนส่งงานการประเมินใหม่เข้ามาในระบบ LMSFDA ซึ่งอยู่ในวิชาที่คุณร่วมเป็นผู้แล มีรายละเอียดดังต่อไปนี้ครับ:</p>
+              
+              <!-- Submission Details Card -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc; border-radius: 16px; margin-bottom: 30px; border: 1px solid #e2e8f0; border-left: 5px solid #1e40af;">
+                <tr>
+                  <td style="padding: 24px;">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td width="35%" style="padding-bottom: 12px; font-size: 14px; font-weight: bold; color: #64748b;">ผู้เรียนผู้ส่งงาน:</td>
+                        <td width="65%" style="padding-bottom: 12px; font-size: 14px; color: #0f2c59; font-weight: 700;">{{studentName}} ({{studentEmail}})</td>
+                      </tr>
+                      <tr>
+                        <td width="35%" style="padding-bottom: 12px; font-size: 14px; font-weight: bold; color: #64748b;">วิชา / Course:</td>
+                        <td width="65%" style="padding-bottom: 12px; font-size: 14px; color: #334155; font-weight: 600;">{{courseTitle}}</td>
+                      </tr>
+                      <tr>
+                        <td width="35%" style="padding-bottom: 12px; font-size: 14px; font-weight: bold; color: #64748b;">การประเมิน / Lesson:</td>
+                        <td width="65%" style="padding-bottom: 12px; font-size: 14px; color: #334155; font-weight: 600;">{{lessonTitle}}</td>
+                      </tr>
+                      <tr>
+                        <td width="35%" style="padding-bottom: 8px; font-size: 14px; font-weight: bold; color: #64748b;">วันที่ส่งงาน:</td>
+                        <td width="65%" style="padding-bottom: 8px; font-size: 14px; color: #334155; font-weight: 600;">{{submittedAt}}</td>
+                      </tr>
+                      {{#if note}}
+                      <tr>
+                        <td colspan="2" style="border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+                          <div style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 6px;">บันทึกจากผู้เรียน / Learner's Note:</div>
+                          <div style="font-size: 14px; color: #475569; background-color: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; line-height: 1.5;">{{note}}</div>
+                        </td>
+                      </tr>
+                      {{/if}}
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Button CTA -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 30px;">
+                <tr>
+                  <td align="center">
+                    <a href="{{actionUrl}}" target="_blank" style="background-color: #1e40af; color: #ffffff; padding: 14px 32px; border-radius: 12px; font-weight: bold; text-decoration: none; display: inline-block; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.2); transition: background-color 0.2s;">ตรวจประเมินผลงาน / Review Submission</a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #64748b;">กรุณาเข้าดำเนินการตรวจประเมินและให้คะแนนผลงานเพื่อแจ้งให้ผู้เรียนทราบต่อไปครับ</p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="background-color: #f8fafc; padding: 24px; border-top: 1px solid #f1f5f9;">
+              <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5;">อีเมลนี้ถูกส่งโดยระบบอัตโนมัติ กรุณาอย่าตอบกลับอีเมลนี้<br>&copy; 2026 สำนักงานคณะกรรมการอาหารและยา (อย.)</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

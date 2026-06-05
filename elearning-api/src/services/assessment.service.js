@@ -176,6 +176,79 @@ const submitAssessment = async (userId, lessonId, data = {}) => {
     }
   });
 
+  // Query student details for notification messages
+  const student = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true }
+  });
+
+  // Query assigned course staff (owner, instructor, trainer)
+  const staffList = await prisma.courseStaff.findMany({
+    where: {
+      courseId: lesson.courseId,
+      role: { in: ['owner', 'instructor', 'trainer'] }
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true
+        }
+      }
+    }
+  });
+
+  if (staffList.length > 0) {
+    const title = `มีการส่งงานใหม่ในวิชา ${lesson.course.title}`;
+    const message = `คุณ ${student?.name || 'ผู้เรียน'} ได้ส่งงาน ${lesson.title} รอการตรวจประเมิน`;
+    const baseDomain = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const actionUrl = `${baseDomain}/admin/assessments?courseId=${lesson.courseId}`;
+
+    // 1. Create in-app notifications
+    const notificationsData = staffList.map(staff => ({
+      userId: staff.userId,
+      assessmentSubmissionId: submission.id,
+      type: 'ASSESSMENT_SUBMITTED',
+      title,
+      message,
+      actionUrl: `/admin/assessments?courseId=${lesson.courseId}`, // Relative path for frontend routing
+      scheduledFor: new Date()
+    }));
+
+    await prisma.userNotification.createMany({
+      data: notificationsData
+    }).catch(err => console.error('[NotificationService] Failed to create staff notifications:', err));
+
+    // 2. Send email notifications
+    const formattedDate = new Intl.DateTimeFormat('th-TH', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'Asia/Bangkok'
+    }).format(new Date());
+
+    staffList.forEach(staff => {
+      if (staff.user?.email) {
+        EmailService.sendEmail({
+          to: staff.user.email,
+          subject: title,
+          templateName: 'assessment_submitted',
+          data: {
+            staffName: staff.user.name,
+            title,
+            studentName: student?.name || 'ผู้เรียน',
+            studentEmail: student?.email || '-',
+            courseTitle: lesson.course.title,
+            lessonTitle: lesson.title,
+            submittedAt: formattedDate,
+            note: submission.note || '-',
+            actionUrl
+          }
+        }).catch(err => console.error('[EmailService] Async send to staff failed:', err));
+      }
+    });
+  }
+
   return serializeSubmission(submission);
 };
 
