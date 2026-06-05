@@ -8,7 +8,7 @@ const ImportModal = ({ isOpen, onClose, type = 'profiles', onImportSuccess }) =>
   const [file, setFile] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState(null);
-  const [mustChangePassword, setMustChangePassword] = React.useState(false);
+  const [mustChangePassword, setMustChangePassword] = React.useState(true);
   const fileInputRef = React.useRef(null);
 
   if (!isOpen) return null;
@@ -101,7 +101,7 @@ const ImportModal = ({ isOpen, onClose, type = 'profiles', onImportSuccess }) =>
   const handleReset = () => {
     setFile(null);
     setResults(null);
-    setMustChangePassword(false);
+    setMustChangePassword(true);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }

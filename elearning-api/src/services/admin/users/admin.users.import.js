@@ -192,7 +192,7 @@ const downloadTemplate = (type) => {
   return xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
 };
 
-const importProfiles = async (fileBuffer, forceMustChangePassword = false) => {
+const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
   const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
