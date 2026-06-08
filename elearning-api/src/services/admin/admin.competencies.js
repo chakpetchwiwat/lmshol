@@ -626,10 +626,18 @@ const importGbtCompetencies = async (fileBuffer) => {
         const categoryCodeToId = new Map();
 
         for (const row of rows) {
+            const cleanCategoryName = (name) => {
+                const trimmed = String(name || '').trim();
+                const lower = trimmed.toLowerCase();
+                if (lower === 'organisation skill' || lower === 'organization skill') return 'Organization Skill';
+                if (lower === 'inspecctor skill' || lower === 'inspector skill') return 'Inspector skill';
+                return trimmed;
+            };
+            const rawCatName = cleanCategoryName(row.categoryName);
             const groupCode = makeImportCode(row.levelGroup, 'GBT_LEVEL');
             const groupName = row.levelGroup || 'GBT Level';
-            const categoryCode = makeImportCode(`${groupCode}_${row.categoryName}`, `${groupCode}_CATEGORY`);
-            const categoryName = row.categoryName || 'Uncategorized';
+            const categoryCode = makeImportCode(`${groupCode}_${rawCatName}`, `${groupCode}_CATEGORY`);
+            const categoryName = rawCatName || 'Uncategorized';
             const levels = parseMeasurementLevels(row.measurementDescription, row.levelCount);
             const measurementLevelCount = parseLevelCount(row.levelCount, levels.length || 3);
             let groupId = groupCodeToId.get(groupCode);
