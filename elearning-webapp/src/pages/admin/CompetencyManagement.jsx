@@ -475,7 +475,7 @@ const CompetencyManagement = () => {
         name: '',
         description: '',
         gbtLevel: initialCategory ? initialCategory.groupName : '',
-        competencyType: 'ความรู้',
+        competencyType: '20-ความรู้ความสามารถ',
         sourceRole: '',
         measurementLevelCount: 3,
         conditionsNote: '',
@@ -505,7 +505,7 @@ const CompetencyManagement = () => {
         name: competency.name,
         description: competency.description || '',
         gbtLevel: competency.gbtLevel || (compCategory ? compCategory.groupName : ''),
-        competencyType: competency.competencyType || 'ความรู้',
+        competencyType: competency.competencyType || '20-ความรู้ความสามารถ',
         sourceRole: competency.sourceRole || '',
         measurementLevelCount: competency.measurementLevelCount || 3,
         conditionsNote: competency.conditionsNote || '',
@@ -1261,19 +1261,23 @@ const CompetencyManagement = () => {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ประเภท (Competency Type)</label>
-                    <select 
-                      required
-                      className="form-select w-full focus:border-indigo-500 h-10 text-sm bg-white" 
-                      value={competencyDrawer.form.competencyType} 
-                      onChange={(e) => setCompetencyDrawer(prev => ({
+                    <SearchableSelect
+                      options={[
+                        { value: '20-ความรู้ความสามารถ', label: '20-ความรู้ความสามารถ' },
+                        { value: '10-ทักษะ', label: '10-ทักษะ' },
+                        { value: '01-สมรรถนะ', label: '01-สมรรถนะ' },
+                        { value: '12-ความรู้ความสามารถ | ทักษะ', label: '12-ความรู้ความสามารถ | ทักษะ' },
+                        { value: '22-ความรู้ความสามารถ | ทักษะ', label: '22-ความรู้ความสามารถ | ทักษะ' },
+                        { value: '03-ความรู้ความสามารถ | สมรรถนะ', label: '03-ความรู้ความสามารถ | สมรรถนะ' },
+                        { value: '02-ทักษะ | สมรรถนะ', label: '02-ทักษะ | สมรรถนะ' }
+                      ]}
+                      value={competencyDrawer.form.competencyType}
+                      onChange={(val) => setCompetencyDrawer(prev => ({
                         ...prev,
-                        form: { ...prev.form, competencyType: e.target.value }
+                        form: { ...prev.form, competencyType: val }
                       }))}
-                    >
-                      <option value="ความรู้">ความรู้</option>
-                      <option value="ทักษะ">ทักษะ</option>
-                      <option value="สมรรถนะ">สมรรถนะ</option>
-                    </select>
+                      placeholder="เลือกประเภท (Competency Type)..."
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">แหล่งที่มา / Role</label>
