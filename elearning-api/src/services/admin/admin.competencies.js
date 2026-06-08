@@ -335,11 +335,21 @@ const createCompetency = async (input = {}) => {
     const legacyCodeStr = legacyCodesList.join(', ');
 
     return prisma.$transaction(async (tx) => {
+        let competencyTypeVal = normalizeText(input.competencyType);
+        const typeId = normalizeText(input.competencyTypeId);
+        if (typeId) {
+            const cType = await tx.competencyType.findUnique({ where: { id: typeId } });
+            if (cType) {
+                competencyTypeVal = cType.name;
+            }
+        }
+
         const competency = await tx.competency.create({
             data: {
                 categoryId: normalizeText(input.categoryId),
                 gbtLevel: normalizeText(input.gbtLevel),
-                competencyType: normalizeText(input.competencyType),
+                competencyType: competencyTypeVal,
+                competencyTypeId: typeId,
                 code: mainCode,
                 legacyCode: legacyCodeStr,
                 sourceRole: normalizeText(input.sourceRole),
@@ -395,12 +405,22 @@ const updateCompetency = async (id, input = {}) => {
     const legacyCodeStr = legacyCodesList.join(', ');
 
     return prisma.$transaction(async (tx) => {
+        let competencyTypeVal = normalizeText(input.competencyType);
+        const typeId = normalizeText(input.competencyTypeId);
+        if (typeId) {
+            const cType = await tx.competencyType.findUnique({ where: { id: typeId } });
+            if (cType) {
+                competencyTypeVal = cType.name;
+            }
+        }
+
         const competency = await tx.competency.update({
             where: { id },
             data: {
                 categoryId: normalizeText(input.categoryId),
                 gbtLevel: normalizeText(input.gbtLevel),
-                competencyType: normalizeText(input.competencyType),
+                competencyType: competencyTypeVal,
+                competencyTypeId: typeId,
                 code: mainCode,
                 legacyCode: legacyCodeStr,
                 sourceRole: normalizeText(input.sourceRole),
@@ -533,6 +553,55 @@ const deleteCompetencyCategory = async (id) => {
     });
 };
 
+const getCompetencyTypes = async () => prisma.competencyType.findMany({
+    orderBy: [
+        { displayOrder: 'asc' },
+        { name: 'asc' }
+    ]
+});
+
+const createCompetencyType = async (input = {}) => prisma.competencyType.create({
+    data: {
+        code: normalizeCode(input.code, input.name),
+        name: normalizeText(input.name),
+        description: normalizeText(input.description),
+        displayOrder: parseInt(input.displayOrder || 0, 10),
+        status: input.status || 'ACTIVE'
+    }
+});
+
+const updateCompetencyType = async (id, input = {}) => {
+    const mainCode = normalizeCode(input.code, input.name);
+    const typeName = normalizeText(input.name);
+
+    return prisma.$transaction(async (tx) => {
+        const updatedType = await tx.competencyType.update({
+            where: { id },
+            data: {
+                code: mainCode,
+                name: typeName,
+                description: normalizeText(input.description),
+                displayOrder: parseInt(input.displayOrder || 0, 10),
+                status: input.status || 'ACTIVE'
+            }
+        });
+
+        // Sync competencyType string in all linked competencies to keep it backward compatible!
+        await tx.competency.updateMany({
+            where: { competencyTypeId: id },
+            data: {
+                competencyType: typeName
+            }
+        });
+
+        return updatedType;
+    });
+};
+
+const deleteCompetencyType = async (id) => prisma.competencyType.delete({
+    where: { id }
+});
+
 const importGbtCompetencies = async (fileBuffer) => {
     if (!fileBuffer) {
         throw new Error('Please upload a GBT Excel file.');
@@ -619,6 +688,22 @@ const importGbtCompetencies = async (fileBuffer) => {
                 categoryCodeToId.set(categoryCode, categoryId);
             }
 
+            let competencyTypeId = null;
+            if (row.competencyType) {
+                const typeCode = makeImportCode(row.competencyType, 'COMPETENCY_TYPE');
+                const typeName = row.competencyType;
+                const existingType = await tx.competencyType.findUnique({ where: { code: typeCode } });
+                const compType = existingType
+                    ? await tx.competencyType.update({
+                        where: { id: existingType.id },
+                        data: { name: typeName }
+                    })
+                    : await tx.competencyType.create({
+                        data: { code: typeCode, name: typeName }
+                    });
+                competencyTypeId = compType.id;
+            }
+
             const existingCompetency = await tx.competency.findUnique({ where: { code: row.code } });
             const competency = existingCompetency
                 ? await tx.competency.update({
@@ -627,6 +712,7 @@ const importGbtCompetencies = async (fileBuffer) => {
                         categoryId,
                         gbtLevel: row.levelGroup,
                         competencyType: row.competencyType,
+                        competencyTypeId,
                         legacyCode: row.legacyCode,
                         sourceRole: row.sourceRole,
                         name: row.name,
@@ -644,6 +730,7 @@ const importGbtCompetencies = async (fileBuffer) => {
                         categoryId,
                         gbtLevel: row.levelGroup,
                         competencyType: row.competencyType,
+                        competencyTypeId,
                         code: row.code,
                         legacyCode: row.legacyCode,
                         sourceRole: row.sourceRole,
@@ -814,5 +901,9 @@ module.exports = {
     serializeMapping,
     resolveImportedCompetencyMappings,
     saveCourseCompetencies,
-    saveUserCertificateCompetencies
+    saveUserCertificateCompetencies,
+    getCompetencyTypes,
+    createCompetencyType,
+    updateCompetencyType,
+    deleteCompetencyType
 };

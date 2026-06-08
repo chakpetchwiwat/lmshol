@@ -182,11 +182,26 @@ model CompetencyCategory {
   @@index([groupId, status, displayOrder])
 }
 
+model CompetencyType {
+  id           String       @id @default(uuid())
+  code         String       @unique
+  name         String
+  description  String?
+  displayOrder Int          @default(0)
+  status       String       @default("ACTIVE")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  competencies Competency[]
+
+  @@index([status, displayOrder])
+}
+
 model Competency {
   id                     String                      @id @default(uuid())
   categoryId             String
   gbtLevel               String?
   competencyType         String?
+  competencyTypeId       String?
   code                   String                      @unique
   legacyCode             String?
   legacyCodes            CompetencyLegacyCode[]
@@ -202,6 +217,7 @@ model Competency {
   createdAt              DateTime                    @default(now())
   updatedAt              DateTime                    @updatedAt
   category               CompetencyCategory          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  type                   CompetencyType?             @relation(fields: [competencyTypeId], references: [id], onDelete: SetNull)
   levels                 CompetencyLevel[]
   courseMappings         CourseCompetency[]
   certificateMappings    UserCertificateCompetency[]

@@ -215,6 +215,26 @@ const deleteCompetency = asyncHandler(async (req, res) => {
   res.json({ success: true, message: 'Competency deleted successfully' });
 });
 
+const getCompetencyTypes = asyncHandler(async (req, res) => {
+  const types = await AdminService.getCompetencyTypes();
+  res.json({ success: true, data: types });
+});
+
+const createCompetencyType = asyncHandler(async (req, res) => {
+  const type = await AdminService.createCompetencyType(req.body);
+  res.status(201).json({ success: true, data: type });
+});
+
+const updateCompetencyType = asyncHandler(async (req, res) => {
+  const type = await AdminService.updateCompetencyType(req.params.id, req.body);
+  res.json({ success: true, data: type });
+});
+
+const deleteCompetencyType = asyncHandler(async (req, res) => {
+  await AdminService.deleteCompetencyType(req.params.id);
+  res.json({ success: true, message: 'Competency type deleted successfully' });
+});
+
 const importGbtCompetencies = asyncHandler(async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'Please upload a GBT Excel file.' });
@@ -657,6 +677,10 @@ module.exports = {
   createCompetency,
   updateCompetency,
   deleteCompetency,
+  getCompetencyTypes,
+  createCompetencyType,
+  updateCompetencyType,
+  deleteCompetencyType,
   importGbtCompetencies,
   getUserDetails,
   createUser,

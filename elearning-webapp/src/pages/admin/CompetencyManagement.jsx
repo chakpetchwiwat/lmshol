@@ -108,6 +108,7 @@ const defaultCompetencyForm = {
   description: '',
   gbtLevel: '',
   competencyType: '',
+  competencyTypeId: '',
   sourceRole: '',
   measurementLevelCount: 3,
   conditionsNote: '',
@@ -166,15 +167,28 @@ const CompetencyManagement = () => {
   // Expanded Groups in Hierarchy Tab
   const [expandedGroups, setExpandedGroups] = React.useState({});
 
+  // Competency Types state
+  const [competencyTypes, setCompetencyTypes] = React.useState([]);
+
+  // Competency Type Modal state
+  const [typeModal, setTypeModal] = React.useState({
+    isOpen: false,
+    mode: 'create', // 'create' | 'edit'
+    id: null,
+    form: { code: '', name: '', description: '', displayOrder: 0 }
+  });
+
   const fetchData = React.useCallback(async () => {
     try {
       setLoading(true);
-      const [treeRes, competenciesRes] = await Promise.all([
+      const [treeRes, competenciesRes, typesRes] = await Promise.all([
         adminAPI.getCompetencyTree(),
-        adminAPI.getCompetencies()
+        adminAPI.getCompetencies(),
+        adminAPI.getCompetencyTypes()
       ]);
       setTree(Array.isArray(treeRes.data) ? treeRes.data : []);
       setCompetencies(Array.isArray(competenciesRes.data) ? competenciesRes.data : []);
+      setCompetencyTypes(Array.isArray(typesRes.data) ? typesRes.data : []);
     } catch (error) {
       console.error('Fetch competency data error:', error);
       toast.error('โหลดข้อมูล competency ไม่สำเร็จ');
@@ -356,6 +370,62 @@ const CompetencyManagement = () => {
     }
   };
 
+  // --- CRUD Functions for Competency Types ---
+  const openCreateType = () => {
+    setTypeModal({
+      isOpen: true,
+      mode: 'create',
+      id: null,
+      form: { code: '', name: '', description: '', displayOrder: competencyTypes.length }
+    });
+  };
+
+  const openEditType = (type) => {
+    setTypeModal({
+      isOpen: true,
+      mode: 'edit',
+      id: type.id,
+      form: {
+        code: type.code,
+        name: type.name,
+        description: type.description || '',
+        displayOrder: type.displayOrder || 0
+      }
+    });
+  };
+
+  const handleSaveType = async (e) => {
+    e.preventDefault();
+    try {
+      if (typeModal.mode === 'create') {
+        await adminAPI.createCompetencyType(typeModal.form);
+        toast.success('สร้างประเภทสมรรถนะสำเร็จ');
+      } else {
+        await adminAPI.updateCompetencyType(typeModal.id, typeModal.form);
+        toast.success('แก้ไขข้อมูลประเภทสมรรถนะสำเร็จ');
+      }
+      setTypeModal(prev => ({ ...prev, isOpen: false }));
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'บันทึกข้อมูลประเภทสมรรถนะไม่สำเร็จ');
+    }
+  };
+
+  const handleDeleteType = async (id, name) => {
+    if (!window.confirm(`คุณแน่ใจหรือไม่ที่จะลบประเภทสมรรถนะ "${name}"?\n(ข้อควรระวัง: สมรรถนะที่เชื่อมโยงกับประเภทนี้จะไม่มีความสัมพันธ์กับประเภทใดๆ)`)) {
+      return;
+    }
+    try {
+      await adminAPI.deleteCompetencyType(id);
+      toast.success('ลบประเภทสมรรถนะเรียบร้อยแล้ว');
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'ลบประเภทสมรรถนะไม่สำเร็จ');
+    }
+  };
+
   // --- CRUD Functions for Competency Items ---
   const handleLevelCountChange = (value) => {
     setCompetencyDrawer(prev => {
@@ -464,6 +534,8 @@ const CompetencyManagement = () => {
   const openCreateCompetency = () => {
     const initialCategory = categoryOptions[0];
     const initialGroupId = initialCategory ? initialCategory.groupId : '';
+    const defaultType = competencyTypes.find(t => t.name === '20-ความรู้ความสามารถ') || competencyTypes[0];
+    
     setCompetencyDrawer({
       isOpen: true,
       mode: 'create',
@@ -475,7 +547,8 @@ const CompetencyManagement = () => {
         name: '',
         description: '',
         gbtLevel: initialCategory ? initialCategory.groupName : '',
-        competencyType: '20-ความรู้ความสามารถ',
+        competencyType: defaultType ? defaultType.name : '',
+        competencyTypeId: defaultType ? defaultType.id : '',
         sourceRole: '',
         measurementLevelCount: 3,
         conditionsNote: '',
@@ -494,6 +567,8 @@ const CompetencyManagement = () => {
   const openEditCompetency = (competency) => {
     const compCategory = categoryOptions.find(c => c.id === competency.categoryId);
     const initialGroupId = compCategory ? compCategory.groupId : '';
+    const typeObj = competencyTypes.find(t => t.id === competency.competencyTypeId) || competencyTypes.find(t => t.name === competency.competencyType);
+    
     setCompetencyDrawer({
       isOpen: true,
       mode: 'edit',
@@ -505,7 +580,8 @@ const CompetencyManagement = () => {
         name: competency.name,
         description: competency.description || '',
         gbtLevel: competency.gbtLevel || (compCategory ? compCategory.groupName : ''),
-        competencyType: competency.competencyType || '20-ความรู้ความสามารถ',
+        competencyType: typeObj ? typeObj.name : (competency.competencyType || ''),
+        competencyTypeId: typeObj ? typeObj.id : (competency.competencyTypeId || ''),
         sourceRole: competency.sourceRole || '',
         measurementLevelCount: competency.measurementLevelCount || 3,
         conditionsNote: competency.conditionsNote || '',
@@ -831,132 +907,194 @@ const CompetencyManagement = () => {
 
       {/* TAB 2: HIERARCHY TREE MANAGEMENT */}
       {activeTab === 'hierarchy' && (!loading || tree.length > 0) && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between bg-white p-4 border border-slate-200 rounded-2xl shadow-sm">
-            <div>
-              <h3 className="text-sm font-black text-slate-900">จัดการโครงสร้าง Framework</h3>
-              <p className="text-xs text-slate-500 font-semibold mt-0.5">
-                จัดกลุ่มสมรรถนะตามระดับและหมวดหมู่
-              </p>
-            </div>
-            <button
-              onClick={openCreateGroup}
-              className="btn btn-primary text-xs font-black flex items-center gap-1.5"
-            >
-              <Plus size={16} />
-              เพิ่มระดับ (Level)
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {tree.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-12 text-center text-slate-400 font-bold">
-                <Layers className="mx-auto mb-2 text-slate-300" size={32} />
-                ยังไม่มีข้อมูลโครงสร้าง Framework
+        <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+          {/* Column 1: Groups & Categories Tree */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between bg-white p-4 border border-slate-200 rounded-2xl shadow-sm">
+              <div>
+                <h3 className="text-sm font-black text-slate-900">จัดการโครงสร้าง Framework</h3>
+                <p className="text-xs text-slate-500 font-semibold mt-0.5">
+                  จัดกลุ่มสมรรถนะตามระดับและหมวดหมู่
+                </p>
               </div>
-            ) : tree.map((group) => {
-              const isExpanded = expandedGroups[group.id];
-              const categories = group.categories || [];
-              
-              return (
-                <div key={group.id} className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                  {/* Group Header */}
-                  <div className="flex items-center justify-between p-4 bg-slate-50/50 border-b border-slate-100">
-                    <div className="flex items-center gap-3">
-                      <button 
-                        onClick={() => toggleGroupExpand(group.id)}
-                        className="p-1 hover:bg-slate-200/50 rounded-lg text-slate-500 transition-colors"
-                      >
-                        {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                      </button>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-black text-slate-900 text-sm">{group.name}</h4>
-                          <span className="text-[10px] font-bold text-slate-500 bg-slate-200/70 px-1.5 py-0.5 rounded border border-slate-300/30">
-                            {group.code}
-                          </span>
+              <button
+                onClick={openCreateGroup}
+                className="btn btn-primary text-xs font-black flex items-center gap-1.5"
+              >
+                <Plus size={16} />
+                เพิ่มระดับ (Level)
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {tree.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-12 text-center text-slate-400 font-bold">
+                  <Layers className="mx-auto mb-2 text-slate-300" size={32} />
+                  ยังไม่มีข้อมูลโครงสร้าง Framework
+                </div>
+              ) : tree.map((group) => {
+                const isExpanded = expandedGroups[group.id];
+                const categories = group.categories || [];
+                
+                return (
+                  <div key={group.id} className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                    {/* Group Header */}
+                    <div className="flex items-center justify-between p-4 bg-slate-50/50 border-b border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={() => toggleGroupExpand(group.id)}
+                          className="p-1 hover:bg-slate-200/50 rounded-lg text-slate-500 transition-colors"
+                        >
+                          {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                        </button>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-black text-slate-900 text-sm">{group.name}</h4>
+                            <span className="text-[10px] font-bold text-slate-500 bg-slate-200/70 px-1.5 py-0.5 rounded border border-slate-300/30">
+                              {group.code}
+                            </span>
+                          </div>
+                          {group.description && (
+                            <p className="text-xs text-slate-500 font-medium mt-0.5">{group.description}</p>
+                          )}
                         </div>
-                        {group.description && (
-                          <p className="text-xs text-slate-500 font-medium mt-0.5">{group.description}</p>
-                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => openCreateCategory(group.id)}
+                          className="btn btn-outline text-[11px] font-black h-8 px-2.5 flex items-center gap-1 hover:bg-white"
+                        >
+                          <Plus size={14} />
+                          เพิ่มหมวดหมู่ (Category)
+                        </button>
+                        <button
+                          onClick={() => openEditGroup(group)}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200/50 transition-all"
+                          title="แก้ไขระดับ"
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteGroup(group.id, group.name)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200/50 transition-all"
+                          title="ลบระดับ"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => openCreateCategory(group.id)}
-                        className="btn btn-outline text-[11px] font-black h-8 px-2.5 flex items-center gap-1 hover:bg-white"
-                      >
-                        <Plus size={14} />
-                        เพิ่มหมวดหมู่ (Category)
-                      </button>
-                      <button
-                        onClick={() => openEditGroup(group)}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200/50 transition-all"
-                        title="แก้ไขระดับ"
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteGroup(group.id, group.name)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200/50 transition-all"
-                        title="ลบระดับ"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Categories List (collapsible) */}
-                  {isExpanded && (
-                    <div className="divide-y divide-slate-100 bg-white">
-                      {categories.length === 0 ? (
-                        <div className="py-4 px-12 text-xs font-bold text-slate-400 italic">
-                          ยังไม่มีหมวดหมู่ในระดับนี้
-                        </div>
-                      ) : categories.map((cat) => (
-                        <div key={cat.id} className="flex items-center justify-between py-3 px-6 hover:bg-slate-50/30 transition-colors">
-                          <div className="flex items-start gap-2.5">
-                            <div className="mt-1 flex h-2 w-2 rounded-full bg-slate-300" />
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-slate-800 text-xs">{cat.name}</span>
-                                <span className="text-[9px] font-semibold text-slate-400 bg-slate-100 px-1 py-0.2 rounded border border-slate-200">
-                                  {cat.code}
-                                </span>
+                    {/* Categories List (collapsible) */}
+                    {isExpanded && (
+                      <div className="divide-y divide-slate-100 bg-white">
+                        {categories.length === 0 ? (
+                          <div className="py-4 px-12 text-xs font-bold text-slate-400 italic">
+                            ยังไม่มีหมวดหมู่ในระดับนี้
+                          </div>
+                        ) : categories.map((cat) => (
+                          <div key={cat.id} className="flex items-center justify-between py-3 px-6 hover:bg-slate-50/30 transition-colors">
+                            <div className="flex items-start gap-2.5">
+                              <div className="mt-1 flex h-2 w-2 rounded-full bg-slate-300" />
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-slate-800 text-xs">{cat.name}</span>
+                                  <span className="text-[9px] font-semibold text-slate-400 bg-slate-100 px-1 py-0.2 rounded border border-slate-200">
+                                    {cat.code}
+                                  </span>
+                                </div>
+                                {cat.description && (
+                                  <p className="text-xs text-slate-400 font-medium mt-0.5">{cat.description}</p>
+                                )}
+                                <p className="text-[10px] text-indigo-600 font-bold mt-1">
+                                  มี {cat.competencies?.length || 0} หัวข้อสมรรถนะ
+                                </p>
                               </div>
-                              {cat.description && (
-                                <p className="text-xs text-slate-400 font-medium mt-0.5">{cat.description}</p>
-                              )}
-                              <p className="text-[10px] text-indigo-600 font-bold mt-1">
-                                มี {cat.competencies?.length || 0} หัวข้อสมรรถนะ
-                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => openEditCategory(cat)}
+                                className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-all"
+                                title="แก้ไขหมวดหมู่"
+                              >
+                                <Edit size={14} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                                className="p-1 text-slate-400 hover:text-rose-600 hover:bg-slate-50 rounded-lg transition-all"
+                                title="ลบหมวดหมู่"
+                              >
+                                <Trash2 size={14} />
+                              </button>
                             </div>
                           </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={() => openEditCategory(cat)}
-                              className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-all"
-                              title="แก้ไขหมวดหมู่"
-                            >
-                              <Edit size={14} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteCategory(cat.id, cat.name)}
-                              className="p-1 text-slate-400 hover:text-rose-600 hover:bg-slate-50 rounded-lg transition-all"
-                              title="ลบหมวดหมู่"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+          {/* Column 2: Competency Types Dynamic CRUD */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between bg-white p-4 border border-slate-200 rounded-2xl shadow-sm">
+              <div>
+                <h3 className="text-sm font-black text-slate-900">ประเภทสมรรถนะ ({competencyTypes.length})</h3>
+                <p className="text-xs text-slate-500 font-semibold mt-0.5">
+                  ความรู้ / ทักษะ / สมรรถนะ
+                </p>
+              </div>
+              <button
+                onClick={openCreateType}
+                className="btn btn-primary text-xs font-black flex items-center gap-1.5"
+              >
+                <Plus size={16} />
+                เพิ่มประเภท
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {competencyTypes.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-12 text-center text-slate-400 font-bold">
+                  <Layers className="mx-auto mb-2 text-slate-300" size={32} />
+                  ยังไม่มีข้อมูลประเภทสมรรถนะ
                 </div>
-              );
-            })}
+              ) : competencyTypes.map((type) => (
+                <div key={type.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex items-start justify-between hover:border-indigo-200 hover:shadow-md transition-all group">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[10px] font-black text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/50">
+                        {type.code}
+                      </span>
+                      <h4 className="font-black text-slate-800 text-xs">{type.name}</h4>
+                    </div>
+                    {type.description && (
+                      <p className="text-[11px] text-slate-500 font-medium leading-relaxed">{type.description}</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => openEditType(type)}
+                      className="p-1 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-all"
+                      title="แก้ไขประเภท"
+                    >
+                      <Edit size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteType(type.id, type.name)}
+                      className="p-1 text-slate-400 hover:text-rose-600 hover:bg-slate-50 rounded-lg transition-all"
+                      title="ลบประเภท"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -1262,20 +1400,19 @@ const CompetencyManagement = () => {
                   <div className="space-y-1.5">
                     <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ประเภท (Competency Type)</label>
                     <SearchableSelect
-                      options={[
-                        { value: '20-ความรู้ความสามารถ', label: '20-ความรู้ความสามารถ' },
-                        { value: '10-ทักษะ', label: '10-ทักษะ' },
-                        { value: '01-สมรรถนะ', label: '01-สมรรถนะ' },
-                        { value: '12-ความรู้ความสามารถ | ทักษะ', label: '12-ความรู้ความสามารถ | ทักษะ' },
-                        { value: '22-ความรู้ความสามารถ | ทักษะ', label: '22-ความรู้ความสามารถ | ทักษะ' },
-                        { value: '03-ความรู้ความสามารถ | สมรรถนะ', label: '03-ความรู้ความสามารถ | สมรรถนะ' },
-                        { value: '02-ทักษะ | สมรรถนะ', label: '02-ทักษะ | สมรรถนะ' }
-                      ]}
-                      value={competencyDrawer.form.competencyType}
-                      onChange={(val) => setCompetencyDrawer(prev => ({
-                        ...prev,
-                        form: { ...prev.form, competencyType: val }
-                      }))}
+                      options={competencyTypes.map(t => ({ value: t.id, label: t.name }))}
+                      value={competencyDrawer.form.competencyTypeId}
+                      onChange={(val) => setCompetencyDrawer(prev => {
+                        const matched = competencyTypes.find(t => t.id === val);
+                        return {
+                          ...prev,
+                          form: { 
+                            ...prev.form, 
+                            competencyTypeId: val,
+                            competencyType: matched ? matched.name : ''
+                          }
+                        };
+                      })}
                       placeholder="เลือกประเภท (Competency Type)..."
                     />
                   </div>
@@ -1514,6 +1651,48 @@ const CompetencyManagement = () => {
               </div>
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setCategoryModal(prev => ({ ...prev, isOpen: false }))} className="btn btn-outline h-9 text-xs">ยกเลิก</button>
+                <button type="submit" className="btn btn-primary h-9 text-xs flex items-center gap-1"><Save size={14} /> บันทึก</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL FOR COMPETENCY TYPE ADD/EDIT */}
+      {typeModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" 
+            onClick={() => setTypeModal(prev => ({ ...prev, isOpen: false }))} 
+          />
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative z-10 border border-slate-100">
+            <div className="px-5 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="font-black text-slate-900 text-sm">
+                {typeModal.mode === 'create' ? 'เพิ่มประเภทสมรรถนะ (Competency Type)' : 'แก้ไขประเภทสมรรถนะ (Competency Type)'}
+              </h3>
+              <button onClick={() => setTypeModal(prev => ({ ...prev, isOpen: false }))} className="text-slate-400 hover:text-slate-600">
+                <X size={16} />
+              </button>
+            </div>
+            <form onSubmit={handleSaveType} className="p-5 space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-black text-slate-600 block">รหัสประเภท (Code)</label>
+                <input required className="form-input w-full uppercase" placeholder="เช่น COMP_KNOWLEDGE" value={typeModal.form.code} onChange={(e) => setTypeModal({ ...typeModal, form: { ...typeModal.form, code: e.target.value } })} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-black text-slate-600 block">ชื่อประเภท (Name)</label>
+                <input required className="form-input w-full" placeholder="เช่น 20-ความรู้ความสามารถ" value={typeModal.form.name} onChange={(e) => setTypeModal({ ...typeModal, form: { ...typeModal.form, name: e.target.value } })} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-black text-slate-600 block">คำอธิบายประเภท (Description)</label>
+                <textarea className="form-input w-full min-h-20" placeholder="คำอธิบายสั้นๆ..." value={typeModal.form.description} onChange={(e) => setTypeModal({ ...typeModal, form: { ...typeModal.form, description: e.target.value } })} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-black text-slate-600 block">ลำดับการแสดงผล (Display Order)</label>
+                <input type="number" required className="form-input w-28 text-center" value={typeModal.form.displayOrder} onChange={(e) => setTypeModal({ ...typeModal, form: { ...typeModal.form, displayOrder: parseInt(e.target.value, 10) || 0 } })} />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setTypeModal(prev => ({ ...prev, isOpen: false }))} className="btn btn-outline h-9 text-xs">ยกเลิก</button>
                 <button type="submit" className="btn btn-primary h-9 text-xs flex items-center gap-1"><Save size={14} /> บันทึก</button>
               </div>
             </form>

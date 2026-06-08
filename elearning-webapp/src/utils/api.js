@@ -299,6 +299,10 @@ export const adminAPI = {
   importGbtCompetencies: (formData) => api.post('/admin/competencies/import-gbt', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  getCompetencyTypes: () => api.get('/admin/competency-types'),
+  createCompetencyType: (data) => api.post('/admin/competency-types', data),
+  updateCompetencyType: (id, data) => api.put(`/admin/competency-types/${id}`, data),
+  deleteCompetencyType: (id) => api.delete('/admin/competency-types/' + id),
 
   getLessons: (courseId) => api.get(`/admin/courses/${courseId}/lessons`),
   createLesson: (data) => api.post('/admin/lessons', data),

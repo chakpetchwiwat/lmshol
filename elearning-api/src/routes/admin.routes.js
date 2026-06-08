@@ -70,6 +70,11 @@ router.post('/competencies', verifySuperAdmin, auditRequest('admin.competency.cr
 router.put('/competencies/:id', verifySuperAdmin, auditRequest('admin.competency.updated', { entityType: 'competency' }), adminController.updateCompetency);
 router.delete('/competencies/:id', verifySuperAdmin, auditRequest('admin.competency.deleted', { entityType: 'competency', includeBody: false }), adminController.deleteCompetency);
 
+router.get('/competency-types', adminController.getCompetencyTypes);
+router.post('/competency-types', verifySuperAdmin, auditRequest('admin.competency_type.created', { entityType: 'competencyType' }), adminController.createCompetencyType);
+router.put('/competency-types/:id', verifySuperAdmin, auditRequest('admin.competency_type.updated', { entityType: 'competencyType' }), adminController.updateCompetencyType);
+router.delete('/competency-types/:id', verifySuperAdmin, auditRequest('admin.competency_type.deleted', { entityType: 'competencyType', includeBody: false }), adminController.deleteCompetencyType);
+
 router.post('/competencies/import-gbt', verifySuperAdmin, upload.single('file'), auditRequest('admin.competency.imported', { entityType: 'competency' }), adminController.importGbtCompetencies);
 
 router.get('/instructor-presets', adminController.getInstructorPresets);
