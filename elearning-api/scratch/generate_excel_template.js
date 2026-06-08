@@ -4,17 +4,17 @@ const xlsx = require('xlsx');
 
 function run() {
   const headers = [
-    'กลุ่มระดับ GBT (levelGroup)',
-    'ชนิดสมรรถนะ (competencyType)',
-    'ชื่อหมวดหมู่ย่อย (categoryName)',
-    'รหัสสมรรถนะหลัก (code)',
-    'บทบาทงาน (sourceRole)',
-    'รหัสสมรรถนะเดิม (legacyCode)',
-    'ชื่อของสมรรถนะ (name)',
-    'คำอธิบายหัวข้อสมรรถนะ (description)',
-    'หมายเหตุและเกณฑ์การเทียบเคียง (note)',
-    'จำนวนระดับการประเมิน (levelCount)',
-    'คำอธิบายแต่ละระดับ (measurementDescription)'
+    'ระดับ (Level)',
+    'ประเภท (Competency Type)\n(ความรู้/ทักษะ/สมรรถนะ)',
+    'หมวดหมู่ (Category)',
+    'รหัส (code)',
+    'แหล่งที่มา / Role',
+    'รหัสเดิม',
+    'ชื่อหัวข้อ',
+    'คำอธิบายเนื้อหา',
+    'เงื่อนไขและหมายเหตุ',
+    'จำนวนการวัดระดับ',
+    'คำอธิบายระดับการวัด'
   ];
 
   const sampleData = [

@@ -494,7 +494,7 @@ const CompetencyManagement = () => {
       `}</style>
 
       <AdminPageHeader
-        title="Competency Framework"
+        title={`Competency Framework (จำนวนทั้งหมด : ${competencies.length})`}
         subtitle="จัดการแผนผังและรายการ Competency Master Data ทั้งหมดขององค์กร เพื่อเชื่อมโยงคอร์สและประวัติอบรม"
         icon={<Target size={24} />}
         actions={(
@@ -516,7 +516,7 @@ const CompetencyManagement = () => {
           }`}
         >
           <Target size={15} />
-          Competencies List
+          รายการสมรรถนะ
         </button>
         <button
           onClick={() => setActiveTab('hierarchy')}
@@ -527,7 +527,7 @@ const CompetencyManagement = () => {
           }`}
         >
           <Layers size={15} />
-          Hierarchy Settings
+          ตั้งค่าโครงสร้าง
         </button>
         <button
           onClick={() => setActiveTab('import')}
@@ -538,7 +538,7 @@ const CompetencyManagement = () => {
           }`}
         >
           <FileSpreadsheet size={15} />
-          Import Excel
+          นำเข้า Excel
         </button>
       </div>
 
@@ -561,7 +561,7 @@ const CompetencyManagement = () => {
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input
                 className="form-input w-full pl-10 h-10 text-sm focus:border-indigo-500"
-                placeholder="ค้นหาด้วยรหัสหลัก, รหัสเดิม หรือชื่อ competency..."
+                placeholder="ค้นหาด้วยรหัส, รหัสเดิม หรือชื่อหัวข้อ..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -575,13 +575,13 @@ const CompetencyManagement = () => {
               )}
             </div>
             
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+            <div className="flex flex-wrap items-center gap-2 lg:flex-nowrap">
               <select 
                 className="form-select h-10 text-sm focus:border-indigo-500 min-w-44"
                 value={filterGroup} 
                 onChange={(e) => { setFilterGroup(e.target.value); setFilterCategory(''); }}
               >
-                <option value="">กลุ่มสมรรถนะทั้งหมด</option>
+                <option value="">ระดับ (Level) ทั้งหมด</option>
                 {tree.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
               </select>
 
@@ -591,16 +591,16 @@ const CompetencyManagement = () => {
                 onChange={(e) => setFilterCategory(e.target.value)}
                 disabled={!filterGroup}
               >
-                <option value="">หมวดหมู่ย่อยทั้งหมด</option>
+                <option value="">หมวดหมู่ (Category) ทั้งหมด</option>
                 {filteredCategoryOptions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
 
               <button
                 onClick={openCreateCompetency}
-                className="btn btn-primary h-10 px-4 text-xs font-black shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-95 transition-all flex items-center gap-1.5 col-span-2 sm:col-span-1"
+                className="btn btn-primary h-10 px-4 text-xs font-black shadow-md shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-95 transition-all flex items-center gap-1.5"
               >
                 <Plus size={16} />
-                เพิ่ม Competency
+                เพิ่มสมรรถนะ
               </button>
             </div>
           </div>
@@ -611,11 +611,11 @@ const CompetencyManagement = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100 text-xs font-black uppercase tracking-wider text-slate-500">
-                    <th className="py-3.5 px-4 w-40">รหัสหลัก (Code)</th>
-                    <th className="py-3.5 px-4 w-48">รหัสเดิม (Legacy)</th>
-                    <th className="py-3.5 px-4 min-w-[20rem]">ชื่อและคำอธิบายสมรรถนะ</th>
-                    <th className="py-3.5 px-4 w-52">กลุ่ม / หมวดหมู่ย่อย</th>
-                    <th className="py-3.5 px-4 w-40 text-center">ระดับ Rubric</th>
+                    <th className="py-3.5 px-4 w-40">รหัส</th>
+                    <th className="py-3.5 px-4 w-48">รหัสเดิม</th>
+                    <th className="py-3.5 px-4 min-w-[20rem]">ชื่อสมรรถนะ / คำอธิบาย</th>
+                    <th className="py-3.5 px-4 w-52">กลุ่ม / หมวดหมู่</th>
+                    <th className="py-3.5 px-4 w-40 text-center">ระดับการวัด</th>
                     <th className="py-3.5 px-4 w-28 text-center">จัดการ</th>
                   </tr>
                 </thead>
@@ -716,7 +716,7 @@ const CompetencyManagement = () => {
             <div>
               <h3 className="text-sm font-black text-slate-900">จัดการโครงสร้าง Framework</h3>
               <p className="text-xs text-slate-500 font-semibold mt-0.5">
-                จัดกลุ่มสมรรถนะตามกลุ่มโมดูล (Group) และหมวดหมู่ย่อย (Category)
+                จัดกลุ่มสมรรถนะตามระดับและหมวดหมู่
               </p>
             </div>
             <button
@@ -724,7 +724,7 @@ const CompetencyManagement = () => {
               className="btn btn-primary text-xs font-black flex items-center gap-1.5"
             >
               <Plus size={16} />
-              เพิ่มกลุ่มสมรรถนะ
+              เพิ่มระดับ (Level)
             </button>
           </div>
 
@@ -768,19 +768,19 @@ const CompetencyManagement = () => {
                         className="btn btn-outline text-[11px] font-black h-8 px-2.5 flex items-center gap-1 hover:bg-white"
                       >
                         <Plus size={14} />
-                        เพิ่มหมวดหมู่ย่อย
+                        เพิ่มหมวดหมู่ (Category)
                       </button>
                       <button
                         onClick={() => openEditGroup(group)}
                         className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200/50 transition-all"
-                        title="แก้ไขกลุ่ม"
+                        title="แก้ไขระดับ"
                       >
                         <Edit size={14} />
                       </button>
                       <button
                         onClick={() => handleDeleteGroup(group.id, group.name)}
                         className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg border border-transparent hover:border-slate-200/50 transition-all"
-                        title="ลบกลุ่ม"
+                        title="ลบระดับ"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -792,7 +792,7 @@ const CompetencyManagement = () => {
                     <div className="divide-y divide-slate-100 bg-white">
                       {categories.length === 0 ? (
                         <div className="py-4 px-12 text-xs font-bold text-slate-400 italic">
-                          ยังไม่มีหมวดหมู่ย่อยในกลุ่มนี้
+                          ยังไม่มีหมวดหมู่ในระดับนี้
                         </div>
                       ) : categories.map((cat) => (
                         <div key={cat.id} className="flex items-center justify-between py-3 px-6 hover:bg-slate-50/30 transition-colors">
@@ -870,17 +870,17 @@ const CompetencyManagement = () => {
               <div className="border border-slate-100 rounded-xl bg-slate-50/50 p-4 space-y-2 mb-6">
                 <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">เงื่อนไขคอลัมน์ใน Excel:</h4>
                 <ul className="text-xs font-semibold text-slate-500 list-disc list-inside space-y-1">
-                  <li>คอลัมน์ A (A-Group): กลุ่มระดับ GBT (เช่น 01-TOP Organisation Level)</li>
-                  <li>คอลัมน์ B (B-Type): ชนิดสมรรถนะ (เช่น สมรรถนะ หรือ ความรู้)</li>
-                  <li>คอลัมน์ C (C-Category): ชื่อหมวดหมู่ย่อย</li>
-                  <li>คอลัมน์ D (D-Code): รหัสสมรรถนะหลัก (ห้ามซ้ำกัน)</li>
-                  <li>คอลัมน์ E (E-Role): บทบาท/กลุ่มงานที่เกี่ยวข้อง</li>
-                  <li>คอลัมน์ F (F-Legacy): รหัสสมรรถนะเดิม (คั่นด้วย comma , รองรับหลายรหัส)</li>
-                  <li>คอลัมน์ G (G-Name): ชื่อของสมรรถนะ</li>
-                  <li>คอลัมน์ H (H-Desc): คำอธิบายหัวข้อสมรรถนะ</li>
-                  <li>คอลัมน์ I (I-Note): หมายเหตุและเกณฑ์การเทียบเคียง</li>
-                  <li>คอลัมน์ J (J-Count): จำนวนระดับการประเมิน (เช่น 3 หรือ 5)</li>
-                  <li>คอลัมน์ K (K-Rubric): คำอธิบายแต่ละระดับ (แบ่งด้วยเครื่องหมาย pipe | )</li>
+                  <li>คอลัมน์ A (A-Group): ระดับ (Level)</li>
+                  <li>คอลัมน์ B (B-Type): ประเภท (Competency Type) (ความรู้/ทักษะ/สมรรถนะ)</li>
+                  <li>คอลัมน์ C (C-Category): หมวดหมู่ (Category)</li>
+                  <li>คอลัมน์ D (D-Code): รหัส (code)</li>
+                  <li>คอลัมน์ E (E-Role): แหล่งที่มา / Role</li>
+                  <li>คอลัมน์ F (F-Legacy): รหัสเดิม</li>
+                  <li>คอลัมน์ G (G-Name): ชื่อหัวข้อ</li>
+                  <li>คอลัมน์ H (H-Desc): คำอธิบายเนื้อหา</li>
+                  <li>คอลัมน์ I (I-Note): เงื่อนไขและหมายเหตุ</li>
+                  <li>คอลัมน์ J (J-Count): จำนวนการวัดระดับ</li>
+                  <li>คอลัมน์ K (K-Rubric): คำอธิบายระดับการวัด</li>
                 </ul>
               </div>
             </div>
@@ -1009,7 +1009,7 @@ const CompetencyManagement = () => {
                 
                 {/* 1. Category Selection */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">หมวดหมู่ย่อย (Category)</label>
+                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">หมวดหมู่ (Category)</label>
                   <select 
                     required 
                     className="form-select w-full focus:border-indigo-500 h-10 text-sm" 
@@ -1019,7 +1019,7 @@ const CompetencyManagement = () => {
                       form: { ...prev.form, categoryId: e.target.value }
                     }))}
                   >
-                    <option value="">เลือกหมวดหมู่ย่อย</option>
+                    <option value="">เลือกหมวดหมู่ (Category)</option>
                     {categoryOptions.map((category) => (
                       <option key={category.id} value={category.id}>{category.groupName} / {category.name}</option>
                     ))}
@@ -1029,7 +1029,7 @@ const CompetencyManagement = () => {
                 {/* 2. Main Code & Name */}
                 <div className="grid gap-4 sm:grid-cols-[180px_1fr]">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">รหัสหลัก (Main Code)</label>
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">รหัส (code)</label>
                     <input 
                       required 
                       className="form-input w-full focus:border-indigo-500 h-10 text-sm font-mono uppercase" 
@@ -1042,7 +1042,7 @@ const CompetencyManagement = () => {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ชื่อสมรรถนะ (Name)</label>
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ชื่อหัวข้อ</label>
                     <input 
                       required 
                       className="form-input w-full focus:border-indigo-500 h-10 text-sm" 
@@ -1058,10 +1058,10 @@ const CompetencyManagement = () => {
 
                 {/* 3. Description */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">คำอธิบายสมรรถนะ (Description)</label>
+                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">คำอธิบายเนื้อหา</label>
                   <textarea 
                     className="form-input w-full focus:border-indigo-500 min-h-20 text-sm py-2" 
-                    placeholder="รายละเอียดพฤติกรรมหรือนิยามของสมรรถนะนี้..." 
+                    placeholder="รายละเอียดพฤติกรรมหรือนิยาม..." 
                     value={competencyDrawer.form.description} 
                     onChange={(e) => setCompetencyDrawer(prev => ({
                       ...prev,
@@ -1072,7 +1072,7 @@ const CompetencyManagement = () => {
 
                 {/* 4. Legacy Codes Chip Input */}
                 <div className="space-y-1.5 border border-slate-200 p-4 rounded-xl bg-slate-50/30">
-                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">รหัสสมรรถนะเดิม (Legacy Codes)</label>
+                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">รหัสเดิม</label>
                   <div className="flex gap-2">
                     <input 
                       className="form-input flex-1 focus:border-indigo-500 h-10 text-sm font-mono uppercase" 
@@ -1113,7 +1113,7 @@ const CompetencyManagement = () => {
                       </span>
                     ))}
                     {competencyDrawer.form.legacyCodes.length === 0 && (
-                      <span className="text-xs text-slate-400 font-medium italic">ไม่มีรหัสสมรรถนะเดิม</span>
+                      <span className="text-xs text-slate-400 font-medium italic">ไม่มีรหัสเดิม</span>
                     )}
                   </div>
                 </div>
@@ -1121,7 +1121,7 @@ const CompetencyManagement = () => {
                 {/* 5. GBT Metadata Fields (gbtLevel, competencyType, sourceRole) */}
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ระดับ GBT (GBT Level)</label>
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ระดับ (Level)</label>
                     <input 
                       className="form-input w-full focus:border-indigo-500 h-9 text-xs" 
                       placeholder="เช่น 01-TOP Organisation" 
@@ -1133,10 +1133,10 @@ const CompetencyManagement = () => {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ชนิดสมรรถนะ (Type)</label>
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ประเภท (Competency Type) (ความรู้/ทักษะ/สมรรถนะ)</label>
                     <input 
                       className="form-input w-full focus:border-indigo-500 h-9 text-xs" 
-                      placeholder="เช่น สมรรถนะ / ความรู้" 
+                      placeholder="เช่น ความรู้ / ทักษะ / สมรรถนะ" 
                       value={competencyDrawer.form.competencyType} 
                       onChange={(e) => setCompetencyDrawer(prev => ({
                         ...prev,
@@ -1145,7 +1145,7 @@ const CompetencyManagement = () => {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">บทบาทงาน (Source Role)</label>
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">แหล่งที่มา / Role</label>
                     <input 
                       className="form-input w-full focus:border-indigo-500 h-9 text-xs" 
                       placeholder="เช่น อย. ทุกหน่วยงาน" 
@@ -1161,10 +1161,10 @@ const CompetencyManagement = () => {
                 {/* 6. Conditions & Measurement Summary Description */}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">หมายเหตุเทียบเคียง (Conditions Note)</label>
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">เงื่อนไขและหมายเหตุ</label>
                     <textarea 
                       className="form-input w-full focus:border-indigo-500 min-h-16 text-xs py-1.5" 
-                      placeholder="หมายเหตุหรือเงื่อนไขการเทียบเคียง..." 
+                      placeholder="เงื่อนไขและหมายเหตุ..." 
                       value={competencyDrawer.form.conditionsNote} 
                       onChange={(e) => setCompetencyDrawer(prev => ({
                         ...prev,
@@ -1173,10 +1173,10 @@ const CompetencyManagement = () => {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">สรุปการวัดผล (Measurement Desc)</label>
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">คำอธิบายระดับการวัด</label>
                     <textarea 
                       className="form-input w-full focus:border-indigo-500 min-h-16 text-xs py-1.5" 
-                      placeholder="คำอธิบายเกณฑ์การผ่านของแต่ละระดับรวม..." 
+                      placeholder="คำอธิบายเกณฑ์การผ่านโดยสรุป..." 
                       value={competencyDrawer.form.measurementDescription} 
                       onChange={(e) => setCompetencyDrawer(prev => ({
                         ...prev,
@@ -1189,9 +1189,9 @@ const CompetencyManagement = () => {
                 {/* 7. Rubrics Levels List */}
                 <div className="space-y-3 pt-3 border-t border-slate-100">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">การกำหนดเกณฑ์ในแต่ละระดับ (Rubrics)</label>
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">คำอธิบายระดับการวัด (Rubrics)</label>
                     <div className="flex items-center gap-1.5 text-xs">
-                      <span className="font-semibold text-slate-500">จำนวนระดับ:</span>
+                      <span className="font-semibold text-slate-500">จำนวนการวัดระดับ:</span>
                       <div className="flex items-center rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
                         <button
                           type="button"
@@ -1305,7 +1305,7 @@ const CompetencyManagement = () => {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative z-10 border border-slate-100">
             <div className="px-5 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
               <h3 className="font-black text-slate-900 text-sm">
-                {groupModal.mode === 'create' ? 'เพิ่มกลุ่มสมรรถนะ' : 'แก้ไขกลุ่มสมรรถนะ'}
+                {groupModal.mode === 'create' ? 'เพิ่มระดับ (Level)' : 'แก้ไขระดับ (Level)'}
               </h3>
               <button onClick={() => setGroupModal(prev => ({ ...prev, isOpen: false }))} className="text-slate-400 hover:text-slate-600">
                 <X size={16} />
@@ -1313,15 +1313,15 @@ const CompetencyManagement = () => {
             </div>
             <form onSubmit={handleSaveGroup} className="p-5 space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-600 block">รหัสกลุ่ม (Code)</label>
+                <label className="text-xs font-black text-slate-600 block">รหัสระดับ (Code)</label>
                 <input required className="form-input w-full uppercase" placeholder="เช่น ORG_CORE" value={groupModal.form.code} onChange={(e) => setGroupModal({ ...groupModal, form: { ...groupModal.form, code: e.target.value } })} />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-600 block">ชื่อกลุ่มสมรรถนะ (Name)</label>
-                <input required className="form-input w-full" placeholder="เช่น กลุ่มงานหลักตามกระทรวง" value={groupModal.form.name} onChange={(e) => setGroupModal({ ...groupModal, form: { ...groupModal.form, name: e.target.value } })} />
+                <label className="text-xs font-black text-slate-600 block">ชื่อระดับ (Name)</label>
+                <input required className="form-input w-full" placeholder="เช่น กลุ่มระดับ GBT..." value={groupModal.form.name} onChange={(e) => setGroupModal({ ...groupModal, form: { ...groupModal.form, name: e.target.value } })} />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-600 block">คำอธิบายกลุ่ม (Description)</label>
+                <label className="text-xs font-black text-slate-600 block">คำอธิบายระดับ (Description)</label>
                 <textarea className="form-input w-full min-h-20" placeholder="คำอธิบายสั้นๆ..." value={groupModal.form.description} onChange={(e) => setGroupModal({ ...groupModal, form: { ...groupModal.form, description: e.target.value } })} />
               </div>
               <div className="space-y-1">
@@ -1347,7 +1347,7 @@ const CompetencyManagement = () => {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative z-10 border border-slate-100">
             <div className="px-5 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
               <h3 className="font-black text-slate-900 text-sm">
-                {categoryModal.mode === 'create' ? 'เพิ่มหมวดหมู่ย่อย' : 'แก้ไขหมวดหมู่ย่อย'}
+                {categoryModal.mode === 'create' ? 'เพิ่มหมวดหมู่ (Category)' : 'แก้ไขหมวดหมู่ (Category)'}
               </h3>
               <button onClick={() => setCategoryModal(prev => ({ ...prev, isOpen: false }))} className="text-slate-400 hover:text-slate-600">
                 <X size={16} />
@@ -1355,9 +1355,9 @@ const CompetencyManagement = () => {
             </div>
             <form onSubmit={handleSaveCategory} className="p-5 space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-600 block">กลุ่มสมรรถนะ (Group)</label>
+                <label className="text-xs font-black text-slate-600 block">ระดับ (Level)</label>
                 <select required className="form-select w-full" value={categoryModal.form.groupId} onChange={(e) => setCategoryModal({ ...categoryModal, form: { ...categoryModal.form, groupId: e.target.value } })}>
-                  <option value="">เลือกกลุ่มสมรรถนะ</option>
+                  <option value="">เลือกระดับ (Level)</option>
                   {tree.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
                 </select>
               </div>
@@ -1366,7 +1366,7 @@ const CompetencyManagement = () => {
                 <input required className="form-input w-full uppercase" placeholder="เช่น ORG_CORE_ADMIN" value={categoryModal.form.code} onChange={(e) => setCategoryModal({ ...categoryModal, form: { ...categoryModal.form, code: e.target.value } })} />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-600 block">ชื่อหมวดหมู่ย่อย (Name)</label>
+                <label className="text-xs font-black text-slate-600 block">ชื่อหมวดหมู่ (Name)</label>
                 <input required className="form-input w-full" placeholder="เช่น การบริหารความเสี่ยงและการประเมิน" value={categoryModal.form.name} onChange={(e) => setCategoryModal({ ...categoryModal, form: { ...categoryModal.form, name: e.target.value } })} />
               </div>
               <div className="space-y-1">
