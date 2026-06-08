@@ -4,6 +4,103 @@ import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 
+const SearchableSelect = ({
+  options = [],
+  value,
+  onChange,
+  placeholder = 'เลือกรายการ...',
+  disabled = false,
+  required = false
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [search, setSearch] = React.useState('');
+  const containerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const clickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', clickOutside);
+    return () => document.removeEventListener('mousedown', clickOutside);
+  }, []);
+
+  const selectedOpt = React.useMemo(() => options.find(opt => opt.value === value), [options, value]);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setSearch(selectedOpt ? selectedOpt.label : '');
+    }
+  }, [isOpen, selectedOpt]);
+
+  const filtered = React.useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!isOpen) return options;
+    if (!q) return options;
+    return options.filter(opt => opt.label.toLowerCase().includes(q));
+  }, [options, search, isOpen]);
+
+  return (
+    <div ref={containerRef} className="relative w-full">
+      <div className="relative">
+        <input
+          type="text"
+          disabled={disabled}
+          required={required && !value}
+          placeholder={placeholder}
+          value={search}
+          onFocus={() => {
+            setIsOpen(true);
+            setSearch('');
+          }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setIsOpen(true);
+          }}
+          className="form-input w-full focus:border-indigo-500 h-10 text-sm pr-8 bg-white"
+        />
+        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-slate-400">
+          <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-indigo-600' : ''}`} />
+        </div>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute left-0 right-0 mt-1.5 z-50 max-h-60 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
+          {filtered.length === 0 ? (
+            <div className="px-3 py-4 text-xs font-bold text-slate-400 text-center uppercase tracking-wider">
+              ไม่พบข้อมูล
+            </div>
+          ) : (
+            filtered.map((opt) => {
+              const isSelected = opt.value === value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(opt.value);
+                    setSearch(opt.label);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-bold transition-all ${
+                    isSelected
+                      ? 'bg-indigo-50 text-indigo-700'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'
+                  }`}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {isSelected && <Check size={14} className="text-indigo-600 shrink-0 ml-2" />}
+                </button>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const defaultCompetencyForm = {
   categoryId: '',
   code: '',
@@ -45,6 +142,7 @@ const CompetencyManagement = () => {
     isOpen: false,
     mode: 'create', // 'create' | 'edit'
     id: null,
+    selectedGroupId: '',
     form: { ...defaultCompetencyForm }
   });
   const [legacyInput, setLegacyInput] = React.useState('');
@@ -347,18 +445,37 @@ const CompetencyManagement = () => {
     }));
   };
 
+  const handleLevelChangeInDrawer = (newGroupId) => {
+    const group = tree.find(g => g.id === newGroupId);
+    const groupName = group ? group.name : '';
+    const categoriesInGroup = group ? (group.categories || []) : [];
+    const firstCatId = categoriesInGroup[0]?.id || '';
+    setCompetencyDrawer(prev => ({
+      ...prev,
+      selectedGroupId: newGroupId,
+      form: {
+        ...prev.form,
+        categoryId: firstCatId,
+        gbtLevel: groupName
+      }
+    }));
+  };
+
   const openCreateCompetency = () => {
+    const initialCategory = categoryOptions[0];
+    const initialGroupId = initialCategory ? initialCategory.groupId : '';
     setCompetencyDrawer({
       isOpen: true,
       mode: 'create',
       id: null,
+      selectedGroupId: initialGroupId,
       form: {
-        categoryId: categoryOptions[0]?.id || '',
+        categoryId: initialCategory ? initialCategory.id : '',
         code: '',
         name: '',
         description: '',
-        gbtLevel: '',
-        competencyType: '',
+        gbtLevel: initialCategory ? initialCategory.groupName : '',
+        competencyType: 'ความรู้',
         sourceRole: '',
         measurementLevelCount: 3,
         conditionsNote: '',
@@ -375,17 +492,20 @@ const CompetencyManagement = () => {
   };
 
   const openEditCompetency = (competency) => {
+    const compCategory = categoryOptions.find(c => c.id === competency.categoryId);
+    const initialGroupId = compCategory ? compCategory.groupId : '';
     setCompetencyDrawer({
       isOpen: true,
       mode: 'edit',
       id: competency.id,
+      selectedGroupId: initialGroupId,
       form: {
         categoryId: competency.categoryId,
         code: competency.code,
         name: competency.name,
         description: competency.description || '',
-        gbtLevel: competency.gbtLevel || '',
-        competencyType: competency.competencyType || '',
+        gbtLevel: competency.gbtLevel || (compCategory ? compCategory.groupName : ''),
+        competencyType: competency.competencyType || 'ความรู้',
         sourceRole: competency.sourceRole || '',
         measurementLevelCount: competency.measurementLevelCount || 3,
         conditionsNote: competency.conditionsNote || '',
@@ -1007,23 +1127,33 @@ const CompetencyManagement = () => {
               {/* Drawer Body Form */}
               <form onSubmit={handleSaveCompetency} className="flex-1 overflow-y-auto p-6 space-y-5">
                 
-                {/* 1. Category Selection */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">หมวดหมู่ (Category)</label>
-                  <select 
-                    required 
-                    className="form-select w-full focus:border-indigo-500 h-10 text-sm" 
-                    value={competencyDrawer.form.categoryId} 
-                    onChange={(e) => setCompetencyDrawer(prev => ({
-                      ...prev,
-                      form: { ...prev.form, categoryId: e.target.value }
-                    }))}
-                  >
-                    <option value="">เลือกหมวดหมู่ (Category)</option>
-                    {categoryOptions.map((category) => (
-                      <option key={category.id} value={category.id}>{category.groupName} / {category.name}</option>
-                    ))}
-                  </select>
+                {/* 1. Level & Category Selection */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ระดับ (Level)</label>
+                    <SearchableSelect
+                      options={tree.map(group => ({ value: group.id, label: group.name }))}
+                      value={competencyDrawer.selectedGroupId}
+                      onChange={handleLevelChangeInDrawer}
+                      placeholder="เลือกระดับ (Level)..."
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">หมวดหมู่ (Category)</label>
+                    <SearchableSelect
+                      options={(() => {
+                        const selectedGroup = tree.find(g => g.id === competencyDrawer.selectedGroupId);
+                        return selectedGroup ? (selectedGroup.categories || []).map(cat => ({ value: cat.id, label: cat.name })) : [];
+                      })()}
+                      value={competencyDrawer.form.categoryId}
+                      onChange={(catId) => setCompetencyDrawer(prev => ({
+                        ...prev,
+                        form: { ...prev.form, categoryId: catId }
+                      }))}
+                      placeholder="เลือกหมวดหมู่ (Category)..."
+                      disabled={!competencyDrawer.selectedGroupId}
+                    />
+                  </div>
                 </div>
 
                 {/* 2. Main Code & Name */}
@@ -1123,26 +1253,27 @@ const CompetencyManagement = () => {
                   <div className="space-y-1.5">
                     <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ระดับ (Level)</label>
                     <input 
-                      className="form-input w-full focus:border-indigo-500 h-9 text-xs" 
-                      placeholder="เช่น 01-TOP Organisation" 
+                      disabled
+                      className="form-input w-full bg-slate-100 text-slate-500 h-10 text-sm cursor-not-allowed" 
+                      placeholder="ระบบเลือกอัตโนมัติ" 
                       value={competencyDrawer.form.gbtLevel} 
-                      onChange={(e) => setCompetencyDrawer(prev => ({
-                        ...prev,
-                        form: { ...prev.form, gbtLevel: e.target.value }
-                      }))}
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ประเภท (Competency Type) (ความรู้/ทักษะ/สมรรถนะ)</label>
-                    <input 
-                      className="form-input w-full focus:border-indigo-500 h-9 text-xs" 
-                      placeholder="เช่น ความรู้ / ทักษะ / สมรรถนะ" 
+                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ประเภท (Competency Type)</label>
+                    <select 
+                      required
+                      className="form-select w-full focus:border-indigo-500 h-10 text-sm bg-white" 
                       value={competencyDrawer.form.competencyType} 
                       onChange={(e) => setCompetencyDrawer(prev => ({
                         ...prev,
                         form: { ...prev.form, competencyType: e.target.value }
                       }))}
-                    />
+                    >
+                      <option value="ความรู้">ความรู้</option>
+                      <option value="ทักษะ">ทักษะ</option>
+                      <option value="สมรรถนะ">สมรรถนะ</option>
+                    </select>
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">แหล่งที่มา / Role</label>
