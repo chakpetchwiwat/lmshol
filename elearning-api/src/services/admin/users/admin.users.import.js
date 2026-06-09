@@ -340,10 +340,11 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
         logs.push(`[Row ${rowNum}] Updated existing user: ${name} (${email}).`);
       } else {
         // Create user
+        const rawPassword = password ? String(password) : 'P@ssword123';
         const createData = {
           name: name || username,
           email,
-          password: await bcrypt.hash(password ? String(password) : 'P@ssword123', 10),
+          password: await bcrypt.hash(rawPassword, 10),
           mustChangePassword: forceMustChangePassword,
           departmentId,
           department: division ? String(division).trim() : null,
@@ -372,6 +373,7 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
             name: name || username,
             email: email,
             username: username,
+            password: rawPassword,
             mustChangePassword: forceMustChangePassword
           }
         }).catch(err => console.error('[EmailService] Welcome email failed:', err));

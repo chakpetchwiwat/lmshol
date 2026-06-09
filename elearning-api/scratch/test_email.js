@@ -11,6 +11,7 @@ const run = async () => {
       name: 'สมชาย ดีใจ',
       email: 'somchai.d@fda.moph.go.th',
       username: 'somchai.d',
+      password: 'password123',
       mustChangePassword: true
     }
   });
