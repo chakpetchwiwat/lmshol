@@ -38,11 +38,30 @@ const ReferenceDataModal = ({
   const [editingItem, setEditingItem] = React.useState(null);
   const [memberEditorItem, setMemberEditorItem] = React.useState(null);
   const [memberSearch, setMemberSearch] = React.useState('');
+  const [itemSearch, setItemSearch] = React.useState('');
   const [selectedMemberIds, setSelectedMemberIds] = React.useState([]);
   const [selectedMembersMap, setSelectedMembersMap] = React.useState({});
   const [savingMembers, setSavingMembers] = React.useState(false);
   const modalScrollRef = React.useRef(null);
   const canManageMembers = Boolean(onUpdateMembers && (getMembers || getMemberIds));
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setItemSearch('');
+      setMemberSearch('');
+    }
+  }, [isOpen]);
+
+  const filteredItems = React.useMemo(() => {
+    if (!itemSearch.trim()) return items;
+    const query = itemSearch.toLowerCase().trim();
+    return items.filter(item => {
+      const nameMatch = String(item.name || '').toLowerCase().includes(query);
+      const groupMatch = String(item.group || '').toLowerCase().includes(query);
+      const codeMatch = String(item.key || item.code || '').toLowerCase().includes(query);
+      return nameMatch || groupMatch || codeMatch;
+    });
+  }, [items, itemSearch]);
 
   const handleMove = async (index, direction) => {
     if (!onReorder) return;
@@ -304,10 +323,10 @@ const ReferenceDataModal = ({
           <div className="flex flex-1 flex-col md:flex-row overflow-hidden min-h-0 bg-slate-50/20">
             
             {/* LEFT WORKSPACE PANEL: Form or Member Manager */}
-            <div ref={modalScrollRef} className="w-full md:w-[38%] border-r border-slate-100/85 flex flex-col bg-white overflow-y-auto overflow-x-hidden p-6">
+            <div className="w-full md:w-[38%] border-r border-slate-100/85 flex flex-col bg-white overflow-hidden p-6">
               {memberEditorItem ? (
                 /* SECTION A: Member Editor Workspace */
-                <div className="flex flex-col flex-1 animate-in fade-in slide-in-from-left-2 duration-200">
+                <div className="flex flex-col flex-1 animate-in fade-in slide-in-from-left-2 duration-200 min-h-0">
                   <div className="mb-5 flex items-start justify-between gap-2">
                     <div>
                       <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100/60 px-2.5 py-0.5 text-[9px] font-black text-emerald-700 tracking-wider uppercase mb-1">
@@ -344,7 +363,7 @@ const ReferenceDataModal = ({
                   </div>
 
                   {/* Users selection list */}
-                  <div className="flex-1 overflow-y-auto space-y-2 pr-1 select-none">
+                  <div ref={modalScrollRef} className="flex-1 overflow-y-auto space-y-2 pr-1 select-none">
                     {filteredMemberUsers.map((user) => {
                       const isSelected = getMembers ? (user.id in selectedMembersMap) : selectedMemberIds.includes(user.id);
                       const memberValue = getMembers && typeof selectedMembersMap[user.id] === 'object'
@@ -446,7 +465,7 @@ const ReferenceDataModal = ({
                 </div>
               ) : (
                 /* SECTION B: Role Creation / Editing Form Workspace */
-                <form onSubmit={handleSubmit} className="flex flex-col flex-1 animate-in fade-in slide-in-from-left-2 duration-200">
+                <form onSubmit={handleSubmit} className="flex flex-col flex-1 animate-in fade-in slide-in-from-left-2 duration-200 min-h-0">
                   <div className="mb-4">
                     <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 border border-indigo-100/60 px-2.5 py-0.5 text-[9px] font-black text-indigo-700 tracking-wider uppercase mb-1">
                       <Sparkles size={10} /> {editingItem ? 'กำลังแก้ไข Role' : 'สร้าง Role ใหม่'}
@@ -456,7 +475,7 @@ const ReferenceDataModal = ({
                     </h4>
                   </div>
 
-                  <div className="space-y-4 flex-1">
+                  <div ref={modalScrollRef} className="space-y-4 flex-1 overflow-y-auto min-h-0 pr-1">
                     {/* Role Name */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-0.5">
@@ -559,14 +578,35 @@ const ReferenceDataModal = ({
             </div>
 
             {/* RIGHT SCROLLABLE LIST PANEL: Roles List */}
-            <div className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden p-6">
+            <div className="flex-1 flex flex-col overflow-hidden p-6">
               <div className="mb-4 flex items-center justify-between shrink-0">
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                  รายการ {itemLabel} ทั้งหมด ({items.length || 0})
+                  รายการ {itemLabel} ทั้งหมด ({itemSearch.trim() ? `${filteredItems.length}/${items.length}` : (items.length || 0)})
                 </h4>
               </div>
 
-              <div className="flex-1 space-y-3">
+              {/* Search roles */}
+              <div className="relative mb-4 shrink-0">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                <input
+                  type="text"
+                  value={itemSearch}
+                  onChange={(event) => setItemSearch(event.target.value)}
+                  placeholder={`ค้นหา${itemLabel}...`}
+                  className="form-input w-full bg-slate-50/50 hover:bg-slate-50 border-slate-200/80 focus:bg-white pl-10 pr-4 py-2 text-xs font-bold transition-all"
+                />
+                {itemSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setItemSearch('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 {loading ? (
                   <div className="py-12 text-center flex flex-col items-center justify-center gap-3">
                     <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
@@ -579,7 +619,7 @@ const ReferenceDataModal = ({
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-3">
-                    {items.map((item, index) => {
+                    {filteredItems.map((item, index) => {
                       const isEditing = editingItem?.id === item.id;
                       const isMemberOpen = memberEditorItem?.id === item.id;
                       return (
@@ -643,27 +683,27 @@ const ReferenceDataModal = ({
                               }`}>
                                 <button
                                   type="button"
-                                  disabled={index === 0}
+                                  disabled={index === 0 || !!itemSearch.trim()}
                                   onClick={() => handleMove(index, -1)}
                                   className={`p-1 rounded-md transition-all ${
                                     isMemberOpen 
                                       ? 'text-slate-400 hover:bg-slate-700 hover:text-white disabled:opacity-20' 
                                       : 'text-slate-400 hover:bg-white hover:text-indigo-600 disabled:opacity-30'
                                   }`}
-                                  title="เลื่อนขึ้น"
+                                  title={itemSearch.trim() ? "ไม่สามารถจัดลำดับขณะค้นหาได้" : "เลื่อนขึ้น"}
                                 >
                                   <ArrowUp size={12} strokeWidth={3} />
                                 </button>
                                 <button
                                   type="button"
-                                  disabled={index === items.length - 1}
+                                  disabled={index === filteredItems.length - 1 || !!itemSearch.trim()}
                                   onClick={() => handleMove(index, 1)}
                                   className={`p-1 rounded-md transition-all ${
                                     isMemberOpen 
                                       ? 'text-slate-400 hover:bg-slate-700 hover:text-white disabled:opacity-20' 
                                       : 'text-slate-400 hover:bg-white hover:text-indigo-600 disabled:opacity-30'
                                   }`}
-                                  title="เลื่อนลง"
+                                  title={itemSearch.trim() ? "ไม่สามารถจัดลำดับขณะค้นหาได้" : "เลื่อนลง"}
                                 >
                                   <ArrowDown size={12} strokeWidth={3} />
                                 </button>
