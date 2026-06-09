@@ -335,18 +335,27 @@ const createCompetency = async (input = {}) => {
     const legacyCodeStr = legacyCodesList.join(', ');
 
     return prisma.$transaction(async (tx) => {
-        let competencyTypeVal = normalizeText(input.competencyType);
-        const typeId = normalizeText(input.competencyTypeId);
-        if (typeId) {
-            const cType = await tx.competencyType.findUnique({ where: { id: typeId } });
-            if (cType) {
-                competencyTypeVal = cType.name;
+        const categoryIdVal = normalizeText(input.categoryId);
+        const category = await tx.competencyCategory.findUnique({
+            where: { id: categoryIdVal }
+        });
+
+        let competencyTypeVal = null;
+        let typeId = null;
+
+        if (category && category.description) {
+            competencyTypeVal = category.description;
+            const compType = await tx.competencyType.findFirst({
+                where: { name: category.description }
+            });
+            if (compType) {
+                typeId = compType.id;
             }
         }
 
         const competency = await tx.competency.create({
             data: {
-                categoryId: normalizeText(input.categoryId),
+                categoryId: categoryIdVal,
                 gbtLevel: normalizeText(input.gbtLevel),
                 competencyType: competencyTypeVal,
                 competencyTypeId: typeId,
@@ -405,19 +414,28 @@ const updateCompetency = async (id, input = {}) => {
     const legacyCodeStr = legacyCodesList.join(', ');
 
     return prisma.$transaction(async (tx) => {
-        let competencyTypeVal = normalizeText(input.competencyType);
-        const typeId = normalizeText(input.competencyTypeId);
-        if (typeId) {
-            const cType = await tx.competencyType.findUnique({ where: { id: typeId } });
-            if (cType) {
-                competencyTypeVal = cType.name;
+        const categoryIdVal = normalizeText(input.categoryId);
+        const category = await tx.competencyCategory.findUnique({
+            where: { id: categoryIdVal }
+        });
+
+        let competencyTypeVal = null;
+        let typeId = null;
+
+        if (category && category.description) {
+            competencyTypeVal = category.description;
+            const compType = await tx.competencyType.findFirst({
+                where: { name: category.description }
+            });
+            if (compType) {
+                typeId = compType.id;
             }
         }
 
         const competency = await tx.competency.update({
             where: { id },
             data: {
-                categoryId: normalizeText(input.categoryId),
+                categoryId: categoryIdVal,
                 gbtLevel: normalizeText(input.gbtLevel),
                 competencyType: competencyTypeVal,
                 competencyTypeId: typeId,
@@ -534,16 +552,41 @@ const deleteCompetencyGroup = async (id) => {
 };
 
 const updateCompetencyCategory = async (id, input = {}) => {
-    return prisma.competencyCategory.update({
-        where: { id },
-        data: {
-            groupId: normalizeText(input.groupId),
-            code: normalizeCode(input.code, input.name),
-            name: normalizeText(input.name),
-            description: normalizeText(input.description),
-            displayOrder: parseInt(input.displayOrder || 0, 10),
-            status: input.status || 'ACTIVE'
+    const descriptionVal = normalizeText(input.description);
+    return prisma.$transaction(async (tx) => {
+        const category = await tx.competencyCategory.update({
+            where: { id },
+            data: {
+                groupId: normalizeText(input.groupId),
+                code: normalizeCode(input.code, input.name),
+                name: normalizeText(input.name),
+                description: descriptionVal,
+                displayOrder: parseInt(input.displayOrder || 0, 10),
+                status: input.status || 'ACTIVE'
+            }
+        });
+
+        // Resolve the CompetencyType ID from the updated description (Competency Type name)
+        let competencyTypeId = null;
+        if (descriptionVal) {
+            const compType = await tx.competencyType.findFirst({
+                where: { name: descriptionVal }
+            });
+            if (compType) {
+                competencyTypeId = compType.id;
+            }
         }
+
+        // Update all competencies under this category to use the new type and typeId
+        await tx.competency.updateMany({
+            where: { categoryId: id },
+            data: {
+                competencyType: descriptionVal,
+                competencyTypeId: competencyTypeId
+            }
+        });
+
+        return category;
     });
 };
 
@@ -575,6 +618,8 @@ const updateCompetencyType = async (id, input = {}) => {
     const typeName = normalizeText(input.name);
 
     return prisma.$transaction(async (tx) => {
+        const oldType = await tx.competencyType.findUnique({ where: { id } });
+
         const updatedType = await tx.competencyType.update({
             where: { id },
             data: {
@@ -585,6 +630,14 @@ const updateCompetencyType = async (id, input = {}) => {
                 status: input.status || 'ACTIVE'
             }
         });
+
+        if (oldType && oldType.name !== typeName) {
+            // Update Category descriptions that match the old name
+            await tx.competencyCategory.updateMany({
+                where: { description: oldType.name },
+                data: { description: typeName }
+            });
+        }
 
         // Sync competencyType string in all linked competencies to keep it backward compatible!
         await tx.competency.updateMany({
@@ -598,9 +651,21 @@ const updateCompetencyType = async (id, input = {}) => {
     });
 };
 
-const deleteCompetencyType = async (id) => prisma.competencyType.delete({
-    where: { id }
-});
+const deleteCompetencyType = async (id) => {
+    return prisma.$transaction(async (tx) => {
+        const oldType = await tx.competencyType.findUnique({ where: { id } });
+        if (oldType) {
+            // Set matching category descriptions to null
+            await tx.competencyCategory.updateMany({
+                where: { description: oldType.name },
+                data: { description: null }
+            });
+        }
+        return tx.competencyType.delete({
+            where: { id }
+        });
+    });
+};
 
 const importGbtCompetencies = async (fileBuffer) => {
     if (!fileBuffer) {

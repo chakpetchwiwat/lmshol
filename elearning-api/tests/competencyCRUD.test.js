@@ -29,6 +29,9 @@ test('Competency Framework CRUD & Legacy Codes Integration Test', async (t) => {
       await prisma.competencyGroup.deleteMany({
         where: { code: GROUP_CODE }
       });
+      await prisma.competencyType.deleteMany({
+        where: { code: { in: ['TEST_TYPE_Y', 'TEST_TYPE_Y_RENAMED'] } }
+      });
     } catch (err) {
       console.warn("Cleanup warning:", err.message);
     }
@@ -152,6 +155,80 @@ test('Competency Framework CRUD & Legacy Codes Integration Test', async (t) => {
     assert.equal(mappingsResult.mappings.length, 1);
     assert.equal(mappingsResult.mappings[0].competencyId, testCompetency.id);
     assert.equal(mappingsResult.mappings[0].requiredLevel, 2);
+  });
+
+  let testType = null;
+  await t.test('5.5. Test database synchronization cascades', async () => {
+    // A. Create a CompetencyType
+    testType = await AdminCompetencies.createCompetencyType({
+      code: 'TEST_TYPE_Y',
+      name: 'Test Type Y Name',
+      description: 'Test Type Y Desc',
+      displayOrder: 99
+    });
+    assert.ok(testType.id);
+
+    // B. Assign this CompetencyType to the category by setting category description to the type's name
+    const updatedCat = await AdminCompetencies.updateCompetencyCategory(testCategory.id, {
+      groupId: testGroup.id,
+      code: testCategory.code,
+      name: testCategory.name,
+      description: 'Test Type Y Name',
+      displayOrder: testCategory.displayOrder
+    });
+    assert.equal(updatedCat.description, 'Test Type Y Name');
+
+    // C. Verify that the child competency's competencyType and competencyTypeId are automatically updated
+    const checkCompAfterCatUpdate = await prisma.competency.findUnique({
+      where: { id: testCompetency.id }
+    });
+    assert.equal(checkCompAfterCatUpdate.competencyType, 'Test Type Y Name');
+    assert.equal(checkCompAfterCatUpdate.competencyTypeId, testType.id);
+
+    // D. Rename the CompetencyType
+    const renamedType = await AdminCompetencies.updateCompetencyType(testType.id, {
+      code: 'TEST_TYPE_Y_RENAMED',
+      name: 'Test Type Y Renamed Name',
+      description: 'Test Type Y Desc',
+      displayOrder: 99
+    });
+    assert.equal(renamedType.name, 'Test Type Y Renamed Name');
+
+    // E. Verify that Category description is updated automatically to 'Test Type Y Renamed Name'
+    const checkCatAfterTypeRename = await prisma.competencyCategory.findUnique({
+      where: { id: testCategory.id }
+    });
+    assert.equal(checkCatAfterTypeRename.description, 'Test Type Y Renamed Name');
+
+    // F. Verify that child competency's competencyType string is updated automatically
+    const checkCompAfterTypeRename = await prisma.competency.findUnique({
+      where: { id: testCompetency.id }
+    });
+    assert.equal(checkCompAfterTypeRename.competencyType, 'Test Type Y Renamed Name');
+
+    // G. Create a new competency under this category, and verify it automatically derives the type
+    const newCompetency = await AdminCompetencies.createCompetency({
+      categoryId: testCategory.id,
+      code: COMP_CODE_2,
+      name: 'Derived Type Competency',
+      levels: []
+    });
+    assert.equal(newCompetency.competencyType, 'Test Type Y Renamed Name');
+    assert.equal(newCompetency.competencyTypeId, testType.id);
+
+    // H. Delete the CompetencyType
+    await AdminCompetencies.deleteCompetencyType(testType.id);
+    const checkType = await prisma.competencyType.findUnique({ where: { id: testType.id } });
+    assert.equal(checkType, null);
+
+    // I. Verify that Category description is set to null
+    const checkCatAfterTypeDelete = await prisma.competencyCategory.findUnique({
+      where: { id: testCategory.id }
+    });
+    assert.equal(checkCatAfterTypeDelete.description, null);
+
+    // Clean up the second competency
+    await AdminCompetencies.deleteCompetency(newCompetency.id);
   });
 
   await t.test('6. Delete Group, Category, and Competency', async () => {

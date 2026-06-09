@@ -519,14 +519,22 @@ const CompetencyManagement = () => {
     const group = tree.find(g => g.id === newGroupId);
     const groupName = group ? group.name : '';
     const categoriesInGroup = group ? (group.categories || []) : [];
-    const firstCatId = categoriesInGroup[0]?.id || '';
+    const firstCat = categoriesInGroup[0];
+    const firstCatId = firstCat?.id || '';
+
+    // Derive competency type from the category's description
+    const catTypeStr = firstCat ? firstCat.description : '';
+    const matchedType = competencyTypes.find(t => t.name === catTypeStr);
+
     setCompetencyDrawer(prev => ({
       ...prev,
       selectedGroupId: newGroupId,
       form: {
         ...prev.form,
         categoryId: firstCatId,
-        gbtLevel: groupName
+        gbtLevel: groupName,
+        competencyTypeId: matchedType ? matchedType.id : '',
+        competencyType: matchedType ? matchedType.name : ''
       }
     }));
   };
@@ -534,7 +542,8 @@ const CompetencyManagement = () => {
   const openCreateCompetency = () => {
     const initialCategory = categoryOptions[0];
     const initialGroupId = initialCategory ? initialCategory.groupId : '';
-    const defaultType = competencyTypes.find(t => t.name === '20-ความรู้ความสามารถ') || competencyTypes[0];
+    const catTypeStr = initialCategory ? initialCategory.description : '';
+    const matchedType = competencyTypes.find(t => t.name === catTypeStr) || competencyTypes[0];
     
     setCompetencyDrawer({
       isOpen: true,
@@ -547,8 +556,8 @@ const CompetencyManagement = () => {
         name: '',
         description: '',
         gbtLevel: initialCategory ? initialCategory.groupName : '',
-        competencyType: defaultType ? defaultType.name : '',
-        competencyTypeId: defaultType ? defaultType.id : '',
+        competencyType: matchedType ? matchedType.name : '',
+        competencyTypeId: matchedType ? matchedType.id : '',
         sourceRole: '',
         measurementLevelCount: 3,
         conditionsNote: '',
@@ -1286,10 +1295,21 @@ const CompetencyManagement = () => {
                         return selectedGroup ? (selectedGroup.categories || []).map(cat => ({ value: cat.id, label: cat.name })) : [];
                       })()}
                       value={competencyDrawer.form.categoryId}
-                      onChange={(catId) => setCompetencyDrawer(prev => ({
-                        ...prev,
-                        form: { ...prev.form, categoryId: catId }
-                      }))}
+                      onChange={(catId) => setCompetencyDrawer(prev => {
+                        const matchedCat = categoryOptions.find(c => c.id === catId);
+                        const catTypeStr = matchedCat ? matchedCat.description : '';
+                        const matchedType = competencyTypes.find(t => t.name === catTypeStr);
+                        
+                        return {
+                          ...prev,
+                          form: { 
+                            ...prev.form, 
+                            categoryId: catId,
+                            competencyTypeId: matchedType ? matchedType.id : '',
+                            competencyType: matchedType ? matchedType.name : ''
+                          }
+                        };
+                      })}
                       placeholder="เลือกหมวดหมู่ (Category)..."
                       disabled={!competencyDrawer.selectedGroupId}
                     />
@@ -1400,8 +1420,9 @@ const CompetencyManagement = () => {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black text-slate-700 uppercase tracking-wider block">ประเภท (Competency Type)</label>
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-wider block">ประเภท (ดึงอัตโนมัติตามหมวดหมู่)</label>
                     <SearchableSelect
+                      disabled={true}
                       options={competencyTypes.map(t => ({ value: t.id, label: t.name }))}
                       value={competencyDrawer.form.competencyTypeId}
                       onChange={(val) => setCompetencyDrawer(prev => {
