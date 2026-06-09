@@ -10,7 +10,7 @@ const normalizeRoleKey = (value) => String(value || '')
 
 async function main() {
   try {
-    const filePath = 'C:\\Users\\AlexWang\\Downloads\\user role update\\Role - Level 05.06.2569.xlsx';
+    const filePath = process.argv[2] || 'C:\\Users\\AlexWang\\Downloads\\user role update\\Role - Level 05.06.2569.xlsx';
     console.log('Reading excel from:', filePath);
     const workbook = xlsx.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
