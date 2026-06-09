@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import AppLogo from '../../components/common/AppLogo';
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const emailInputId = React.useId();
@@ -78,15 +80,25 @@ const Login = () => {
             <label htmlFor={passwordInputId} className="text-sm font-semibold text-slate-700">
               รหัสผ่าน
             </label>
-            <input
-              id={passwordInputId}
-              type="password"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 text-sm font-medium text-slate-900 transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 2xl:p-4"
-              placeholder="••••••••"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                id={passwordInputId}
+                type={showPassword ? 'text' : 'password'}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 pr-12 text-sm font-medium text-slate-900 transition-all focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 2xl:p-4"
+                placeholder="••••••••"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           <button

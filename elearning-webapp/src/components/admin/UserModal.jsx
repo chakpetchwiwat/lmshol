@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, Check, Tags, X } from 'lucide-react';
+import { Building2, Check, Tags, X, Eye, EyeOff } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
@@ -36,6 +36,7 @@ const UserModal = ({
   onUploadCertificate,
 }) => {
   const [assignmentMode, setAssignmentMode] = React.useState('department');
+  const [showPassword, setShowPassword] = React.useState(false);
   const roleOptions = cohortRoles;
   const selectedRoleLabels = (formData.roles || []).map(key => cohortRoles.find(r => r.key === key)?.name).filter(Boolean);
   
@@ -115,6 +116,12 @@ const UserModal = ({
     }));
   };
 
+  React.useEffect(() => {
+    if (!isOpen) {
+      setShowPassword(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) {
     return null;
   }
@@ -173,14 +180,24 @@ const UserModal = ({
               <label className="mb-1.5 block text-sm font-bold text-slate-700">
                 รหัสผ่าน {editingUser && <span className="text-xs font-medium text-slate-400">(เว้นว่างหากไม่ต้องการเปลี่ยน)</span>}
               </label>
-              <input
-                required={!editingUser}
-                type="password"
-                placeholder="อย่างน้อย 8 ตัวอักษร"
-                className="form-input w-full"
-                value={formData.password}
-                onChange={(event) => setFormData({ ...formData, password: event.target.value })}
-              />
+              <div className="relative">
+                <input
+                  required={!editingUser}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="อย่างน้อย 8 ตัวอักษร"
+                  className="form-input w-full pr-10"
+                  value={formData.password || ''}
+                  onChange={(event) => setFormData({ ...formData, password: event.target.value })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                  aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               <div className="flex items-center gap-2 mt-2">
                 <input
                   type="checkbox"
