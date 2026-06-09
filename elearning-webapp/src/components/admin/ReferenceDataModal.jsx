@@ -32,6 +32,7 @@ const ReferenceDataModal = ({
   const [draftName, setDraftName] = React.useState('');
   const [accessAdmin, setAccessAdmin] = React.useState(false);
   const [draftType, setDraftType] = React.useState('FUNCTION');
+  const [draftGroup, setDraftGroup] = React.useState('');
   const [draftLevelsList, setDraftLevelsList] = React.useState([]);
   const [levelInput, setLevelInput] = React.useState('');
   const [editingItem, setEditingItem] = React.useState(null);
@@ -67,6 +68,7 @@ const ReferenceDataModal = ({
     setDraftName('');
     setAccessAdmin(false);
     setDraftType('FUNCTION');
+    setDraftGroup('');
     setDraftLevelsList([]);
     setLevelInput('');
     setEditingItem(null);
@@ -92,7 +94,7 @@ const ReferenceDataModal = ({
         name,
         ...(showAccessToggle ? { accessAdmin } : {}),
         ...(showTypeSelection ? { type: draftType } : {}),
-        ...(itemLabel === 'Role' ? { levels: draftLevelsList, adminLevels: [] } : {})
+        ...(itemLabel === 'Role' ? { group: draftGroup, levels: [], adminLevels: [] } : {})
       };
 
       if (editingItem) {
@@ -122,7 +124,8 @@ const ReferenceDataModal = ({
       setDraftType(item.type || 'FUNCTION');
     }
     if (itemLabel === 'Role') {
-      setDraftLevelsList(Array.isArray(item.levels) ? item.levels : []);
+      setDraftGroup(item.group || '');
+      setDraftLevelsList([]);
       setLevelInput('');
     }
     requestAnimationFrame(() => {
@@ -384,36 +387,6 @@ const ReferenceDataModal = ({
                           
                           {getMembers && isSelected && (
                             <div className="flex flex-col gap-2 border-t border-slate-100/80 pt-2.5 mt-1 animate-in fade-in slide-in-from-top-1 duration-150">
-                              {roleLevels.length > 0 && (
-                                <div className="flex flex-col gap-1">
-                                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-wider px-0.5">
-                                    ระดับระดับชั้น (Level)
-                                  </label>
-                                  <select
-                                    value={currentLevel}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      if (val === '') {
-                                        setSelectedMembersMap((current) => {
-                                          const next = { ...current };
-                                          delete next[user.id];
-                                          return next;
-                                        });
-                                      } else {
-                                        handleMemberLevelChange(user.id, val);
-                                      }
-                                    }}
-                                    className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-bold text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/20"
-                                  >
-                                    <option value="">เลือกระดับ (Level)...</option>
-                                    {roleLevels.map((lvl) => (
-                                      <option key={lvl} value={lvl}>
-                                        {lvl}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              )}
                               
                               <button
                                 type="button"
@@ -543,65 +516,19 @@ const ReferenceDataModal = ({
                       </label>
                     )}
 
-                    {/* Levels definition (Only for Role) */}
+                    {/* Group definition (Only for Role) */}
                     {itemLabel === 'Role' && (
-                      <div className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+                      <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-0.5">
-                          ระดับย่อยความเชี่ยวชาญ (เช่น G1, G2, G3)
+                          กลุ่มของ Role (Group)
                         </label>
-                        <div className="flex gap-1.5">
-                          <input
-                            type="text"
-                            value={levelInput}
-                            onChange={(event) => setLevelInput(event.target.value)}
-                            onKeyDown={(event) => {
-                              if (event.key === 'Enter') {
-                                event.preventDefault();
-                                addDraftLevel();
-                              }
-                            }}
-                            placeholder="พิมพ์ชื่อระดับแล้วกด Add..."
-                            className="form-input flex-1 min-w-0 bg-white px-3 py-2 text-xs font-bold border-slate-200/80 focus:border-indigo-500"
-                          />
-                          <button
-                            type="button"
-                            onClick={addDraftLevel}
-                            className="rounded-lg bg-indigo-600 px-3 py-2 text-xs font-black text-white hover:bg-indigo-700 transition-colors flex items-center gap-1 shrink-0"
-                          >
-                            <Plus size={14} />
-                            Add
-                          </button>
-                        </div>
-
-                        {draftLevelsList.length > 0 ? (
-                          <div className="mt-2 space-y-1.5 max-h-[160px] overflow-y-auto pr-1">
-                            {draftLevelsList.map((lvl, index) => (
-                              <div 
-                                key={lvl} 
-                                className="group flex items-center justify-between gap-3 rounded-lg border border-slate-100 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm animate-in fade-in slide-in-from-top-1 duration-150"
-                              >
-                                <span className="flex items-center gap-2">
-                                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[10px] font-black text-slate-400">
-                                    {index + 1}
-                                  </span>
-                                  <span>{lvl}</span>
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => removeDraftLevel(lvl)}
-                                  className="rounded-md p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors"
-                                  aria-label={`ลบระดับ ${lvl}`}
-                                >
-                                  <X size={12} />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-center text-[10px] text-slate-400 font-bold italic py-3">
-                            ยังไม่มีการระบุระดับย่อย (พิมพ์เพิ่มตามลำดับชั้น)
-                          </p>
-                        )}
+                        <input
+                          type="text"
+                          value={draftGroup}
+                          onChange={(event) => setDraftGroup(event.target.value)}
+                          placeholder="ระบุกลุ่มของ Role เช่น Generic Drug and New Generic Drug..."
+                          className="form-input w-full px-4 py-2.5 text-xs font-bold border-slate-200/80 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 focus:outline-none"
+                        />
                       </div>
                     )}
                   </div>
@@ -683,6 +610,11 @@ const ReferenceDataModal = ({
                                   isEditing ? 'text-indigo-600' : isMemberOpen ? 'text-white' : 'text-slate-900'
                                 }`}>
                                   {item.name}
+                                  {item.group && (
+                                    <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-[8px] font-black uppercase text-indigo-700 ring-1 ring-inset ring-indigo-200">
+                                      Group: {item.group}
+                                    </span>
+                                  )}
                                   {showTypeSelection && item.type && (
                                     <span className={`rounded px-1.5 py-0.5 text-[8px] font-black uppercase ring-1 ring-inset ${
                                       typeOptions.find(o => o.value === item.type)?.color || 'bg-slate-50 text-slate-500 ring-slate-200'

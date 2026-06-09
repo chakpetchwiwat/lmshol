@@ -375,30 +375,46 @@ const CourseBasicInfoForm = ({
                   <h5 className="text-sm font-black text-slate-900">Role ที่เห็นคอร์สได้</h5>
                   <p className="text-xs text-slate-500">พนักงานที่มี Role ตามที่เลือกจะสามารถมองเห็นและเข้าเรียนคอร์สนี้ได้</p>
                 </div>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="max-h-[350px] overflow-y-auto pr-1 space-y-4">
                   {cohortRoles.length === 0 ? (
                     <p className="text-sm text-slate-500 col-span-full">ยังไม่มี Role ในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
                   ) : (
-                    cohortRoles.map((role) => (
-                      <label key={role.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={Array.isArray(courseForm.visibleCohortRoleIds) && courseForm.visibleCohortRoleIds.includes(role.id)}
-                          onChange={(event) => {
-                            const currentIds = Array.isArray(courseForm.visibleCohortRoleIds) ? courseForm.visibleCohortRoleIds : [];
-                            const nextIds = event.target.checked
-                              ? [...currentIds, role.id]
-                              : currentIds.filter((id) => id !== role.id);
+                    Object.entries(
+                      cohortRoles.reduce((acc, role) => {
+                        const groupName = role.group || 'ทั่วไป';
+                        if (!acc[groupName]) acc[groupName] = [];
+                        acc[groupName].push(role);
+                        return acc;
+                      }, {})
+                    ).map(([groupName, roles]) => (
+                      <div key={groupName} className="space-y-2 border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
+                        <h6 className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                          {groupName}
+                        </h6>
+                        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                          {roles.map((role) => (
+                            <label key={role.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer bg-white">
+                              <input
+                                type="checkbox"
+                                checked={Array.isArray(courseForm.visibleCohortRoleIds) && courseForm.visibleCohortRoleIds.includes(role.id)}
+                                onChange={(event) => {
+                                  const currentIds = Array.isArray(courseForm.visibleCohortRoleIds) ? courseForm.visibleCohortRoleIds : [];
+                                  const nextIds = event.target.checked
+                                    ? [...currentIds, role.id]
+                                    : currentIds.filter((id) => id !== role.id);
 
-                            setCourseForm({
-                              ...courseForm,
-                              visibleCohortRoleIds: nextIds,
-                            });
-                          }}
-                          className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                        />
-                        <span className="font-bold truncate">{role.name}</span>
-                      </label>
+                                  setCourseForm({
+                                    ...courseForm,
+                                    visibleCohortRoleIds: nextIds,
+                                  });
+                                }}
+                                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                              />
+                              <span className="font-bold truncate">{role.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
                     ))
                   )}
                 </div>

@@ -8,33 +8,29 @@ const normalizeRoleKey = (value) => String(value || '')
     .replace(/[^\p{L}\p{N}]+/gu, '_')
     .replace(/^_+|_+$/g, '');
 
+const isSupervisorRole = (roleName) => {
+    const lower = String(roleName || '').toLowerCase();
+    return lower.includes('supervisor') ||
+           lower.includes('lead inspector') ||
+           lower.includes('reviewer') ||
+           lower.includes('evaluator');
+};
+
 const buildRoleData = (data, { includeOrderDefault = false } = {}) => {
     const name = sanitizeName(data.name, 'Cohort role');
     const payload = { name };
+
+    if (data.group !== undefined) {
+        payload.group = data.group ? String(data.group).trim() : null;
+    }
 
     if (data.order !== undefined || includeOrderDefault) {
         payload.order = parseInteger(data.order, 0);
     }
 
-    if (data.levels !== undefined) {
-        if (Array.isArray(data.levels)) {
-            payload.levels = data.levels.map(l => String(l || '').trim()).filter(Boolean);
-        } else if (typeof data.levels === 'string') {
-            payload.levels = data.levels.split(',').map(l => l.trim()).filter(Boolean);
-        }
-    }
-
-    if (data.adminLevels !== undefined) {
-        const levels = Array.isArray(payload.levels)
-            ? payload.levels
-            : (Array.isArray(data.levels) ? data.levels.map(l => String(l || '').trim()).filter(Boolean) : null);
-        const adminLevels = Array.isArray(data.adminLevels)
-            ? data.adminLevels.map(l => String(l || '').trim()).filter(Boolean)
-            : [];
-        payload.adminLevels = levels
-            ? adminLevels.filter((level) => levels.includes(level))
-            : adminLevels;
-    }
+    // Bypass levels hierarchy
+    payload.levels = [];
+    payload.adminLevels = [];
 
     return payload;
 };
@@ -331,19 +327,25 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
                 }
                 const memberInfo = parsedMembers.find((m) => m.userId === user.id);
                 updatedRoleLevels[role.key] = memberInfo.level;
-                if (memberInfo.level && (role.adminLevels || []).includes(memberInfo.level) && user.permission !== 'admin') {
+                
+                if (isSupervisorRole(role.name) && user.permission === 'user') {
                     nextPermission = 'manager';
-                } else if (user.permission === 'manager') {
-                    const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key);
-                    if (!keepManagerPermission) {
-                        nextPermission = 'user';
-                    }
                 }
             } else {
                 updatedRoles = updatedRoles.filter((r) => r !== role.key);
                 delete updatedRoleLevels[role.key];
                 const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key);
-                if (!keepManagerPermission) {
+                
+                let hasOtherSupervisorRole = false;
+                if (updatedRoles.length > 0) {
+                    const otherRoles = await tx.cohortRole.findMany({
+                        where: { key: { in: updatedRoles } },
+                        select: { name: true }
+                    });
+                    hasOtherSupervisorRole = otherRoles.some(r => isSupervisorRole(r.name));
+                }
+
+                if (!keepManagerPermission && !hasOtherSupervisorRole) {
                     nextPermission = 'user';
                 }
             }

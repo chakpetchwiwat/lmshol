@@ -198,6 +198,12 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
   const sheet = workbook.Sheets[sheetName];
   const rows = xlsx.utils.sheet_to_json(sheet);
 
+  const cohortRolesList = await prisma.cohortRole.findMany();
+  const cohortRolesByName = {};
+  cohortRolesList.forEach(role => {
+    cohortRolesByName[role.name.trim().toLowerCase()] = role;
+  });
+
   let successCount = 0;
   let errorCount = 0;
   const logs = [];
@@ -256,6 +262,7 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
     const positionType = findMappedValue(row, PROFILE_MAPPING.positionType);
     const supervisorName = findMappedValue(row, PROFILE_MAPPING.supervisorName);
     const password = findMappedValue(row, PROFILE_MAPPING.password);
+    const role1Val = findMappedValue(row, ['role 1', 'role1', 'role', 'บทบาท']);
 
     try {
       // 1. Process Division / Department
@@ -306,6 +313,18 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
       }
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
+      
+      let userRoles = [];
+      if (role1Val) {
+        const normalizedRoleName = String(role1Val).trim().toLowerCase();
+        const matchedRole = cohortRolesByName[normalizedRoleName];
+        if (matchedRole) {
+          userRoles.push(matchedRole.key);
+        } else {
+          logs.push(`[Row ${rowNum}] Warning: Role "${role1Val}" not found in database. Skipping role assignment.`);
+        }
+      }
+
       if (existingUser) {
         // Update user
         const updateData = {
@@ -331,6 +350,22 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
         if (forceMustChangePassword) {
           updateData.mustChangePassword = true;
         }
+        if (userRoles.length > 0) {
+          updateData.roles = userRoles;
+          
+          const isSupervisor = userRoles.some(rk => {
+            const role = cohortRolesList.find(cr => cr.key === rk);
+            if (!role) return false;
+            const lowerName = role.name.toLowerCase();
+            return lowerName.includes('supervisor') ||
+                   lowerName.includes('lead inspector') ||
+                   lowerName.includes('reviewer') ||
+                   lowerName.includes('evaluator');
+          });
+          if (isSupervisor && existingUser.permission === 'user') {
+            updateData.permission = 'manager';
+          }
+        }
 
         await prisma.user.update({
           where: { id: existingUser.id },
@@ -346,6 +381,7 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
           email,
           password: await bcrypt.hash(rawPassword, 10),
           mustChangePassword: forceMustChangePassword,
+          roles: userRoles,
           departmentId,
           department: division ? String(division).trim() : null,
           tierId,
@@ -358,6 +394,19 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
           retirementDateRaw: retirementDate ? String(retirementDate).trim() : null,
           educationHistory: eduHistory.length > 0 ? eduHistory : null
         };
+
+        const isSupervisor = userRoles.some(rk => {
+          const role = cohortRolesList.find(cr => cr.key === rk);
+          if (!role) return false;
+          const lowerName = role.name.toLowerCase();
+          return lowerName.includes('supervisor') ||
+                 lowerName.includes('lead inspector') ||
+                 lowerName.includes('reviewer') ||
+                 lowerName.includes('evaluator');
+        });
+        if (isSupervisor) {
+          createData.permission = 'manager';
+        }
 
         await prisma.user.create({ data: createData });
         successCount++;

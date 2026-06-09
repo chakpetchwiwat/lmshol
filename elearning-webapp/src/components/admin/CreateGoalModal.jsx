@@ -257,33 +257,49 @@ const CreateGoalModal = ({
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {cohortRoles.map((role) => {
-                      const isSelected = selectedCohortRoleIds.includes(role.id);
-                      return (
-                        <button
-                          key={role.id}
-                          type="button"
-                          onClick={() => toggleCohortRole(role.id)}
-                          className={`flex items-center justify-between rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-all ${
-                            isSelected
-                              ? 'border-primary bg-white text-primary shadow-sm'
-                              : 'border-slate-200 bg-white text-slate-600 hover:border-primary/30'
-                          }`}
-                        >
-                          <span className="flex min-w-0 items-center gap-2">
-                            <Tags size={16} className="shrink-0" />
-                            <span className="truncate">{role.name}</span>
-                          </span>
-                          {isSelected && <Check size={16} className="shrink-0" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {cohortRoles.length === 0 && (
+                  {cohortRoles.length === 0 ? (
                     <div className="rounded-xl border border-dashed border-slate-200 bg-white p-4 text-center text-xs font-bold text-slate-400">
                       ยังไม่มี Cohort Role ในระบบ
+                    </div>
+                  ) : (
+                    <div className="max-h-[350px] overflow-y-auto pr-1 space-y-4">
+                      {Object.entries(
+                        cohortRoles.reduce((acc, role) => {
+                          const groupName = role.group || 'ทั่วไป';
+                          if (!acc[groupName]) acc[groupName] = [];
+                          acc[groupName].push(role);
+                          return acc;
+                        }, {})
+                      ).map(([groupName, roles]) => (
+                        <div key={groupName} className="space-y-2 border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
+                          <h6 className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                            {groupName}
+                          </h6>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {roles.map((role) => {
+                              const isSelected = selectedCohortRoleIds.includes(role.id);
+                              return (
+                                <button
+                                  key={role.id}
+                                  type="button"
+                                  onClick={() => toggleCohortRole(role.id)}
+                                  className={`flex items-center justify-between rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-all ${
+                                    isSelected
+                                      ? 'border-primary bg-white text-primary shadow-sm'
+                                      : 'border-slate-200 bg-white text-slate-600 hover:border-primary/30'
+                                  }`}
+                                >
+                                  <span className="flex min-w-0 items-center gap-2 flex-1">
+                                    <Tags size={16} className="shrink-0 text-slate-400" />
+                                    <span className="truncate">{role.name}</span>
+                                  </span>
+                                  {isSelected && <Check size={16} className="shrink-0" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

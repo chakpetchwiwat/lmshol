@@ -320,69 +320,50 @@ const UserModal = ({
                         ยังไม่มี Cohort Role ในระบบ
                       </div>
                     ) : (
-                      <div className="grid max-h-52 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
-                        {roleOptions.map((role) => {
-                          const isSelected = (formData.roles || []).includes(role.key);
-                          const currentLevel = formData.roleLevels?.[role.key] || '';
-                          const roleLevels = role.levels || [];
+                      <div className="max-h-[350px] overflow-y-auto pr-1 space-y-4">
+                        {Object.entries(
+                          roleOptions.reduce((acc, role) => {
+                            const groupName = role.group || 'ทั่วไป';
+                            if (!acc[groupName]) acc[groupName] = [];
+                            acc[groupName].push(role);
+                            return acc;
+                          }, {})
+                        ).map(([groupName, roles]) => (
+                          <div key={groupName} className="space-y-2 border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
+                            <h6 className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+                              {groupName}
+                            </h6>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              {roles.map((role) => {
+                                const isSelected = (formData.roles || []).includes(role.key);
 
-                          return (
-                            <div
-                              key={role.key}
-                              className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-all ${
-                                isSelected
-                                  ? 'border-primary/40 bg-primary/10 text-primary shadow-sm'
-                                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                              }`}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => toggleCohortRole(role.key)}
-                                className="flex-1 min-w-0 text-left hover:text-primary"
-                              >
-                                <span className="truncate block">{role.name}</span>
-                              </button>
-
-                              {isSelected && roleLevels.length > 0 && (
-                                <div className="shrink-0">
-                                  <select
-                                    value={currentLevel}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setFormData(prev => ({
-                                        ...prev,
-                                        roleLevels: {
-                                          ...(prev.roleLevels || {}),
-                                          [role.key]: val
-                                        }
-                                      }));
-                                    }}
-                                    className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold text-slate-700 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
+                                return (
+                                  <button
+                                    key={role.key}
+                                    type="button"
+                                    onClick={() => toggleCohortRole(role.key)}
+                                    className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left text-sm font-bold transition-all ${
+                                      isSelected
+                                        ? 'border-primary/40 bg-primary/10 text-primary shadow-sm'
+                                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                                    }`}
                                   >
-                                    <option value="">เลือกระดับ...</option>
-                                    {roleLevels.map((lvl) => (
-                                      <option key={lvl} value={lvl}>
-                                        {lvl}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              )}
-
-                              <button
-                                type="button"
-                                onClick={() => toggleCohortRole(role.key)}
-                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
-                                  isSelected
-                                    ? 'border-primary bg-primary text-white'
-                                    : 'border-slate-300 bg-white text-transparent'
-                                }`}
-                              >
-                                <Check size={13} strokeWidth={3} />
-                              </button>
+                                    <span className="truncate block flex-1">{role.name}</span>
+                                    <span
+                                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                                        isSelected
+                                          ? 'border-primary bg-primary text-white'
+                                          : 'border-slate-300 bg-white text-transparent'
+                                      }`}
+                                    >
+                                      <Check size={13} strokeWidth={3} />
+                                    </span>
+                                  </button>
+                                );
+                              })}
                             </div>
-                          );
-                        })}
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>

@@ -393,6 +393,7 @@ model CohortRole {
   id              String                   @id @default(uuid())
   key             String                   @unique
   name            String                   @unique
+  group           String?
   order           Int                      @default(0)
   levels          String[]                 @default([])
   adminLevels     String[]                 @default([])

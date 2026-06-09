@@ -106,17 +106,19 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
     const cohortRoleKeys = Array.isArray(data.roles)
         ? data.roles
         : (Array.isArray(baseData.roles) ? baseData.roles : []);
-    const cohortRoleLevels = data.roleLevels || baseData.roleLevels || {};
-    if (cohortRoleKeys.length > 0 && cohortRoleLevels && data.permission !== USER_PERMISSIONS.ADMIN) {
+    if (cohortRoleKeys.length > 0 && data.permission !== USER_PERMISSIONS.ADMIN) {
         const cohortRoles = await tx.cohortRole.findMany({
             where: { key: { in: cohortRoleKeys } },
-            select: { key: true, adminLevels: true }
+            select: { name: true }
         });
-        const hasAdminLevel = cohortRoles.some((role) => {
-            const assignedLevel = cohortRoleLevels[role.key];
-            return assignedLevel && (role.adminLevels || []).includes(assignedLevel);
+        const hasSupervisorRole = cohortRoles.some((role) => {
+            const lower = role.name.toLowerCase();
+            return lower.includes('supervisor') ||
+                   lower.includes('lead inspector') ||
+                   lower.includes('reviewer') ||
+                   lower.includes('evaluator');
         });
-        if (hasAdminLevel) {
+        if (hasSupervisorRole) {
             data.permission = USER_PERMISSIONS.MANAGER;
         }
     }
