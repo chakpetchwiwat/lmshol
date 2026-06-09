@@ -599,7 +599,7 @@ const UserManagement = () => {
                 </button>
                 <button type="button" onClick={() => setShowCohortRoleModal(true)} className="btn btn-outline">
                   <Users size={18} />
-                  จัดการ Role
+                  จัดการ Role ({(cohortRoles || []).length})
                 </button>
                 {/* Export Excel Dropdown */}
                 <div className="relative">

@@ -389,7 +389,7 @@ const CourseBasicInfoForm = ({
                     ).map(([groupName, roles]) => (
                       <div key={groupName} className="space-y-2 border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
                         <h6 className="text-[11px] font-black uppercase tracking-wider text-slate-400">
-                          {groupName}
+                          {groupName} ({roles.length})
                         </h6>
                         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                           {roles.map((role) => (
