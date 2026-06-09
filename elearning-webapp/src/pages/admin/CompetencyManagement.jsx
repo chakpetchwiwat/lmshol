@@ -997,15 +997,17 @@ const CompetencyManagement = () => {
                             <div className="flex items-start gap-2.5">
                               <div className="mt-1 flex h-2 w-2 rounded-full bg-slate-300" />
                               <div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                   <span className="font-bold text-slate-800 text-xs">{cat.name}</span>
-                                  <span className="text-[9px] font-semibold text-slate-400 bg-slate-100 px-1 py-0.2 rounded border border-slate-200">
+                                  <span className="text-[9px] font-semibold text-slate-400 bg-slate-100 px-1 py-0.5 rounded border border-slate-200 font-mono">
                                     {cat.code}
                                   </span>
+                                  {cat.description && (
+                                    <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-[8px] font-black uppercase text-indigo-700 ring-1 ring-inset ring-indigo-200">
+                                      {cat.description}
+                                    </span>
+                                  )}
                                 </div>
-                                {cat.description && (
-                                  <p className="text-xs text-slate-400 font-medium mt-0.5">{cat.description}</p>
-                                )}
                                 <p className="text-[10px] text-indigo-600 font-bold mt-1">
                                   มี {cat.competencies?.length || 0} หัวข้อสมรรถนะ
                                 </p>
@@ -1642,8 +1644,18 @@ const CompetencyManagement = () => {
                 <input required className="form-input w-full" placeholder="เช่น การบริหารความเสี่ยงและการประเมิน" value={categoryModal.form.name} onChange={(e) => setCategoryModal({ ...categoryModal, form: { ...categoryModal.form, name: e.target.value } })} />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-black text-slate-600 block">คำอธิบายหมวดหมู่ (Description)</label>
-                <textarea className="form-input w-full min-h-20" placeholder="คำอธิบายสั้นๆ..." value={categoryModal.form.description} onChange={(e) => setCategoryModal({ ...categoryModal, form: { ...categoryModal.form, description: e.target.value } })} />
+                <label className="text-xs font-black text-slate-600 block">ประเภทสมรรถนะ (Competency Type)</label>
+                <select 
+                  required 
+                  className="form-select w-full bg-white text-xs font-bold" 
+                  value={categoryModal.form.description} 
+                  onChange={(e) => setCategoryModal({ ...categoryModal, form: { ...categoryModal.form, description: e.target.value } })}
+                >
+                  <option value="">เลือกประเภทสมรรถนะ (Competency Type)</option>
+                  {competencyTypes.map(type => (
+                    <option key={type.id} value={type.name}>{type.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-black text-slate-600 block">ลำดับการแสดงผล (Display Order)</label>
