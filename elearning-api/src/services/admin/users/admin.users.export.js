@@ -67,7 +67,10 @@ const IMPORT_COMPAT_PROFILE_HEADERS = [
   'Supervisor Name',
   'Password',
   'CV',
-  'Job Description'
+  'Job Description',
+  'Role 1',
+  'Role 2',
+  'Role 3'
 ];
 
 const IMPORT_COMPAT_TRAINING_HEADERS = [
@@ -254,11 +257,26 @@ const createWorkbook = (sheetName, headers, rows, columnWidths, rowHeights = [])
 };
 
 const exportUserProfiles = async (actor, frontendUrl = 'http://localhost:3000') => {
-  const users = await getScopedUsersForExport(actor, {});
+  const users = await getScopedUsersForExport(actor, { roles: true });
+  
+  // Load Cohort Roles for translating keys to names
+  const cohortRoles = await prisma.cohortRole.findMany({
+    select: { key: true, name: true }
+  });
+  const roleKeyToName = {};
+  for (const r of cohortRoles) {
+    roleKeyToName[r.key] = r.name;
+  }
+
   const rows = users.map((user) => {
     const { firstName, lastName } = splitName(user.name);
     const firstEducation = getFirstEducation(user);
     const highestEducation = getHighestEducation(user);
+
+    const userRoleNames = (user.roles || []).map(key => roleKeyToName[key] || key);
+    const role1 = userRoleNames[0] || '';
+    const role2 = userRoleNames[1] || '';
+    const role3 = userRoleNames[2] || '';
 
     return [
       usernameFromEmail(user.email),
@@ -281,9 +299,12 @@ const exportUserProfiles = async (actor, frontendUrl = 'http://localhost:3000') 
       empty(user.nationalId, ''),
       empty(user.positionType, ''),
       empty(user.supervisorName, ''),
-      '',
+      '', // Password remains empty since DB stores one-way bcrypt hashes
       findProfileFileLink(user, ['cv', 'resume', 'ประวัติ'], frontendUrl),
-      findProfileFileLink(user, ['job description', 'jd', 'description', 'หน้าที่'], frontendUrl)
+      findProfileFileLink(user, ['job description', 'jd', 'description', 'หน้าที่'], frontendUrl),
+      role1,
+      role2,
+      role3
     ];
   });
 
@@ -291,7 +312,7 @@ const exportUserProfiles = async (actor, frontendUrl = 'http://localhost:3000') 
     'users profile',
     IMPORT_COMPAT_PROFILE_HEADERS,
     rows,
-    [24, 32, 18, 18, 30, 22, 28, 28, 28, 30, 28, 36, 28, 30, 28, 36, 18, 24, 22, 28, 18, 36, 36]
+    [24, 32, 18, 18, 30, 22, 28, 28, 28, 30, 28, 36, 28, 30, 28, 36, 18, 24, 22, 28, 18, 36, 36, 28, 28, 28]
   );
 };
 
