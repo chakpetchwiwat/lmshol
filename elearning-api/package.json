@@ -7,7 +7,7 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "npm run test:helpers && npm run test:security",
-    "test:helpers": "node tests/visibility.helpers.node.test.js && node tests/auth.helpers.test.js && node tests/coursePermissions.test.js && node tests/courseStaff.service.test.js && node tests/course.routes.test.js && node tests/user.helpers.test.js && node tests/user.serializers.test.js && node tests/user.flows.test.js && node tests/goal.notifications.test.js && node tests/certificateUrl.test.js && node tests/certificateSignatures.test.js",
+    "test:helpers": "node tests/visibility.helpers.node.test.js && node tests/auth.helpers.test.js && node tests/coursePermissions.test.js && node tests/courseStaff.service.test.js && node tests/course.routes.test.js && node tests/user.helpers.test.js && node tests/user.serializers.test.js && node tests/user.flows.test.js && node tests/goal.notifications.test.js && node tests/certificateUrl.test.js && node tests/certificateSignatures.test.js && node tests/validationAndCache.test.js",
     "test:security": "node tests/security.config.test.js && node tests/loginProtection.test.js",
     "test:refactor-contracts": "node scripts/compare_refactor_contracts.js",
     "certificates:regenerate": "node scripts/regenerate_certificates_by_no.js",

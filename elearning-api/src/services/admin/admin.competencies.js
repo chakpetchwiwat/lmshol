@@ -1,5 +1,11 @@
 const prisma = require('../../utils/prisma');
 const xlsx = require('xlsx');
+const { getCachedData, evictCache } = require('../../utils/cache.helpers');
+
+const evictCompetencyCaches = async () => {
+    await evictCache('competencies:*');
+    await evictCache('categories:*');
+};
 
 const normalizeText = (value) => {
     if (value === undefined || value === null) return null;
@@ -256,30 +262,40 @@ const serializeMapping = (mapping) => ({
 });
 
 const getCompetencies = async () => {
-    const competencies = await prisma.competency.findMany({
-        include: competencyInclude,
-        orderBy: [
-            { category: { group: { displayOrder: 'asc' } } },
-            { category: { displayOrder: 'asc' } },
-            { displayOrder: 'asc' },
-            { name: 'asc' }
-        ]
-    });
+    return getCachedData('competencies:list', async () => {
+        const competencies = await prisma.competency.findMany({
+            include: competencyInclude,
+            orderBy: [
+                { category: { group: { displayOrder: 'asc' } } },
+                { category: { displayOrder: 'asc' } },
+                { displayOrder: 'asc' },
+                { name: 'asc' }
+            ]
+        });
 
-    return competencies.map(serializeCompetency);
+        return competencies.map(serializeCompetency);
+    });
 };
 
-const getCompetencyTree = async () => prisma.competencyGroup.findMany({
-    include: {
-        categories: {
+const getCompetencyTree = async () => {
+    return getCachedData('competencies:tree', async () => {
+        return prisma.competencyGroup.findMany({
             include: {
-                competencies: {
+                categories: {
                     include: {
-                        levels: {
+                        competencies: {
+                            include: {
+                                levels: {
+                                    orderBy: [
+                                        { displayOrder: 'asc' },
+                                        { level: 'asc' }
+                                    ]
+                                }
+                            },
                             orderBy: [
                                 { displayOrder: 'asc' },
-                                { level: 'asc' }
-                            ]
+                                { name: 'asc' }
+                              ]
                         }
                     },
                     orderBy: [
@@ -292,34 +308,38 @@ const getCompetencyTree = async () => prisma.competencyGroup.findMany({
                 { displayOrder: 'asc' },
                 { name: 'asc' }
             ]
+        });
+    });
+};
+
+const createCompetencyGroup = async (input = {}) => {
+    const result = await prisma.competencyGroup.create({
+        data: {
+            code: normalizeCode(input.code, input.name),
+            name: normalizeText(input.name),
+            description: normalizeText(input.description),
+            displayOrder: parseInt(input.displayOrder || 0, 10),
+            status: input.status || 'ACTIVE'
         }
-    },
-    orderBy: [
-        { displayOrder: 'asc' },
-        { name: 'asc' }
-    ]
-});
+    });
+    await evictCompetencyCaches();
+    return result;
+};
 
-const createCompetencyGroup = async (input = {}) => prisma.competencyGroup.create({
-    data: {
-        code: normalizeCode(input.code, input.name),
-        name: normalizeText(input.name),
-        description: normalizeText(input.description),
-        displayOrder: parseInt(input.displayOrder || 0, 10),
-        status: input.status || 'ACTIVE'
-    }
-});
-
-const createCompetencyCategory = async (input = {}) => prisma.competencyCategory.create({
-    data: {
-        groupId: normalizeText(input.groupId),
-        code: normalizeCode(input.code, input.name),
-        name: normalizeText(input.name),
-        description: normalizeText(input.description),
-        displayOrder: parseInt(input.displayOrder || 0, 10),
-        status: input.status || 'ACTIVE'
-    }
-});
+const createCompetencyCategory = async (input = {}) => {
+    const result = await prisma.competencyCategory.create({
+        data: {
+            groupId: normalizeText(input.groupId),
+            code: normalizeCode(input.code, input.name),
+            name: normalizeText(input.name),
+            description: normalizeText(input.description),
+            displayOrder: parseInt(input.displayOrder || 0, 10),
+            status: input.status || 'ACTIVE'
+        }
+    });
+    await evictCompetencyCaches();
+    return result;
+};
 
 const createCompetency = async (input = {}) => {
     const mainCode = normalizeCode(input.code, input.name);
@@ -334,7 +354,7 @@ const createCompetency = async (input = {}) => {
         : [];
     const legacyCodeStr = legacyCodesList.join(', ');
 
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
         const categoryIdVal = normalizeText(input.categoryId);
         const category = await tx.competencyCategory.findUnique({
             where: { id: categoryIdVal }
@@ -399,6 +419,9 @@ const createCompetency = async (input = {}) => {
             include: competencyInclude
         });
     });
+
+    await evictCompetencyCaches();
+    return result;
 };
 
 const updateCompetency = async (id, input = {}) => {
@@ -413,7 +436,7 @@ const updateCompetency = async (id, input = {}) => {
         : [];
     const legacyCodeStr = legacyCodesList.join(', ');
 
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
         const categoryIdVal = normalizeText(input.categoryId);
         const category = await tx.competencyCategory.findUnique({
             where: { id: categoryIdVal }
@@ -524,16 +547,21 @@ const updateCompetency = async (id, input = {}) => {
             include: competencyInclude
         });
     });
+
+    await evictCompetencyCaches();
+    return result;
 };
 
 const deleteCompetency = async (id) => {
-    return prisma.competency.delete({
+    const result = await prisma.competency.delete({
         where: { id }
     });
+    await evictCompetencyCaches();
+    return result;
 };
 
 const updateCompetencyGroup = async (id, input = {}) => {
-    return prisma.competencyGroup.update({
+    const result = await prisma.competencyGroup.update({
         where: { id },
         data: {
             code: normalizeCode(input.code, input.name),
@@ -543,17 +571,21 @@ const updateCompetencyGroup = async (id, input = {}) => {
             status: input.status || 'ACTIVE'
         }
     });
+    await evictCompetencyCaches();
+    return result;
 };
 
 const deleteCompetencyGroup = async (id) => {
-    return prisma.competencyGroup.delete({
+    const result = await prisma.competencyGroup.delete({
         where: { id }
     });
+    await evictCompetencyCaches();
+    return result;
 };
 
 const updateCompetencyCategory = async (id, input = {}) => {
     const descriptionVal = normalizeText(input.description);
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
         const category = await tx.competencyCategory.update({
             where: { id },
             data: {
@@ -588,36 +620,49 @@ const updateCompetencyCategory = async (id, input = {}) => {
 
         return category;
     });
+
+    await evictCompetencyCaches();
+    return result;
 };
 
 const deleteCompetencyCategory = async (id) => {
-    return prisma.competencyCategory.delete({
+    const result = await prisma.competencyCategory.delete({
         where: { id }
+    });
+    await evictCompetencyCaches();
+    return result;
+};
+
+const getCompetencyTypes = async () => {
+    return getCachedData('competencies:types', async () => {
+        return prisma.competencyType.findMany({
+            orderBy: [
+                { displayOrder: 'asc' },
+                { name: 'asc' }
+            ]
+        });
     });
 };
 
-const getCompetencyTypes = async () => prisma.competencyType.findMany({
-    orderBy: [
-        { displayOrder: 'asc' },
-        { name: 'asc' }
-    ]
-});
-
-const createCompetencyType = async (input = {}) => prisma.competencyType.create({
-    data: {
-        code: normalizeCode(input.code, input.name),
-        name: normalizeText(input.name),
-        description: normalizeText(input.description),
-        displayOrder: parseInt(input.displayOrder || 0, 10),
-        status: input.status || 'ACTIVE'
-    }
-});
+const createCompetencyType = async (input = {}) => {
+    const result = await prisma.competencyType.create({
+        data: {
+            code: normalizeCode(input.code, input.name),
+            name: normalizeText(input.name),
+            description: normalizeText(input.description),
+            displayOrder: parseInt(input.displayOrder || 0, 10),
+            status: input.status || 'ACTIVE'
+        }
+    });
+    await evictCompetencyCaches();
+    return result;
+};
 
 const updateCompetencyType = async (id, input = {}) => {
     const mainCode = normalizeCode(input.code, input.name);
     const typeName = normalizeText(input.name);
 
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
         const oldType = await tx.competencyType.findUnique({ where: { id } });
 
         const updatedType = await tx.competencyType.update({
@@ -649,10 +694,13 @@ const updateCompetencyType = async (id, input = {}) => {
 
         return updatedType;
     });
+
+    await evictCompetencyCaches();
+    return result;
 };
 
 const deleteCompetencyType = async (id) => {
-    return prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
         const oldType = await tx.competencyType.findUnique({ where: { id } });
         if (oldType) {
             // Set matching category descriptions to null
@@ -665,6 +713,9 @@ const deleteCompetencyType = async (id) => {
             where: { id }
         });
     });
+
+    await evictCompetencyCaches();
+    return result;
 };
 
 const importGbtCompetencies = async (fileBuffer) => {
@@ -884,6 +935,7 @@ const importGbtCompetencies = async (fileBuffer) => {
         }
     }, { timeout: 600000 });
 
+    await evictCompetencyCaches();
     summary.logs.push(`Imported ${summary.importedRows} GBT competency rows.`);
     return summary;
 };

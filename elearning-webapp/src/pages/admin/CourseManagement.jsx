@@ -106,6 +106,13 @@ const CourseManagement = () => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedCategory, setSelectedCategory] = React.useState(FILTER_VALUES.ALL);
   const [courseView, setCourseView] = React.useState(ENTITY_VIEW_STATUS.ACTIVE);
+  const [loadingCourses, setLoadingCourses] = React.useState(false);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [pageSize] = React.useState(10);
+  const [totalPages, setTotalPages] = React.useState(1);
+  const [totalCourses, setTotalCourses] = React.useState(0);
+  const [activeCount, setActiveCount] = React.useState(0);
+  const [archivedCount, setArchivedCount] = React.useState(0);
 
   const [showModal, setShowModal] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
@@ -130,8 +137,7 @@ const CourseManagement = () => {
 
   const fetchData = React.useCallback(async () => {
     try {
-      const [courseResponse, categoryResponse, departmentResponse, tierResponse, cohortRoleResponse, competencyResponse, instructorPresetResponse, organizationPresetResponse] = await Promise.all([
-        adminAPI.getCourses(),
+      const [categoryResponse, departmentResponse, tierResponse, cohortRoleResponse, competencyResponse, instructorPresetResponse, organizationPresetResponse] = await Promise.all([
         adminAPI.getCategories(),
         adminAPI.getDepartments(),
         adminAPI.getTiers(),
@@ -141,7 +147,6 @@ const CourseManagement = () => {
         adminAPI.getOrganizationPresets(),
       ]);
 
-      setCourses(courseResponse.data || []);
       setCategories(categoryResponse.data || []);
       setDepartments(departmentResponse.data || []);
       setTiers(tierResponse.data || []);
@@ -157,9 +162,51 @@ const CourseManagement = () => {
     }
   }, [toast]);
 
+  const fetchCourses = React.useCallback(async () => {
+    try {
+      setLoadingCourses(true);
+      const params = {
+        page: currentPage,
+        limit: pageSize,
+        search: searchTerm || undefined,
+        categoryId: selectedCategory === FILTER_VALUES.ALL ? undefined : selectedCategory,
+        courseView: courseView === ENTITY_VIEW_STATUS.ARCHIVED ? 'archived' : 'active'
+      };
+      const response = await adminAPI.getCourses(params);
+      if (response.data && response.data.items) {
+        setCourses(response.data.items);
+        setTotalPages(response.data.pages || 1);
+        setTotalCourses(response.data.total || 0);
+        setActiveCount(response.data.activeCount || 0);
+        setArchivedCount(response.data.archivedCount || 0);
+      } else {
+        // Plain array fallback
+        const items = response.data || [];
+        setCourses(items);
+        setTotalPages(1);
+        setTotalCourses(items.length);
+        setActiveCount(items.filter(c => !c.isArchived).length);
+        setArchivedCount(items.filter(c => c.isArchived).length);
+      }
+    } catch (error) {
+      console.error('Fetch courses error:', error);
+      toast.error('ไม่สามารถโหลดข้อมูลคอร์สได้');
+    } finally {
+      setLoadingCourses(false);
+    }
+  }, [currentPage, pageSize, searchTerm, selectedCategory, courseView, toast]);
+
   React.useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  React.useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, courseView]);
 
   const resetCourseForm = () => {
     setCourseForm(getDefaultCourseForm());
@@ -502,19 +549,83 @@ const CourseManagement = () => {
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         categories={categories}
-        activeCount={courses.filter(c => !c.isArchived).length}
-        archivedCount={courses.filter(c => c.isArchived).length}
+        activeCount={activeCount}
+        archivedCount={archivedCount}
       />
 
       <CourseTable 
-        courses={filteredCourses}
-        loading={loading}
+        courses={courses}
+        loading={loadingCourses}
         onEdit={openEditCourse}
         onDelete={handleDeleteCourse}
         onRepublish={handleRepublishCourse}
         onArchive={handleArchiveCourse}
         onViewHistory={handleViewHistory}
       />
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between border border-slate-200 bg-white px-4 py-3 sm:px-6 rounded-2xl shadow-sm mt-4">
+          <div className="flex flex-1 justify-between sm:hidden">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="relative inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              ย้อนกลับ
+            </button>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="relative ml-3 inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              ถัดไป
+            </button>
+          </div>
+          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-slate-500">
+                แสดงผล <span className="font-medium text-slate-800">{Math.min((currentPage - 1) * pageSize + 1, totalCourses)}</span> ถึง{' '}
+                <span className="font-medium text-slate-800">{Math.min(currentPage * pageSize, totalCourses)}</span> จากทั้งหมด{' '}
+                <span className="font-medium text-slate-800">{totalCourses}</span> คอร์ส
+              </p>
+            </div>
+            <div>
+              <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                >
+                  ย้อนกลับ
+                </button>
+                {Array.from({ length: totalPages }, (_, index) => {
+                  const pageNum = index + 1;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 ${
+                        pageNum === currentPage
+                          ? 'z-10 bg-primary text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+                          : 'text-slate-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:outline-offset-0'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                >
+                  ถัดไป
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      )}
 
       <CourseModal
         isOpen={showModal}

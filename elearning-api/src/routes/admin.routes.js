@@ -6,6 +6,7 @@ const certificateController = require('../controllers/certificate.controller');
 const { verifyToken, verifyAdmin, verifySuperAdmin, verifyAdminOrManager, verifyAdminPanelAccess, verifyCourseAccess } = require('../middleware/auth');
 const { adminAnalyticsRateLimiter } = require('../middleware/rateLimiters');
 const { auditRequest } = require('../services/audit.service');
+const { validateBodySchema, courseSchema, categorySchema, competencySchema } = require('../utils/validation.helpers');
 const multer = require('multer');
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -66,8 +67,8 @@ router.post('/competency-categories', verifySuperAdmin, auditRequest('admin.comp
 router.put('/competency-categories/:id', verifySuperAdmin, auditRequest('admin.competency_category.updated', { entityType: 'competencyCategory' }), adminController.updateCompetencyCategory);
 router.delete('/competency-categories/:id', verifySuperAdmin, auditRequest('admin.competency_category.deleted', { entityType: 'competencyCategory', includeBody: false }), adminController.deleteCompetencyCategory);
 
-router.post('/competencies', verifySuperAdmin, auditRequest('admin.competency.created', { entityType: 'competency' }), adminController.createCompetency);
-router.put('/competencies/:id', verifySuperAdmin, auditRequest('admin.competency.updated', { entityType: 'competency' }), adminController.updateCompetency);
+router.post('/competencies', verifySuperAdmin, validateBodySchema(competencySchema), auditRequest('admin.competency.created', { entityType: 'competency' }), adminController.createCompetency);
+router.put('/competencies/:id', verifySuperAdmin, validateBodySchema(competencySchema), auditRequest('admin.competency.updated', { entityType: 'competency' }), adminController.updateCompetency);
 router.delete('/competencies/:id', verifySuperAdmin, auditRequest('admin.competency.deleted', { entityType: 'competency', includeBody: false }), adminController.deleteCompetency);
 
 router.get('/competency-types', adminController.getCompetencyTypes);
@@ -88,11 +89,11 @@ router.put('/organization-presets/:id', verifySuperAdmin, adminController.update
 router.delete('/organization-presets/:id', verifySuperAdmin, adminController.deleteOrganizationPreset);
 
 router.get('/courses', adminController.getAdminCourses);
-router.post('/courses', verifyAdmin, auditRequest('admin.course.created', { entityType: 'course' }), adminController.createCourse);
+router.post('/courses', verifyAdmin, validateBodySchema(courseSchema), auditRequest('admin.course.created', { entityType: 'course' }), adminController.createCourse);
 router.put('/courses/:id/republish', verifySuperAdmin, auditRequest('admin.course.republished', { entityType: 'course' }), adminController.republishCourse);
 router.put('/courses/:id/archive', verifySuperAdmin, auditRequest('admin.course.archived', { entityType: 'course' }), adminController.archiveCourse);
 router.get('/courses/:id/history', verifyCourseAccess, adminController.getCourseHistory);
-router.put('/courses/:id', verifyCourseAccess, auditRequest('admin.course.updated', { entityType: 'course' }), adminController.updateCourse);
+router.put('/courses/:id', verifyCourseAccess, validateBodySchema(courseSchema), auditRequest('admin.course.updated', { entityType: 'course' }), adminController.updateCourse);
 router.delete('/courses/:id', verifySuperAdmin, auditRequest('admin.course.deleted', { entityType: 'course', includeBody: false }), adminController.deleteCourse);
 
 router.get('/announcements', verifyAdminOrManager, adminController.getAdminAnnouncements);
@@ -104,11 +105,11 @@ router.put('/announcements/:id', verifyAdminOrManager, auditRequest('admin.annou
 router.delete('/announcements/:id', verifyAdminOrManager, auditRequest('admin.announcement.deleted', { entityType: 'announcement', includeBody: false }), adminController.deleteAnnouncement);
 
 router.get('/categories', adminController.getCategories);
-router.post('/categories', verifySuperAdmin, adminController.createCategory);
+router.post('/categories', verifySuperAdmin, validateBodySchema(categorySchema), adminController.createCategory);
 router.put('/categories/reorder', verifySuperAdmin, adminController.reorderCategories);
 router.put('/categories/:id/republish', verifySuperAdmin, adminController.republishCategory);
 router.put('/categories/:id/archive', verifySuperAdmin, adminController.archiveCategory);
-router.put('/categories/:id', verifySuperAdmin, adminController.updateCategory);
+router.put('/categories/:id', verifySuperAdmin, validateBodySchema(categorySchema), adminController.updateCategory);
 router.delete('/categories/:id', verifySuperAdmin, adminController.deleteCategory);
 
 router.get('/rewards', adminController.getAdminRewards);

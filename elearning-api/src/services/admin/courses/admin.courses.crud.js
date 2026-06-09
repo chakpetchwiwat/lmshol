@@ -119,7 +119,8 @@ const saveCourseVisibility = async (tx, courseId, visibleToAll, visibleDepartmen
     }
 };
 
-const getAdminCourses = async (user) => {
+const getAdminCourses = async (user, options = {}) => {
+    const { page, limit, search, categoryId, courseView } = options;
     const where = {};
     
     // If not admin/superadmin, only show courses where user is staff
@@ -133,8 +134,98 @@ const getAdminCourses = async (user) => {
             };
         } else {
             // Security: If we can't identify the user, they see nothing
-            return [];
+            return page && limit ? { items: [], total: 0, pages: 0, currentPage: page } : [];
         }
+    }
+
+    if (categoryId && categoryId !== 'all') {
+        where.categoryId = categoryId;
+    }
+
+    if (search) {
+        where.OR = [
+            { title: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } }
+        ];
+    }
+
+    const referenceDate = new Date();
+    if (courseView === 'archived') {
+        where.isTemporary = true;
+        where.expiredAt = { lt: referenceDate };
+    } else if (courseView === 'active') {
+        const activeClause = {
+            OR: [
+                { isTemporary: false },
+                { expiredAt: null },
+                { expiredAt: { gte: referenceDate } }
+            ]
+        };
+        if (where.OR) {
+            where.AND = [
+                { OR: where.OR },
+                activeClause
+            ];
+            delete where.OR;
+        } else {
+            where.OR = activeClause.OR;
+        }
+    }
+
+    // If page & limit are specified, paginate
+    if (page !== undefined && limit !== undefined) {
+        const skip = (page - 1) * limit;
+        const baseWhere = {};
+        if (user?.role !== USER_ROLES.ADMIN && user?.role !== USER_ROLES.SUPERADMIN) {
+            const userId = user.userId || user.id;
+            if (userId) {
+                baseWhere.staff = {
+                    some: {
+                        userId: userId
+                    }
+                };
+            }
+        }
+
+        const [total, courses, activeCount, archivedCount] = await Promise.all([
+            prisma.course.count({ where }),
+            prisma.course.findMany({
+                where,
+                include: courseInclude,
+                orderBy: [
+                    { isTemporary: 'desc' },
+                    { createdAt: 'desc' }
+                ],
+                skip,
+                take: limit
+            }),
+            prisma.course.count({
+                where: {
+                    ...baseWhere,
+                    OR: [
+                        { isTemporary: false },
+                        { expiredAt: null },
+                        { expiredAt: { gte: referenceDate } }
+                    ]
+                }
+            }),
+            prisma.course.count({
+                where: {
+                    ...baseWhere,
+                    isTemporary: true,
+                    expiredAt: { lt: referenceDate }
+                }
+            })
+        ]);
+
+        return {
+            items: courses.map(mapCourseRecord),
+            total,
+            pages: Math.ceil(total / limit),
+            currentPage: page,
+            activeCount,
+            archivedCount
+        };
     }
 
     const courses = await prisma.course.findMany({

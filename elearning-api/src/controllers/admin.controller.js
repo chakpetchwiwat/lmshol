@@ -393,8 +393,15 @@ const deleteOrganizationPreset = asyncHandler(async (req, res) => {
 
 // COURSES
 const getAdminCourses = asyncHandler(async (req, res) => {
-  const courses = await AdminService.getAdminCourses(req.user);
-  res.json({ success: true, data: courses });
+  const { page, limit, search, categoryId, courseView } = req.query;
+  const result = await AdminService.getAdminCourses(req.user, {
+    page: page ? parseInt(page, 10) : undefined,
+    limit: limit ? parseInt(limit, 10) : undefined,
+    search,
+    categoryId,
+    courseView
+  });
+  res.json({ success: true, data: result });
 });
 
 const createCourse = asyncHandler(async (req, res) => {

@@ -261,7 +261,7 @@ export const adminAPI = {
   updateOrganizationPreset: (id, data) => api.put(`/admin/organization-presets/${id}`, data),
   deleteOrganizationPreset: (id) => api.delete(`/admin/organization-presets/${id}`),
 
-  getCourses: () => api.get('/admin/courses'),
+  getCourses: (params) => api.get('/admin/courses', { params }),
   createCourse: (data) => api.post('/admin/courses', data),
   updateCourse: (id, data) => api.put(`/admin/courses/${id}`, data),
   republishCourse: (id) => api.put(`/admin/courses/${id}/republish`),

@@ -1,6 +1,7 @@
 const prisma = require('../../utils/prisma');
 const { ENTITY_STATUS, REDEEM_STATUS } = require('../../utils/constants/statuses');
 const { POINT_SOURCE_TYPES } = require('../../utils/constants/ledger');
+const { getCachedData, evictCache } = require('../../utils/cache.helpers');
 const { mapCategoryRecord, mapCourseRecord } = require('./admin.serializers');
 const { categoryInclude, courseInclude } = require('./admin.queries');
 const { parseInteger, parseOptionalDate, normalizeNullableId, normalizeIdArray, sanitizeName, ensureReferenceName, ensureReferenceIdsExist, ensureInstructorPresetExists, buildTemporaryStateData } = require('./admin.helpers');
@@ -60,51 +61,63 @@ const saveCategoryVisibility = async (tx, categoryId, visibleToAll, visibleDepar
 };
 
 const getCategories = async () => {
-    const categories = await prisma.category.findMany({
-        include: categoryInclude,
-        orderBy: [
-            { isTemporary: 'desc' },
-            { order: 'asc' }
-        ]
-    });
+    return getCachedData('categories:list', async () => {
+        const categories = await prisma.category.findMany({
+            include: categoryInclude,
+            orderBy: [
+                { isTemporary: 'desc' },
+                { order: 'asc' }
+            ]
+        });
 
-    return categories.map(mapCategoryRecord);
+        return categories.map(mapCategoryRecord);
+    });
 };
 
-const createCategory = async (input) => prisma.$transaction(async (tx) => {
-    const { data, visibleDepartmentIds, visibleTierIds } = await buildCategoryMutationPayload(tx, input);
+const createCategory = async (input) => {
+    const category = await prisma.$transaction(async (tx) => {
+        const { data, visibleDepartmentIds, visibleTierIds } = await buildCategoryMutationPayload(tx, input);
 
-    const category = await tx.category.create({
-        data
+        const category = await tx.category.create({
+            data
+        });
+
+        await saveCategoryVisibility(tx, category.id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+
+        const createdCategory = await tx.category.findUnique({
+            where: { id: category.id },
+            include: categoryInclude
+        });
+
+        return mapCategoryRecord(createdCategory);
     });
 
-    await saveCategoryVisibility(tx, category.id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+    await evictCache('categories:*');
+    return category;
+};
 
-    const createdCategory = await tx.category.findUnique({
-        where: { id: category.id },
-        include: categoryInclude
+const updateCategory = async (id, input) => {
+    const category = await prisma.$transaction(async (tx) => {
+        const { data, visibleDepartmentIds, visibleTierIds } = await buildCategoryMutationPayload(tx, input);
+
+        await tx.category.update({
+            where: { id },
+            data
+        });
+
+        await saveCategoryVisibility(tx, id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
+
+        const updatedCategory = await tx.category.findUnique({
+            where: { id },
+            include: categoryInclude
+        });
+
+        return mapCategoryRecord(updatedCategory);
     });
 
-    return mapCategoryRecord(createdCategory);
-});
-
-const updateCategory = async (id, input) => prisma.$transaction(async (tx) => {
-    const { data, visibleDepartmentIds, visibleTierIds } = await buildCategoryMutationPayload(tx, input);
-
-    await tx.category.update({
-        where: { id },
-        data
-    });
-
-    await saveCategoryVisibility(tx, id, data.visibleToAll, visibleDepartmentIds, visibleTierIds);
-
-    const updatedCategory = await tx.category.findUnique({
-        where: { id },
-        include: categoryInclude
-    });
-
-    return mapCategoryRecord(updatedCategory);
-});
+    await evictCache('categories:*');
+    return category;
+};
 
 const republishCategory = async (id) => {
     const category = await prisma.category.update({
@@ -116,28 +129,44 @@ const republishCategory = async (id) => {
         include: categoryInclude
     });
 
+    await evictCache('categories:*');
     return mapCategoryRecord(category);
 };
 
-const archiveCategory = async (id) => prisma.category.update({
-    where: { id },
-    data: {
-        isTemporary: true,
-        expiredAt: new Date()
-    },
-    include: categoryInclude
-});
-
-const deleteCategory = async (id) => prisma.category.delete({
-    where: { id }
-});
-
-const reorderCategories = async (categoryIds) => prisma.$transaction(
-    categoryIds.map((id, index) => prisma.category.update({
+const archiveCategory = async (id) => {
+    const category = await prisma.category.update({
         where: { id },
-        data: { order: index }
-    }))
-);
+        data: {
+            isTemporary: true,
+            expiredAt: new Date()
+        },
+        include: categoryInclude
+    });
+
+    await evictCache('categories:*');
+    return mapCategoryRecord(category);
+};
+
+const deleteCategory = async (id) => {
+    const result = await prisma.category.delete({
+        where: { id }
+    });
+
+    await evictCache('categories:*');
+    return result;
+};
+
+const reorderCategories = async (categoryIds) => {
+    const result = await prisma.$transaction(
+        categoryIds.map((id, index) => prisma.category.update({
+            where: { id },
+            data: { order: index }
+        }))
+    );
+
+    await evictCache('categories:*');
+    return result;
+};
 
 module.exports = {
     buildCategoryMutationPayload,
