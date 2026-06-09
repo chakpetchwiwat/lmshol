@@ -35,7 +35,7 @@ app.use(express.json({ limit: securityConfig.bodyLimits.json }));
 app.use(express.urlencoded({ limit: securityConfig.bodyLimits.urlencoded, extended: true }));
 
 // Serve uploaded files as static (Only for local development)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads/public', express.static(path.join(__dirname, '../uploads/public')));
 
 // Basic Route for Testing
 app.get('/', (req, res) => {
