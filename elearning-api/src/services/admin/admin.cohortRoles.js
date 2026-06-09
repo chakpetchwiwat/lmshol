@@ -35,38 +35,102 @@ const buildRoleData = (data, { includeOrderDefault = false } = {}) => {
     return payload;
 };
 
-const shouldUserKeepManagerPermission = async (tx, user, targetRoleKey = null) => {
+const prefetchUserPermissionsMap = async (tx, userIds, targetRoleKey = null) => {
+    const accessAdminTiers = await tx.tier.findMany({
+        where: { accessAdmin: true },
+        select: { id: true }
+    });
+    const accessAdminTierIds = new Set(accessAdminTiers.map(t => t.id));
+
+    const supervisedCounts = await tx.userCohortSupervisor.groupBy({
+        by: ['supervisorId'],
+        where: {
+            supervisorId: { in: userIds },
+            ...(targetRoleKey ? { cohortRole: { key: { not: targetRoleKey } } } : {})
+        },
+        _count: {
+            userId: true
+        }
+    });
+    const supervisedCountsMap = new Map(
+        supervisedCounts.map(s => [s.supervisorId, s._count.userId])
+    );
+
+    const roleSupervisorCounts = await tx.cohortRoleSupervisor.groupBy({
+        by: ['supervisorId'],
+        where: {
+            supervisorId: { in: userIds },
+            ...(targetRoleKey ? { cohortRole: { key: { not: targetRoleKey } } } : {})
+        },
+        _count: {
+            cohortRoleId: true
+        }
+    });
+    const roleSupervisorCountsMap = new Map(
+        roleSupervisorCounts.map(r => [r.supervisorId, r._count.cohortRoleId])
+    );
+
+    const allCohortRoles = await tx.cohortRole.findMany({
+        select: { key: true, name: true, adminLevels: true }
+    });
+    const cohortRolesMap = new Map(allCohortRoles.map(r => [r.key, r]));
+
+    return {
+        accessAdminTierIds,
+        supervisedCountsMap,
+        roleSupervisorCountsMap,
+        cohortRolesMap
+    };
+};
+
+const shouldUserKeepManagerPermission = async (tx, user, targetRoleKey = null, prefetch = null) => {
     if (['admin', 'superadmin', 'ADMIN', 'SUPERADMIN'].includes(user.permission)) {
         return true;
     }
 
     const tierId = user.tierId || null;
     if (tierId) {
-        const tier = await tx.tier.findUnique({
-            where: { id: tierId },
-            select: { accessAdmin: true }
-        });
-        if (tier?.accessAdmin) {
-            return true;
+        if (prefetch && prefetch.accessAdminTierIds) {
+            if (prefetch.accessAdminTierIds.has(tierId)) {
+                return true;
+            }
+        } else {
+            const tier = await tx.tier.findUnique({
+                where: { id: tierId },
+                select: { accessAdmin: true }
+            });
+            if (tier?.accessAdmin) {
+                return true;
+            }
         }
     }
 
-    const supervisedCount = await tx.userCohortSupervisor.count({
-        where: {
-            supervisorId: user.id,
-            ...(targetRoleKey ? { cohortRole: { key: { not: targetRoleKey } } } : {})
-        }
-    });
+    let supervisedCount = 0;
+    if (prefetch && prefetch.supervisedCountsMap) {
+        supervisedCount = prefetch.supervisedCountsMap.get(user.id) || 0;
+    } else {
+        supervisedCount = await tx.userCohortSupervisor.count({
+            where: {
+                supervisorId: user.id,
+                ...(targetRoleKey ? { cohortRole: { key: { not: targetRoleKey } } } : {})
+            }
+        });
+    }
     if (supervisedCount > 0) {
         return true;
     }
 
-    const roleSupervisorCount = await tx.cohortRoleSupervisor.count({
-        where: {
-            supervisorId: user.id,
-            ...(targetRoleKey ? { cohortRole: { key: { not: targetRoleKey } } } : {})
-        }
-    });
+    let roleSupervisorCount = 0;
+    if (prefetch && prefetch.roleSupervisorCountsMap) {
+        roleSupervisorCount = prefetch.roleSupervisorCountsMap.get(user.id) || 0;
+    } else {
+        roleSupervisorCount = await tx.cohortRoleSupervisor.count({
+            where: {
+                supervisorId: user.id,
+                ...(targetRoleKey ? { cohortRole: { key: { not: targetRoleKey } } } : {})
+            }
+        });
+    }
     if (roleSupervisorCount > 0) {
         return true;
     }
@@ -76,21 +140,34 @@ const shouldUserKeepManagerPermission = async (tx, user, targetRoleKey = null) =
         return false;
     }
 
-    const roles = await tx.cohortRole.findMany({
-        where: { key: { in: roleKeys } },
-        select: { key: true, adminLevels: true }
-    });
     const roleLevels = typeof user.roleLevels === 'object' && user.roleLevels ? user.roleLevels : {};
-    return roles.some((role) => {
-        const assignedLevel = roleLevels[role.key];
-        return assignedLevel && (role.adminLevels || []).includes(assignedLevel);
-    });
+
+    if (prefetch && prefetch.cohortRolesMap) {
+        return roleKeys.some((roleKey) => {
+            const role = prefetch.cohortRolesMap.get(roleKey);
+            if (!role) return false;
+            const assignedLevel = roleLevels[roleKey];
+            return assignedLevel && (role.adminLevels || []).includes(assignedLevel);
+        });
+    } else {
+        const roles = await tx.cohortRole.findMany({
+            where: { key: { in: roleKeys } },
+            select: { key: true, adminLevels: true }
+        });
+        return roles.some((role) => {
+            const assignedLevel = roleLevels[role.key];
+            return assignedLevel && (role.adminLevels || []).includes(assignedLevel);
+        });
+    }
 };
 
 const syncRoleAdminMemberPermissions = async (tx, role) => {
     const users = await tx.user.findMany({
         where: { roles: { has: role.key } }
     });
+
+    const userIds = users.map(u => u.id);
+    const prefetch = userIds.length > 0 ? await prefetchUserPermissionsMap(tx, userIds, role.key) : null;
 
     for (const user of users) {
         if (['admin', 'superadmin', 'ADMIN', 'SUPERADMIN'].includes(user.permission)) {
@@ -104,7 +181,7 @@ const syncRoleAdminMemberPermissions = async (tx, role) => {
         if (assignedLevel && (role.adminLevels || []).includes(assignedLevel)) {
             nextPermission = 'manager';
         } else if (user.permission === 'manager') {
-            const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key);
+            const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key, prefetch);
             nextPermission = keepManagerPermission ? user.permission : 'user';
         }
 
@@ -218,11 +295,14 @@ const deleteCohortRole = async (id) => prisma.$transaction(async (tx) => {
         }
     });
 
+    const userIds = usersWithRole.map(u => u.id);
+    const prefetch = userIds.length > 0 ? await prefetchUserPermissionsMap(tx, userIds, role.key) : null;
+
     for (const user of usersWithRole) {
         const updatedRoles = user.roles.filter((r) => r !== role.key);
         let updatedRoleLevels = typeof user.roleLevels === 'object' && user.roleLevels ? { ...user.roleLevels } : {};
         delete updatedRoleLevels[role.key];
-        const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key);
+        const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key, prefetch);
 
         await tx.user.update({
             where: { id: user.id },
@@ -315,6 +395,9 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
             }
         });
 
+        const userIds = usersToUpdate.map(u => u.id);
+        const prefetch = userIds.length > 0 ? await prefetchUserPermissionsMap(tx, userIds, role.key) : null;
+
         for (const user of usersToUpdate) {
             const isNewMember = normalizedUserIds.includes(user.id);
             let updatedRoles = [...(user.roles || [])];
@@ -334,15 +417,22 @@ const updateCohortRoleMembers = async (id, membersInput = []) => {
             } else {
                 updatedRoles = updatedRoles.filter((r) => r !== role.key);
                 delete updatedRoleLevels[role.key];
-                const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key);
+                const keepManagerPermission = await shouldUserKeepManagerPermission(tx, user, role.key, prefetch);
                 
                 let hasOtherSupervisorRole = false;
                 if (updatedRoles.length > 0) {
-                    const otherRoles = await tx.cohortRole.findMany({
-                        where: { key: { in: updatedRoles } },
-                        select: { name: true }
-                    });
-                    hasOtherSupervisorRole = otherRoles.some(r => isSupervisorRole(r.name));
+                    if (prefetch && prefetch.cohortRolesMap) {
+                        hasOtherSupervisorRole = updatedRoles.some((roleKey) => {
+                            const r = prefetch.cohortRolesMap.get(roleKey);
+                            return r && isSupervisorRole(r.name);
+                        });
+                    } else {
+                        const otherRoles = await tx.cohortRole.findMany({
+                            where: { key: { in: updatedRoles } },
+                            select: { name: true }
+                        });
+                        hasOtherSupervisorRole = otherRoles.some(r => isSupervisorRole(r.name));
+                    }
                 }
 
                 if (!keepManagerPermission && !hasOtherSupervisorRole) {
