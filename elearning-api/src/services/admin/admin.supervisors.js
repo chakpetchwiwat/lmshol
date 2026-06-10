@@ -131,6 +131,10 @@ const mapTrackedUser = (user) => ({
     email: user.email,
     departmentId: user.departmentRef?.id || user.departmentId || null,
     department: user.departmentRef?.name || user.department || null,
+    subdivision: user.subdivision || null,
+    position: user.tier?.name || user.position || null,
+    positionLevel: user.positionLevel || null,
+    positionType: user.positionType || null,
     roles: user.roles || [],
     roleLevels: user.roleLevels || {},
     tracking: summarizeEnrollments(user.enrollments || [])
@@ -157,6 +161,7 @@ const getSupervisorTracking = async (authUser) => {
             },
             include: {
                 departmentRef: true,
+                tier: true,
                 enrollments: {
                     include: {
                         course: {
@@ -251,6 +256,7 @@ const getSupervisorTracking = async (authUser) => {
                 user: {
                     include: {
                         departmentRef: true,
+                        tier: true,
                         enrollments: {
                             include: {
                                 course: {

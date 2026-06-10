@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, BookOpenCheck, CheckCircle2, Search, Users } from 'lucide-react';
+import { Activity, BookOpenCheck, CheckCircle2, Search, Users, ChevronDown, Check } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import UserDetailModal from '../../components/admin/UserDetailModal';
@@ -12,6 +12,103 @@ const formatDate = (value) => {
     month: 'short',
     year: 'numeric'
   }).format(new Date(value));
+};
+
+const SearchableSelect = ({
+  options = [],
+  value,
+  onChange,
+  placeholder = 'เลือกรายการ...',
+  disabled = false,
+  required = false
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [search, setSearch] = React.useState('');
+  const containerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const clickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', clickOutside);
+    return () => document.removeEventListener('mousedown', clickOutside);
+  }, []);
+
+  const selectedOpt = React.useMemo(() => options.find(opt => opt.value === value), [options, value]);
+
+  React.useEffect(() => {
+    if (!isOpen) {
+      setSearch(selectedOpt ? selectedOpt.label : '');
+    }
+  }, [isOpen, selectedOpt]);
+
+  const filtered = React.useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!isOpen) return options;
+    if (!q) return options;
+    return options.filter(opt => opt.label.toLowerCase().includes(q));
+  }, [options, search, isOpen]);
+
+  return (
+    <div ref={containerRef} className="relative w-full">
+      <div className="relative">
+        <input
+          type="text"
+          disabled={disabled}
+          required={required && !value}
+          placeholder={placeholder}
+          value={search}
+          onFocus={() => {
+            setIsOpen(true);
+            setSearch('');
+          }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setIsOpen(true);
+          }}
+          className="form-input w-full bg-slate-50 font-bold h-[46px] text-sm pr-10 focus:bg-white focus:ring-0 focus:border-slate-300"
+        />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none text-slate-400">
+          <ChevronDown size={18} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-primary' : ''}`} />
+        </div>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute left-0 right-0 mt-1.5 z-50 max-h-60 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
+          {filtered.length === 0 ? (
+            <div className="px-3 py-4 text-xs font-bold text-slate-400 text-center uppercase tracking-wider">
+              ไม่พบข้อมูล
+            </div>
+          ) : (
+            filtered.map((opt) => {
+              const isSelected = opt.value === value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(opt.value);
+                    setSearch(opt.label);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-bold transition-all ${
+                    isSelected
+                      ? 'bg-indigo-50 text-indigo-700'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600'
+                  }`}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {isSelected && <Check size={14} className="text-indigo-600 shrink-0 ml-2" />}
+                </button>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
 };
 
 const CohortTracking = () => {
@@ -54,6 +151,19 @@ const CohortTracking = () => {
     totalCourses: acc.totalCourses + (group.summary?.totalCourses || 0)
   }), { roleCount: 0, userCount: 0, completedCourses: 0, totalCourses: 0 }), [groups]);
 
+  const cohortRoleOptions = React.useMemo(() => {
+    const list = [{ value: 'all', label: 'ทุก Cohort Role' }];
+    groups.forEach((group) => {
+      if (group.cohortRole?.id) {
+        list.push({
+          value: group.cohortRole.id,
+          label: group.cohortRole.name || 'Cohort Role'
+        });
+      }
+    });
+    return list;
+  }, [groups]);
+
   const filteredGroups = React.useMemo(() => {
     const keyword = searchTerm.trim().toLowerCase();
     return groups
@@ -62,7 +172,7 @@ const CohortTracking = () => {
         ...group,
         users: (group.users || []).filter((user) => {
           if (!keyword) return true;
-          return `${user.name || ''} ${user.email || ''} ${user.department || ''}`.toLowerCase().includes(keyword);
+          return `${user.name || ''} ${user.email || ''} ${user.department || ''} ${user.subdivision || ''} ${user.position || ''}`.toLowerCase().includes(keyword);
         })
       }))
       .filter((group) => group.users.length > 0 || !keyword);
@@ -136,18 +246,14 @@ const CohortTracking = () => {
             className="form-input w-full bg-slate-50 py-3 pl-10 pr-4 text-sm"
           />
         </div>
-        <select
-          value={selectedRoleId}
-          onChange={(event) => setSelectedRoleId(event.target.value)}
-          className="form-input min-h-[46px] bg-slate-50 px-4 text-sm font-bold lg:w-72"
-        >
-          <option value="all">ทุก Cohort Role</option>
-          {groups.map((group) => (
-            <option key={group.cohortRole?.id} value={group.cohortRole?.id}>
-              {group.cohortRole?.name}
-            </option>
-          ))}
-        </select>
+        <div className="w-full lg:w-72">
+          <SearchableSelect
+            options={cohortRoleOptions}
+            value={selectedRoleId}
+            onChange={setSelectedRoleId}
+            placeholder="ค้นหาหรือเลือก Cohort Role..."
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -184,7 +290,11 @@ const CohortTracking = () => {
                   <thead className="bg-white">
                     <tr className="text-xs font-black uppercase tracking-wider text-slate-400">
                       <th className="px-5 py-3">ผู้เรียน</th>
-                      <th className="px-5 py-3">Level</th>
+                      <th className="px-5 py-3">แผนก</th>
+                      <th className="px-5 py-3">กลุ่มงาน (Sub-division)</th>
+                      <th className="px-5 py-3">ตำแหน่ง</th>
+                      <th className="px-5 py-3">ระดับตำแหน่ง</th>
+                      <th className="px-5 py-3">Cohort Level</th>
                       <th className="px-5 py-3">คอร์ส</th>
                       <th className="px-5 py-3">ความคืบหน้า</th>
                       <th className="px-5 py-3">ล่าสุด</th>
@@ -202,8 +312,20 @@ const CohortTracking = () => {
                               className="text-left"
                             >
                               <span className="block text-sm font-black text-slate-900 hover:text-primary">{user.name || user.email}</span>
-                              <span className="mt-0.5 block text-xs font-semibold text-slate-400">{user.email} · {user.department || '-'}</span>
+                              <span className="mt-0.5 block text-xs font-semibold text-slate-400">{user.email}</span>
                             </button>
+                          </td>
+                          <td className="px-5 py-4 text-sm font-bold text-slate-600 max-w-[150px] truncate" title={user.department}>
+                            {user.department || '-'}
+                          </td>
+                          <td className="px-5 py-4 text-sm font-bold text-slate-600 max-w-[150px] truncate" title={user.subdivision}>
+                            {user.subdivision || '-'}
+                          </td>
+                          <td className="px-5 py-4 text-sm font-bold text-slate-600 max-w-[150px] truncate" title={user.position}>
+                            {user.position || '-'}
+                          </td>
+                          <td className="px-5 py-4 text-sm font-bold text-slate-600 whitespace-nowrap">
+                            {user.positionLevel || '-'}
                           </td>
                           <td className="px-5 py-4 text-sm font-bold text-slate-600">{level}</td>
                           <td className="px-5 py-4 text-sm font-bold text-slate-600">
