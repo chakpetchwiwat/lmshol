@@ -1,6 +1,7 @@
 const prisma = require('../../utils/prisma');
 const { USER_PERMISSIONS } = require('../../utils/constants/roles');
-const { ENROLLMENT_STATUS } = require('../../utils/constants/statuses');
+const { ENROLLMENT_STATUS, GOAL_STATUS } = require('../../utils/constants/statuses');
+const { GOAL_SCOPES } = require('../../utils/constants/scopes');
 const { getActorContext } = require('./admin.helpers');
 
 /**
@@ -125,7 +126,96 @@ const summarizeEnrollments = (enrollments = []) => {
     };
 };
 
-const mapTrackedUser = (user) => ({
+const calculateUserGoalMetrics = (user, activeGoals) => {
+    const applicableGoals = activeGoals.filter(goal => {
+        const hasTargetUsers = goal.targetUsers && goal.targetUsers.length > 0;
+        const hasTargetCohortRoles = goal.targetCohortRoles && goal.targetCohortRoles.length > 0;
+        const hasTargetDepartments = goal.targetDepartments && goal.targetDepartments.length > 0;
+
+        if (hasTargetUsers) {
+            return goal.targetUsers.some(tu => tu.userId === user.id);
+        }
+        if (hasTargetCohortRoles) {
+            return goal.targetCohortRoles.some(tcr => tcr.cohortRole?.key && (user.roles || []).includes(tcr.cohortRole.key));
+        }
+        if (hasTargetDepartments) {
+            return goal.targetDepartments.some(td => td.departmentId === user.departmentId);
+        }
+        if (goal.scope === GOAL_SCOPES.GLOBAL) {
+            return true;
+        }
+        if (goal.scope === GOAL_SCOPES.DEPARTMENT) {
+            return goal.departmentId === user.departmentId;
+        }
+        return false;
+    });
+
+    let completedGoals = 0;
+    let totalGoals = applicableGoals.length;
+    let sumProgressPercent = 0;
+
+    const enrollments = user.enrollments || [];
+
+    applicableGoals.forEach(goal => {
+        const windowStart = new Date(goal.createdAt);
+        const windowEnd = goal.expiryDate ? new Date(goal.expiryDate) : new Date(2100, 0, 1);
+        const goalCourseIds = new Set(goal.courses.map(c => c.courseId));
+
+        const completions = enrollments.filter(enrollment => {
+            if (enrollment.status !== ENROLLMENT_STATUS.COMPLETED) return false;
+            if (goal.type === 'SPECIFIC') {
+                return goalCourseIds.has(enrollment.courseId);
+            }
+            const completedAt = enrollment.completedAt ? new Date(enrollment.completedAt) : null;
+            return completedAt && completedAt >= windowStart && completedAt <= windowEnd;
+        });
+
+        const completionCount = completions.length;
+        const targetCount = goal.targetCount;
+        const isSuccess = completionCount >= targetCount;
+
+        if (isSuccess) {
+            completedGoals++;
+        }
+
+        let progressPercent = 0;
+        if (goal.type === 'SPECIFIC') {
+            if (goal.courses.length > 0) {
+                const totalProgress = goal.courses.reduce((sum, gc) => {
+                    const enrollment = enrollments.find(e => e.courseId === gc.courseId);
+                    return sum + (enrollment ? Number(enrollment.progressPercent || 0) : 0);
+                }, 0);
+                progressPercent = Math.round(totalProgress / goal.courses.length);
+            } else {
+                progressPercent = 0;
+            }
+        } else {
+            progressPercent = targetCount > 0 ? Math.round((completionCount / targetCount) * 100) : 0;
+        }
+
+        progressPercent = Math.min(progressPercent, 100);
+        sumProgressPercent += progressPercent;
+    });
+
+    const averageProgress = totalGoals > 0 ? Math.round(sumProgressPercent / totalGoals) : 0;
+
+    const latest = [...enrollments].sort((left, right) => {
+        const leftDate = new Date(left.completedAt || left.startedAt || left.createdAt || 0).getTime();
+        const rightDate = new Date(right.completedAt || right.startedAt || right.createdAt || 0).getTime();
+        return rightDate - leftDate;
+    })[0];
+
+    return {
+        completedGoals,
+        totalGoals,
+        averageProgress,
+        latestCourseTitle: latest?.course?.title || null,
+        latestLearningAt: latest?.completedAt || latest?.startedAt || null,
+        latestStatus: latest?.status || null
+    };
+};
+
+const mapTrackedUser = (user, activeGoals) => ({
     id: user.id,
     name: user.name,
     email: user.email,
@@ -137,12 +227,32 @@ const mapTrackedUser = (user) => ({
     positionType: user.positionType || null,
     roles: user.roles || [],
     roleLevels: user.roleLevels || {},
-    tracking: summarizeEnrollments(user.enrollments || [])
+    tracking: calculateUserGoalMetrics(user, activeGoals)
 });
 
 const getSupervisorTracking = async (authUser) => {
     const actor = await getActorContext(authUser);
     const actorId = actor.id || actor.userId;
+
+    const activeGoals = await prisma.learningGoal.findMany({
+        where: {
+            status: GOAL_STATUS.ACTIVE,
+            OR: [
+                { expiryDate: null },
+                { expiryDate: { gte: new Date() } }
+            ]
+        },
+        include: {
+            courses: true,
+            targetDepartments: true,
+            targetCohortRoles: {
+                include: {
+                    cohortRole: true
+                }
+            },
+            targetUsers: true
+        }
+    });
 
     if (actor.isAdmin) {
         // Fetch all cohort roles
@@ -214,9 +324,9 @@ const getSupervisorTracking = async (authUser) => {
 
         // Build groups
         const groups = cohortRoles.map(role => {
-            const roleUsers = users.filter(user => user.roles.includes(role.key)).map(mapTrackedUser);
-            const completedCourses = roleUsers.reduce((sum, user) => sum + user.tracking.completedCourses, 0);
-            const totalCourses = roleUsers.reduce((sum, user) => sum + user.tracking.totalCourses, 0);
+            const roleUsers = users.filter(user => user.roles.includes(role.key)).map(user => mapTrackedUser(user, activeGoals));
+            const completedGoals = roleUsers.reduce((sum, user) => sum + user.tracking.completedGoals, 0);
+            const totalGoals = roleUsers.reduce((sum, user) => sum + user.tracking.totalGoals, 0);
 
             return {
                 cohortRole: role,
@@ -224,9 +334,9 @@ const getSupervisorTracking = async (authUser) => {
                 users: roleUsers,
                 summary: {
                     userCount: roleUsers.length,
-                    totalCourses,
-                    completedCourses,
-                    completionRate: totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0
+                    totalGoals,
+                    completedGoals,
+                    completionRate: totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0
                 }
             };
         });
@@ -302,13 +412,13 @@ const getSupervisorTracking = async (authUser) => {
 
             const group = groupsMap.get(roleId);
             group.supervisors.set(row.supervisorId, row.supervisor);
-            group.users.set(row.userId, mapTrackedUser(row.user));
+            group.users.set(row.userId, mapTrackedUser(row.user, activeGoals));
         });
 
         const groups = Array.from(groupsMap.values()).map((group) => {
             const users = Array.from(group.users.values());
-            const completedCourses = users.reduce((sum, user) => sum + user.tracking.completedCourses, 0);
-            const totalCourses = users.reduce((sum, user) => sum + user.tracking.totalCourses, 0);
+            const completedGoals = users.reduce((sum, user) => sum + user.tracking.completedGoals, 0);
+            const totalGoals = users.reduce((sum, user) => sum + user.tracking.totalGoals, 0);
 
             return {
                 cohortRole: group.cohortRole,
@@ -316,9 +426,9 @@ const getSupervisorTracking = async (authUser) => {
                 users,
                 summary: {
                     userCount: users.length,
-                    totalCourses,
-                    completedCourses,
-                    completionRate: totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0
+                    totalGoals,
+                    completedGoals,
+                    completionRate: totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0
                 }
             };
         });

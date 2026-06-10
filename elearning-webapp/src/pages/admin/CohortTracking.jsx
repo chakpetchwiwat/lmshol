@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, BookOpenCheck, CheckCircle2, Search, Users, ChevronDown, Check } from 'lucide-react';
+import { Activity, BookOpenCheck, CheckCircle2, Search, Users, ChevronDown, Check, Download } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import UserDetailModal from '../../components/admin/UserDetailModal';
@@ -146,10 +146,8 @@ const CohortTracking = () => {
   const groups = React.useMemo(() => trackingData?.groups || [], [trackingData]);
   const totals = React.useMemo(() => groups.reduce((acc, group) => ({
     roleCount: acc.roleCount + 1,
-    userCount: acc.userCount + (group.summary?.userCount || 0),
-    completedCourses: acc.completedCourses + (group.summary?.completedCourses || 0),
-    totalCourses: acc.totalCourses + (group.summary?.totalCourses || 0)
-  }), { roleCount: 0, userCount: 0, completedCourses: 0, totalCourses: 0 }), [groups]);
+    userCount: acc.userCount + (group.summary?.userCount || 0)
+  }), { roleCount: 0, userCount: 0 }), [groups]);
 
   const cohortRoleOptions = React.useMemo(() => {
     const list = [{ value: 'all', label: 'ทุก Cohort Role' }];
@@ -193,9 +191,79 @@ const CohortTracking = () => {
     }
   };
 
-  const completionRate = totals.totalCourses > 0
-    ? Math.round((totals.completedCourses / totals.totalCourses) * 100)
-    : 0;
+  const handleExportExcel = () => {
+    try {
+      toast.info('กำลังสร้างไฟล์รายงาน...');
+
+      const headers = [
+        'Cohort Role',
+        'ผู้เรียน',
+        'อีเมล',
+        'แผนก',
+        'กลุ่มงาน (Sub-division)',
+        'ตำแหน่ง',
+        'ระดับตำแหน่ง',
+        'เป้าหมายสำเร็จ',
+        'เป้าหมายทั้งหมด',
+        'ความคืบหน้าเฉลี่ย',
+        'ล่าสุด',
+        'วันที่เรียนล่าสุด'
+      ];
+
+      const rows = [];
+      filteredGroups.forEach((group) => {
+        const groupName = group.cohortRole?.name || 'Cohort Role';
+        (group.users || []).forEach((user) => {
+          rows.push([
+            groupName,
+            user.name || user.email,
+            user.email,
+            user.department || '-',
+            user.subdivision || '-',
+            user.position || '-',
+            user.positionLevel || '-',
+            user.tracking.completedGoals,
+            user.tracking.totalGoals,
+            `${user.tracking.averageProgress || 0}%`,
+            user.tracking.latestCourseTitle || '-',
+            formatDate(user.tracking.latestLearningAt)
+          ]);
+        });
+      });
+
+      if (rows.length === 0) {
+        toast.error('ไม่มีข้อมูลที่จะส่งออก');
+        return;
+      }
+
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(val => {
+          let cleanVal = String(val === null || val === undefined ? '' : val).replace(/"/g, '""');
+          if (cleanVal.includes(',') || cleanVal.includes('\n') || cleanVal.includes('"')) {
+            cleanVal = `"${cleanVal}"`;
+          }
+          return cleanVal;
+        }).join(','))
+      ].join('\r\n');
+
+      // UTF-8 BOM to support Thai in Excel
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `cohort_tracking_report_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success('ดาวน์โหลดรายงานสำเร็จ');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('ไม่สามารถส่งออกข้อมูลได้');
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -204,7 +272,7 @@ const CohortTracking = () => {
         subtitle="ติดตามประวัติการเรียนของผู้เรียนตามกลุ่มที่คุณดูแล"
       />
 
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-2">
         <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs font-black uppercase tracking-wider text-slate-400">Groups</span>
@@ -219,20 +287,6 @@ const CohortTracking = () => {
           </div>
           <p className="mt-3 text-2xl font-black text-slate-900">{totals.userCount}</p>
         </div>
-        <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-400">Completed</span>
-            <BookOpenCheck size={18} className="text-emerald-600" />
-          </div>
-          <p className="mt-3 text-2xl font-black text-slate-900">{totals.completedCourses}</p>
-        </div>
-        <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-black uppercase tracking-wider text-slate-400">Rate</span>
-            <CheckCircle2 size={18} className="text-amber-600" />
-          </div>
-          <p className="mt-3 text-2xl font-black text-slate-900">{completionRate}%</p>
-        </div>
       </div>
 
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm lg:flex-row lg:items-center">
@@ -246,14 +300,24 @@ const CohortTracking = () => {
             className="form-input w-full bg-slate-50 py-3 pl-10 pr-4 text-sm"
           />
         </div>
-        <div className="w-full lg:w-72">
-          <SearchableSelect
-            options={cohortRoleOptions}
-            value={selectedRoleId}
-            onChange={setSelectedRoleId}
-            placeholder="ค้นหาหรือเลือก Cohort Role..."
-          />
+        <div className="w-full lg:w-72 flex gap-3">
+          <div className="flex-1">
+            <SearchableSelect
+              options={cohortRoleOptions}
+              value={selectedRoleId}
+              onChange={setSelectedRoleId}
+              placeholder="ค้นหาหรือเลือก Cohort Role..."
+            />
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={handleExportExcel}
+          className="flex h-[46px] items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-sm font-black text-white hover:bg-emerald-700 transition-colors shrink-0"
+        >
+          <Download size={16} />
+          ส่งออก Excel
+        </button>
       </div>
 
       {loading ? (
@@ -294,7 +358,7 @@ const CohortTracking = () => {
                       <th className="px-5 py-3">กลุ่มงาน (Sub-division)</th>
                       <th className="px-5 py-3">ตำแหน่ง</th>
                       <th className="px-5 py-3">ระดับตำแหน่ง</th>
-                      <th className="px-5 py-3">คอร์ส</th>
+                      <th className="px-5 py-3">เป้าหมาย</th>
                       <th className="px-5 py-3">ความคืบหน้า</th>
                       <th className="px-5 py-3">ล่าสุด</th>
                     </tr>
@@ -326,7 +390,7 @@ const CohortTracking = () => {
                             {user.positionLevel || '-'}
                           </td>
                           <td className="px-5 py-4 text-sm font-bold text-slate-600">
-                            {user.tracking.completedCourses}/{user.tracking.totalCourses}
+                            {user.tracking.completedGoals}/{user.tracking.totalGoals}
                           </td>
                           <td className="px-5 py-4">
                             <div className="flex min-w-40 items-center gap-3">
