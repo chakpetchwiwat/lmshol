@@ -294,7 +294,6 @@ const CohortTracking = () => {
                       <th className="px-5 py-3">กลุ่มงาน (Sub-division)</th>
                       <th className="px-5 py-3">ตำแหน่ง</th>
                       <th className="px-5 py-3">ระดับตำแหน่ง</th>
-                      <th className="px-5 py-3">Cohort Level</th>
                       <th className="px-5 py-3">คอร์ส</th>
                       <th className="px-5 py-3">ความคืบหน้า</th>
                       <th className="px-5 py-3">ล่าสุด</th>
@@ -302,7 +301,6 @@ const CohortTracking = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {(group.users || []).map((user) => {
-                      const level = user.roleLevels?.[group.cohortRole?.key] || '-';
                       return (
                         <tr key={user.id} className="hover:bg-slate-50/70">
                           <td className="px-5 py-4">
@@ -327,7 +325,6 @@ const CohortTracking = () => {
                           <td className="px-5 py-4 text-sm font-bold text-slate-600 whitespace-nowrap">
                             {user.positionLevel || '-'}
                           </td>
-                          <td className="px-5 py-4 text-sm font-bold text-slate-600">{level}</td>
                           <td className="px-5 py-4 text-sm font-bold text-slate-600">
                             {user.tracking.completedCourses}/{user.tracking.totalCourses}
                           </td>
