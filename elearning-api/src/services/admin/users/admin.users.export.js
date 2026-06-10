@@ -472,63 +472,29 @@ const exportUserTrainings = async (actor) => {
     }
   });
 
-  const hasTrainingRows = [];
-  const noTrainingRows = [];
+  const rows = [];
   users.forEach((user) => {
     const items = buildTrainingItems(user);
-    if (items.length === 0) {
-      const { prefix, name } = parseNamePrefix(user.name || '');
-      noTrainingRows.push([
-        user.email || '',
-        user.name || [prefix, name].filter(Boolean).join(' '),
-        '',
-        '',
-        '',
-        '',
-        '',
-        'ยังไม่มีประวัติการอบรม',
-        '',
-        '',
-        '',
-        '',
-        '',
-        ''
+    items.forEach((item) => {
+      rows.push([
+        item.email,
+        item.fullName,
+        item.courseName,
+        item.organizer,
+        item.date,
+        item.days,
+        item.intake,
+        item.venue,
+        item.item,
+        item.type,
+        item.details,
+        item.competencyCodes,
+        item.competencyLevels,
+        item.competencyNotes,
+        item.remarks
       ]);
-    } else {
-      items.forEach((item) => {
-        hasTrainingRows.push([
-          item.email,
-          item.fullName,
-          item.courseName,
-          item.organizer,
-          item.date,
-          item.days,
-          item.intake,
-          item.venue,
-          item.item,
-          item.type,
-          item.details,
-          item.competencyCodes,
-          item.competencyLevels,
-          item.competencyNotes,
-          item.remarks
-        ]);
-      });
-    }
+    });
   });
-
-  const rows = [
-    ...hasTrainingRows,
-    ...noTrainingRows.map((row) => {
-      const normalized = [...row];
-      while (normalized.length < IMPORT_COMPAT_TRAINING_HEADERS.length) {
-        normalized.push('');
-      }
-      normalized[7] = '';
-      normalized[14] = 'ยังไม่มีประวัติการอบรม';
-      return normalized;
-    })
-  ];
 
   return createWorkbook(
     'Training Report',

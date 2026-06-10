@@ -273,9 +273,59 @@ const createCohortRole = async (data) => {
 };
 
 const updateCohortRole = async (id, data) => prisma.$transaction(async (tx) => {
+    const oldRole = await tx.cohortRole.findUnique({ where: { id } });
+    if (!oldRole) {
+        throw new Error('Cohort role not found');
+    }
+
+    const payload = buildRoleData(data);
+    const newKey = normalizeRoleKey(data.key || payload.name);
+
+    if (newKey !== oldRole.key) {
+        // Check if newKey already exists on a different role
+        const keyExists = await tx.cohortRole.findFirst({
+            where: {
+                key: newKey,
+                id: { not: id }
+            }
+        });
+        if (keyExists) {
+            throw new Error('Cohort role key already exists');
+        }
+
+        // Update users who have the old role key
+        const users = await tx.user.findMany({
+            where: {
+                roles: {
+                    has: oldRole.key
+                }
+            }
+        });
+
+        for (const user of users) {
+            const updatedRoles = user.roles.map((r) => (r === oldRole.key ? newKey : r));
+            let updatedRoleLevels = typeof user.roleLevels === 'object' && user.roleLevels ? { ...user.roleLevels } : {};
+            if (oldRole.key in updatedRoleLevels) {
+                updatedRoleLevels[newKey] = updatedRoleLevels[oldRole.key];
+                delete updatedRoleLevels[oldRole.key];
+            }
+
+            await tx.user.update({
+                where: { id: user.id },
+                data: {
+                    roles: updatedRoles,
+                    roleLevels: updatedRoleLevels,
+                    updatedAt: new Date()
+                }
+            });
+        }
+
+        payload.key = newKey;
+    }
+
     const role = await tx.cohortRole.update({
         where: { id },
-        data: buildRoleData(data)
+        data: payload
     });
     await syncRoleAdminMemberPermissions(tx, role);
     return role;

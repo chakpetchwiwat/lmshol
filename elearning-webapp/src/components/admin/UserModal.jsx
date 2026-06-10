@@ -1,11 +1,14 @@
 import React from 'react';
-import { Building2, Check, Tags, X, Eye, EyeOff } from 'lucide-react';
+import { Building2, Check, Tags, X, Eye, EyeOff, UserRound } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
 import ProfileEducationSection from '../user/ProfileEducationSection';
 import ProfileFilesSection from '../user/ProfileFilesSection';
 import ProfileCertificates from '../user/ProfileCertificates';
+import { adminAPI, getFullUrl } from '../../utils/api';
+import { compressImage } from '../../utils/imageUtils';
+import MediaLibraryModal from '../common/MediaLibraryModal';
 
 const UserModal = ({
   isOpen,
@@ -37,6 +40,31 @@ const UserModal = ({
 }) => {
   const [assignmentMode, setAssignmentMode] = React.useState('department');
   const [showPassword, setShowPassword] = React.useState(false);
+  const [mediaLibrary, setMediaLibrary] = React.useState({
+    isOpen: false,
+    allowedTypes: 'all',
+    onSelect: null
+  });
+  const [uploadingImage, setUploadingImage] = React.useState(false);
+  const imageInputRef = React.useRef(null);
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingImage(true);
+      const compressedFile = await compressImage(file);
+      const response = await adminAPI.uploadFile(compressedFile);
+      setFormData((current) => ({ ...current, profileImageUrl: response.data.fileUrl }));
+    } catch (error) {
+      console.error('Upload profile image error:', error);
+    } finally {
+      setUploadingImage(false);
+      event.target.value = '';
+    }
+  };
+
   const roleOptions = cohortRoles;
   const selectedRoleLabels = (formData.roles || []).map(key => cohortRoles.find(r => r.key === key)?.name).filter(Boolean);
   
@@ -151,28 +179,63 @@ const UserModal = ({
 
         <div className="flex-1 overflow-y-auto px-6 py-6">
           <form id="user-form" onSubmit={onSave} className="space-y-5">
-            <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">ชื่อ - นามสกุล</label>
-                <input
-                  required
-                  type="text"
-                  className="form-input w-full"
-                  value={formData.name}
-                  onChange={(event) => setFormData({ ...formData, name: event.target.value })}
-                  placeholder="เช่น สมชาย ใจดี"
-                />
+            <div className="flex flex-col sm:flex-row items-start gap-6">
+              <div className="flex flex-col items-center gap-2 shrink-0">
+                <div className="group relative h-24 w-24 shrink-0 overflow-hidden rounded-[1.5rem] border-4 border-slate-50 bg-slate-100 shadow-md">
+                  {formData.profileImageUrl ? (
+                    <img src={getFullUrl(formData.profileImageUrl)} alt="Profile" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-slate-300">
+                      <UserRound size={32} />
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-1.5 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => imageInputRef.current?.click()}
+                    className="btn btn-outline btn-xs px-2 py-1 text-[10px]"
+                    disabled={uploadingImage}
+                  >
+                    {uploadingImage ? '...' : 'อัปโหลด'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMediaLibrary({
+                      isOpen: true,
+                      allowedTypes: 'image',
+                      onSelect: (file) => setFormData(c => ({ ...c, profileImageUrl: file.fileUrl }))
+                    })}
+                    className="btn btn-outline btn-xs px-2 py-1 text-[10px]"
+                  >
+                    คลังสื่อ
+                  </button>
+                </div>
+                <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-bold text-slate-700">อีเมล</label>
-                <input
-                  required
-                  type="email"
-                  className="form-input w-full"
-                  value={formData.email}
-                  onChange={(event) => setFormData({ ...formData, email: event.target.value })}
-                  placeholder="employee@company.com"
-                />
+              <div className="flex-1 w-full grid gap-5 md:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-bold text-slate-700">ชื่อ - นามสกุล</label>
+                  <input
+                    required
+                    type="text"
+                    className="form-input w-full"
+                    value={formData.name}
+                    onChange={(event) => setFormData({ ...formData, name: event.target.value })}
+                    placeholder="เช่น สมชาย ใจดี"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-bold text-slate-700">อีเมล</label>
+                  <input
+                    required
+                    type="email"
+                    className="form-input w-full"
+                    value={formData.email}
+                    onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+                    placeholder="employee@company.com"
+                  />
+                </div>
               </div>
             </div>
 
@@ -466,6 +529,12 @@ const UserModal = ({
         </div>
       </div>
       </div>
+      <MediaLibraryModal
+        isOpen={mediaLibrary.isOpen}
+        allowedTypes={mediaLibrary.allowedTypes}
+        onClose={() => setMediaLibrary(prev => ({ ...prev, isOpen: false }))}
+        onSelect={mediaLibrary.onSelect}
+      />
     </ModalPortal>
   );
 };

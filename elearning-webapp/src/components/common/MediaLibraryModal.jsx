@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search, FileText, Image, Upload, Check, Loader2, RefreshCw } from 'lucide-react';
+import { X, Search, FileText, Image, Upload, Check, Loader2, RefreshCw, Play } from 'lucide-react';
 import ModalPortal from './ModalPortal';
 import { adminAPI, getFullUrl } from '../../utils/api';
 
@@ -106,7 +106,7 @@ const MediaLibraryModal = ({ isOpen, onClose, onSelect, allowedTypes = 'all' }) 
 
   return (
     <ModalPortal isOpen={isOpen}>
-      <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+      <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
         <div className="card flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden border border-slate-100 bg-white p-0 shadow-2xl rounded-2xl">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4">
