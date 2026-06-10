@@ -14,7 +14,7 @@ const getSettings = async (authUser) => {
     let scope = 'global';
     let departmentId = null;
 
-    if (authUser?.userId && authUser.permission !== USER_PERMISSIONS.ADMIN) {
+    if (authUser?.userId && authUser.permission !== USER_PERMISSIONS.ADMIN && authUser.permission !== USER_PERMISSIONS.SUPERADMIN) {
         const actor = await authHelpers.getActorContext(prisma, authUser);
         departmentId = actor?.departmentId || null;
         if (departmentId) {

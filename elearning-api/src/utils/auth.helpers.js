@@ -123,8 +123,8 @@ const getActorContext = async (prisma, authUser) => {
     const actorPermission = actor.permission || actor.role;
     const isSupervisor = (actor.cohortSupervisors?.length || 0) > 0 ||
         (actor.cohortRoleSupervisorRoles?.length || 0) > 0;
-    const effectivePermission = actorPermission === USER_PERMISSIONS.ADMIN
-        ? USER_PERMISSIONS.ADMIN
+    const effectivePermission = (actorPermission === USER_PERMISSIONS.ADMIN || actorPermission === USER_PERMISSIONS.SUPERADMIN)
+        ? actorPermission
         : (actorPermission === USER_PERMISSIONS.MANAGER || actor.tier?.accessAdmin || isSupervisor)
             ? USER_PERMISSIONS.MANAGER
             : USER_PERMISSIONS.USER;
@@ -133,7 +133,7 @@ const getActorContext = async (prisma, authUser) => {
         ...mapUserRecord(actor),
         effectivePermission,
         effectiveRole: effectivePermission, // Compatibility alias
-        isAdmin: effectivePermission === USER_PERMISSIONS.ADMIN,
+        isAdmin: effectivePermission === USER_PERMISSIONS.ADMIN || effectivePermission === USER_PERMISSIONS.SUPERADMIN,
         isManager: effectivePermission === USER_PERMISSIONS.MANAGER,
         isSupervisor,
         canAccessAdminPanel: ADMIN_PANEL_PERMISSIONS.includes(effectivePermission)

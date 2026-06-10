@@ -30,6 +30,26 @@ test('getActorContext resolves actor context for admin users', async () => {
     assert.equal(actor.canAccessAdminPanel, true);
 });
 
+test('getActorContext resolves actor context for superadmin users', async () => {
+    const actor = await authHelpers.getActorContext(
+        createPrisma({
+            id: 'superadmin-1',
+            role: USER_ROLES.SUPERADMIN,
+            departmentId: null,
+            departmentRef: null,
+            tier: null,
+            createdAt: new Date('2026-04-01T00:00:00.000Z')
+        }),
+        { userId: 'superadmin-1', role: USER_ROLES.SUPERADMIN }
+    );
+
+    assert.equal(actor.role, USER_ROLES.SUPERADMIN);
+    assert.equal(actor.effectiveRole, USER_ROLES.SUPERADMIN);
+    assert.equal(actor.isAdmin, true);
+    assert.equal(actor.canAccessAdminPanel, true);
+});
+
+
 test('getActorContext resolves manager scope with department information', async () => {
     const actor = await authHelpers.getActorContext(
         createPrisma({

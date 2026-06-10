@@ -140,96 +140,194 @@ const getSupervisorTracking = async (authUser) => {
     const actor = await getActorContext(authUser);
     const actorId = actor.id || actor.userId;
 
-    const rows = await prisma.userCohortSupervisor.findMany({
-        where: actor.isAdmin ? {} : { supervisorId: actorId },
-        include: {
-            cohortRole: true,
-            supervisor: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true
+    if (actor.isAdmin) {
+        // Fetch all cohort roles
+        const cohortRoles = await prisma.cohortRole.findMany({
+            orderBy: { order: 'asc' }
+        });
+
+        const roleKeys = cohortRoles.map(r => r.key);
+
+        // Fetch all users who have at least one of these cohort roles
+        const users = await prisma.user.findMany({
+            where: {
+                roles: {
+                    hasSome: roleKeys
                 }
             },
-            user: {
-                include: {
-                    departmentRef: true,
-                    enrollments: {
-                        include: {
-                            course: {
-                                select: {
-                                    id: true,
-                                    title: true,
-                                    points: true,
-                                    category: {
-                                        select: {
-                                            id: true,
-                                            name: true,
-                                            type: true
-                                        }
+            include: {
+                departmentRef: true,
+                enrollments: {
+                    include: {
+                        course: {
+                            select: {
+                                id: true,
+                                title: true,
+                                points: true,
+                                category: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        type: true
                                     }
                                 }
                             }
-                        },
-                        orderBy: [
-                            { completedAt: 'desc' },
-                            { startedAt: 'desc' }
-                        ]
+                        }
+                    },
+                    orderBy: [
+                        { completedAt: 'desc' },
+                        { startedAt: 'desc' }
+                    ]
+                }
+            },
+            orderBy: { name: 'asc' }
+        });
+
+        // Fetch all cohort role supervisors
+        const roleSupervisors = await prisma.cohortRoleSupervisor.findMany({
+            include: {
+                supervisor: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
                     }
                 }
             }
-        },
-        orderBy: [
-            { cohortRole: { order: 'asc' } },
-            { user: { name: 'asc' } }
-        ]
-    });
+        });
 
-    const groupsMap = new Map();
+        // Group supervisors by cohort role ID
+        const supervisorsByRoleId = new Map();
+        roleSupervisors.forEach(rs => {
+            if (!supervisorsByRoleId.has(rs.cohortRoleId)) {
+                supervisorsByRoleId.set(rs.cohortRoleId, []);
+            }
+            if (rs.supervisor) {
+                supervisorsByRoleId.get(rs.cohortRoleId).push(rs.supervisor);
+            }
+        });
 
-    rows.forEach((row) => {
-        const roleId = row.cohortRoleId;
-        if (!groupsMap.has(roleId)) {
-            groupsMap.set(roleId, {
-                cohortRole: row.cohortRole,
-                supervisors: new Map(),
-                users: new Map()
-            });
-        }
+        // Build groups
+        const groups = cohortRoles.map(role => {
+            const roleUsers = users.filter(user => user.roles.includes(role.key)).map(mapTrackedUser);
+            const completedCourses = roleUsers.reduce((sum, user) => sum + user.tracking.completedCourses, 0);
+            const totalCourses = roleUsers.reduce((sum, user) => sum + user.tracking.totalCourses, 0);
 
-        const group = groupsMap.get(roleId);
-        group.supervisors.set(row.supervisorId, row.supervisor);
-        group.users.set(row.userId, mapTrackedUser(row.user));
-    });
-
-    const groups = Array.from(groupsMap.values()).map((group) => {
-        const users = Array.from(group.users.values());
-        const completedCourses = users.reduce((sum, user) => sum + user.tracking.completedCourses, 0);
-        const totalCourses = users.reduce((sum, user) => sum + user.tracking.totalCourses, 0);
+            return {
+                cohortRole: role,
+                supervisors: supervisorsByRoleId.get(role.id) || [],
+                users: roleUsers,
+                summary: {
+                    userCount: roleUsers.length,
+                    totalCourses,
+                    completedCourses,
+                    completionRate: totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0
+                }
+            };
+        });
 
         return {
-            cohortRole: group.cohortRole,
-            supervisors: Array.from(group.supervisors.values()),
-            users,
-            summary: {
-                userCount: users.length,
-                totalCourses,
-                completedCourses,
-                completionRate: totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0
-            }
+            actor: {
+                id: actorId,
+                name: actor.name,
+                permission: actor.permission,
+                isAdmin: actor.isAdmin,
+                isSupervisor: actor.isSupervisor
+            },
+            groups
         };
-    });
+    } else {
+        const rows = await prisma.userCohortSupervisor.findMany({
+            where: { supervisorId: actorId },
+            include: {
+                cohortRole: true,
+                supervisor: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                },
+                user: {
+                    include: {
+                        departmentRef: true,
+                        enrollments: {
+                            include: {
+                                course: {
+                                    select: {
+                                        id: true,
+                                        title: true,
+                                        points: true,
+                                        category: {
+                                            select: {
+                                                id: true,
+                                                name: true,
+                                                type: true
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            orderBy: [
+                                { completedAt: 'desc' },
+                                { startedAt: 'desc' }
+                            ]
+                        }
+                    }
+                }
+            },
+            orderBy: [
+                { cohortRole: { order: 'asc' } },
+                { user: { name: 'asc' } }
+            ]
+        });
 
-    return {
-        actor: {
-            id: actorId,
-            name: actor.name,
-            permission: actor.permission,
-            isAdmin: actor.isAdmin,
-            isSupervisor: actor.isSupervisor
-        },
-        groups
-    };
+        const groupsMap = new Map();
+
+        rows.forEach((row) => {
+            const roleId = row.cohortRoleId;
+            if (!groupsMap.has(roleId)) {
+                groupsMap.set(roleId, {
+                    cohortRole: row.cohortRole,
+                    supervisors: new Map(),
+                    users: new Map()
+                });
+            }
+
+            const group = groupsMap.get(roleId);
+            group.supervisors.set(row.supervisorId, row.supervisor);
+            group.users.set(row.userId, mapTrackedUser(row.user));
+        });
+
+        const groups = Array.from(groupsMap.values()).map((group) => {
+            const users = Array.from(group.users.values());
+            const completedCourses = users.reduce((sum, user) => sum + user.tracking.completedCourses, 0);
+            const totalCourses = users.reduce((sum, user) => sum + user.tracking.totalCourses, 0);
+
+            return {
+                cohortRole: group.cohortRole,
+                supervisors: Array.from(group.supervisors.values()),
+                users,
+                summary: {
+                    userCount: users.length,
+                    totalCourses,
+                    completedCourses,
+                    completionRate: totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0
+                }
+            };
+        });
+
+        return {
+            actor: {
+                id: actorId,
+                name: actor.name,
+                permission: actor.permission,
+                isAdmin: actor.isAdmin,
+                isSupervisor: actor.isSupervisor
+            },
+            groups
+        };
+    }
 };
 
 module.exports = {
