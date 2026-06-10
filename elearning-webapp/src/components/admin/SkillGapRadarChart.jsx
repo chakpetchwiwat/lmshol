@@ -18,6 +18,10 @@ const CATEGORY_MAP = {
 const ALL_TYPES = Object.keys(CATEGORY_MAP);
 
 const SkillGapRadarChart = ({ data, onSelectSkillGap }) => {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
   const safeData = data || [];
 
   const chartData = ALL_TYPES.map((type) => {
@@ -46,31 +50,33 @@ const SkillGapRadarChart = ({ data, onSelectSkillGap }) => {
         </div>
       </div>
 
-      <div className="flex h-[300px] w-full min-w-0 items-center justify-center">
+      <div className="relative flex h-[300px] w-full min-w-0 items-center justify-center">
         {safeData.length === 0 ? (
           <div className="text-sm italic text-slate-400">No mastery data reported yet</div>
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
-              <PolarGrid stroke="#e2e8f0" />
-              <PolarAngleAxis
-                dataKey="subject"
-                tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }}
-              />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-              <Radar
-                name="Mastery Level"
-                dataKey="mastery"
-                stroke="#4f46e5"
-                fill="#4f46e5"
-                fillOpacity={0.55}
-              />
-              <Tooltip
-                contentStyle={{ borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 20px 45px -30px rgb(15 23 42 / 0.45)' }}
-                formatter={(value, name, info) => [`${value}%`, info?.payload?.subject || name]}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
+          mounted && (
+            <ResponsiveContainer width="99%" height={300}>
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+                <PolarGrid stroke="#e2e8f0" />
+                <PolarAngleAxis
+                  dataKey="subject"
+                  tick={{ fill: '#64748b', fontSize: 10, fontWeight: 600 }}
+                />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                <Radar
+                  name="Mastery Level"
+                  dataKey="mastery"
+                  stroke="#4f46e5"
+                  fill="#4f46e5"
+                  fillOpacity={0.55}
+                />
+                <Tooltip
+                  contentStyle={{ borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 20px 45px -30px rgb(15 23 42 / 0.45)' }}
+                  formatter={(value, name, info) => [`${value}%`, info?.payload?.subject || name]}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          )
         )}
       </div>
 

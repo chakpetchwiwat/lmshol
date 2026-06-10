@@ -5,6 +5,10 @@ import {
 } from 'recharts';
 
 const WeeklyActivityChart = ({ data, onSelectBucket }) => {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
   const safeData = data || [];
   const totalStarts = safeData.reduce((sum, item) => sum + (item.count || 0), 0);
   const activeBuckets = safeData.filter((item) => (item.count || 0) > 0);
@@ -49,26 +53,28 @@ const WeeklyActivityChart = ({ data, onSelectBucket }) => {
       </div>
 
       <div className="relative h-[300px] w-full min-w-0 overflow-hidden">
-        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300}>
-          <BarChart data={safeData} margin={{ top: 8, right: 10, left: -12, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-            <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} allowDecimals={false} />
-            <Tooltip
-              cursor={{ fill: '#eef2ff' }}
-              contentStyle={{ borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 20px 45px -30px rgb(15 23 42 / 0.45)' }}
-              formatter={(value, name, info) => [
-                `${value} คน`,
-                info?.payload?.label || name,
-              ]}
-            />
-            <Bar dataKey="count" radius={[12, 12, 4, 4]} barSize={28} onClick={onSelectBucket} className={onSelectBucket ? 'cursor-pointer' : ''}>
-              {safeData.map((entry, index) => (
-                <Cell key={entry.bucketKey || index} fill={entry.count > 0 ? '#4f46e5' : '#cbd5e1'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        {mounted && (
+          <ResponsiveContainer width="99%" height={300}>
+            <BarChart data={safeData} margin={{ top: 8, right: 10, left: -12, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+              <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12 }} allowDecimals={false} />
+              <Tooltip
+                cursor={{ fill: '#eef2ff' }}
+                contentStyle={{ borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 20px 45px -30px rgb(15 23 42 / 0.45)' }}
+                formatter={(value, name, info) => [
+                  `${value} คน`,
+                  info?.payload?.label || name,
+                ]}
+              />
+              <Bar dataKey="count" radius={[12, 12, 4, 4]} barSize={28} onClick={onSelectBucket} className={onSelectBucket ? 'cursor-pointer' : ''}>
+                {safeData.map((entry, index) => (
+                  <Cell key={entry.bucketKey || index} fill={entry.count > 0 ? '#4f46e5' : '#cbd5e1'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">

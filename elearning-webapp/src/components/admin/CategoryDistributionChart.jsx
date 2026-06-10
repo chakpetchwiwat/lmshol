@@ -7,6 +7,10 @@ import {
 const COLORS = ['#4f46e5', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#0ea5e9'];
 
 const CategoryDistributionChart = ({ data, totalCourses, onSelectCategory }) => {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
   const safeData = data || [];
 
   return (
@@ -22,7 +26,8 @@ const CategoryDistributionChart = ({ data, totalCourses, onSelectCategory }) => 
       </div>
 
       <div className="relative h-[250px] w-full min-w-0 overflow-hidden">
-        <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={250}>
+        {mounted && (
+          <ResponsiveContainer width="99%" height={250}>
           <PieChart>
             <Pie
               data={safeData}
@@ -45,6 +50,7 @@ const CategoryDistributionChart = ({ data, totalCourses, onSelectCategory }) => 
             />
           </PieChart>
         </ResponsiveContainer>
+        )}
         <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
           <p className="text-[10px] font-black uppercase tracking-[0.18em] text-muted">คอร์สที่เปิด</p>
           <p className="text-2xl font-black text-slate-900">{totalCourses || 0}</p>

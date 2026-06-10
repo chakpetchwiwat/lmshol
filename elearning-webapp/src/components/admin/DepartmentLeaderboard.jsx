@@ -8,6 +8,10 @@ import {
 const COLORS = ['#4f46e5', '#7c3aed', '#a855f7', '#ec4899', '#f59e0b'];
 
 const DepartmentLeaderboard = ({ data, onSelectDepartment }) => {
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
   const sortedData = [...(data || [])]
     .sort((left, right) => right.completion_rate - left.completion_rate)
     .slice(0, 5);
@@ -26,8 +30,9 @@ const DepartmentLeaderboard = ({ data, onSelectDepartment }) => {
         </div>
       </div>
 
-      <div className="h-[300px] w-full min-w-0">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="relative h-[300px] w-full min-w-0">
+        {mounted && (
+          <ResponsiveContainer width="99%" height={300}>
           <BarChart
             data={sortedData}
             layout="vertical"
@@ -59,6 +64,7 @@ const DepartmentLeaderboard = ({ data, onSelectDepartment }) => {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        )}
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
