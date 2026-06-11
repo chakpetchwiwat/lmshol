@@ -231,12 +231,44 @@ const CustomFormPrintContent = ({ report }) => {
     .join(' ');
 
   const records = report.profile?.customFormRows || report.rows || [];
-  const pageSize = 30;
+  const pageSize = 16;
   const totalPages = Math.max(1, Math.ceil(records.length / pageSize));
   const pages = Array.from({ length: totalPages }, (_, pageIndex) => (
     records.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
   ));
   const emptyRows = (count) => Array.from({ length: count }, (_, index) => index);
+
+  const getPageDateRange = (pageRecords) => {
+    const dates = [];
+    pageRecords.forEach(r => {
+      if (r.rawStartDate) {
+        const d = new Date(r.rawStartDate);
+        if (!isNaN(d.getTime())) dates.push(d);
+      }
+      if (r.rawEndDate) {
+        const d = new Date(r.rawEndDate);
+        if (!isNaN(d.getTime())) dates.push(d);
+      }
+      if (!r.rawStartDate && !r.rawEndDate && r.dateForSort) {
+        const d = new Date(r.dateForSort);
+        if (!isNaN(d.getTime())) dates.push(d);
+      }
+    });
+
+    if (dates.length === 0) return '..............................';
+
+    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+
+    const minStr = formatThaiDateTime(minDate, false);
+    const maxStr = formatThaiDateTime(maxDate, false);
+
+    if (minStr === '-' || maxStr === '-') {
+      return '..............................';
+    }
+
+    return `${minStr} - ${maxStr}`;
+  };
 
   return (
     <div className="custom-form-print">
@@ -284,6 +316,7 @@ const CustomFormPrintContent = ({ report }) => {
           font-size: 16pt;
           font-weight: 700;
           line-height: 1.05;
+          text-align: center;
         }
 
         .form-person-line,
@@ -318,13 +351,13 @@ const CustomFormPrintContent = ({ report }) => {
           border-collapse: collapse;
           table-layout: fixed;
           font-size: 16pt;
-          line-height: 1;
+          line-height: 1.15;
         }
 
         .training-record-table th,
         .training-record-table td {
           border: 0.7pt solid #555;
-          height: 18pt;
+          height: 20pt;
           padding: 1pt 3pt;
           vertical-align: middle;
         }
@@ -354,21 +387,33 @@ const CustomFormPrintContent = ({ report }) => {
           -webkit-line-clamp: 2;
         }
 
-        .form-footer {
+        .form-footer-container {
           position: absolute;
-          right: 34pt;
+          left: 30pt;
+          right: 30pt;
           bottom: 18pt;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
           font-size: 16pt;
           font-weight: 700;
+          font-family: 'TH Sarabun PSK', sans-serif;
         }
 
-        .training-record-table col:nth-child(1) { width: 33pt; }
-        .training-record-table col:nth-child(2) { width: 37pt; }
-        .training-record-table col:nth-child(3) { width: 70pt; }
-        .training-record-table col:nth-child(4) { width: 70pt; }
-        .training-record-table col:nth-child(5) { width: 58pt; }
-        .training-record-table col:nth-child(6) { width: 128pt; }
-        .training-record-table col:nth-child(7) { width: 103pt; }
+        .form-note {
+          margin-top: 8pt;
+          font-size: 16pt;
+          font-weight: 700;
+          font-family: 'TH Sarabun PSK', sans-serif;
+        }
+
+        .training-record-table col:nth-child(1) { width: 35pt; }
+        .training-record-table col:nth-child(2) { width: 45pt; }
+        .training-record-table col:nth-child(3) { width: 75pt; }
+        .training-record-table col:nth-child(4) { width: 75pt; }
+        .training-record-table col:nth-child(5) { width: 45pt; }
+        .training-record-table col:nth-child(6) { width: 135pt; }
+        .training-record-table col:nth-child(7) { width: 120pt; }
         .training-record-table col:nth-child(8) { width: auto; }
 
         @media print {
@@ -432,17 +477,14 @@ const CustomFormPrintContent = ({ report }) => {
               </colgroup>
               <thead>
                 <tr>
-                  <th rowSpan={2}>ลำดับที่</th>
-                  <th rowSpan={2}>ปี</th>
-                  <th colSpan={2}>ระยะเวลาการฝึกอบรม</th>
-                  <th rowSpan={2}>จำนวนวัน</th>
-                  <th rowSpan={2}>ชื่อหลักสูตร</th>
-                  <th rowSpan={2}>หน่วยงาน / สถานที่จัด</th>
-                  <th rowSpan={2}>หลักฐาน / เลขที่</th>
-                </tr>
-                <tr>
-                  <th>ตั้งแต่</th>
-                  <th>ถึง</th>
+                  <th>ลำดับที่</th>
+                  <th>ปี พ.ศ.</th>
+                  <th>ระยะเวลาเริ่มการอบรม</th>
+                  <th>ระยะเวลาสิ้นสุดการอบรม</th>
+                  <th>จำนวนวัน</th>
+                  <th>ชื่อหัวข้อ/หลักสูตร</th>
+                  <th>หน่วยงานที่จัดการฝึกอบรม / สถานที่</th>
+                  <th>รหัสหลักสูตร</th>
                 </tr>
               </thead>
               <tbody>
@@ -463,20 +505,29 @@ const CustomFormPrintContent = ({ report }) => {
                 })}
                 {emptyRows(missingRowCount).map((emptyIndex) => (
                   <tr key={`empty-row-${pageNum}-${emptyIndex}`} aria-hidden="true">
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            <div className="form-footer">หน้า {pageNum}/{totalPages}</div>
+            {pageNum === totalPages && (
+              <div className="form-note">
+                หมายเหตุ: วันฝึกอบรม 1 วัน คิดเป็นชั่วโมงฝึกอบรม 8 ชั่วโมง
+              </div>
+            )}
+
+            <div className="form-footer-container">
+              <div>วันที่อบรม: {getPageDateRange(pageRecords)}</div>
+              <div>F-D3-14 (04-19/06/69) หน้า {pageNum} / {totalPages}</div>
+            </div>
           </div>
         );
       })}

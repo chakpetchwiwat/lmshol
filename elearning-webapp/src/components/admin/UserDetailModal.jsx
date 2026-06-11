@@ -195,10 +195,12 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
           issuer: 'สำนักงานคณะกรรมการอาหารและยา',
           code: cert.certificateNo || '-',
           dateForSort: startDate ? new Date(startDate) : new Date(),
+          rawStartDate: startDate,
+          rawEndDate: endDate
         };
       }),
       ...externalCertificates.map((cert) => {
-        const startDate = cert.issueDate;
+        const startDate = cert.startDate || cert.issueDate;
         const endDate = cert.issueDate;
         const venue = cert.trainingVenue;
         const issuer = cert.issuer || '-';
@@ -211,12 +213,14 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
           title: cert.title || '-',
           issuer: location,
           code: cert.credentialId || cert.intakeNo || '-',
-          dateForSort: cert.issueDate ? new Date(cert.issueDate) : new Date(0),
+          dateForSort: startDate ? new Date(startDate) : new Date(0),
+          rawStartDate: startDate,
+          rawEndDate: endDate
         };
       }),
     ];
 
-    allRecords.sort((a, b) => b.dateForSort.getTime() - a.dateForSort.getTime());
+    allRecords.sort((a, b) => a.dateForSort.getTime() - b.dateForSort.getTime());
 
     const sections = [
       {
