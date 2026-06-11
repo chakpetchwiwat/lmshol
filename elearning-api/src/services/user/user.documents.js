@@ -2,7 +2,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const ErrorResponse = require('../../utils/errorResponse');
 
-const SUPABASE_BUCKET = 'secure-documents';
+const DEFAULT_SECURE_BUCKET = 'secure-documents';
 const DOCUMENT_ACCESS_TOKEN_TTL_SECONDS = 120;
 
 const isProtectedDocumentLesson = (lesson) => (
@@ -22,23 +22,9 @@ const getStorageObjectRefFromContentUrl = (contentUrl) => {
 
     if (!/^https?:\/\//i.test(trimmedUrl)) {
         return {
-            bucket: SUPABASE_BUCKET,
+            bucket: DEFAULT_SECURE_BUCKET,
             path: trimmedUrl.replace(/^\/+/, '').replace(/^uploads\//, '')
         };
-    }
-
-    try {
-        const parsedUrl = new URL(trimmedUrl);
-        const match = parsedUrl.pathname.match(/\/storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)$/);
-
-        if (match) {
-            return {
-                bucket: decodeURIComponent(match[1]),
-                path: decodeURIComponent(match[2])
-            };
-        }
-    } catch (error) {
-        return null;
     }
 
     return null;
@@ -58,7 +44,7 @@ const createDocumentAccessToken = ({ userId, resourceType, resourceId, contentUr
             userId,
             resourceType,
             resourceId,
-            bucket: storageRef?.bucket || SUPABASE_BUCKET,
+            bucket: storageRef?.bucket || DEFAULT_SECURE_BUCKET,
             path: storageRef?.path || null,
             sourceUrl: storageRef?.path ? null : sourceUrl
         },
@@ -175,7 +161,7 @@ const getDocumentUpstreamResponse = async (documentAccessPayload) => {
     let fileName = 'document';
 
     if (storagePath) {
-        const localFilePath = await resolveLocalPath(bucket || SUPABASE_BUCKET, storagePath);
+        const localFilePath = await resolveLocalPath(bucket || DEFAULT_SECURE_BUCKET, storagePath);
         fileName = getDocumentFilename(storagePath);
         return {
             isLocal: true,
@@ -183,19 +169,6 @@ const getDocumentUpstreamResponse = async (documentAccessPayload) => {
             fileName
         };
     } else if (sourceUrl) {
-        const isSupabase = sourceUrl.includes('.supabase.co/storage/v1/object/');
-        if (isSupabase) {
-            const storageRef = getStorageObjectRefFromContentUrl(sourceUrl);
-            if (storageRef?.path) {
-                const localFilePath = await resolveLocalPath(storageRef.bucket, storageRef.path);
-                fileName = getDocumentFilename(storageRef.path);
-                return {
-                    isLocal: true,
-                    localFilePath,
-                    fileName
-                };
-            }
-        }
         upstreamUrl = sourceUrl;
         fileName = getDocumentFilename(sourceUrl);
     } else {

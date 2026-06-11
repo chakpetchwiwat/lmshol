@@ -16,8 +16,6 @@ const { writeAuditLog } = require('../services/audit.service');
 const router = express.Router();
 const securityConfig = getSecurityConfig();
 
-// Supabase client is now managed centrally in ../config/supabase
-
 // Use Memory Storage for Serverless (Vercel)
 const storage = multer.memoryStorage();
 

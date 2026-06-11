@@ -23,7 +23,7 @@ async function main() {
   for (let i=0; i<deptArr.length; i++) {
     const existing = await prisma.department.findFirst({ where: { name: deptArr[i] }});
     if (!existing) {
-      await prisma.department.create({ data: { name: deptArr[i], order: i } });
+      await prisma.department.create({ data: { name: deptArr[i] } });
     }
   }
 
