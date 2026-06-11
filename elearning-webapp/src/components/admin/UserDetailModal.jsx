@@ -17,7 +17,7 @@ import {
   User2,
   X,
 } from 'lucide-react';
-import { formatThaiDateTime } from '../../utils/dateUtils';
+import { formatThaiDateTime, toThaiYear } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
 import CustomSelect from '../common/CustomSelect';
 import { useToast } from '../../context/useToast';
@@ -230,6 +230,70 @@ sections
     });
   };
 
+  const handlePrintForm = () => {
+    const enrollments = detail?.enrollments || [];
+    const systemCertificates = detail?.systemCertificates || [];
+    const externalCertificates = detail?.externalCertificates || [];
+
+    const getDurationDays = (startDateStr, endDateStr) => {
+      if (!startDateStr || !endDateStr) return '1';
+      const start = new Date(startDateStr);
+      const end = new Date(endDateStr);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return String(diffDays === 0 ? 1 : diffDays);
+    };
+
+    const allRecords = [
+      ...systemCertificates.map((cert) => {
+        const enrollment = enrollments.find((e) => e.course?.title === cert.courseTitle);
+        const startDate = enrollment?.startedAt || cert.issuedAt;
+        const endDate = enrollment?.completedAt || cert.issuedAt;
+        return {
+          year: toThaiYear(startDate),
+          startDateFormatted: formatThaiDateTime(startDate, false),
+          endDateFormatted: formatThaiDateTime(endDate, false),
+          durationDays: getDurationDays(startDate, endDate),
+          title: cert.courseTitle || '-',
+          issuer: 'สำนักงานคณะกรรมการอาหารและยา',
+          code: cert.certificateNo || '-',
+          dateForSort: startDate ? new Date(startDate) : new Date(),
+        };
+      }),
+      ...externalCertificates.map((cert) => {
+        const startDate = cert.issueDate;
+        const endDate = cert.issueDate;
+        const venue = cert.trainingVenue;
+        const issuer = cert.issuer || '-';
+        const location = venue ? `${issuer} / ${venue}` : issuer;
+        return {
+          year: toThaiYear(startDate),
+          startDateFormatted: formatThaiDateTime(startDate, false),
+          endDateFormatted: formatThaiDateTime(endDate, false),
+          durationDays: cert.trainingDays || '1',
+          title: cert.title || '-',
+          issuer: location,
+          code: cert.credentialId || cert.intakeNo || '-',
+          dateForSort: cert.issueDate ? new Date(cert.issueDate) : new Date(0),
+        };
+      }),
+    ];
+
+    allRecords.sort((a, b) => b.dateForSort.getTime() - a.dateForSort.getTime());
+
+    openPrintReport({
+      type: 'custom-form',
+      fileName: `user-training-form-${detail?.name || 'report'}`,
+      reportTitle: 'แบบประวัติการฝึกอบรม (Training Record)',
+      profile: {
+        name: detail?.name || '-',
+        subdivision: detail?.subdivision || '',
+        department: detail?.department || '',
+      },
+      rows: allRecords,
+    });
+  };
+
   return (
     <ModalPortal isOpen>
       <div className="fixed inset-0 z-[95] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
@@ -250,6 +314,14 @@ sections
                   >
                     <FileDown size={16} />
                     <span className="hidden sm:inline">Export to Excel</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePrintForm}
+                    className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-indigo-600 px-4 py-2 text-sm font-black text-white transition-all duration-300 hover:from-violet-600 hover:to-indigo-700 hover:shadow-lg hover:shadow-indigo-500/25 active:scale-95 shadow-md shadow-indigo-500/10"
+                  >
+                    <Printer size={16} />
+                    <span className="hidden sm:inline">พิมพ์ตามแบบฟอร์ม</span>
                   </button>
                   <button
                     type="button"

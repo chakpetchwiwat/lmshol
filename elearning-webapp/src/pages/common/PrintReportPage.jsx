@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { ExternalLink, Printer } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import {
@@ -20,6 +20,10 @@ import {
   renderPrintReportMarkup,
 } from '../../utils/printUtils';
 import { formatThaiDateTime } from '../../utils/dateUtils';
+import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+
+GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const PIE_COLORS = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
 
@@ -213,6 +217,339 @@ const DashboardPrintContent = ({ report }) => {
           </table>
         </div>
       </section>
+    </div>
+  );
+};
+
+const PdfBackgroundCanvas = ({ pdfDocument }) => {
+  const canvasRef = React.useRef(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const renderPage = async () => {
+      if (!pdfDocument || !canvasRef.current) return;
+      const page = await pdfDocument.getPage(1);
+      if (cancelled || !canvasRef.current) return;
+
+      const viewport = page.getViewport({ scale: 1.0 });
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d', { alpha: false });
+      const outputScale = window.devicePixelRatio || 1;
+
+      canvas.width = Math.floor(viewport.width * outputScale);
+      canvas.height = Math.floor(viewport.height * outputScale);
+      canvas.style.width = `${viewport.width}px`;
+      canvas.style.height = `${viewport.height}px`;
+
+      context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+
+      const renderTask = page.render({
+        canvasContext: context,
+        viewport,
+      });
+
+      try {
+        await renderTask.promise;
+      } catch (error) {
+        if (error?.name !== 'RenderingCancelledException') {
+          throw error;
+        }
+      }
+    };
+
+    renderPage().catch((error) => {
+      console.error('PdfBackgroundCanvas render error:', error);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pdfDocument]);
+
+  return <canvas ref={canvasRef} className="pdf-bg-canvas" />;
+};
+
+const CustomFormPrintContent = ({ report }) => {
+  const [pdfDocument, setPdfDocument] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    let active = true;
+    const loadPdf = async () => {
+      try {
+        const url = '/F-D3-14_3.pdf';
+        const loadingTask = getDocument({
+          url,
+          withCredentials: false,
+        });
+        const loadedPdf = await loadingTask.promise;
+        if (active) {
+          setPdfDocument(loadedPdf);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to load PDF background template:', err);
+        if (active) {
+          setError('ไม่สามารถโหลดเทมเพลต PDF ได้');
+          setLoading(false);
+        }
+      }
+    };
+    loadPdf();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
+        <p className="text-sm font-semibold">กำลังโหลดเทมเพลตแบบฟอร์ม...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-20 text-red-600 font-semibold">
+        {error}
+      </div>
+    );
+  }
+
+  const name = report.profile?.name || '';
+  const subdivision = report.profile?.subdivision || '';
+  const department = report.profile?.department || '';
+
+  let cleanSub = subdivision.trim();
+  if (cleanSub && !cleanSub.startsWith('กลุ่ม')) {
+    cleanSub = 'กลุ่ม' + cleanSub;
+  }
+  const cleanDept = department.trim();
+  const subdivisionText = cleanSub 
+    ? `${cleanSub} ${cleanDept} สำนักงานคณะกรรมการอาหารและยา`
+    : `${cleanDept} สำนักงานคณะกรรมการอาหารและยา`;
+
+  const records = report.rows || [];
+  const pageSize = 33;
+  const totalPages = Math.max(1, Math.ceil(records.length / pageSize));
+
+  const pages = [];
+  for (let p = 0; p < totalPages; p++) {
+    pages.push(records.slice(p * pageSize, (p + 1) * pageSize));
+  }
+
+  return (
+    <div className="custom-form-print">
+      <style>{`
+        @font-face {
+          font-family: 'TH Sarabun PSK';
+          src: url('/fonts/THSarabun.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: 'TH Sarabun PSK';
+          src: url('/fonts/THSarabun Bold.ttf') format('truetype');
+          font-weight: bold;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: 'TH Sarabun PSK';
+          src: url('/fonts/THSarabun Italic.ttf') format('truetype');
+          font-weight: normal;
+          font-style: italic;
+        }
+        @font-face {
+          font-family: 'TH Sarabun PSK';
+          src: url('/fonts/THSarabun BoldItalic.ttf') format('truetype');
+          font-weight: bold;
+          font-style: italic;
+        }
+
+        .custom-form-print {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: #eef2ff;
+          padding: 20px 0;
+          min-height: 100vh;
+        }
+
+        .custom-form-page {
+          position: relative;
+          width: 595.32pt;
+          height: 841.92pt;
+          background: white;
+          margin-bottom: 20px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          overflow: hidden;
+          box-sizing: border-box;
+        }
+
+        .pdf-bg-canvas {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 595.32pt;
+          height: 841.92pt;
+          z-index: 1;
+        }
+
+        .form-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 595.32pt;
+          height: 841.92pt;
+          z-index: 5;
+          pointer-events: none;
+          font-family: 'TH Sarabun PSK', sans-serif;
+          color: black;
+        }
+
+        .overlay-text {
+          position: absolute;
+          line-height: 1;
+        }
+
+        .overlay-name {
+          left: 65pt;
+          top: 67pt;
+          font-size: 16pt;
+          font-weight: bold;
+        }
+
+        .subdivision-mask {
+          position: absolute;
+          left: 35pt;
+          top: 83.5pt;
+          width: 520pt;
+          height: 18pt;
+          background: white;
+          z-index: 2;
+        }
+
+        .overlay-subdivision {
+          left: 36pt;
+          top: 84.5pt;
+          font-size: 16pt;
+          font-weight: bold;
+          z-index: 3;
+        }
+
+        .table-row-overlay {
+          position: absolute;
+          left: 30pt;
+          width: 535pt;
+          height: 18.6pt;
+          display: flex;
+          align-items: center;
+          font-size: 15pt;
+          line-height: 1.1;
+        }
+
+        .overlay-cell {
+          position: absolute;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .cell-no { left: 0pt; width: 30pt; text-align: center; }
+        .cell-year { left: 30pt; width: 38pt; text-align: center; }
+        .cell-start { left: 68pt; width: 70pt; text-align: center; }
+        .cell-end { left: 138pt; width: 70pt; text-align: center; }
+        .cell-days { left: 208pt; width: 60pt; text-align: center; }
+        .cell-title { left: 268pt; width: 115pt; text-align: left; padding-left: 4pt; }
+        .cell-issuer { left: 383pt; width: 95pt; text-align: left; padding-left: 4pt; }
+        .cell-code { left: 478pt; width: 57pt; text-align: center; }
+
+        .page-number-mask {
+          position: absolute;
+          left: 528pt;
+          top: 812pt;
+          width: 32pt;
+          height: 15pt;
+          background: white;
+          z-index: 2;
+        }
+
+        .overlay-page-number {
+          left: 532pt;
+          top: 813pt;
+          font-size: 15pt;
+          font-weight: bold;
+          z-index: 3;
+        }
+
+        @media print {
+          @page {
+            size: A4 portrait !important;
+            margin: 0 !important;
+          }
+
+          body, html {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          .custom-form-print {
+            padding: 0 !important;
+            background: white !important;
+          }
+
+          .custom-form-page {
+            margin: 0 !important;
+            box-shadow: none !important;
+            page-break-after: always !important;
+            break-after: page !important;
+          }
+        }
+      `}</style>
+
+      {pages.map((pageRecords, pageIdx) => {
+        const pageNum = pageIdx + 1;
+        return (
+          <div key={`form-page-${pageNum}`} className="custom-form-page">
+            <PdfBackgroundCanvas pdfDocument={pdfDocument} />
+            
+            <div className="subdivision-mask" />
+            <div className="page-number-mask" />
+
+            <div className="form-overlay">
+              <div className="overlay-text overlay-name">{name}</div>
+              <div className="overlay-text overlay-subdivision">{subdivisionText}</div>
+              <div className="overlay-text overlay-page-number">{pageNum}/{totalPages}</div>
+
+              {pageRecords.map((record, recordIdx) => {
+                const globalIdx = pageIdx * pageSize + recordIdx + 1;
+                const rowTop = 157.46 + recordIdx * 18.6;
+                return (
+                  <div 
+                    key={`row-${globalIdx}`} 
+                    className="table-row-overlay" 
+                    style={{ top: `${rowTop.toFixed(2)}pt` }}
+                  >
+                    <div className="overlay-cell cell-no">{globalIdx}</div>
+                    <div className="overlay-cell cell-year">{record.year || '-'}</div>
+                    <div className="overlay-cell cell-start">{record.startDateFormatted || '-'}</div>
+                    <div className="overlay-cell cell-end">{record.endDateFormatted || '-'}</div>
+                    <div className="overlay-cell cell-days">{record.durationDays || '-'}</div>
+                    <div className="overlay-cell cell-title" title={record.title}>{record.title}</div>
+                    <div className="overlay-cell cell-issuer" title={record.issuer}>{record.issuer}</div>
+                    <div className="overlay-cell cell-code" title={record.code}>{record.code}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -545,7 +882,9 @@ const PrintReportPage = () => {
       </div>
 
       <div className="print-shell">
-        {report.type === 'dashboard' ? (
+        {report.type === 'custom-form' ? (
+          <CustomFormPrintContent report={report} />
+        ) : report.type === 'dashboard' ? (
           <DashboardPrintContent report={report} />
         ) : (
           <div dangerouslySetInnerHTML={{ __html: renderPrintReportMarkup(report) }} />
