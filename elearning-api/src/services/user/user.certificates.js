@@ -39,6 +39,7 @@ const normalizeCertificatePayload = (data = {}) => {
     return {
         title,
         issuer,
+        startDate: parseOptionalDate(data.startDate),
         issueDate: parseOptionalDate(data.issueDate),
         expirationDate: noExpiration ? null : parseOptionalDate(data.expirationDate),
         noExpiration,

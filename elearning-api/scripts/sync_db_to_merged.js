@@ -175,8 +175,11 @@ async function run() {
     }
 
     const title = String(row[courseNameColIdx] || 'ไม่มีชื่อหลักสูตร').trim();
-    const rawDate = row[completionDateColIdx] || row[enrolmentDateColIdx];
-    const parsedDate = parseExcelDate(rawDate);
+    const parsedCompletionDate = parseExcelDate(row[completionDateColIdx]);
+    const parsedEnrolmentDate = parseExcelDate(row[enrolmentDateColIdx]);
+
+    const issueDate = parsedCompletionDate || parsedEnrolmentDate;
+    const startDate = parsedEnrolmentDate;
     
     const trainingDaysVal = row[daysColIdx] !== undefined && row[daysColIdx] !== null ? String(row[daysColIdx]).trim() : null;
     const intakeNoVal = row[intakeColIdx] !== undefined && row[intakeColIdx] !== null ? String(row[intakeColIdx]).trim() : null;
@@ -185,10 +188,9 @@ async function run() {
       userId: user.id,
       title: title,
       issuer: String(row[organizingAgencyColIdx] || '-').trim(),
-      issueDate: parsedDate,
+      issueDate: issueDate,
+      startDate: startDate,
       noExpiration: true,
-      trainingType: String(row[courseGroupColIdx] || 'ภายนอก').trim(),
-      trainingItem: String(row[courseTypeColIdx] || 'อบรม').trim(),
       trainingType: String(row[courseTypeColIdx] || 'external').trim(),
       trainingItem: String(row[courseGroupColIdx] || 'unclassified').trim(),
       trainingVenue: row[venueColIdx] ? String(row[venueColIdx]).trim() : null,

@@ -78,6 +78,7 @@ const IMPORT_COMPAT_TRAINING_HEADERS = [
   'Full Name',
   'Course Name',
   'Organizing Agency',
+  'Enrolment Date',
   'Completion Date',
   'Number of Days',
   'Intake No.',
@@ -369,8 +370,19 @@ const buildTrainingItems = (user) => {
   }
   const department = user.departmentRef?.name || user.department || '';
 
+  const courseStartDates = {};
+  if (Array.isArray(user.enrollments)) {
+    user.enrollments.forEach((enroll) => {
+      if (enroll.courseId) {
+        courseStartDates[enroll.courseId] = enroll.startedAt;
+      }
+    });
+  }
+
   const systemItems = (user.issuedCertificates || []).map((cert) => {
     const formattedDate = formatDate(cert.issuedAt);
+    const startedAt = courseStartDates[cert.courseId];
+    const formattedStartDate = startedAt ? formatDate(startedAt) : formattedDate;
     const courseCompetencies = cert.course?.competencies || [];
     return {
       email: user.email || '',
@@ -383,6 +395,7 @@ const buildTrainingItems = (user) => {
       item: 'อบรม',
       details: '',
       courseName: cert.course?.title || '',
+      startDate: formattedStartDate,
       date: formattedDate,
       days: '',
       intake: '',
@@ -397,6 +410,7 @@ const buildTrainingItems = (user) => {
 
   const externalItems = (user.certificates || []).map((cert) => {
     const formattedDate = formatDate(cert.issueDate);
+    const formattedStartDate = cert.startDate ? formatDate(cert.startDate) : formattedDate;
     return {
       email: user.email || '',
       fullName: user.name || '',
@@ -408,6 +422,7 @@ const buildTrainingItems = (user) => {
       item: cert.trainingItem || 'อบรม',
       details: cert.trainingDetails || '',
       courseName: cert.title || '',
+      startDate: formattedStartDate,
       date: formattedDate,
       days: cert.trainingDays || '',
       intake: cert.intakeNo || '',
@@ -425,11 +440,18 @@ const buildTrainingItems = (user) => {
 
 const exportUserTrainings = async (actor) => {
   const users = await getScopedUsersForExport(actor, {
+    enrollments: {
+      select: {
+        courseId: true,
+        startedAt: true
+      }
+    },
     issuedCertificates: {
       where: { status: 'VALID' },
       select: {
         certificateNo: true,
         issuedAt: true,
+        courseId: true,
         course: {
           select: {
             title: true,
@@ -451,6 +473,7 @@ const exportUserTrainings = async (actor) => {
         title: true,
         issuer: true,
         issueDate: true,
+        startDate: true,
         expirationDate: true,
         credentialId: true,
         credentialUrl: true,
@@ -481,6 +504,7 @@ const exportUserTrainings = async (actor) => {
         item.fullName,
         item.courseName,
         item.organizer,
+        item.startDate,
         item.date,
         item.days,
         item.intake,
@@ -500,7 +524,7 @@ const exportUserTrainings = async (actor) => {
     'Training Report',
     IMPORT_COMPAT_TRAINING_HEADERS,
     rows,
-    [15, 30, 50, 25, 15, 15, 15, 25, 18, 18, 25, 20, 18, 25, 25]
+    [15, 30, 50, 25, 15, 15, 15, 15, 25, 18, 18, 25, 20, 18, 25, 25]
   );
 };
 
@@ -561,25 +585,31 @@ const exportSingleUser = async (id, authUser) => {
   ]);
 
   // Sheet 4: ประวัติการอบรม (Training History)
-  const certHeaders = ['หลักสูตร / หัวข้อ', 'ประเภท', 'ผู้จัด / ผู้ออก', 'เลขที่ใบเซอร์ / รายละเอียด', 'วันที่ได้รับ', 'จำนวนวัน', 'รุ่นที่', 'สถานที่', 'หมายเหตุ'];
+  const certHeaders = ['หลักสูตร / หัวข้อ', 'ประเภท', 'ผู้จัด / ผู้ออก', 'เลขที่ใบเซอร์ / รายละเอียด', 'วันที่เริ่ม', 'วันที่สิ้นสุด / วันที่ได้รับ', 'จำนวนวัน', 'รุ่นที่', 'สถานที่', 'หมายเหตุ'];
   
-  const systemCerts = (detail.systemCertificates || []).map(cert => [
-    cert.courseTitle || '-',
-    'ภายใน',
-    'LMS System',
-    cert.certificateNo || '-',
-    cert.issuedAt ? formatDate(cert.issuedAt) : '-',
-    '-',
-    '-',
-    'Online (e-Learning)',
-    ''
-  ]);
+  const systemCerts = (detail.systemCertificates || []).map(cert => {
+    const enroll = (detail.enrollments || []).find(e => e.course?.id === cert.courseId);
+    const startDateVal = enroll?.startedAt ? formatDate(enroll.startedAt) : (cert.issuedAt ? formatDate(cert.issuedAt) : '-');
+    return [
+      cert.courseTitle || '-',
+      'ภายใน',
+      'LMS System',
+      cert.certificateNo || '-',
+      startDateVal,
+      cert.issuedAt ? formatDate(cert.issuedAt) : '-',
+      '-',
+      '-',
+      'Online (e-Learning)',
+      ''
+    ];
+  });
   
   const externalCerts = (detail.externalCertificates || []).map(cert => [
     cert.title || '-',
     cert.trainingType || 'ภายนอก',
     cert.issuer || '-',
     cert.credentialId || cert.trainingDetails || '-',
+    cert.startDate ? formatDate(cert.startDate) : (cert.issueDate ? formatDate(cert.issueDate) : '-'),
     cert.issueDate ? formatDate(cert.issueDate) : '-',
     cert.trainingDays || '-',
     cert.intakeNo || '-',
@@ -602,7 +632,7 @@ const exportSingleUser = async (id, authUser) => {
   addSheet('ข้อมูลทั่วไป', profileHeaders, profileRows, [25, 45]);
   addSheet('ประวัติการเรียน', learningHeaders, learningRows, [45, 25, 18, 18, 15, 15]);
   addSheet('ประวัติ Point', pointsHeaders, pointsRows, [15, 35, 30, 12, 18]);
-  addSheet('ประวัติการอบรม', certHeaders, certRows, [45, 15, 25, 30, 18, 12, 12, 25, 20]);
+  addSheet('ประวัติการอบรม', certHeaders, certRows, [45, 15, 25, 30, 18, 18, 12, 12, 25, 20]);
 
   const buffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
   return { name: detail.name, buffer };

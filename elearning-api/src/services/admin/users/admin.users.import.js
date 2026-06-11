@@ -36,7 +36,8 @@ const TRAINING_MAPPING = {
   fullName: ['full name', 'ชื่อ-นามสกุล', 'ชื่อ นามสกุล', 'ชื่อ', 'name'],
   courseName: ['course name', 'course', 'หลักสูตร', 'หลักสูตร/หัวข้อเรื่อง ประชุม/ฝึกอบรม/สัมมนา', 'หัวข้อ', 'ชื่อหลักสูตร', 'coursename'],
   organizingAgency: ['organizing agency', 'ผู้จัด', 'หน่วยงานผู้จัด', 'organizer', 'issuer', 'organizingagency'],
-  completionDate: ['completion date', 'วัน/เดือน/ปี', 'วันที่เรียนจบ', 'วันที่อบรม', 'completion date/enrolment date', 'issue date', 'completiondate', 'enrolment date', 'completiondate', 'date'],
+  completionDate: ['completion date', 'วัน/เดือน/ปี', 'วันที่เรียนจบ', 'วันที่อบรม', 'issue date', 'completiondate', 'end date', 'enddate', 'date', 'วันที่สิ้นสุด', 'วันที่สิ้นสุดอบรม'],
+  startDate: ['enrolment date', 'enrollment date', 'วันที่เริ่ม', 'start date', 'startdate', 'enrolmentdate', 'enrollmentdate', 'วันที่เริ่มอบรม', 'วันที่อบรมเริ่ม'],
   numberOfDays: ['number of days', 'จำนวนวัน', 'days', 'numberofdays'],
   intakeNo: ['intake no.', 'รุ่นที่', 'รุ่น', 'intake no', 'intake', 'intakeno'],
   venue: ['venue', 'สถานที่', 'สถานที่อบรม'],
@@ -152,13 +153,13 @@ const downloadTemplate = (type) => {
   } else if (type === 'trainings') {
     sheetName = 'Template ประวัติอบรม';
     headers = [
-      'Email', 'Full Name', 'Course Name', 'Organizing Agency', 'Completion Date',
+      'Email', 'Full Name', 'Course Name', 'Organizing Agency', 'Enrolment Date', 'Completion Date',
       'Number of Days', 'Intake No.', 'Venue', 'Course Group', 'Course Type',
       'Training Details', 'Competency Codes', 'Competency Levels', 'Competency Notes', 'Remarks'
     ];
     sampleData = [
       [
-        'somchai.d@fda.moph.go.th', 'สมชาย ดีใจ', 'การประเมินความปลอดภัยทางยาขั้นสูง', 'กองยา', '2026-05-20',
+        'somchai.d@fda.moph.go.th', 'สมชาย ดีใจ', 'การประเมินความปลอดภัยทางยาขั้นสูง', 'กองยา', '2026-05-18', '2026-05-20',
         '2', 'รุ่นที่ 5', 'ห้องประชุม 1', 'ภายนอก', 'วิชาการ', 'ผ่านอบรม'
       ]
     ];
@@ -168,14 +169,14 @@ const downloadTemplate = (type) => {
 
   if (type === 'trainings') {
     sampleData = sampleData.map((row) => {
-      if (row.length !== 11) return row;
+      if (row.length !== 12) return row;
       return [
-        ...row.slice(0, 10),
+        ...row.slice(0, 11),
         '',
         'GBT-001; GBT-002',
         '2; 3',
         'Column K measurement refs',
-        row[10]
+        row[11]
       ];
     });
   }
@@ -501,7 +502,13 @@ const importTrainings = async (fileBuffer) => {
     const title = String(courseNameVal).trim();
     const issuer = String(findMappedValue(row, TRAINING_MAPPING.organizingAgency) || '-').trim();
     const completionDateVal = findMappedValue(row, TRAINING_MAPPING.completionDate);
-    const issueDate = parseExcelDate(completionDateVal);
+    let issueDate = parseExcelDate(completionDateVal);
+    const startDateVal = findMappedValue(row, TRAINING_MAPPING.startDate);
+    let startDate = parseExcelDate(startDateVal);
+
+    if (!issueDate && startDate) {
+      issueDate = startDate;
+    }
 
     if (!issueDate) {
       errorCount++;
@@ -549,6 +556,7 @@ const importTrainings = async (fileBuffer) => {
             title,
             issuer,
             issueDate,
+            startDate,
             trainingDays,
             intakeNo,
             trainingVenue,
