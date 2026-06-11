@@ -1,6 +1,7 @@
 const prisma = require('../../../utils/prisma');
 const authHelpers = require('../../../utils/auth.helpers');
 const xlsx = require('xlsx');
+const path = require('path');
 
 const PROFILE_HEADERS = [
   'Username',
@@ -533,108 +534,183 @@ const exportSingleUser = async (id, authUser) => {
   const detail = await detailsService.getUserDetails(id, authUser);
   if (!detail) throw new Error('User not found');
 
-  // Sheet 1: ข้อมูลทั่วไป (General Info)
-  const profileHeaders = ['หัวข้อ', 'ข้อมูล'];
-  const firstEdu = getFirstEducation(detail);
-  const highestEdu = getHighestEducation(detail);
+  const enrollments = detail.enrollments || [];
+  const systemCertificates = detail.systemCertificates || [];
+  const externalCertificates = detail.externalCertificates || [];
 
-  const profileRows = [
-    ['ชื่อ-นามสกุล', detail.name || '-'],
-    ['อีเมล', detail.email || '-'],
-    ['เลขประจำตัวประชาชน', detail.nationalId || '-'],
-    ['แผนก', detail.department || '-'],
-    ['กลุ่มงาน', detail.subdivision || '-'],
-    ['ตำแหน่ง', detail.position || '-'],
-    ['ระดับ', detail.tier?.name || detail.tier || '-'],
-    ['ประเภทตำแหน่ง', detail.positionType || '-'],
-    ['หัวหน้างาน', detail.supervisorName || '-'],
-    ['วันเริ่มงาน', formatDate(detail.employmentDate)],
-    ['วันเกษียณอายุ', detail.retirementDateRaw || '-'],
-    ['แต้มคงเหลือ', String(detail.pointsBalance || 0)],
-    // ประวัติการศึกษา
-    ['ระดับการศึกษา', firstEdu.degree || firstEdu.degreeName || '-'],
-    ['วุฒิการศึกษา', firstEdu.degreeName || firstEdu.degree || '-'],
-    ['สาขาวิชา', firstEdu.major || firstEdu.faculty || '-'],
-    ['สถาบันการศึกษา', firstEdu.institution || '-'],
-    // ประวัติการศึกษาสูงสุด
-    ['ระดับการศึกษาสูงสุด', highestEdu.degree || highestEdu.highestLevel || '-'],
-    ['วุฒิการศึกษาสูงสุด', highestEdu.degreeName || highestEdu.highestDegreeName || '-'],
-    ['สาขาวิชาสูงสุด', highestEdu.major || highestEdu.highestFieldOfStudy || '-'],
-    ['สถาบันการศึกษาสูงสุด', highestEdu.institution || highestEdu.highestInstitution || '-']
-  ];
-
-  // Sheet 2: ประวัติการเรียน (Learning History)
-  const learningHeaders = ['คอร์ส', 'หมวดหมู่', 'เริ่มเรียน', 'สำเร็จเมื่อ', 'ความคืบหน้า', 'สถานะ'];
-  const learningRows = (detail.enrollments || []).map(item => [
-    item.course?.title || '-',
-    item.course?.categoryName || '-',
-    item.startedAt ? formatDate(item.startedAt) : '-',
-    item.completedAt ? formatDate(item.completedAt) : '-',
-    `${Math.round(item.progressPercent || 0)}%`,
-    item.status === 'COMPLETED' ? 'เรียนจบแล้ว' : 'กำลังเรียน'
-  ]);
-
-  // Sheet 3: ประวัติ Point
-  const pointsHeaders = ['ประเภท', 'ที่มา/การใช้งาน', 'หมายเหตุ', 'Point', 'เวลา'];
-  const pointsRows = (detail.pointsHistory || []).map(item => [
-    item.points >= 0 ? 'ได้รับแต้ม' : 'ใช้แต้ม',
-    item.sourceLabel || '-',
-    item.note || '-',
-    String(item.points),
-    item.createdAt ? formatDate(item.createdAt) : '-'
-  ]);
-
-  // Sheet 4: ประวัติการอบรม (Training History)
-  const certHeaders = ['หลักสูตร / หัวข้อ', 'ประเภท', 'ผู้จัด / ผู้ออก', 'เลขที่ใบเซอร์ / รายละเอียด', 'วันที่เริ่ม', 'วันที่สิ้นสุด / วันที่ได้รับ', 'จำนวนวัน', 'รุ่นที่', 'สถานที่', 'หมายเหตุ'];
-  
-  const systemCerts = (detail.systemCertificates || []).map(cert => {
-    const enroll = (detail.enrollments || []).find(e => e.course?.id === cert.courseId);
-    const startDateVal = enroll?.startedAt ? formatDate(enroll.startedAt) : (cert.issuedAt ? formatDate(cert.issuedAt) : '-');
-    return [
-      cert.courseTitle || '-',
-      'ภายใน',
-      'LMS System',
-      cert.certificateNo || '-',
-      startDateVal,
-      cert.issuedAt ? formatDate(cert.issuedAt) : '-',
-      '-',
-      '-',
-      'Online (e-Learning)',
-      ''
-    ];
-  });
-  
-  const externalCerts = (detail.externalCertificates || []).map(cert => [
-    cert.title || '-',
-    cert.trainingType || 'ภายนอก',
-    cert.issuer || '-',
-    cert.credentialId || cert.trainingDetails || '-',
-    cert.startDate ? formatDate(cert.startDate) : (cert.issueDate ? formatDate(cert.issueDate) : '-'),
-    cert.issueDate ? formatDate(cert.issueDate) : '-',
-    cert.trainingDays || '-',
-    cert.intakeNo || '-',
-    cert.trainingVenue || '-',
-    cert.remarks || ''
-  ]);
-  
-  const certRows = [...systemCerts, ...externalCerts];
-
-  // Build Workbook
-  const wb = xlsx.utils.book_new();
-
-  // Helper to add sheet
-  const addSheet = (sheetName, headers, rows, colWidths) => {
-    const ws = xlsx.utils.aoa_to_sheet([headers, ...rows]);
-    setWorkbookView(ws, colWidths);
-    xlsx.utils.book_append_sheet(wb, ws, sheetName);
+  const getDurationDays = (startDateStr, endDateStr) => {
+    if (!startDateStr || !endDateStr) return '1';
+    const start = new Date(startDateStr);
+    const end = new Date(endDateStr);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return String(diffDays === 0 ? 1 : diffDays);
   };
 
-  addSheet('ข้อมูลทั่วไป', profileHeaders, profileRows, [25, 45]);
-  addSheet('ประวัติการเรียน', learningHeaders, learningRows, [45, 25, 18, 18, 15, 15]);
-  addSheet('ประวัติ Point', pointsHeaders, pointsRows, [15, 35, 30, 12, 18]);
-  addSheet('ประวัติการอบรม', certHeaders, certRows, [45, 15, 25, 30, 18, 18, 12, 12, 25, 20]);
+  const toThaiYear = (dateVal) => {
+    if (!dateVal) return '-';
+    const date = new Date(dateVal);
+    if (isNaN(date.getTime())) return '-';
+    return String(date.getFullYear() + 543);
+  };
 
-  const buffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  const allRecords = [
+    ...systemCertificates.map((cert) => {
+      const enrollment = enrollments.find((e) => e.course?.title === cert.courseTitle);
+      const startDate = enrollment?.startedAt || cert.issuedAt;
+      const endDate = enrollment?.completedAt || cert.issuedAt;
+      return {
+        year: toThaiYear(startDate),
+        startDateFormatted: formatDate(startDate) || '-',
+        endDateFormatted: formatDate(endDate) || '-',
+        durationDays: getDurationDays(startDate, endDate),
+        title: cert.courseTitle || '-',
+        issuer: 'สำนักงานคณะกรรมการอาหารและยา',
+        code: cert.certificateNo || '-',
+        dateForSort: startDate ? new Date(startDate) : new Date(),
+        rawStartDate: startDate,
+        rawEndDate: endDate
+      };
+    }),
+    ...externalCertificates.map((cert) => {
+      const startDate = cert.startDate || cert.issueDate;
+      const endDate = cert.issueDate;
+      const venue = cert.trainingVenue;
+      const issuer = cert.issuer || '-';
+      const location = venue ? `${issuer} / ${venue}` : issuer;
+      return {
+        year: toThaiYear(startDate),
+        startDateFormatted: formatDate(startDate) || '-',
+        endDateFormatted: formatDate(endDate) || '-',
+        durationDays: cert.trainingDays ? String(cert.trainingDays) : '1',
+        title: cert.title || '-',
+        issuer: location,
+        code: cert.credentialId || cert.intakeNo || '-',
+        dateForSort: startDate ? new Date(startDate) : new Date(0),
+        rawStartDate: startDate,
+        rawEndDate: endDate
+      };
+    }),
+  ];
+
+  // Sort chronologically (oldest to newest)
+  allRecords.sort((a, b) => a.dateForSort.getTime() - b.dateForSort.getTime());
+
+  const templatePath = path.join(__dirname, '..', '..', '..', 'templates', 'F-D3-14.xlsx');
+  const wbTemplate = xlsx.readFile(templatePath);
+  const tempSheet = wbTemplate.Sheets[wbTemplate.SheetNames[0]];
+
+  const pageSize = 16;
+  const totalPages = Math.max(1, Math.ceil(allRecords.length / pageSize));
+  
+  const wbOut = xlsx.utils.book_new();
+
+  const getPageDateRange = (pageRecords) => {
+    const dates = [];
+    pageRecords.forEach(r => {
+      if (r.rawStartDate) {
+        const d = new Date(r.rawStartDate);
+        if (!isNaN(d.getTime())) dates.push(d);
+      }
+      if (r.rawEndDate) {
+        const d = new Date(r.rawEndDate);
+        if (!isNaN(d.getTime())) dates.push(d);
+      }
+    });
+
+    if (dates.length === 0) return '..............................';
+
+    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+
+    const minStr = formatDate(minDate);
+    const maxStr = formatDate(maxDate);
+
+    if (!minStr || !maxStr) {
+      return '..............................';
+    }
+
+    return `${minStr} - ${maxStr}`;
+  };
+
+  for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+    const pageRecords = allRecords.slice(pageIdx * pageSize, (pageIdx + 1) * pageSize);
+    
+    // Deep clone the template sheet object
+    const ws = JSON.parse(JSON.stringify(tempSheet));
+    
+    // Write name to cell A2
+    ws['A2'] = { t: 's', v: `ของ ${detail.name || '-'}` };
+    
+    // Write subdivision text to cell A3
+    let cleanSub = (detail.subdivision || '').trim();
+    if (cleanSub && !cleanSub.startsWith('กลุ่ม')) {
+      cleanSub = `กลุ่ม${cleanSub}`;
+    }
+    const subdivisionText = [cleanSub, (detail.department || '').trim(), 'สำนักงานคณะกรรมการอาหารและยา']
+      .filter(Boolean)
+      .join(' ');
+    ws['A3'] = { t: 's', v: subdivisionText };
+
+    // Fill the 16 table rows (rows 6 to 21)
+    for (let idx = 0; idx < pageSize; idx++) {
+      const record = pageRecords[idx];
+      const rNum = 6 + idx;
+      
+      if (record) {
+        ws[`A${rNum}`] = { t: 'n', v: pageIdx * pageSize + idx + 1 };
+        ws[`B${rNum}`] = { t: 's', v: record.year };
+        ws[`C${rNum}`] = { t: 's', v: record.startDateFormatted };
+        ws[`D${rNum}`] = { t: 's', v: record.endDateFormatted };
+        ws[`E${rNum}`] = { t: 'n', v: Number(record.durationDays) || 1 };
+        ws[`F${rNum}`] = { t: 's', v: record.title };
+        ws[`G${rNum}`] = { t: 's', v: record.issuer };
+        ws[`H${rNum}`] = { t: 's', v: record.code };
+      } else {
+        ws[`A${rNum}`] = { t: 's', v: '' };
+        ws[`B${rNum}`] = { t: 's', v: '' };
+        ws[`C${rNum}`] = { t: 's', v: '' };
+        ws[`D${rNum}`] = { t: 's', v: '' };
+        ws[`E${rNum}`] = { t: 's', v: '' };
+        ws[`F${rNum}`] = { t: 's', v: '' };
+        ws[`G${rNum}`] = { t: 's', v: '' };
+        ws[`H${rNum}`] = { t: 's', v: '' };
+      }
+    }
+
+    // Handle note cell A22
+    if (pageIdx + 1 < totalPages) {
+      ws['A22'] = { t: 's', v: '' }; // Clear note if not last page
+    } else {
+      ws['A22'] = { t: 's', v: 'หมายเหตุ: วันฝึกอบรม 1 วัน คิดเป็นชั่วโมงฝึกอบรม 8 ชั่วโมง' };
+    }
+
+    // Page-specific date range
+    const dateRange = getPageDateRange(pageRecords);
+
+    // Set page footer and page print setup options to landscape
+    ws['!margins'] = tempSheet['!margins'] || {
+      left: 0.7874015748031497,
+      right: 0.7874015748031497,
+      top: 0.7874015748031497,
+      bottom: 0.7874015748031497,
+      header: 0.3937007874015748,
+      footer: 0.3937007874015748
+    };
+
+    ws['!pageSetup'] = {
+      orientation: 'landscape',
+      paperSize: 9 // A4
+    };
+
+    ws['!headerFooter'] = {
+      oddFooter: `&L&"TH Sarabun PSK"&16Printed date: ...............................................&RF-D3-14 (${dateRange}) หน้า ${pageIdx + 1} / ${totalPages}`
+    };
+
+    xlsx.utils.book_append_sheet(wbOut, ws, `หน้า ${pageIdx + 1}`);
+  }
+
+  const buffer = xlsx.write(wbOut, { type: 'buffer', bookType: 'xlsx' });
   return { name: detail.name, buffer };
 };
 

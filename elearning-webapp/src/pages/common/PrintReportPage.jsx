@@ -297,8 +297,8 @@ const CustomFormPrintContent = ({ report }) => {
 
         .custom-form-page {
           position: relative;
-          width: 595.32pt;
-          height: 841.92pt;
+          width: 841.92pt;
+          height: 595.32pt;
           margin-bottom: 22px;
           padding: 28pt 30pt 24pt;
           overflow: hidden;
@@ -407,18 +407,18 @@ const CustomFormPrintContent = ({ report }) => {
           font-family: 'TH Sarabun PSK', sans-serif;
         }
 
-        .training-record-table col:nth-child(1) { width: 35pt; }
-        .training-record-table col:nth-child(2) { width: 45pt; }
-        .training-record-table col:nth-child(3) { width: 75pt; }
-        .training-record-table col:nth-child(4) { width: 75pt; }
-        .training-record-table col:nth-child(5) { width: 45pt; }
-        .training-record-table col:nth-child(6) { width: 135pt; }
-        .training-record-table col:nth-child(7) { width: 120pt; }
+        .training-record-table col:nth-child(1) { width: 45pt; }
+        .training-record-table col:nth-child(2) { width: 60pt; }
+        .training-record-table col:nth-child(3) { width: 100pt; }
+        .training-record-table col:nth-child(4) { width: 100pt; }
+        .training-record-table col:nth-child(5) { width: 60pt; }
+        .training-record-table col:nth-child(6) { width: 200pt; }
+        .training-record-table col:nth-child(7) { width: 180pt; }
         .training-record-table col:nth-child(8) { width: auto; }
 
         @media print {
           @page {
-            size: A4 portrait !important;
+            size: A4 landscape !important;
             margin: 0 !important;
           }
 
@@ -525,8 +525,8 @@ const CustomFormPrintContent = ({ report }) => {
             )}
 
             <div className="form-footer-container">
-              <div>วันที่อบรม: {getPageDateRange(pageRecords)}</div>
-              <div>F-D3-14 (04-19/06/69) หน้า {pageNum} / {totalPages}</div>
+              <div>Printed date: ...........................................................</div>
+              <div>F-D3-14 ({getPageDateRange(pageRecords)}) หน้า {pageNum} / {totalPages}</div>
             </div>
           </div>
         );
