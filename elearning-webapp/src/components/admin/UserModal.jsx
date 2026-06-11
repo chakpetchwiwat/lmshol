@@ -91,8 +91,24 @@ const UserModal = ({
     }));
   };
 
-  // Sync Role with Tier managerAccess
+  // Detect if user has a cohort supervisor role
+  const isCohortSupervisor = React.useMemo(() => {
+    const userRoleKeys = formData.roles || [];
+    return userRoleKeys.some(roleKey => {
+      const role = cohortRoles.find(r => r.key === roleKey);
+      if (!role) return false;
+      const lower = String(role.name || '').toLowerCase();
+      return lower.includes('supervisor') ||
+             lower.includes('lead inspector') ||
+             lower.includes('reviewer') ||
+             lower.includes('evaluator');
+    });
+  }, [formData.roles, cohortRoles]);
+
+  // Sync Role with Tier managerAccess (Only for Cohort Supervisors)
   React.useEffect(() => {
+    if (!isCohortSupervisor) return;
+
     // Protected: Don't sync for superadmins (they shouldn't be downgraded by changing tier)
     if (formData.role === 'admin') return;
 
@@ -105,7 +121,18 @@ const UserModal = ({
         }
       }
     }
-  }, [formData.tierId, tiers, formData.role, setFormData]);
+  }, [formData.tierId, tiers, formData.role, setFormData, isCohortSupervisor]);
+
+  // Initialize assignmentMode based on whether user has roles/department
+  React.useEffect(() => {
+    if (isOpen) {
+      if (formData.roles && formData.roles.length > 0 && !formData.departmentId) {
+        setAssignmentMode('role');
+      } else {
+        setAssignmentMode('department');
+      }
+    }
+  }, [isOpen, formData.roles, formData.departmentId]);
 
   const selectedDepartmentName = React.useMemo(
     () => departments.find((department) => department.id === formData.departmentId)?.name || 'ยังไม่ได้กำหนดแผนก',
@@ -221,7 +248,7 @@ const UserModal = ({
                     type="text"
                     className="form-input w-full"
                     value={formData.name}
-                    onChange={(event) => setFormData({ ...formData, name: event.target.value })}
+                    onChange={(event) => setFormData(prev => ({ ...prev, name: event.target.value }))}
                     placeholder="เช่น สมชาย ใจดี"
                   />
                 </div>
@@ -232,7 +259,7 @@ const UserModal = ({
                     type="email"
                     className="form-input w-full"
                     value={formData.email}
-                    onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+                    onChange={(event) => setFormData(prev => ({ ...prev, email: event.target.value }))}
                     placeholder="employee@company.com"
                   />
                 </div>
@@ -250,7 +277,7 @@ const UserModal = ({
                   placeholder="อย่างน้อย 8 ตัวอักษร"
                   className="form-input w-full pr-10"
                   value={formData.password || ''}
-                  onChange={(event) => setFormData({ ...formData, password: event.target.value })}
+                  onChange={(event) => setFormData(prev => ({ ...prev, password: event.target.value }))}
                 />
                 <button
                   type="button"
@@ -266,7 +293,7 @@ const UserModal = ({
                   type="checkbox"
                   id="mustChangePassword"
                   checked={formData.mustChangePassword || false}
-                  onChange={(event) => setFormData({ ...formData, mustChangePassword: event.target.checked })}
+                  onChange={(event) => setFormData(prev => ({ ...prev, mustChangePassword: event.target.checked }))}
                   className="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
                 />
                 <label htmlFor="mustChangePassword" className="text-sm font-semibold text-slate-700 cursor-pointer select-none">
@@ -280,15 +307,15 @@ const UserModal = ({
                 <CustomSelect
                   label="สิทธิ์ระบบ (Permission)"
                   value={formData.role}
-                  disabled={!!formData.tierId && formData.role !== 'admin'}
-                  onChange={(event) => setFormData({ ...formData, role: event.target.value })}
+                  disabled={isCohortSupervisor && !!formData.tierId && formData.role !== 'admin'}
+                  onChange={(event) => setFormData(prev => ({ ...prev, role: event.target.value }))}
                   options={[
                     { value: 'user', label: 'User' },
                     { value: 'manager', label: 'Manager' },
                     ...(canEditRole || formData.role === 'admin' ? [{ value: 'admin', label: 'Admin' }] : [])
                   ]}
                 />
-                {formData.tierId && formData.role !== 'admin' && (
+                {isCohortSupervisor && formData.tierId && formData.role !== 'admin' && (
                   <p className="mt-1 ml-1 text-[11px] font-medium text-slate-400 italic">
                     * สิทธิ์ระบบจะถูกกำหนดโดยอัตโนมัติตาม "ตำแหน่ง (Position)" ที่คุณเลือก
                   </p>
@@ -336,7 +363,7 @@ const UserModal = ({
                     <CustomSelect
                       label="แผนก"
                       value={formData.departmentId}
-                      onChange={(event) => setFormData({ ...formData, departmentId: event.target.value })}
+                      onChange={(event) => setFormData(prev => ({ ...prev, departmentId: event.target.value }))}
                       options={[
                         { value: '', label: 'ยังไม่ได้กำหนดแผนก' },
                         ...departments.map((d) => ({ value: d.id, label: d.name }))
@@ -346,7 +373,7 @@ const UserModal = ({
                     <CustomSelect
                       label="กลุ่มงาน (SUB-DIVISION)"
                       value={formData.subdivision || ''}
-                      onChange={(event) => setFormData({ ...formData, subdivision: event.target.value })}
+                      onChange={(event) => setFormData(prev => ({ ...prev, subdivision: event.target.value }))}
                       options={[
                         { value: '', label: 'ไม่ได้ระบุ' },
                         ...subdivisions.map(s => ({ value: s.name, label: s.name }))
@@ -356,7 +383,7 @@ const UserModal = ({
                     <CustomSelect
                       label="ตำแหน่ง (POSITION)"
                       value={formData.tierId}
-                      onChange={(event) => setFormData({ ...formData, tierId: event.target.value })}
+                      onChange={(event) => setFormData(prev => ({ ...prev, tierId: event.target.value }))}
                       options={[
                         { value: '', label: 'ไม่ได้ระบุ' },
                         ...tiers.map((t) => ({ value: t.id, label: t.name }))
@@ -366,20 +393,26 @@ const UserModal = ({
                     <CustomSelect
                       label="ระดับตำแหน่ง (LEVEL)"
                       value={formData.positionLevel || ''}
-                      onChange={(event) => setFormData({ ...formData, positionLevel: event.target.value })}
+                      onChange={(event) => setFormData(prev => ({ ...prev, positionLevel: event.target.value }))}
                       options={[
                         { value: '', label: 'ไม่ได้ระบุ' },
-                        ...positionLevels.map(l => ({ value: l.name, label: l.name }))
+                        ...positionLevels.map(l => {
+                          const name = typeof l === 'string' ? l : l?.name || '';
+                          return { value: name, label: name };
+                        })
                       ]}
                     />
 
                     <CustomSelect
                       label="ประเภทตำแหน่ง (TYPE)"
                       value={formData.positionType || ''}
-                      onChange={(event) => setFormData({ ...formData, positionType: event.target.value })}
+                      onChange={(event) => setFormData(prev => ({ ...prev, positionType: event.target.value }))}
                       options={[
                         { value: '', label: 'ไม่ได้ระบุ' },
-                        ...positionTypes.map(t => ({ value: t.name, label: t.name }))
+                        ...positionTypes.map(t => {
+                          const name = typeof t === 'string' ? t : t?.name || '';
+                          return { value: name, label: name };
+                        })
                       ]}
                     />
                   </div>
@@ -498,7 +531,7 @@ const UserModal = ({
                 <CustomDateTimePicker
                   showTime={false}
                   value={formData.employmentDate}
-                  onChange={(event) => setFormData({ ...formData, employmentDate: event.target.value })}
+                  onChange={(event) => setFormData(prev => ({ ...prev, employmentDate: event.target.value }))}
                   label="วันที่เริ่มงาน"
                 />
               </div>
@@ -509,10 +542,10 @@ const UserModal = ({
                   type="number"
                   className="form-input w-full font-bold text-warning"
                   value={formData.pointsBalance}
-                  onChange={(event) => setFormData({
-                    ...formData,
+                  onChange={(event) => setFormData(prev => ({
+                    ...prev,
                     pointsBalance: parseInt(event.target.value, 10) || 0,
-                  })}
+                  }))}
                 />
               </div>
             </div>
