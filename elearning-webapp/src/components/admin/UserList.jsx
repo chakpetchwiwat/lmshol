@@ -50,9 +50,9 @@ const UserList = ({
               '-'
             )}
           </td>
-          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted max-w-[120px] truncate" title={user.department}>{user.department || '-'}</td>
-          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted max-w-[120px] truncate" title={user.subdivision}>{user.subdivision || '-'}</td>
-          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted max-w-[120px] truncate" title={user.position}>{user.position || '-'}</td>
+          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted break-words whitespace-normal min-w-[100px] max-w-[180px]">{user.department || '-'}</td>
+          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted break-words whitespace-normal min-w-[120px] max-w-[220px]">{user.subdivision || '-'}</td>
+          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted break-words whitespace-normal min-w-[100px] max-w-[180px]">{user.position || '-'}</td>
           <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted whitespace-nowrap">{user.positionLevel || '-'}</td>
           <td className="p-3 sm:p-4 text-center text-xs sm:text-sm whitespace-nowrap">
             <span className="rounded-full bg-primary-light px-2 py-1 font-bold text-primary">
