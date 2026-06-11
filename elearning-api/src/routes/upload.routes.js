@@ -241,6 +241,14 @@ const canPreviewProfileFile = async (authUser, fileKey) => {
         return { allowed: true, ownerUserId: authUser.userId, accessType: 'owner', fileName: matchedFile.fileName };
     }
 
+    // Check if user owns it via UserCertificate (external certificates)
+    const ownCert = await prisma.userCertificate.findFirst({
+        where: { userId: authUser.userId, fileKey }
+    });
+    if (ownCert) {
+        return { allowed: true, ownerUserId: authUser.userId, accessType: 'owner-certificate', fileName: ownCert.fileName || ownCert.title };
+    }
+
     const actor = await getActorContext(authUser);
     if (!actor.canAccessAdminPanel) {
         return { allowed: false };
@@ -254,6 +262,9 @@ const canPreviewProfileFile = async (authUser, fileKey) => {
     });
 
     let matchedFileAdmin = null;
+    let targetUserId = null;
+    let fileName = null;
+
     const matchedUser = usersWithProfileFiles.find((candidate) => {
         if (Array.isArray(candidate.profileFiles)) {
             const found = candidate.profileFiles.find((file) => file?.fileKey === fileKey);
@@ -265,20 +276,34 @@ const canPreviewProfileFile = async (authUser, fileKey) => {
         return false;
     });
 
-    if (!matchedUser) {
+    if (matchedUser) {
+        targetUserId = matchedUser.id;
+        fileName = matchedFileAdmin ? matchedFileAdmin.fileName : null;
+    } else {
+        // Fallback: Check if fileKey belongs to a UserCertificate (external certificate)
+        const matchingCert = await prisma.userCertificate.findFirst({
+            where: { fileKey }
+        });
+        if (matchingCert) {
+            targetUserId = matchingCert.userId;
+            fileName = matchingCert.fileName || matchingCert.title;
+        }
+    }
+
+    if (!targetUserId) {
         return { allowed: false };
     }
 
     const scopedUser = await prisma.user.findFirst({
-        where: await buildScopedUserWhere(actor, matchedUser.id),
+        where: await buildScopedUserWhere(actor, targetUserId),
         select: { id: true }
     });
 
     return {
         allowed: Boolean(scopedUser),
-        ownerUserId: matchedUser.id,
+        ownerUserId: targetUserId,
         accessType: 'admin-scoped',
-        fileName: matchedFileAdmin ? matchedFileAdmin.fileName : null
+        fileName
     };
 };
 

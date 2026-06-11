@@ -97,6 +97,49 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
     }
   };
 
+  const handleOpenExternalCertificate = async (cert) => {
+    try {
+      if (cert?.fileKey) {
+        const response = await adminAPI.getProfileFileDownloadUrl(cert.fileKey);
+        const url = response?.data?.url || response?.url;
+        if (url) {
+          window.open(url, '_blank', 'noopener,noreferrer');
+          return;
+        }
+      }
+
+      if (cert?.fileUrl) {
+        window.open(getFullUrl(cert.fileUrl), '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      toast.warning('ไม่พบลิงก์ไฟล์เกียรติบัตร');
+    } catch (error) {
+      console.error('Open external certificate error', error);
+      toast.error('เปิดไฟล์เกียรติบัตรไม่สำเร็จ');
+    }
+  };
+
+  const handleOpenSystemCertificate = async (cert) => {
+    try {
+      if (!cert?.id) {
+        toast.warning('ไม่พบข้อมูลเกียรติบัตร');
+        return;
+      }
+
+      const response = await adminAPI.getCertificateDownloadUrl(cert.id);
+      const url = response?.data?.url || response?.url;
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        toast.warning('ไม่พบลิงก์ดาวน์โหลดเกียรติบัตร');
+      }
+    } catch (error) {
+      console.error('Open system certificate error', error);
+      toast.error('ไม่สามารถเปิดไฟล์เกียรติบัตรได้');
+    }
+  };
+
   const handleExport = async () => {
     try {
       toast.info('กำลังสร้างไฟล์รายงานประวัติผู้ใช้งานรายบุคคล กรุณารอสักครู่...');
@@ -570,7 +613,7 @@ sections
                               <div 
                                 key={cert.id} 
                                 className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:bg-white hover:border-primary/20 hover:shadow-md cursor-pointer"
-                                onClick={() => cert.fileUrl && window.open(cert.fileUrl, '_blank')}
+                                onClick={() => handleOpenExternalCertificate(cert)}
                               >
                                 <div className="flex items-center gap-3 w-full">
                                   <div className="h-10 w-10 shrink-0 rounded-xl bg-white flex items-center justify-center text-primary border border-slate-100 shadow-sm group-hover:bg-primary group-hover:text-white transition-colors">
@@ -621,7 +664,7 @@ sections
                               <div 
                                 key={cert.id} 
                                 className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-emerald-50/30 p-4 transition-all hover:bg-white hover:border-emerald-200 hover:shadow-md cursor-pointer"
-                                onClick={() => cert.pdfUrl && window.open(cert.pdfUrl, '_blank')}
+                                onClick={() => handleOpenSystemCertificate(cert)}
                               >
                                 <div className="flex items-center gap-3 w-full">
                                   <div className="h-10 w-10 shrink-0 rounded-xl bg-white flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-colors">
