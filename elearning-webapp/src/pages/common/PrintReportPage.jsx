@@ -333,7 +333,7 @@ const CustomFormPrintContent = ({ report }) => {
     ? `${cleanSub} ${cleanDept} สำนักงานคณะกรรมการอาหารและยา`
     : `${cleanDept} สำนักงานคณะกรรมการอาหารและยา`;
 
-  const records = report.rows || [];
+  const records = report.profile?.customFormRows || report.rows || [];
   const pageSize = 33;
   const totalPages = Math.max(1, Math.ceil(records.length / pageSize));
 
@@ -557,6 +557,7 @@ const CustomFormPrintContent = ({ report }) => {
 const PrintReportPage = () => {
   const { reportId } = useParams();
   const report = React.useMemo(() => getStoredPrintReport(reportId), [reportId]);
+  const [isCustomFormView, setIsCustomFormView] = React.useState(false);
 
   React.useEffect(() => {
     if (!report) {
@@ -872,6 +873,17 @@ const PrintReportPage = () => {
           </div>
 
           <div className="print-toolbar-actions">
+            {report.profile?.customFormRows && (
+              <button
+                type="button"
+                className="print-toolbar-button"
+                style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)', marginRight: '8px' }}
+                onClick={() => setIsCustomFormView(!isCustomFormView)}
+              >
+                <Printer size={16} />
+                <span>{isCustomFormView ? 'แสดงรายงานปกติ' : 'พิมพ์ตามแบบฟอร์ม'}</span>
+              </button>
+            )}
             <div className="print-toolbar-note">เปิดหน้านี้แล้วสั่งพิมพ์หรือ Save as PDF ได้ทันที</div>
             <button type="button" className="print-toolbar-button" onClick={() => window.print()}>
               <Printer size={16} />
@@ -882,7 +894,7 @@ const PrintReportPage = () => {
       </div>
 
       <div className="print-shell">
-        {report.type === 'custom-form' ? (
+        {(report.type === 'custom-form' || isCustomFormView) ? (
           <CustomFormPrintContent report={report} />
         ) : report.type === 'dashboard' ? (
           <DashboardPrintContent report={report} />
