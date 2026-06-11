@@ -471,30 +471,34 @@ router.get('/secure/:token', async (req, res) => {
         const normalizedKey = path.normalize(fileKey).replace(/^(\.\.(\/|\\|$))+/, '');
         let absolutePath = path.join(UPLOADS_DIR, normalizedKey);
         
+        // Try local file exists checks with secure, public, and public/uploads subdirectories
+        const possiblePaths = [
+            absolutePath,
+            path.join(UPLOADS_DIR, 'secure', normalizedKey),
+            path.join(UPLOADS_DIR, 'public', normalizedKey),
+            path.join(UPLOADS_DIR, 'public/uploads', normalizedKey)
+        ];
+
+        for (const p of possiblePaths) {
+            try {
+                await fs.access(p);
+                absolutePath = p;
+                break;
+            } catch (err) {
+                // Try next path
+            }
+        }
+        
         // Ensure it only serves from allowed secure/private directories to prevent arbitrary file read
         const isAllowedPath = 
             absolutePath.includes(path.join('secure', '')) ||
+            absolutePath.includes(path.join('public', '')) ||
             absolutePath.includes(path.join('certificates', '')) ||
             absolutePath.includes(path.join('assessments', '')) ||
             absolutePath.includes(path.join('signatures', ''));
             
         if (!isAllowedPath) {
             return res.status(403).send('Forbidden access to non-secure directory');
-        }
-
-        // Try local file exists check, fallback to prepended secure/ if it's a migrated bucket file
-        try {
-            await fs.access(absolutePath);
-        } catch (e) {
-            if (!normalizedKey.startsWith('secure/') && !normalizedKey.startsWith('secure\\')) {
-                const fallbackPath = path.join(UPLOADS_DIR, 'secure', normalizedKey);
-                try {
-                    await fs.access(fallbackPath);
-                    absolutePath = fallbackPath;
-                } catch (fallbackErr) {
-                    // Let res.sendFile handle error naturally
-                }
-            }
         }
 
         if (originalName) {

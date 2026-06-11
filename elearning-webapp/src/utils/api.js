@@ -367,7 +367,7 @@ export const adminAPI = {
 
   // System Settings
   getSettings: () => api.get('/settings'),
-  updateSetting: (key, value) => api.patch(`/settings/${key}`, { value }),
+  patchSetting: (key, value) => api.patch(`/settings/${key}`, { value }),
 
   // Goals
   getGoals: () => api.get('/goals?includeExpired=true'),

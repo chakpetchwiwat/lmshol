@@ -205,6 +205,46 @@ const getCertificateSignedUrl = async (userId, certificateId) => {
         throw new Error('ไม่มีไฟล์แนบสำหรับ certificate นี้');
     }
 
+    const certUrl = cert.pdfUrl || cert.fileUrl || '';
+    if (certUrl && certUrl.startsWith('http')) {
+        let existsLocally = false;
+        try {
+            const url = new URL(certUrl);
+            const match = url.pathname.match(/\/public\/(uploads|secure-documents)\/(.+)$/);
+            if (match) {
+                const storagePath = match[2];
+                const path = require('path');
+                const fs = require('fs/promises');
+                const UPLOADS_DIR = process.env.NODE_ENV === 'production' ? '/var/www/html/uploads' : path.resolve(__dirname, '../../../uploads');
+                
+                const normalizedKey = path.normalize(storagePath).replace(/^(\.\.(\/|\\|$))+/, '');
+                const possiblePaths = [
+                    path.join(UPLOADS_DIR, normalizedKey),
+                    path.join(UPLOADS_DIR, 'secure', normalizedKey),
+                    path.join(UPLOADS_DIR, 'public', normalizedKey),
+                    path.join(UPLOADS_DIR, 'public/uploads', normalizedKey)
+                ];
+                
+                for (const p of possiblePaths) {
+                    try {
+                        await fs.access(p);
+                        existsLocally = true;
+                        fileKey = normalizedKey;
+                        break;
+                    } catch {
+                        // ignore
+                    }
+                }
+            }
+        } catch (err) {
+            // ignore URL parsing error
+        }
+        
+        if (!existsLocally) {
+            return { url: certUrl };
+        }
+    }
+
     let cleanFileKey = fileKey;
     if (cleanFileKey.startsWith('/uploads/')) {
         cleanFileKey = cleanFileKey.replace(/^\/uploads\//, '');

@@ -842,7 +842,7 @@ const UserManagement = () => {
         }}
       />
 
-      <div className="card !overflow-visible">
+      <div className="card !overflow-visible w-full min-w-0">
         <UserFilters 
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}

@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { adminAPI } from '../../utils/api';
 import Skeleton from '../../components/common/Skeleton';
 import { Save, Settings, Target, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -36,7 +36,7 @@ const SystemSettings = () => {
     setSaving(true);
     setMessage(null);
     try {
-      const response = await adminAPI.updateSetting(key, value);
+      const response = await adminAPI.patchSetting(key, value);
       setSettings((prev) => ({
         ...prev,
         [key]: value,
