@@ -54,19 +54,88 @@ const Profile = () => {
     }
   }, [isForced]);
 
+  const getNormalizedEducation = (eduHistory) => {
+    if (!eduHistory) return [];
+    if (Array.isArray(eduHistory)) return eduHistory;
+
+    const normalized = [];
+    if (eduHistory.institution || eduHistory.degreeName || eduHistory.fieldOfStudy || eduHistory.level) {
+      normalized.push({
+        id: 'standard_edu',
+        institution: eduHistory.institution || '',
+        degree: eduHistory.degreeName || eduHistory.level || '',
+        faculty: '',
+        major: eduHistory.fieldOfStudy || '',
+        graduationYear: '',
+      });
+    }
+    if (eduHistory.highestInstitution || eduHistory.highestDegreeName || eduHistory.highestFieldOfStudy || eduHistory.highestLevel) {
+      normalized.push({
+        id: 'highest_edu',
+        institution: eduHistory.highestInstitution || '',
+        degree: eduHistory.highestDegreeName || eduHistory.highestLevel || '',
+        faculty: '',
+        major: eduHistory.highestFieldOfStudy || '',
+        graduationYear: '',
+      });
+    }
+    return normalized;
+  };
+
+  const getNormalizedProfileFiles = (profileFiles) => {
+    if (!profileFiles) return [];
+    if (Array.isArray(profileFiles)) return profileFiles;
+
+    const normalized = [];
+    if (profileFiles.cv) {
+      normalized.push({
+        id: 'imported_cv',
+        title: 'CV (Curriculum Vitae)',
+        fileName: 'ไฟล์ประวัติการทำงาน',
+        fileUrl: profileFiles.cv,
+        fileKey: '',
+        fileMimeType: 'application/pdf',
+        uploadedAt: '',
+      });
+    }
+    if (profileFiles.jobDescription) {
+      normalized.push({
+        id: 'imported_jd',
+        title: 'Job Description',
+        fileName: 'ไฟล์คำบรรยายลักษณะงาน',
+        fileUrl: profileFiles.jobDescription,
+        fileKey: '',
+        fileMimeType: 'application/pdf',
+        uploadedAt: '',
+      });
+    }
+    return normalized;
+  };
+
   React.useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const [userRes, coursesRes, certificatesRes, lmsCertificatesRes] = await Promise.all([
+        const results = await Promise.allSettled([
           authAPI.getCurrentUser(),
           userAPI.getCourses(),
           userAPI.getCertificates(),
           userAPI.getLmsCertificates(),
         ]);
-        setUser(userRes?.data || userRes);
-        setCourses(Array.isArray(coursesRes?.data) ? coursesRes.data : Array.isArray(coursesRes) ? coursesRes : []);
-        setCertificates(Array.isArray(certificatesRes?.data) ? certificatesRes.data : Array.isArray(certificatesRes) ? certificatesRes : []);
-        setLmsCertificates(Array.isArray(lmsCertificatesRes?.data) ? lmsCertificatesRes.data : Array.isArray(lmsCertificatesRes) ? lmsCertificatesRes : []);
+
+        const userRes = results[0].status === 'fulfilled' ? results[0].value : null;
+        const coursesRes = results[1].status === 'fulfilled' ? results[1].value : null;
+        const certificatesRes = results[2].status === 'fulfilled' ? results[2].value : null;
+        const lmsCertificatesRes = results[3].status === 'fulfilled' ? results[3].value : null;
+
+        if (userRes) {
+          setUser(userRes?.data || userRes);
+        } else if (results[0].status === 'rejected') {
+          console.error('Fetch user details failed:', results[0].reason);
+        }
+
+        setCourses(coursesRes ? (Array.isArray(coursesRes?.data) ? coursesRes.data : Array.isArray(coursesRes) ? coursesRes : []) : []);
+        setCertificates(certificatesRes ? (Array.isArray(certificatesRes?.data) ? certificatesRes.data : Array.isArray(certificatesRes) ? certificatesRes : []) : []);
+        setLmsCertificates(lmsCertificatesRes ? (Array.isArray(lmsCertificatesRes?.data) ? lmsCertificatesRes.data : Array.isArray(lmsCertificatesRes) ? lmsCertificatesRes : []) : []);
       } catch (error) {
         console.error('Fetch profile error:', error);
       } finally {
@@ -186,8 +255,9 @@ const Profile = () => {
         fileMimeType: uploaded?.fileMimeType || file.type,
         uploadedAt: new Date().toISOString(),
       };
+      const currentFiles = getNormalizedProfileFiles(user?.profileFiles);
       await handleSaveProfileDetails({
-        profileFiles: [nextFile, ...((user?.profileFiles || []))]
+        profileFiles: [nextFile, ...currentFiles]
       }, 'อัปโหลดไฟล์ข้อมูลอื่นๆ แล้ว');
     } catch (error) {
       console.error('Upload profile file error', error);
@@ -198,8 +268,9 @@ const Profile = () => {
   };
 
   const handleDeleteProfileFile = async (fileId) => {
+    const currentFiles = getNormalizedProfileFiles(user?.profileFiles);
     await handleSaveProfileDetails({
-      profileFiles: (user?.profileFiles || []).filter((file) => file.id !== fileId)
+      profileFiles: currentFiles.filter((file) => file.id !== fileId)
     }, 'ลบไฟล์แล้ว');
   };
 
@@ -327,13 +398,13 @@ const Profile = () => {
       />
 
       <ProfileEducationSection
-        education={Array.isArray(user?.educationHistory) ? user.educationHistory : []}
+        education={getNormalizedEducation(user?.educationHistory)}
         saving={savingProfileDetails}
         onSave={handleSaveEducation}
       />
 
       <ProfileFilesSection
-        files={Array.isArray(user?.profileFiles) ? user.profileFiles : []}
+        files={getNormalizedProfileFiles(user?.profileFiles)}
         saving={savingProfileDetails}
         uploading={uploadingProfileFile}
         onUpload={handleUploadProfileFile}
