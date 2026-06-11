@@ -95,33 +95,13 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
             if (!tier) throw new Error('Tier not found');
             data.tierId = tier.id;
             data.position = tier.name;
-            const targetPermission = tier.accessAdmin ? USER_PERMISSIONS.MANAGER : USER_PERMISSIONS.USER;
-            if (data.permission !== USER_PERMISSIONS.ADMIN) data.permission = targetPermission;
         } else {
             data.tierId = null;
             data.position = null;
         }
     }
 
-    const cohortRoleKeys = Array.isArray(data.roles)
-        ? data.roles
-        : (Array.isArray(baseData.roles) ? baseData.roles : []);
-    if (cohortRoleKeys.length > 0 && data.permission !== USER_PERMISSIONS.ADMIN) {
-        const cohortRoles = await tx.cohortRole.findMany({
-            where: { key: { in: cohortRoleKeys } },
-            select: { name: true }
-        });
-        const hasSupervisorRole = cohortRoles.some((role) => {
-            const lower = role.name.toLowerCase();
-            return lower.includes('supervisor') ||
-                   lower.includes('lead inspector') ||
-                   lower.includes('reviewer') ||
-                   lower.includes('evaluator');
-        });
-        if (hasSupervisorRole) {
-            data.permission = USER_PERMISSIONS.MANAGER;
-        }
-    }
+
 
     if (baseData.subdivision !== undefined) {
         data.subdivision = baseData.subdivision ? String(baseData.subdivision).trim() : null;

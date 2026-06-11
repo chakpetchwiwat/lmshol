@@ -72,7 +72,7 @@ const AdminLayout = () => {
   };
 
   const isFullAdmin = canEditAdminUsers(user);
-  const isManager = user?.role === USER_ROLES.MANAGER || user?.tier?.accessAdmin;
+  const isManager = user?.role === USER_ROLES.MANAGER;
   const isSupervisor = user?.isSupervisor === true;
   const isCourseStaffOnly = !isFullAdmin && !isManager && !isSupervisor && user?.isCourseStaff;
 

@@ -105,23 +105,7 @@ const UserModal = ({
     });
   }, [formData.roles, cohortRoles]);
 
-  // Sync Role with Tier managerAccess (Only for Cohort Supervisors)
-  React.useEffect(() => {
-    if (!isCohortSupervisor) return;
 
-    // Protected: Don't sync for superadmins (they shouldn't be downgraded by changing tier)
-    if (formData.role === 'admin') return;
-
-    if (formData.tierId) {
-      const selectedTier = tiers.find((t) => t.id === formData.tierId);
-      if (selectedTier) {
-        const targetRole = selectedTier.accessAdmin ? 'manager' : 'user';
-        if (formData.role !== targetRole) {
-          setFormData((prev) => ({ ...prev, role: targetRole }));
-        }
-      }
-    }
-  }, [formData.tierId, tiers, formData.role, setFormData, isCohortSupervisor]);
 
   // Initialize assignmentMode based on whether user has roles/department
   React.useEffect(() => {
@@ -307,7 +291,6 @@ const UserModal = ({
                 <CustomSelect
                   label="สิทธิ์ระบบ (Permission)"
                   value={formData.role}
-                  disabled={isCohortSupervisor && !!formData.tierId && formData.role !== 'admin'}
                   onChange={(event) => setFormData(prev => ({ ...prev, role: event.target.value }))}
                   options={[
                     { value: 'user', label: 'User' },
@@ -315,11 +298,6 @@ const UserModal = ({
                     ...(canEditRole || formData.role === 'admin' ? [{ value: 'admin', label: 'Admin' }] : [])
                   ]}
                 />
-                {isCohortSupervisor && formData.tierId && formData.role !== 'admin' && (
-                  <p className="mt-1 ml-1 text-[11px] font-medium text-slate-400 italic">
-                    * สิทธิ์ระบบจะถูกกำหนดโดยอัตโนมัติตาม "ตำแหน่ง (Position)" ที่คุณเลือก
-                  </p>
-                )}
               </div>
             )}
 

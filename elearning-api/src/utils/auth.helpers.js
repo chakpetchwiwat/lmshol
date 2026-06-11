@@ -125,7 +125,7 @@ const getActorContext = async (prisma, authUser) => {
         (actor.cohortRoleSupervisorRoles?.length || 0) > 0;
     const effectivePermission = (actorPermission === USER_PERMISSIONS.ADMIN || actorPermission === USER_PERMISSIONS.SUPERADMIN)
         ? actorPermission
-        : (actorPermission === USER_PERMISSIONS.MANAGER || actor.tier?.accessAdmin || isSupervisor)
+        : (actorPermission === USER_PERMISSIONS.MANAGER || isSupervisor)
             ? USER_PERMISSIONS.MANAGER
             : USER_PERMISSIONS.USER;
 

@@ -48,7 +48,7 @@ const verifySuperAdmin = (req, res, next) => {
 };
 
 const verifyAdminOrManager = (req, res, next) => {
-  if (req.user && (req.user.permission === USER_PERMISSIONS.SUPERADMIN || req.user.permission === USER_PERMISSIONS.ADMIN || req.user.permission === USER_PERMISSIONS.MANAGER || req.user.tier?.accessAdmin || req.user.isSupervisor)) {
+  if (req.user && (req.user.permission === USER_PERMISSIONS.SUPERADMIN || req.user.permission === USER_PERMISSIONS.ADMIN || req.user.permission === USER_PERMISSIONS.MANAGER || req.user.isSupervisor)) {
     next();
   } else {
     res.status(403).json({ message: 'สิทธิ์ระดับผู้ดูแลแผนกหรือแอดมินเท่านั้น (Manager or Admin access required)' });
@@ -81,7 +81,7 @@ const verifyAdminPanelAccess = async (req, res, next) => {
 
     const isSupervisor = (user?.cohortSupervisors?.length || 0) > 0 || (user?.cohortRoleSupervisorRoles?.length || 0) > 0;
 
-    if (user && (ADMIN_PANEL_PERMISSIONS.includes(user.permission) || user.tier?.accessAdmin || (user.courseStaff && user.courseStaff.length > 0) || isSupervisor)) {
+    if (user && (ADMIN_PANEL_PERMISSIONS.includes(user.permission) || (user.courseStaff && user.courseStaff.length > 0) || isSupervisor)) {
       // Update req.user with latest data for downstream use
       req.user.permission = user.permission;
       req.user.role = user.permission; // Compatibility alias
