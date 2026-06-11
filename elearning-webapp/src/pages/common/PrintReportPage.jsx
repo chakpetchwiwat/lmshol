@@ -20,10 +20,6 @@ import {
   renderPrintReportMarkup,
 } from '../../utils/printUtils';
 import { formatThaiDateTime } from '../../utils/dateUtils';
-import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
-import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
-
-GlobalWorkerOptions.workerSrc = pdfWorkerUrl + '?v=2';
 
 const PIE_COLORS = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
 
@@ -221,126 +217,26 @@ const DashboardPrintContent = ({ report }) => {
   );
 };
 
-const PdfBackgroundCanvas = ({ pdfDocument }) => {
-  const canvasRef = React.useRef(null);
-
-  React.useEffect(() => {
-    let cancelled = false;
-
-    const renderPage = async () => {
-      if (!pdfDocument || !canvasRef.current) return;
-      const page = await pdfDocument.getPage(1);
-      if (cancelled || !canvasRef.current) return;
-
-      const viewport = page.getViewport({ scale: 1.0 });
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d', { alpha: false });
-      const outputScale = window.devicePixelRatio || 1;
-
-      canvas.width = Math.floor(viewport.width * outputScale);
-      canvas.height = Math.floor(viewport.height * outputScale);
-      canvas.style.width = `${viewport.width}px`;
-      canvas.style.height = `${viewport.height}px`;
-
-      context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
-
-      const renderTask = page.render({
-        canvasContext: context,
-        viewport,
-      });
-
-      try {
-        await renderTask.promise;
-      } catch (error) {
-        if (error?.name !== 'RenderingCancelledException') {
-          throw error;
-        }
-      }
-    };
-
-    renderPage().catch((error) => {
-      console.error('PdfBackgroundCanvas render error:', error);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [pdfDocument]);
-
-  return <canvas ref={canvasRef} className="pdf-bg-canvas" />;
-};
-
 const CustomFormPrintContent = ({ report }) => {
-  const [pdfDocument, setPdfDocument] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-
-  React.useEffect(() => {
-    let active = true;
-    const loadPdf = async () => {
-      try {
-        const url = '/F-D3-14_3.pdf';
-        const loadingTask = getDocument({
-          url,
-          withCredentials: false,
-        });
-        const loadedPdf = await loadingTask.promise;
-        if (active) {
-          setPdfDocument(loadedPdf);
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error('Failed to load PDF background template:', err);
-        if (active) {
-          setError('ไม่สามารถโหลดเทมเพลต PDF ได้');
-          setLoading(false);
-        }
-      }
-    };
-    loadPdf();
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center p-20 gap-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-        <p className="text-sm font-semibold">กำลังโหลดเทมเพลตแบบฟอร์ม...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center p-20 text-red-600 font-semibold">
-        {error}
-      </div>
-    );
-  }
-
   const name = report.profile?.name || '';
   const subdivision = report.profile?.subdivision || '';
   const department = report.profile?.department || '';
 
   let cleanSub = subdivision.trim();
   if (cleanSub && !cleanSub.startsWith('กลุ่ม')) {
-    cleanSub = 'กลุ่ม' + cleanSub;
+    cleanSub = `กลุ่ม${cleanSub}`;
   }
-  const cleanDept = department.trim();
-  const subdivisionText = cleanSub 
-    ? `${cleanSub} ${cleanDept} สำนักงานคณะกรรมการอาหารและยา`
-    : `${cleanDept} สำนักงานคณะกรรมการอาหารและยา`;
+  const subdivisionText = [cleanSub, department.trim(), 'สำนักงานคณะกรรมการอาหารและยา']
+    .filter(Boolean)
+    .join(' ');
 
   const records = report.profile?.customFormRows || report.rows || [];
-  const pageSize = 33;
+  const pageSize = 30;
   const totalPages = Math.max(1, Math.ceil(records.length / pageSize));
-
-  const pages = [];
-  for (let p = 0; p < totalPages; p++) {
-    pages.push(records.slice(p * pageSize, (p + 1) * pageSize));
-  }
+  const pages = Array.from({ length: totalPages }, (_, pageIndex) => (
+    records.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+  ));
+  const emptyRows = (count) => Array.from({ length: count }, (_, index) => index);
 
   return (
     <div className="custom-form-print">
@@ -357,25 +253,13 @@ const CustomFormPrintContent = ({ report }) => {
           font-weight: bold;
           font-style: normal;
         }
-        @font-face {
-          font-family: 'TH Sarabun PSK';
-          src: url('/fonts/THSarabun Italic.ttf') format('truetype');
-          font-weight: normal;
-          font-style: italic;
-        }
-        @font-face {
-          font-family: 'TH Sarabun PSK';
-          src: url('/fonts/THSarabun BoldItalic.ttf') format('truetype');
-          font-weight: bold;
-          font-style: italic;
-        }
 
         .custom-form-print {
           display: flex;
           flex-direction: column;
           align-items: center;
           background: #eef2ff;
-          padding: 20px 0;
+          padding: 24px 0;
           min-height: 100vh;
         }
 
@@ -383,108 +267,109 @@ const CustomFormPrintContent = ({ report }) => {
           position: relative;
           width: 595.32pt;
           height: 841.92pt;
-          background: white;
-          margin-bottom: 20px;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          margin-bottom: 22px;
+          padding: 28pt 30pt 24pt;
           overflow: hidden;
           box-sizing: border-box;
-        }
-
-        .pdf-bg-canvas {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 595.32pt;
-          height: 841.92pt;
-          z-index: 1;
-        }
-
-        .form-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 595.32pt;
-          height: 841.92pt;
-          z-index: 5;
-          pointer-events: none;
-          font-family: 'TH Sarabun PSK', sans-serif;
-          color: black;
-        }
-
-        .overlay-text {
-          position: absolute;
-          line-height: 1;
-        }
-
-        .overlay-name {
-          left: 65pt;
-          top: 67pt;
+          background: #fff;
+          color: #111827;
+          box-shadow: 0 18px 50px -28px rgba(15, 23, 42, 0.45);
+          font-family: 'TH Sarabun PSK', 'Sarabun', 'Tahoma', sans-serif;
           font-size: 16pt;
-          font-weight: bold;
-        }
-
-        .subdivision-mask {
-          position: absolute;
-          left: 35pt;
-          top: 83.5pt;
-          width: 520pt;
-          height: 18pt;
-          background: white;
-          z-index: 2;
-        }
-
-        .overlay-subdivision {
-          left: 36pt;
-          top: 84.5pt;
-          font-size: 16pt;
-          font-weight: bold;
-          z-index: 3;
-        }
-
-        .table-row-overlay {
-          position: absolute;
-          left: 30pt;
-          width: 535pt;
-          height: 18.6pt;
-          display: flex;
-          align-items: center;
-          font-size: 15pt;
           line-height: 1.1;
         }
 
-        .overlay-cell {
-          position: absolute;
+        .form-title {
+          margin: 0 0 1pt;
+          font-size: 16pt;
+          font-weight: 700;
+          line-height: 1.05;
+        }
+
+        .form-person-line,
+        .form-unit-line {
+          display: grid;
+          align-items: end;
+          column-gap: 5pt;
+          height: 17pt;
+        }
+
+        .form-person-line {
+          grid-template-columns: auto 1fr;
+        }
+
+        .form-unit-line {
+          grid-template-columns: 1fr;
+        }
+
+        .form-fill {
+          min-width: 0;
+          border-bottom: 0.7pt dotted #666;
+          padding: 0 4pt 1pt;
+          font-weight: 700;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .training-record-table {
+          width: 100%;
+          margin-top: 10pt;
+          border-collapse: collapse;
+          table-layout: fixed;
+          font-size: 16pt;
+          line-height: 1;
+        }
+
+        .training-record-table th,
+        .training-record-table td {
+          border: 0.7pt solid #555;
+          height: 18pt;
+          padding: 1pt 3pt;
+          vertical-align: middle;
+        }
+
+        .training-record-table th {
+          text-align: center;
+          font-weight: 700;
+          line-height: 0.95;
+        }
+
+        .training-record-table td {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
 
-        .cell-no { left: 0pt; width: 30pt; text-align: center; }
-        .cell-year { left: 30pt; width: 38pt; text-align: center; }
-        .cell-start { left: 68pt; width: 70pt; text-align: center; }
-        .cell-end { left: 138pt; width: 70pt; text-align: center; }
-        .cell-days { left: 208pt; width: 60pt; text-align: center; }
-        .cell-title { left: 268pt; width: 115pt; text-align: left; padding-left: 4pt; }
-        .cell-issuer { left: 383pt; width: 95pt; text-align: left; padding-left: 4pt; }
-        .cell-code { left: 478pt; width: 57pt; text-align: center; }
+        .training-record-table .center {
+          text-align: center;
+        }
 
-        .page-number-mask {
+        .training-record-table .wrap {
+          display: -webkit-box;
+          overflow: hidden;
+          white-space: normal;
+          line-height: 1.02;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+        }
+
+        .form-footer {
           position: absolute;
-          left: 512pt;
-          top: 812pt;
-          width: 53pt;
-          height: 15pt;
-          background: white;
-          z-index: 2;
+          right: 34pt;
+          bottom: 18pt;
+          font-size: 16pt;
+          font-weight: 700;
         }
 
-        .overlay-page-number {
-          left: 513pt;
-          top: 813pt;
-          font-size: 15pt;
-          font-weight: bold;
-          z-index: 3;
-        }
+        .training-record-table col:nth-child(1) { width: 33pt; }
+        .training-record-table col:nth-child(2) { width: 37pt; }
+        .training-record-table col:nth-child(3) { width: 70pt; }
+        .training-record-table col:nth-child(4) { width: 70pt; }
+        .training-record-table col:nth-child(5) { width: 58pt; }
+        .training-record-table col:nth-child(6) { width: 128pt; }
+        .training-record-table col:nth-child(7) { width: 103pt; }
+        .training-record-table col:nth-child(8) { width: auto; }
 
         @media print {
           @page {
@@ -508,45 +393,90 @@ const CustomFormPrintContent = ({ report }) => {
             box-shadow: none !important;
             page-break-after: always !important;
             break-after: page !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+          .custom-form-page:last-child {
+            page-break-after: auto !important;
+            break-after: auto !important;
           }
         }
       `}</style>
 
       {pages.map((pageRecords, pageIdx) => {
         const pageNum = pageIdx + 1;
+        const missingRowCount = Math.max(0, pageSize - pageRecords.length);
+
         return (
           <div key={`form-page-${pageNum}`} className="custom-form-page">
-            <PdfBackgroundCanvas pdfDocument={pdfDocument} />
-            
-            <div className="subdivision-mask" />
-            <div className="page-number-mask" />
-
-            <div className="form-overlay">
-              <div className="overlay-text overlay-name">{name}</div>
-              <div className="overlay-text overlay-subdivision">{subdivisionText}</div>
-              <div className="overlay-text overlay-page-number">หน้า {pageNum}/{totalPages}</div>
-
-              {pageRecords.map((record, recordIdx) => {
-                const globalIdx = pageIdx * pageSize + recordIdx + 1;
-                const rowTop = 157.46 + recordIdx * 18.6;
-                return (
-                  <div 
-                    key={`row-${globalIdx}`} 
-                    className="table-row-overlay" 
-                    style={{ top: `${rowTop.toFixed(2)}pt` }}
-                  >
-                    <div className="overlay-cell cell-no">{globalIdx}</div>
-                    <div className="overlay-cell cell-year">{record.year || '-'}</div>
-                    <div className="overlay-cell cell-start">{record.startDateFormatted || '-'}</div>
-                    <div className="overlay-cell cell-end">{record.endDateFormatted || '-'}</div>
-                    <div className="overlay-cell cell-days">{record.durationDays || '-'}</div>
-                    <div className="overlay-cell cell-title" title={record.title}>{record.title}</div>
-                    <div className="overlay-cell cell-issuer" title={record.issuer}>{record.issuer}</div>
-                    <div className="overlay-cell cell-code" title={record.code}>{record.code}</div>
-                  </div>
-                );
-              })}
+            <h1 className="form-title">แบบประวัติการฝึกอบรม (Training Record)</h1>
+            <div className="form-person-line">
+              <span>ของ</span>
+              <span className="form-fill">{name || '-'}</span>
             </div>
+            <div className="form-unit-line">
+              <span className="form-fill">{subdivisionText || '-'}</span>
+            </div>
+
+            <table className="training-record-table" aria-label="Training Record">
+              <colgroup>
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th rowSpan={2}>ลำดับที่</th>
+                  <th rowSpan={2}>ปี</th>
+                  <th colSpan={2}>ระยะเวลาการฝึกอบรม</th>
+                  <th rowSpan={2}>จำนวนวัน</th>
+                  <th rowSpan={2}>ชื่อหลักสูตร</th>
+                  <th rowSpan={2}>หน่วยงาน / สถานที่จัด</th>
+                  <th rowSpan={2}>หลักฐาน / เลขที่</th>
+                </tr>
+                <tr>
+                  <th>ตั้งแต่</th>
+                  <th>ถึง</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRecords.map((record, recordIdx) => {
+                  const globalIdx = pageIdx * pageSize + recordIdx + 1;
+                  return (
+                    <tr key={`row-${globalIdx}`}>
+                      <td className="center">{globalIdx}</td>
+                      <td className="center">{record.year || '-'}</td>
+                      <td className="center">{record.startDateFormatted || '-'}</td>
+                      <td className="center">{record.endDateFormatted || '-'}</td>
+                      <td className="center">{record.durationDays || '-'}</td>
+                      <td><span className="wrap" title={record.title}>{record.title || '-'}</span></td>
+                      <td><span className="wrap" title={record.issuer}>{record.issuer || '-'}</span></td>
+                      <td className="center">{record.code || '-'}</td>
+                    </tr>
+                  );
+                })}
+                {emptyRows(missingRowCount).map((emptyIndex) => (
+                  <tr key={`empty-row-${pageNum}-${emptyIndex}`} aria-hidden="true">
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="form-footer">หน้า {pageNum}/{totalPages}</div>
           </div>
         );
       })}
