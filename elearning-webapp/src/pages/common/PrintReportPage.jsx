@@ -470,16 +470,16 @@ const CustomFormPrintContent = ({ report }) => {
 
         .page-number-mask {
           position: absolute;
-          left: 528pt;
+          left: 512pt;
           top: 812pt;
-          width: 32pt;
+          width: 53pt;
           height: 15pt;
           background: white;
           z-index: 2;
         }
 
         .overlay-page-number {
-          left: 532pt;
+          left: 513pt;
           top: 813pt;
           font-size: 15pt;
           font-weight: bold;
@@ -524,7 +524,7 @@ const CustomFormPrintContent = ({ report }) => {
             <div className="form-overlay">
               <div className="overlay-text overlay-name">{name}</div>
               <div className="overlay-text overlay-subdivision">{subdivisionText}</div>
-              <div className="overlay-text overlay-page-number">{pageNum}/{totalPages}</div>
+              <div className="overlay-text overlay-page-number">หน้า {pageNum}/{totalPages}</div>
 
               {pageRecords.map((record, recordIdx) => {
                 const globalIdx = pageIdx * pageSize + recordIdx + 1;
