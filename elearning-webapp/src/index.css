@@ -613,9 +613,16 @@
     padding-right: 3.5rem !important;
   }
 
-  /* Scale Recovery for Modals & Portals (Counteracts the 90% shrink) */
   [role="dialog"] > div,
   .fixed.z-\[9999\] {
     font-size: 111.11%;
   }
+}
+
+/* Global Admin Table Text Wrap standard */
+.admin-main th,
+.admin-main td {
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }

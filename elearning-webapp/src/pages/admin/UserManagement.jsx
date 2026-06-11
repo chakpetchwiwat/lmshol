@@ -525,14 +525,14 @@ const UserManagement = () => {
   }, [searchTerm, selectedDepartment, selectedTier, users, tiers]);
 
   const columns = React.useMemo(() => [
-    { label: 'ผู้ใช้งาน' },
-    { label: 'บทบาท (Role)' },
-    { label: 'แผนก' },
-    { label: 'กลุ่มงาน (Sub-division)' },
-    { label: 'ตำแหน่ง (Position)' },
-    { label: 'ระดับตำแหน่ง (Level)' },
-    { label: 'คอร์สที่จบ', className: 'text-center' },
-    { label: 'จัดการ', className: 'text-right' },
+    { label: 'ผู้ใช้งาน', className: 'w-[18%] min-w-[150px]' },
+    { label: 'บทบาท (Role)', className: 'w-[15%] min-w-[120px]' },
+    { label: 'แผนก', className: 'w-[10%] min-w-[80px]' },
+    { label: 'กลุ่มงาน (Sub-division)', className: 'w-[20%] min-w-[150px]' },
+    { label: 'ตำแหน่ง (Position)', className: 'w-[18%] min-w-[130px]' },
+    { label: 'ระดับตำแหน่ง (Level)', className: 'w-[8%] min-w-[70px]' },
+    { label: 'คอร์สที่จบ', className: 'w-[6%] min-w-[60px] text-center whitespace-nowrap' },
+    { label: 'จัดการ', className: 'w-[5%] min-w-[60px] text-right whitespace-nowrap' },
   ], []);
 
   const handleExportProfiles = async () => {
@@ -842,7 +842,7 @@ const UserManagement = () => {
         }}
       />
 
-      <div className="card !overflow-visible w-full min-w-0">
+      <div className="card w-full min-w-0 overflow-hidden">
         <UserFilters 
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
