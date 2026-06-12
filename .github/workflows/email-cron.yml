@@ -1,0 +1,40 @@
+name: Send Scheduled Emails Cron
+on:
+  schedule:
+    # ตั้งตารางเวลาให้ระบบรันตรวจสอบคิวเมล ทุกๆ 15 นาที
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # ปุ่มสำหรับกดสั่งให้รันทำงานทันทีผ่านเว็บอินเทอร์เฟซของ GitHub
+
+jobs:
+  run-cron-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: elearning-api/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd elearning-api
+          npm ci
+
+      - name: Run Send Emails Script
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          # ตัวแปรระบบตั้งค่าการส่งเมลที่ต้องใช้ในสคริปต์
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+        run: |
+          node elearning-api/scripts/send_scheduled_emails.js
