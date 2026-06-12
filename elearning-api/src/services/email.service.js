@@ -69,22 +69,22 @@ const sendEmail = async ({ to, subject, templateName, data }) => {
     };
 
     const html = compileTemplate(templateName, mergedData);
-    const fromEmail = process.env.SMTP_FROM || 'no-reply@lmsfda.moph.go.th';
+    const fromEmail = process.env.SMTP_FROM || 'no-reply@looma.co';
 
-    // Path to the FDA logo inside the API assets folder
-    const logoPath = path.join(__dirname, '../assets/fda-logo.webp');
+    // Path to the Looma logo inside the API assets folder
+    const logoPath = path.join(__dirname, '../assets/looma-logo.png');
     const attachments = [];
     
     if (fs.existsSync(logoPath)) {
       attachments.push({
-        filename: 'fda-logo.webp',
+        filename: 'looma-logo.png',
         path: logoPath,
         cid: 'fdalogo' // Referenced as src="cid:fdalogo" in the html
       });
     }
 
     const mailOptions = {
-      from: `"LMSFDA" <${fromEmail}>`,
+      from: `"Looma LMS" <${fromEmail}>`,
       to,
       subject,
       html,
