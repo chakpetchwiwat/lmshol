@@ -72,7 +72,7 @@ const SystemSettings = () => {
             <p className="text-slate-500 font-medium">
               {isFullAdmin
                 ? 'กำหนดค่าเริ่มต้นของระบบสำหรับผู้ใช้งานทั้งหมด'
-                : `กำหนดเป้าหมายรายสัปดาห์สำหรับแผนก ${currentUser?.department || 'ของคุณ'}`}
+                : `กำหนดเป้าหมายรายสัปดาห์สำหรับกอง ${currentUser?.department || 'ของคุณ'}`}
             </p>
           </div>
         </div>
@@ -129,8 +129,8 @@ const SystemSettings = () => {
               <Info size={16} className="shrink-0 mt-0.5" />
               <p className="text-xs font-medium leading-relaxed">
                 {isFullAdmin
-                  ? 'ค่านี้จะเป็นค่าเริ่มต้นของทั้งระบบ แต่ถ้าแผนกใดมี manager ตั้งค่าเฉพาะแผนกไว้ ผู้ใช้ในแผนกนั้นจะเห็นค่าเฉพาะแผนกแทน'
-                  : 'ค่านี้จะถูกใช้เฉพาะผู้ใช้งานในแผนกของคุณ และจะ override ค่า global ของระบบ'}
+                  ? 'ค่านี้จะเป็นค่าเริ่มต้นของทั้งระบบ แต่ถ้ากองใดมี manager ตั้งค่าเฉพาะกองไว้ ผู้ใช้ในกองนั้นจะเห็นค่าเฉพาะกองแทน'
+                  : 'ค่านี้จะถูกใช้เฉพาะผู้ใช้งานในกองของคุณ และจะ override ค่า global ของระบบ'}
               </p>
             </div>
           </div>

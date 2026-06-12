@@ -25,6 +25,7 @@ const UserList = ({
       data={users}
       loading={loading}
       emptyMessage="ยังไม่พบผู้ใช้งานที่ตรงกับตัวกรอง"
+      className="border-none shadow-none rounded-none bg-transparent"
       renderRow={(user) => (
         <tr key={user.id} className="border-b border-border transition-colors hover:bg-gray-50/50">
           <td className="p-3 sm:p-4">

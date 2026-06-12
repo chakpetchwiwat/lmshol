@@ -94,6 +94,14 @@ const ProfileEducationSection = ({ education = [], saving, onSave }) => {
       <div className="mt-5 overflow-hidden rounded-[1.5rem] border border-slate-100">
         {education.length ? (
           <div className="divide-y divide-slate-100">
+            {/* Header row */}
+            <div className="hidden lg:grid grid-cols-[1.2fr_1fr_1fr_1fr_auto] gap-3 bg-slate-50/80 px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-slate-500 border-b border-slate-100">
+              <div>สถาบันการศึกษา</div>
+              <div>วุฒิการศึกษา</div>
+              <div>คณะ</div>
+              <div>สาขาวิชา</div>
+              <div className="w-[84px] text-center">จัดการ</div>
+            </div>
             {education.map((item) => (
               <article 
                 key={item.id} 

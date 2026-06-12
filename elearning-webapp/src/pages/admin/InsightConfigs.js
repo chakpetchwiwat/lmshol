@@ -17,7 +17,7 @@ export const getWeeklyInsightConfig = (bucket, selectedDepartmentName, renderUse
   ],
   columns: [
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-    { key: 'department', label: 'แผนก' },
+    { key: 'department', label: 'กอง' },
     { key: 'courseTitle', label: 'คอร์ส' },
     { key: 'status', label: 'สถานะ', render: (row) => ENROLLMENT_STATUS_LABELS[row.status] || row.status },
     { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
@@ -37,7 +37,7 @@ export const getTypeInsightConfig = (group, renderUserLink) => ({
   ],
   columns: [
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-    { key: 'department', label: 'แผนก' },
+    { key: 'department', label: 'กอง' },
     { key: 'courseTitle', label: 'คอร์ส' },
     { key: 'status', label: 'สถานะ', render: (row) => ENROLLMENT_STATUS_LABELS[row.status] || row.status },
     { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
@@ -52,11 +52,11 @@ export const getCategoryInsightConfig = (category, selectedDepartmentName, rende
   subtitle: 'ผู้เรียนและคอร์สที่อยู่ภายใต้หมวดหมู่นี้',
   summary: [
     { label: 'จำนวน enrollment', value: category.value || 0 },
-    { label: 'แผนก', value: selectedDepartmentName },
+    { label: 'กอง', value: selectedDepartmentName },
   ],
   columns: [
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-    { key: 'department', label: 'แผนก' },
+    { key: 'department', label: 'กอง' },
     { key: 'courseTitle', label: 'คอร์ส' },
     { key: 'status', label: 'สถานะ', render: (row) => ENROLLMENT_STATUS_LABELS[row.status] || row.status },
     { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
@@ -70,11 +70,11 @@ export const getCourseInsightConfig = (course, selectedDepartmentName, renderUse
   subtitle: 'รายชื่อผู้เรียนที่ลงทะเบียนและผลลัพธ์ของคอร์สนี้',
   summary: [
     { label: 'ผู้ลงทะเบียน', value: course.students || 0 },
-    { label: 'แผนก', value: selectedDepartmentName },
+    { label: 'กอง', value: selectedDepartmentName },
   ],
   columns: [
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-    { key: 'department', label: 'แผนก' },
+    { key: 'department', label: 'กอง' },
     { key: 'status', label: 'สถานะ', render: (row) => ENROLLMENT_STATUS_LABELS[row.status] || row.status },
     { key: 'score', label: 'คะแนน', render: (row) => row.score ?? '-' },
     { key: 'startedAt', label: 'เริ่มเรียน', render: (row) => formatThaiDateTime(row.startedAt, true) },
@@ -90,11 +90,11 @@ export const getSkillGapInsightConfig = (skill, selectedDepartmentName, renderUs
   summary: [
     { label: 'คะแนนเฉลี่ย', value: `${Number(skill.average_mastery || 0).toFixed(1)}%` },
     { label: 'จำนวนรายการสอบ', value: skill.details?.length || 0 },
-    { label: 'แผนก', value: selectedDepartmentName },
+    { label: 'กอง', value: selectedDepartmentName },
   ],
   columns: [
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-    { key: 'department', label: 'แผนก' },
+    { key: 'department', label: 'กอง' },
     { key: 'courseTitle', label: 'คอร์ส' },
     { key: 'lessonTitle', label: 'แบบทดสอบ' },
     { key: 'score', label: 'คะแนน' },
@@ -106,7 +106,7 @@ export const getSkillGapInsightConfig = (skill, selectedDepartmentName, renderUs
 
 export const getDepartmentInsightConfig = (department, periodLabel, renderUserLink) => ({
   title: `Department: ${department.name}`,
-  subtitle: 'ผลการเรียนรายบุคคลของผู้เรียนภายในแผนกนี้',
+  subtitle: 'ผลการเรียนรายบุคคลของผู้เรียนภายในกองนี้',
   summary: [
     { label: 'Completion Rate', value: `${Number(department.completion_rate || 0).toFixed(1)}%` },
     { label: 'จำนวนผู้เรียน', value: department.details?.length || 0 },
@@ -120,7 +120,7 @@ export const getDepartmentInsightConfig = (department, periodLabel, renderUserLi
     { key: 'avgScore', label: 'คะแนนเฉลี่ย', render: (row) => row.avgScore ?? '-' },
   ],
   rows: department.details || [],
-  emptyMessage: 'ไม่พบข้อมูลผู้เรียนในแผนกนี้',
+  emptyMessage: 'ไม่พบข้อมูลผู้เรียนในกองนี้',
 });
 
 export const getRoiInsightConfig = (bucket, selectedDepartmentName, renderUserLink) => ({
@@ -134,7 +134,7 @@ export const getRoiInsightConfig = (bucket, selectedDepartmentName, renderUserLi
   columns: [
     { key: 'kind', label: 'ประเภท', render: (row) => row.kind === 'completion' ? 'สำเร็จ' : 'Points' },
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-    { key: 'department', label: 'แผนก' },
+    { key: 'department', label: 'กอง' },
     { key: 'courseTitle', label: 'รายการ' },
     { key: 'points', label: 'แต้ม', render: (row) => row.points || 0 },
     { key: 'completedAt', label: 'เวลา', render: (row) => formatThaiDateTime(row.completedAt, true) },
@@ -148,11 +148,11 @@ export const getRiskInsightConfig = (rows, selectedDepartmentName, renderUserLin
   subtitle: 'ผู้เรียนที่ทำคะแนนหรือจำนวนคอร์สไม่ครบตามเป้าหมาย (Goal) ที่ใกล้หมดอายุ',
   summary: [
     { label: 'จำนวนรายการ', value: rows.length },
-    { label: 'แผนก', value: selectedDepartmentName },
+    { label: 'กอง', value: selectedDepartmentName },
   ],
   columns: [
     { key: 'userName', label: 'ผู้เรียน', render: renderUserLink },
-    { key: 'department', label: 'แผนก' },
+    { key: 'department', label: 'กอง' },
     { key: 'goalTitle', label: 'เป้าหมาย (Goal)', render: renderGoalLink },
     { key: 'gapCount', label: 'ขาดอีก (รายการ)', render: (row) => row.gapCount > 0 ? `${row.gapCount} คอร์ส` : '-' },
     { key: 'deadline', label: 'วันหมดอายุเป้าหมาย', render: (row) => formatThaiDateTime(row.deadline, true) },

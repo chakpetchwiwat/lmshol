@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   MonitorPlay,
@@ -41,14 +41,18 @@ const CourseDetail = () => {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [showVideo, setShowVideo] = React.useState(false);
   const [bookmarking, setBookmarking] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
     const fetchDetail = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const response = await userAPI.getCourseDetails(id);
         setCourse(response.data);
       } catch (error) {
         console.error('Fetch course detail error:', error);
+        setError(error.response?.data?.message || 'ไม่พบหลักสูตรที่คุณต้องการ หรือคุณไม่มีสิทธิ์เข้าถึงหลักสูตรนี้');
       } finally {
         setLoading(false);
       }
@@ -98,25 +102,13 @@ const CourseDetail = () => {
   const durationHours = durationMinutes > 0 ? Math.max(1, Math.round((durationMinutes / 60) * 10) / 10) : 2;
 
   const learningPoints = React.useMemo(
-    () =>
-      tryParse(course?.whatYouWillLearn, [
-        'เข้าใจภาพรวมของเนื้อหาและนำไปใช้ต่อยอดในการทำงานได้จริง',
-        'มีแนวคิดและขั้นตอนที่ชัดเจนสำหรับลงมือทำด้วยตัวเอง',
-        'ได้ตัวอย่างและเทคนิคที่ช่วยให้ทำงานได้เร็วและแม่นยำขึ้น',
-        'พร้อมประยุกต์ใช้ความรู้กับสถานการณ์จริงในองค์กร',
-      ]),
+    () => tryParse(course?.whatYouWillLearn, []),
     [course],
   );
 
   const whatYouGet = React.useMemo(
-    () =>
-      tryParse(course?.whatYouWillGet, [
-        { icon: 'video', text: `วิดีโอคุณภาพสูง ความยาวรวมประมาณ ${durationHours} ชั่วโมง` },
-        { icon: 'file', text: 'เอกสารประกอบการเรียนสำหรับทบทวนหลังเรียน' },
-        { icon: 'infinite', text: 'เข้าถึงเนื้อหาได้ตลอดตามสิทธิ์ของหลักสูตร' },
-        { icon: 'award', text: 'ใบรับรองเมื่อเรียนครบตามเงื่อนไขของหลักสูตร' },
-      ]),
-    [course, durationHours],
+    () => tryParse(course?.whatYouWillGet, []),
+    [course],
   );
 
   const benefitsIconMap = {
@@ -171,8 +163,28 @@ const CourseDetail = () => {
     }
   };
 
-  if (loading || !course) {
+  if (loading) {
     return <Skeleton.CourseDetail />;
+  }
+
+  if (error || !course) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 max-w-lg mx-auto mt-12">
+        <div className="w-20 h-20 bg-red-50 rounded-[2.5rem] flex items-center justify-center text-red-500 mb-6 border border-red-100">
+          <BookOpen size={40} />
+        </div>
+        <h2 className="text-2xl font-black text-slate-900 mb-2">ไม่พบหลักสูตร</h2>
+        <p className="text-slate-500 font-bold max-w-sm mb-8">
+          {error || 'หลักสูตรนี้อาจไม่มีอยู่ หรือถูกยกเลิกการเผยแพร่ หรือคุณไม่มีสิทธิ์เข้าถึงหลักสูตรนี้'}
+        </p>
+        <button
+          onClick={handleReturnToCourseList}
+          className="px-8 py-3 bg-primary text-white rounded-2xl font-black shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all active:scale-95"
+        >
+          กลับไปยังหน้ารายการคอร์ส
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -203,7 +215,9 @@ const CourseDetail = () => {
 
       <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-[1450px] flex-col-reverse gap-6 px-4 sm:px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-10 2xl:px-12">
         <div className="flex w-full flex-col gap-6 md:gap-8 lg:min-w-0 lg:flex-1">
-          <CourseBenefits learningPoints={learningPoints} />
+          {learningPoints && learningPoints.length > 0 && (
+            <CourseBenefits learningPoints={learningPoints} />
+          )}
 
           <CourseDocumentList 
             course={course}

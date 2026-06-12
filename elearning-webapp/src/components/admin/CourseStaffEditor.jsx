@@ -227,7 +227,7 @@ const CourseStaffEditor = ({ courseId, currentUser, onStaffChanged, initialStaff
                         className="w-full text-left p-3 hover:bg-slate-50 border-b border-slate-100 last:border-0 transition-colors"
                       >
                         <div className="font-bold text-slate-700">{user.name}</div>
-                        <div className="text-xs text-slate-400">{user.email} • {user.department || 'ไม่ระบุแผนก'}</div>
+                        <div className="text-xs text-slate-400">{user.email} • {user.department || 'ไม่ระบุกอง'}</div>
                       </button>
                     ))}
                   </div>

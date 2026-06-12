@@ -20,7 +20,7 @@ const AnnouncementHistoryModal = ({
         { label: 'ชื่อประกาศ', value: title || '-' },
         { label: 'จำนวนผู้อ่าน', value: `${historyData.length} รายการ` },
       ],
-      columns: ['ผู้อ่าน', 'อีเมล', 'แผนก', 'วันที่เข้าอ่าน', 'คะแนนสอบ', 'สถานะ'],
+      columns: ['ผู้อ่าน', 'อีเมล', 'กอง', 'วันที่เข้าอ่าน', 'คะแนนสอบ', 'สถานะ'],
       rows: historyData.map((item) => ([
         item.user?.name || '-',
         item.user?.email || '-',
@@ -75,7 +75,7 @@ const AnnouncementHistoryModal = ({
                 <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                   <tr>
                     <th className="px-6 py-4">ผู้อ่าน</th>
-                    <th className="px-6 py-4">แผนก</th>
+                    <th className="px-6 py-4">กอง</th>
                     <th className="px-6 py-4">วันที่เข้าอ่าน</th>
                     <th className="px-6 py-4">คะแนนสอบ</th>
                     <th className="px-6 py-4">สถานะ</th>

@@ -151,7 +151,7 @@ const RedeemRequests = () => {
         },
         { label: 'เดือน / ปี', value: periodValue },
       ],
-      columns: ['รหัสอ้างอิง', 'ผู้แลก', 'แผนก', 'ของรางวัล', 'แต้มที่ใช้', 'วันที่ขอ', 'สถานะ'],
+      columns: ['รหัสอ้างอิง', 'ผู้แลก', 'กอง', 'ของรางวัล', 'แต้มที่ใช้', 'วันที่ขอ', 'สถานะ'],
       rows: filteredRequests.map((request) => [
         getRequestRef(request),
         request.user?.name || request.userId || '-',

@@ -20,7 +20,7 @@ const getGoalAudience = (goal) => {
 
   if (departmentTargets.length > 0) {
     return {
-      label: `แผนก ${departmentTargets.length} แผนก`,
+      label: `กอง ${departmentTargets.length} กอง`,
       detail: departmentTargets.slice(0, 2).map((target) => target.department?.name).filter(Boolean).join(', '),
       className: 'text-amber-600'
     };
@@ -43,7 +43,7 @@ const getGoalAudience = (goal) => {
   }
 
   return {
-    label: `แผนก ${goal.department?.name || 'ของคุณ'}`,
+    label: `กอง ${goal.department?.name || 'ของคุณ'}`,
     detail: '',
     className: 'text-amber-600'
   };

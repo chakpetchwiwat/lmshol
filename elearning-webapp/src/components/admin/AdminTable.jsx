@@ -7,9 +7,10 @@ const AdminTable = ({
   loading,
   emptyMessage = 'ไม่พบข้อมูล',
   renderRow,
+  className = '',
 }) => {
   return (
-    <div className="card overflow-hidden">
+    <div className={`card w-full min-w-0 overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-left text-sm sm:text-base">
           <thead>

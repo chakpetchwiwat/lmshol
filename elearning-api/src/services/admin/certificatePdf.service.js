@@ -275,9 +275,17 @@ const drawModern = (doc, data, width, height) => {
   doc.text('Verify', 100, boxY + 75);
 
   doc.fillColor('#1e293b').fontSize(11);
-  doc.text(data.certificateNo || '-', 200, boxY + 15);
-  doc.text(data.issuedAt || '-', 200, boxY + 45);
-  doc.fontSize(8).text(data.verificationUrl || '-', 200, boxY + 75);
+  doc.text(data.certificateNo || '-', 175, boxY + 15);
+  doc.text(data.issuedAt || '-', 175, boxY + 45);
+  doc.fontSize(8).text(data.verificationUrl || '-', 175, boxY + 75, { width: 175 });
+
+  if (data.qrCodeBuffer) {
+    try {
+      doc.image(data.qrCodeBuffer, 365, boxY + 15, { width: 80, height: 80 });
+    } catch (e) {
+      console.warn('[CertificatePdf] Failed to draw QR code in Modern template:', e.message);
+    }
+  }
 
   // 6. Signatures (Bottom Right)
   drawSignatureGroup(doc, data, height - 200, width, height, 'right');
@@ -331,10 +339,25 @@ async function generatePdfBuffer(_html, options = {}) {
         stampImageBuffer: await loadImageBuffer(signer.stampImageUrl)
       })))
     : [];
+  let qrCodeBuffer = null;
+  if (data.verificationUrl) {
+    try {
+      const QRCode = require('qrcode');
+      qrCodeBuffer = await QRCode.toBuffer(data.verificationUrl, {
+        type: 'png',
+        margin: 1,
+        width: 150
+      });
+    } catch (err) {
+      console.warn('[CertificatePdf] Failed to generate QR code buffer:', err.message);
+    }
+  }
+
   const renderData = {
     ...data,
     signatureImageBuffer,
-    signers
+    signers,
+    qrCodeBuffer
   };
 
   return new Promise((resolve, reject) => {
@@ -366,13 +389,23 @@ async function generatePdfBuffer(_html, options = {}) {
         const footerY = height - 120;
         const leftMargin = 80;
 
-        doc.fillColor('#333333').fontSize(11);
-        doc.text(`เลขที่เกียรติบัตร: ${data.certificateNo || '-'}`, leftMargin, footerY);
-        doc.text(`วันที่ออก: ${data.issuedAt || '-'}`, leftMargin, footerY + 18);
+        if (renderData.qrCodeBuffer) {
+          try {
+            doc.image(renderData.qrCodeBuffer, leftMargin, footerY - 5, { width: 65, height: 65 });
+          } catch (e) {
+            console.warn('[CertificatePdf] Failed to draw QR code in PDF:', e.message);
+          }
+        }
 
-        doc.fontSize(9);
-        doc.text('ตรวจสอบความถูกต้องได้ที่:', leftMargin, footerY + 45);
-        doc.fillColor('#666666').text(data.verificationUrl || '-', leftMargin, footerY + 58);
+        const textX = renderData.qrCodeBuffer ? leftMargin + 80 : leftMargin;
+
+        doc.fillColor('#333333').fontSize(10);
+        doc.text(`เลขที่เกียรติบัตร: ${data.certificateNo || '-'}`, textX, footerY);
+        doc.text(`วันที่ออก: ${data.issuedAt || '-'}`, textX, footerY + 16);
+
+        doc.fontSize(8);
+        doc.text('สแกน QR Code หรือตรวจสอบที่:', textX, footerY + 36);
+        doc.fillColor('#666666').text(data.verificationUrl || '-', textX, footerY + 48, { width: 300 });
       }
 
       // Branding

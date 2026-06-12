@@ -49,7 +49,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
     try {
       if (activeTab === 'position') {
         await adminAPI.createDepartment({ name: newItemName.trim() });
-        toast.success('เพิ่มแผนกเรียบร้อย');
+        toast.success('เพิ่มกองเรียบร้อย');
       } else if (activeTab === 'level') {
         const newLevels = [...subdivisions, { name: newItemName.trim() }];
         await adminAPI.updateSetting('SUBDIVISIONS', newLevels.map(l => l.name));
@@ -78,7 +78,7 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
     try {
       if (activeTab === 'position') {
         await adminAPI.deleteDepartment(item.id);
-        toast.success('ลบแผนกเรียบร้อย');
+        toast.success('ลบกองเรียบร้อย');
       } else if (activeTab === 'level') {
         const newLevels = subdivisions.filter(l => l.name !== item.name);
         await adminAPI.updateSetting('SUBDIVISIONS', newLevels.map(l => l.name));
@@ -159,13 +159,13 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
             ✕
           </button>
           <div className="p-6">
-        <h2 className="text-xl font-bold text-slate-800 mb-2">จัดการแผนกและกลุ่มงาน</h2>
+        <h2 className="text-xl font-bold text-slate-800 mb-2">จัดการกองและกลุ่มงาน</h2>
         <p className="text-sm text-slate-500 mb-6">
           คุณสามารถเพิ่ม แก้ไข ลำดับ และลบข้อมูลตำแหน่ง เพื่อให้เป็นตัวเลือกในหน้าผู้ใช้งานได้
         </p>
 
         <div className="flex gap-6 border-b border-slate-200 mb-6">
-          {renderTab('position', 'แผนก (Department)')}
+          {renderTab('position', 'กอง (Division)')}
           {renderTab('level', 'กลุ่มงาน (Sub-division)')}
           {renderTab('type', '')}
         </div>

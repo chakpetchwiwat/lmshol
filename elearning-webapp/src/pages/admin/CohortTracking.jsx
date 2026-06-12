@@ -199,7 +199,7 @@ const CohortTracking = () => {
         'Cohort Role',
         'ผู้เรียน',
         'อีเมล',
-        'แผนก',
+        'กอง',
         'กลุ่มงาน (Sub-division)',
         'ตำแหน่ง',
         'ระดับตำแหน่ง',
@@ -296,7 +296,7 @@ const CohortTracking = () => {
             type="text"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="ค้นหาชื่อ อีเมล หรือแผนก..."
+            placeholder="ค้นหาชื่อ อีเมล หรือกอง..."
             className="form-input w-full bg-slate-50 py-3 pl-10 pr-4 text-sm"
           />
         </div>
@@ -354,7 +354,7 @@ const CohortTracking = () => {
                   <thead className="bg-white">
                     <tr className="text-xs font-black uppercase tracking-wider text-slate-400">
                       <th className="px-5 py-3">ผู้เรียน</th>
-                      <th className="px-5 py-3">แผนก</th>
+                      <th className="px-5 py-3">กอง</th>
                       <th className="px-5 py-3">กลุ่มงาน (Sub-division)</th>
                       <th className="px-5 py-3">ตำแหน่ง</th>
                       <th className="px-5 py-3">ระดับตำแหน่ง</th>

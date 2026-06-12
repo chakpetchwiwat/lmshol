@@ -184,7 +184,7 @@ const DashboardPrintContent = ({ report }) => {
             <thead>
               <tr>
                 <th>ผู้เรียน</th>
-                <th>แผนก</th>
+                <th>กอง</th>
                 <th>คอร์ส</th>
                 <th>หมวดหมู่</th>
                 <th>สถานะ</th>
@@ -299,10 +299,10 @@ const CustomFormPrintContent = ({ report }) => {
         .custom-form-page {
           position: relative;
           width: 841.92pt;
-          height: 595.32pt;
+          min-height: 595.32pt;
+          height: auto;
           margin-bottom: 22px;
-          padding: 28pt 30pt 24pt;
-          overflow: hidden;
+          padding: 28pt 30pt 40pt; /* slightly larger bottom padding for absolute footer */
           box-sizing: border-box;
           background: #fff;
           color: #111827;
@@ -349,7 +349,10 @@ const CustomFormPrintContent = ({ report }) => {
         .training-record-table {
           width: 100%;
           margin-top: 10pt;
-          border-collapse: collapse;
+          border-spacing: 0;
+          border-collapse: separate;
+          border-left: 0.7pt solid #555;
+          border-top: 0.7pt solid #555;
           table-layout: fixed;
           font-size: 16pt;
           line-height: 1.15;
@@ -357,10 +360,12 @@ const CustomFormPrintContent = ({ report }) => {
 
         .training-record-table th,
         .training-record-table td {
-          border: 0.7pt solid #555;
+          border-right: 0.7pt solid #555;
+          border-bottom: 0.7pt solid #555;
           height: 20pt;
-          padding: 1pt 3pt;
+          padding: 1.5pt 3pt;
           vertical-align: middle;
+          box-sizing: border-box;
         }
 
         .training-record-table th {
@@ -370,9 +375,9 @@ const CustomFormPrintContent = ({ report }) => {
         }
 
         .training-record-table td {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          word-wrap: break-word;
+          word-break: break-word;
+          white-space: normal;
         }
 
         .training-record-table .center {
@@ -380,12 +385,11 @@ const CustomFormPrintContent = ({ report }) => {
         }
 
         .training-record-table .wrap {
-          display: -webkit-box;
-          overflow: hidden;
+          display: block;
           white-space: normal;
-          line-height: 1.02;
-          -webkit-box-orient: vertical;
-          -webkit-line-clamp: 2;
+          word-wrap: break-word;
+          word-break: break-word;
+          line-height: 1.05;
         }
 
         .form-footer-container {

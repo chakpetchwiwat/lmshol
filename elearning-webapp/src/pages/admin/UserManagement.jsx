@@ -315,8 +315,8 @@ const UserManagement = () => {
 
   const handleDepartmentDelete = async (id, name) => {
     const ok = await confirm({
-      title: 'ยืนยันการลบแผนก',
-      message: `ต้องการลบแผนก "${name}" ใช่หรือไม่?`,
+      title: 'ยืนยันการลบกอง',
+      message: `ต้องการลบกอง "${name}" ใช่หรือไม่?`,
       confirmLabel: 'ลบ',
       variant: 'danger',
     });
@@ -324,11 +324,11 @@ const UserManagement = () => {
 
     try {
       await adminAPI.deleteDepartment(id);
-      toast.success('ลบแผนกเรียบร้อย');
+      toast.success('ลบกองเรียบร้อย');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete department error:', error);
-      toast.error(error.response?.data?.message || 'ลบแผนกไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'ลบกองไม่สำเร็จ');
     }
   };
 
@@ -526,13 +526,13 @@ const UserManagement = () => {
 
   const columns = React.useMemo(() => [
     { label: 'ผู้ใช้งาน', className: 'w-[18%] min-w-[150px]' },
-    { label: 'บทบาท (Role)', className: 'w-[15%] min-w-[120px]' },
-    { label: 'แผนก', className: 'w-[10%] min-w-[80px]' },
-    { label: 'กลุ่มงาน (Sub-division)', className: 'w-[20%] min-w-[150px]' },
+    { label: 'บทบาท (Role)', className: 'w-[12%] min-w-[120px]' },
+    { label: 'กอง', className: 'w-[8%] min-w-[80px]' },
+    { label: 'กลุ่มงาน (Sub-division)', className: 'w-[18%] min-w-[160px]' },
     { label: 'ตำแหน่ง (Position)', className: 'w-[18%] min-w-[130px]' },
-    { label: 'ระดับตำแหน่ง (Level)', className: 'w-[8%] min-w-[70px]' },
-    { label: 'คอร์สที่จบ', className: 'w-[6%] min-w-[60px] text-center whitespace-nowrap' },
-    { label: 'จัดการ', className: 'w-[5%] min-w-[60px] text-right whitespace-nowrap' },
+    { label: 'ระดับตำแหน่ง (Level)', className: 'w-[8%] min-w-[80px]' },
+    { label: 'คอร์สที่จบ', className: 'w-[8%] min-w-[80px] text-center whitespace-nowrap' },
+    { label: 'จัดการ', className: 'w-[10%] min-w-[100px] text-right whitespace-nowrap' },
   ], []);
 
   const handleExportProfiles = async () => {
@@ -581,17 +581,17 @@ const UserManagement = () => {
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title={`${isManagerView ? 'พนักงานในแผนก' : 'ผู้ใช้งานระบบ'} (รวม ${users.length} คน)`}
+        title={`${isManagerView ? 'พนักงานในกอง' : 'ผู้ใช้งานระบบ'} (รวม ${users.length} คน)`}
         subtitle={isManagerView
-          ? `ดูข้อมูลผู้ใช้งานเฉพาะแผนก ${currentUser?.department || 'ของคุณ'} และตรวจสอบประวัติการเรียนกับ Point ได้ในที่เดียว`
-          : 'เพิ่มผู้ใช้งาน จัดการแผนก/ระดับ และดูประวัติการเรียนกับ Point รายบุคคล'}
+          ? `ดูข้อมูลผู้ใช้งานเฉพาะกอง ${currentUser?.department || 'ของคุณ'} และตรวจสอบประวัติการเรียนกับ Point ได้ในที่เดียว`
+          : 'เพิ่มผู้ใช้งาน จัดการกอง/ระดับ และดูประวัติการเรียนกับ Point รายบุคคล'}
         actions={(
           <div className="flex flex-wrap gap-2">
             {canEditUsers && (
               <>
                 <button type="button" onClick={() => setShowDepartmentModal(true)} className="btn btn-outline">
                   <Settings2 size={18} />
-                  จัดการแผนก
+                  จัดการกอง
                 </button>
                 <button type="button" onClick={() => setShowTierModal(true)} className="btn btn-outline">
                   <Sparkles size={18} />

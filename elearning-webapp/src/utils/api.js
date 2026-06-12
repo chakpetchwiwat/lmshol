@@ -129,6 +129,7 @@ export const userAPI = {
   getPoints: () => api.get('/user/points'),
   getRewards: () => api.get('/user/rewards'),
   getCategories: () => api.get('/user/categories'),
+  getCompetencies: () => api.get('/user/competencies'),
   requestRedeem: (rewardId) => api.post(`/user/redeem/${rewardId}`),
   submitQuiz: (lessonId, data) => api.post(`/user/lessons/${lessonId}/quiz`, data),
   getAssessmentSubmission: (lessonId) => api.get(`/user/lessons/${lessonId}/assessment`),

@@ -890,7 +890,7 @@ const exportSingleUserForm = async (id, authUser) => {
         durationDays: getDurationDays(startDate, endDate),
         title: cert.courseTitle || '-',
         issuer: 'สำนักงานคณะกรรมการอาหารและยา',
-        code: cert.certificateNo || '-',
+        code: cert.competencyCode || '',
         dateForSort: startDate ? new Date(startDate) : new Date(),
         rawStartDate: startDate,
         rawEndDate: endDate
@@ -909,7 +909,7 @@ const exportSingleUserForm = async (id, authUser) => {
         durationDays: cert.trainingDays ? String(cert.trainingDays) : '1',
         title: cert.title || '-',
         issuer: location,
-        code: cert.credentialId || cert.intakeNo || '-',
+        code: cert.competencyCode || '',
         dateForSort: startDate ? new Date(startDate) : new Date(0),
         rawStartDate: startDate,
         rawEndDate: endDate

@@ -102,7 +102,7 @@ const GoalDetail = () => {
                 <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start justify-between">
                     <div className="flex-1">
                         <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded border mb-4 ${goal.scope === 'DEPARTMENT' ? 'border-amber-400/30 text-amber-300 bg-amber-400/10' : 'border-blue-400/30 text-blue-300 bg-blue-400/10'}`}>
-                            เป้าหมาย: {goal.scope === 'DEPARTMENT' ? 'แผนก ' + (goal.department?.name || '') : 'องค์กร'}
+                            เป้าหมาย: {goal.scope === 'DEPARTMENT' ? 'กอง ' + (goal.department?.name || '') : 'องค์กร'}
                         </span>
                         <h1 className="text-3xl md:text-5xl font-black mb-4 leading-tight">{goal.title}</h1>
                         <p className="text-slate-400 text-lg md:max-w-2xl">

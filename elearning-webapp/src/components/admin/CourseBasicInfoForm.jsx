@@ -261,7 +261,7 @@ const CourseBasicInfoForm = ({
         <div className="flex flex-col gap-1">
           <h4 className="text-base font-black text-slate-900">สิทธิ์การมองเห็นคอร์ส</h4>
           <p className="text-sm text-slate-500">
-            กำหนดได้ว่าแผนกไหนหรือ Role ไหนจะเห็นคอร์สนี้ ถ้าไม่จำกัด ระบบจะแสดงคอร์สให้ทุกคน
+            กำหนดได้ว่ากองไหนหรือ Role ไหนจะเห็นคอร์สนี้ ถ้าไม่จำกัด ระบบจะแสดงคอร์สให้ทุกคน
           </p>
         </div>
 
@@ -284,7 +284,7 @@ const CourseBasicInfoForm = ({
             <span>
               <span className="block text-sm font-bold text-slate-900">เปิดให้ทุกคนเห็นคอร์สนี้</span>
               <span className="block text-xs text-slate-500">
-                ถ้าปิดตัวเลือกนี้ ระบบจะใช้แผนกหรือ Role ในการควบคุมการมองเห็น
+                ถ้าปิดตัวเลือกนี้ ระบบจะใช้กองหรือ Role ในการควบคุมการมองเห็น
               </span>
             </span>
           </label>
@@ -310,7 +310,7 @@ const CourseBasicInfoForm = ({
                 }`}
               >
                 <Building2 size={15} />
-                แผนก
+                กอง
               </button>
               <button
                 type="button"
@@ -336,12 +336,12 @@ const CourseBasicInfoForm = ({
             {targetMode === 'department' && (
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
                 <div className="mb-3">
-                  <h5 className="text-sm font-black text-slate-900">แผนกที่เห็นคอร์สได้</h5>
-                  <p className="text-xs text-slate-500">พนักงานในแผนกที่เลือกจะสามารถมองเห็นและเข้าเรียนคอร์สนี้ได้</p>
+                  <h5 className="text-sm font-black text-slate-900">กองที่เห็นคอร์สได้</h5>
+                  <p className="text-xs text-slate-500">พนักงานในกองที่เลือกจะสามารถมองเห็นและเข้าเรียนคอร์สนี้ได้</p>
                 </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {departments.length === 0 ? (
-                    <p className="text-sm text-slate-500 col-span-full">ยังไม่มีแผนกในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
+                    <p className="text-sm text-slate-500 col-span-full">ยังไม่มีกองในระบบ กรุณาไปเพิ่มจากหน้าผู้ใช้งานก่อน</p>
                   ) : (
                     departments.map((department) => (
                       <label key={department.id} className="flex items-center gap-3 rounded-xl border border-slate-100 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">

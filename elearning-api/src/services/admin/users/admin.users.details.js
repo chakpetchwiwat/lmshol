@@ -47,13 +47,32 @@ const getUserDetails = async (id, authUser) => {
             departmentRef: true,
             tier: true,
             certificates: {
+                include: {
+                    competencies: {
+                        include: {
+                            competency: {
+                                select: { code: true }
+                            }
+                        }
+                    }
+                },
                 orderBy: { createdAt: 'desc' }
             },
             issuedCertificates: {
                 where: { status: 'VALID' },
                 include: {
                     course: {
-                        select: { id: true, title: true }
+                        select: {
+                            id: true,
+                            title: true,
+                            competencies: {
+                                include: {
+                                    competency: {
+                                        select: { code: true }
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 orderBy: { issuedAt: 'desc' }
@@ -86,15 +105,26 @@ const getUserDetails = async (id, authUser) => {
                 points: enrollment.course.points
             }
         })),
-        externalCertificates: user.certificates || [],
-        systemCertificates: (user.issuedCertificates || []).map(cert => ({
-            id: cert.id,
-            certificateNo: cert.certificateNo,
-            courseTitle: cert.course?.title,
-            courseId: cert.courseId,
-            issuedAt: cert.issuedAt,
-            pdfUrl: cert.pdfUrl
+        externalCertificates: (user.certificates || []).map(cert => ({
+            ...cert,
+            competencyCode: cert.competencies
+                ? cert.competencies.map(cc => cc.competency?.code).filter(Boolean).join(', ')
+                : ''
         })),
+        systemCertificates: (user.issuedCertificates || []).map(cert => {
+            const competencyCodes = cert.course?.competencies
+                ? cert.course.competencies.map(cc => cc.competency?.code).filter(Boolean)
+                : [];
+            return {
+                id: cert.id,
+                certificateNo: cert.certificateNo,
+                courseTitle: cert.course?.title,
+                courseId: cert.courseId,
+                issuedAt: cert.issuedAt,
+                pdfUrl: cert.pdfUrl,
+                competencyCode: competencyCodes.join(', ') || ''
+            };
+        }),
         pointsHistory
     };
 };

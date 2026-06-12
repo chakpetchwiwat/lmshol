@@ -41,11 +41,11 @@ const UserPermissionGuide = () => {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">ผู้ดูแลระบบสูงสุด / ผู้ดูแลระบบ</h3>
               <p className="text-sm font-semibold text-slate-400 mb-6 pb-4 border-b border-slate-800/60">
-                ขอบเขตข้อมูล: <span className="text-white">ทุกผู้เรียน ทุกแผนก ทุกหลักสูตร (Global)</span>
+                ขอบเขตข้อมูล: <span className="text-white">ทุกผู้เรียน ทุกกอง ทุกหลักสูตร (Global)</span>
               </p>
               <ul className="space-y-3.5 text-sm text-slate-300">
                 <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>จัดการผู้ใช้งานทั้งหมดในระบบ (เพิ่ม, แก้ไขสิทธิ์, ลบ, กำหนดสังกัด)</span></li>
-                <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>จัดการโครงสร้างองค์กร (แผนก, ระดับตำแหน่ง, และ Cohort Roles)</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>จัดการโครงสร้างองค์กร (กอง, ระดับตำแหน่ง, และ Cohort Roles)</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>สร้าง แก้ไข และลบ หลักสูตร บทเรียน สื่อ และแบบทดสอบทั้งหมด</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>ดูรายงานความคืบหน้า รายงานผลสัมฤทธิ์ และรายงานแต้มสะสมในภาพรวมระบบ</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>จัดการและปรับปรุงแต้มสะสม (Points Balance) ของผู้ใช้งานทุกคน</span></li>
@@ -64,7 +64,7 @@ const UserPermissionGuide = () => {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">ฝ่ายทรัพยากรบุคคล</h3>
               <p className="text-sm font-semibold text-slate-400 mb-6 pb-4 border-b border-slate-800/60">
-                ขอบเขตข้อมูล: <span className="text-white">ทุกผู้เรียน ทุกลิงก์ฝึกอบรม ทุกแผนก (Global Reporting)</span>
+                ขอบเขตข้อมูล: <span className="text-white">ทุกผู้เรียน ทุกลิงก์ฝึกอบรม ทุกกอง (Global Reporting)</span>
               </p>
               <ul className="space-y-3.5 text-sm text-slate-300">
                 <li className="flex gap-3"><Check size={16} className="text-pink-500 shrink-0 mt-0.5" /> <span>เข้าถึงข้อมูลโปรไฟล์ ประวัติการศึกษา และเอกสารของผู้เรียนทุกคนในองค์กร</span></li>
@@ -86,13 +86,13 @@ const UserPermissionGuide = () => {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">ผู้จัดการ / หัวหน้างาน</h3>
               <p className="text-sm font-semibold text-slate-400 mb-6 pb-4 border-b border-slate-800/60">
-                ขอบเขตข้อมูล: <span className="text-white">เฉพาะสมาชิกในแผนกของตนเอง (Department Scope)</span>
+                ขอบเขตข้อมูล: <span className="text-white">เฉพาะสมาชิกในกองของตนเอง (Department Scope)</span>
               </p>
               <ul className="space-y-3.5 text-sm text-slate-300">
                 <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>เข้าถึงระบบหลังบ้าน (Admin Panel) เพื่อดูสถิติและผลการเรียน</span></li>
-                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>ติดตามความคืบหน้าการฝึกอบรมและดูประวัติคะแนนของพนักงานในแผนก</span></li>
-                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>สร้างเป้าหมายการฝึกอบรมประจำสัปดาห์/เดือนสำหรับแผนกหรือกลุ่มงานของตน</span></li>
-                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>เขียนและเผยแพร่ประกาศข่าวสารเฉพาะพนักงานในสังกัดแผนก</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>ติดตามความคืบหน้าการฝึกอบรมและดูประวัติคะแนนของพนักงานในกอง</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>สร้างเป้าหมายการฝึกอบรมประจำสัปดาห์/เดือนสำหรับกองหรือกลุ่มงานของตน</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>เขียนและเผยแพร่ประกาศข่าวสารเฉพาะพนักงานในสังกัดกอง</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>ได้รับการปรับสิทธิ์ระบบเป็น 'Manager' อัตโนมัติตามตำแหน่งที่มีสิทธิ์ accessAdmin</span></li>
               </ul>
             </div>
@@ -209,7 +209,7 @@ const UserPermissionGuide = () => {
                 ขอบเขตข้อมูล: <span className="text-white">ข้อมูลการเรียนของตนเองเท่านั้น (Personal Portal)</span>
               </p>
               <ul className="space-y-3.5 text-sm text-slate-300">
-                <li className="flex gap-3"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> <span>เข้าใช้พอร์ทัลหลัก สมัครและเข้าเรียนในวิชาที่สอดคล้องกับแผนก/ตำแหน่ง/Cohort</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> <span>เข้าใช้พอร์ทัลหลัก สมัครและเข้าเรียนในวิชาที่สอดคล้องกับกอง/ตำแหน่ง/Cohort</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> <span>เข้าศึกษา ทำการเรียนการสอนผ่านสื่อผสม และดาวน์โหลดเอกสารประกอบการเรียน</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> <span>ทำแบบทดสอบและประเมินผลเพื่อปลดล็อคบทเรียนและรับแต้มสะสม</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> <span>รับใบประกาศนียบัตรออนไลน์และเก็บลงในประวัติการฝึกอบรมส่วนตัว</span></li>
@@ -228,7 +228,7 @@ const UserPermissionGuide = () => {
           </h4>
           <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
             <p>
-              1. <strong className="text-white">การยกระดับสิทธิ์แบบอิงตำแหน่ง (Tiers)</strong>: หากพนักงานมีตำแหน่งที่เป็นหัวหน้าแผนก (เช่น Director) ระบบจะตรวจจับค่า <code className="bg-slate-950 px-1.5 py-0.5 rounded text-indigo-300 text-xs">accessAdmin: true</code> จากตาราง Tier แล้วยกสิทธิ์ในระดับระบบขึ้นเป็น <strong className="text-white">Manager</strong> โดยอัตโนมัติเพื่อให้สามารถเข้าห้องหลังบ้านได้ทันที
+              1. <strong className="text-white">การยกระดับสิทธิ์แบบอิงตำแหน่ง (Tiers)</strong>: หากพนักงานมีตำแหน่งที่เป็นหัวหน้ากอง (เช่น Director) ระบบจะตรวจจับค่า <code className="bg-slate-950 px-1.5 py-0.5 rounded text-indigo-300 text-xs">accessAdmin: true</code> จากตาราง Tier แล้วยกสิทธิ์ในระดับระบบขึ้นเป็น <strong className="text-white">Manager</strong> โดยอัตโนมัติเพื่อให้สามารถเข้าห้องหลังบ้านได้ทันที
             </p>
             <p>
               2. <strong className="text-white">การยกระดับสิทธิ์แบบอิงผู้ดูแล Cohort (Cohort Supervisor)</strong>: สิทธิ์ระบบจะถูกจำกัดเฉพาะกลุ่ม และล็อคสิทธิ์ตามตำแหน่งงานของผู้ดูแล Cohort คนนั้นโดยตรง

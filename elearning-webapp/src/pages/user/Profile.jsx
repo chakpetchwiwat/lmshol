@@ -39,6 +39,7 @@ const Profile = () => {
   const [uploadingProfileFile, setUploadingProfileFile] = React.useState(false);
   const [savingSignature, setSavingSignature] = React.useState(false);
   const [uploadingSignature, setUploadingSignature] = React.useState(false);
+  const [competencies, setCompetencies] = React.useState([]);
 
   const passwordDialogTitleId = React.useId();
   const policyDialogTitleId = React.useId();
@@ -120,12 +121,14 @@ const Profile = () => {
           userAPI.getCourses(),
           userAPI.getCertificates(),
           userAPI.getLmsCertificates(),
+          userAPI.getCompetencies(),
         ]);
 
         const userRes = results[0].status === 'fulfilled' ? results[0].value : null;
         const coursesRes = results[1].status === 'fulfilled' ? results[1].value : null;
         const certificatesRes = results[2].status === 'fulfilled' ? results[2].value : null;
         const lmsCertificatesRes = results[3].status === 'fulfilled' ? results[3].value : null;
+        const competenciesRes = results[4].status === 'fulfilled' ? results[4].value : null;
 
         if (userRes) {
           setUser(userRes?.data || userRes);
@@ -136,6 +139,7 @@ const Profile = () => {
         setCourses(coursesRes ? (Array.isArray(coursesRes?.data) ? coursesRes.data : Array.isArray(coursesRes) ? coursesRes : []) : []);
         setCertificates(certificatesRes ? (Array.isArray(certificatesRes?.data) ? certificatesRes.data : Array.isArray(certificatesRes) ? certificatesRes : []) : []);
         setLmsCertificates(lmsCertificatesRes ? (Array.isArray(lmsCertificatesRes?.data) ? lmsCertificatesRes.data : Array.isArray(lmsCertificatesRes) ? lmsCertificatesRes : []) : []);
+        setCompetencies(competenciesRes ? (Array.isArray(competenciesRes?.data) ? competenciesRes.data : Array.isArray(competenciesRes) ? competenciesRes : []) : []);
       } catch (error) {
         console.error('Fetch profile error:', error);
       } finally {
@@ -420,6 +424,7 @@ const Profile = () => {
       <ProfileCertificates
         certificates={certificates}
         lmsCertificates={lmsCertificates}
+        competencies={competencies}
         saving={savingCertificate}
         uploading={uploadingCertificate}
         onCreate={handleCreateCertificate}

@@ -143,7 +143,7 @@ const AnnouncementModal = ({
                     className="form-input w-full"
                     value={form.title}
                     onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                    placeholder="เช่น แจ้งปิดระบบชั่วคราวสำหรับแผนกขาย"
+                    placeholder="เช่น แจ้งปิดระบบชั่วคราวสำหรับกองขาย"
                   />
                 </div>
 
@@ -189,8 +189,8 @@ const AnnouncementModal = ({
                       >
                         <Users size={20} className={form.scope === 'DEPARTMENT' ? 'text-primary' : 'text-slate-400'} />
                         <div className="text-left">
-                          <p className="text-sm font-bold">เฉพาะแผนก (Department)</p>
-                          <p className="text-xs opacity-80">แสดงเฉพาะแผนกที่เลือก</p>
+                          <p className="text-sm font-bold">เฉพาะกอง (Department)</p>
+                          <p className="text-xs opacity-80">แสดงเฉพาะกองที่เลือก</p>
                         </div>
                       </button>
                     </div>
@@ -200,12 +200,12 @@ const AnnouncementModal = ({
                 <div className={isFullAdmin && form.scope === 'GLOBAL' ? 'hidden' : ''}>
                   {isFullAdmin ? (
                     <CustomSelect
-                      label="แผนก"
-                      placeholder="เลือกแผนก..."
+                      label="กอง"
+                      placeholder="เลือกกอง..."
                       value={form.departmentId}
                       onChange={(event) => setForm((current) => ({ ...current, departmentId: event.target.value }))}
                       options={[
-                        { value: '', label: 'เลือกแผนก' },
+                        { value: '', label: 'เลือกกอง' },
                         ...departments.map((department) => ({ value: department.id, label: department.name }))
                       ]}
                     />
@@ -214,7 +214,7 @@ const AnnouncementModal = ({
                     <div className="flex items-center gap-2 rounded-xl border border-primary/10 bg-primary/5 px-4 py-3 ">
                       <CheckCircle2 size={16} className="text-primary" />
                       <span className="text-sm font-bold text-primary">
-                        แผนกของคุณ: {user?.department || 'กำลังโหลด...'}
+                        กองของคุณ: {user?.department || 'กำลังโหลด...'}
                       </span>
                     </div>
                   )}
