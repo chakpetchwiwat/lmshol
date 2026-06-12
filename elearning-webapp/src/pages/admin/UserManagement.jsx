@@ -526,13 +526,13 @@ const UserManagement = () => {
 
   const columns = React.useMemo(() => [
     { label: 'ผู้ใช้งาน', className: 'w-[18%] min-w-[150px]' },
-    { label: 'บทบาท (Role)', className: 'w-[15%] min-w-[120px]' },
-    { label: 'กอง', className: 'w-[10%] min-w-[80px]' },
-    { label: 'กลุ่มงาน (Sub-division)', className: 'w-[20%] min-w-[150px]' },
+    { label: 'บทบาท (Role)', className: 'w-[12%] min-w-[120px]' },
+    { label: 'กอง', className: 'w-[8%] min-w-[80px]' },
+    { label: 'กลุ่มงาน (Sub-division)', className: 'w-[18%] min-w-[160px]' },
     { label: 'ตำแหน่ง (Position)', className: 'w-[18%] min-w-[130px]' },
-    { label: 'ระดับตำแหน่ง (Level)', className: 'w-[8%] min-w-[70px]' },
-    { label: 'คอร์สที่จบ', className: 'w-[6%] min-w-[60px] text-center whitespace-nowrap' },
-    { label: 'จัดการ', className: 'w-[5%] min-w-[60px] text-right whitespace-nowrap' },
+    { label: 'ระดับตำแหน่ง (Level)', className: 'w-[8%] min-w-[80px]' },
+    { label: 'คอร์สที่จบ', className: 'w-[8%] min-w-[80px] text-center whitespace-nowrap' },
+    { label: 'จัดการ', className: 'w-[10%] min-w-[100px] text-right whitespace-nowrap' },
   ], []);
 
   const handleExportProfiles = async () => {

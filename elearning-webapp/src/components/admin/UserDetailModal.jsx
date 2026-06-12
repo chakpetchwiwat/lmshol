@@ -179,9 +179,7 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
       const diffTime = Math.abs(end - start);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return String(diffDays === 0 ? 1 : diffDays);
-    };
-
-    const allRecords = [
+    };    const allRecords = [
       ...systemCertificates.map((cert) => {
         const enrollment = enrollments.find((e) => e.course?.title === cert.courseTitle);
         const startDate = enrollment?.startedAt || cert.issuedAt;
@@ -193,7 +191,7 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
           durationDays: getDurationDays(startDate, endDate),
           title: cert.courseTitle || '-',
           issuer: 'สำนักงานคณะกรรมการอาหารและยา',
-          code: cert.certificateNo || '-',
+          code: cert.competencyCode || '',
           dateForSort: startDate ? new Date(startDate) : new Date(),
           rawStartDate: startDate,
           rawEndDate: endDate
@@ -209,10 +207,10 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
           year: toThaiYear(startDate),
           startDateFormatted: formatThaiDateTime(startDate, false),
           endDateFormatted: formatThaiDateTime(endDate, false),
-          durationDays: cert.trainingDays || '1',
+          durationDays: cert.trainingDays ? String(cert.trainingDays) : '1',
           title: cert.title || '-',
           issuer: location,
-          code: cert.credentialId || cert.intakeNo || '-',
+          code: cert.competencyCode || '',
           dateForSort: startDate ? new Date(startDate) : new Date(0),
           rawStartDate: startDate,
           rawEndDate: endDate
