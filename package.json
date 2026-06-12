@@ -1,0 +1,12 @@
+{
+  "name": "lmshol-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "elearning-api",
+    "elearning-webapp"
+  ],
+  "scripts": {
+    "build": "npm run build:vercel --workspace=elearning-webapp"
+  }
+}
