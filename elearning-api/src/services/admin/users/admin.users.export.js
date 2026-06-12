@@ -1,7 +1,221 @@
 const prisma = require('../../../utils/prisma');
 const authHelpers = require('../../../utils/auth.helpers');
 const xlsx = require('xlsx');
+const fs = require('fs');
 const path = require('path');
+const zlib = require('zlib');
+
+const CRC32_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    table[n] = c >>> 0;
+  }
+  return table;
+})();
+
+const crc32 = (buffer) => {
+  let crc = 0 ^ -1;
+  for (let i = 0; i < buffer.length; i++) {
+    crc = (crc >>> 8) ^ CRC32_TABLE[(crc ^ buffer[i]) & 0xFF];
+  }
+  return (crc ^ -1) >>> 0;
+};
+
+const readZipEntries = (zipBuffer) => {
+  let eocdOffset = -1;
+  for (let i = zipBuffer.length - 22; i >= 0; i--) {
+    if (zipBuffer.readUInt32LE(i) === 0x06054b50) {
+      eocdOffset = i;
+      break;
+    }
+  }
+  if (eocdOffset < 0) throw new Error('Invalid XLSX zip: EOCD not found');
+
+  const totalEntries = zipBuffer.readUInt16LE(eocdOffset + 10);
+  const centralDirectoryOffset = zipBuffer.readUInt32LE(eocdOffset + 16);
+  const entries = [];
+  let offset = centralDirectoryOffset;
+
+  for (let i = 0; i < totalEntries; i++) {
+    if (zipBuffer.readUInt32LE(offset) !== 0x02014b50) {
+      throw new Error('Invalid XLSX zip: central directory is corrupt');
+    }
+
+    const compressionMethod = zipBuffer.readUInt16LE(offset + 10);
+    const compressedSize = zipBuffer.readUInt32LE(offset + 20);
+    const nameLength = zipBuffer.readUInt16LE(offset + 28);
+    const extraLength = zipBuffer.readUInt16LE(offset + 30);
+    const commentLength = zipBuffer.readUInt16LE(offset + 32);
+    const localHeaderOffset = zipBuffer.readUInt32LE(offset + 42);
+    const name = zipBuffer.toString('utf8', offset + 46, offset + 46 + nameLength);
+
+    const localNameLength = zipBuffer.readUInt16LE(localHeaderOffset + 26);
+    const localExtraLength = zipBuffer.readUInt16LE(localHeaderOffset + 28);
+    const dataOffset = localHeaderOffset + 30 + localNameLength + localExtraLength;
+    const rawData = zipBuffer.subarray(dataOffset, dataOffset + compressedSize);
+
+    let data;
+    if (compressionMethod === 0) {
+      data = Buffer.from(rawData);
+    } else if (compressionMethod === 8) {
+      data = zlib.inflateRawSync(rawData);
+    } else {
+      throw new Error(`Unsupported XLSX zip compression method: ${compressionMethod}`);
+    }
+
+    entries.push({ name, data });
+    offset += 46 + nameLength + extraLength + commentLength;
+  }
+
+  return entries;
+};
+
+const writeZipEntries = (entries) => {
+  const localParts = [];
+  const centralParts = [];
+  let offset = 0;
+
+  entries.forEach(({ name, data }) => {
+    const nameBuffer = Buffer.from(name, 'utf8');
+    const fileBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
+    const crc = crc32(fileBuffer);
+
+    const localHeader = Buffer.alloc(30);
+    localHeader.writeUInt32LE(0x04034b50, 0);
+    localHeader.writeUInt16LE(20, 4);
+    localHeader.writeUInt16LE(0x0800, 6);
+    localHeader.writeUInt16LE(0, 8);
+    localHeader.writeUInt32LE(crc, 14);
+    localHeader.writeUInt32LE(fileBuffer.length, 18);
+    localHeader.writeUInt32LE(fileBuffer.length, 22);
+    localHeader.writeUInt16LE(nameBuffer.length, 26);
+
+    localParts.push(localHeader, nameBuffer, fileBuffer);
+
+    const centralHeader = Buffer.alloc(46);
+    centralHeader.writeUInt32LE(0x02014b50, 0);
+    centralHeader.writeUInt16LE(20, 4);
+    centralHeader.writeUInt16LE(20, 6);
+    centralHeader.writeUInt16LE(0x0800, 8);
+    centralHeader.writeUInt16LE(0, 10);
+    centralHeader.writeUInt32LE(crc, 16);
+    centralHeader.writeUInt32LE(fileBuffer.length, 20);
+    centralHeader.writeUInt32LE(fileBuffer.length, 24);
+    centralHeader.writeUInt16LE(nameBuffer.length, 28);
+    centralHeader.writeUInt32LE(offset, 42);
+    centralParts.push(centralHeader, nameBuffer);
+
+    offset += localHeader.length + nameBuffer.length + fileBuffer.length;
+  });
+
+  const centralDirectoryOffset = offset;
+  const centralDirectory = Buffer.concat(centralParts);
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0);
+  eocd.writeUInt16LE(entries.length, 8);
+  eocd.writeUInt16LE(entries.length, 10);
+  eocd.writeUInt32LE(centralDirectory.length, 12);
+  eocd.writeUInt32LE(centralDirectoryOffset, 16);
+
+  return Buffer.concat([...localParts, centralDirectory, eocd]);
+};
+
+const upsertZipEntry = (entries, name, data) => {
+  const index = entries.findIndex((entry) => entry.name === name);
+  const normalizedData = Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8');
+  if (index >= 0) {
+    entries[index] = { name, data: normalizedData };
+  } else {
+    entries.push({ name, data: normalizedData });
+  }
+};
+
+const ensureContentType = (contentTypesXml, xml) => (
+  contentTypesXml.includes(xml)
+    ? contentTypesXml
+    : contentTypesXml.replace('</Types>', `${xml}</Types>`)
+);
+
+const escapeXml = (value) => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+const replaceTemplateCell = (sheetXml, ref, value, type = 's') => {
+  const pattern = new RegExp(`<c\\b(?=[^>]*\\br="${ref}")[^>]*\\/>|<c\\b(?=[^>]*\\br="${ref}")[^>]*>[\\s\\S]*?<\\/c>`);
+  const current = sheetXml.match(pattern)?.[0] || `<c r="${ref}"/>`;
+  const style = current.match(/\ss="[^"]+"/)?.[0] || '';
+
+  let nextCell;
+  if (value === '' || value === null || value === undefined) {
+    nextCell = `<c r="${ref}"${style}/>`;
+  } else if (type === 'n') {
+    nextCell = `<c r="${ref}"${style}><v>${Number(value) || 0}</v></c>`;
+  } else {
+    nextCell = `<c r="${ref}"${style} t="inlineStr"><is><t>${escapeXml(value)}</t></is></c>`;
+  }
+
+  return pattern.test(sheetXml)
+    ? sheetXml.replace(pattern, nextCell)
+    : sheetXml.replace('</row>', `${nextCell}</row>`);
+};
+
+const buildTrainingRecordTemplateSheetXml = (templateSheetXml, { detail, pageRecords, pageIdx, totalPages, pageSize, printedDate, dateRange }) => {
+  let sheetXml = templateSheetXml;
+
+  sheetXml = replaceTemplateCell(sheetXml, 'A2', `ของ ${detail.name || '-'}`);
+
+  let cleanSub = (detail.subdivision || '').trim();
+  if (cleanSub && !cleanSub.startsWith('กลุ่ม')) {
+    cleanSub = `กลุ่ม${cleanSub}`;
+  }
+  const subdivisionText = [
+    cleanSub,
+    (detail.department || '').trim(),
+    'สำนักงานคณะกรรมการอาหารและยา'
+  ].filter(Boolean).join(' ');
+  sheetXml = replaceTemplateCell(sheetXml, 'A3', subdivisionText);
+
+  for (let idx = 0; idx < pageSize; idx++) {
+    const record = pageRecords[idx];
+    const rowNumber = 6 + idx;
+    const rowValues = record
+      ? [
+        { col: 'A', value: pageIdx * pageSize + idx + 1, type: 'n' },
+        { col: 'B', value: record.year },
+        { col: 'C', value: record.startDateFormatted },
+        { col: 'D', value: record.endDateFormatted },
+        { col: 'E', value: Number(record.durationDays) || 1, type: 'n' },
+        { col: 'F', value: record.title },
+        { col: 'G', value: record.issuer },
+        { col: 'H', value: record.code },
+      ]
+      : ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map((col) => ({ col, value: '' }));
+
+    rowValues.forEach(({ col, value, type }) => {
+      sheetXml = replaceTemplateCell(sheetXml, `${col}${rowNumber}`, value, type);
+    });
+  }
+
+  sheetXml = replaceTemplateCell(
+    sheetXml,
+    'A22',
+    pageIdx + 1 < totalPages
+      ? ''
+      : 'หมายเหตุ: วันฝึกอบรม 1 วัน คิดเป็นชั่วโมงฝึกอบรม 8 ชั่วโมง'
+  );
+
+  const footer = `&L&"TH SarabunPSK,Regular"&16Printed date: ${printedDate}&R&"TH SarabunPSK,Regular"&16F-D3-14 (${dateRange}) หน้า ${pageIdx + 1} / ${totalPages}`;
+  return sheetXml.replace(
+    /<headerFooter>[\s\S]*?<\/headerFooter>/,
+    `<headerFooter><oddFooter>${escapeXml(footer)}</oddFooter></headerFooter>`
+  );
+};
 
 const PROFILE_HEADERS = [
   'Username',
@@ -706,14 +920,23 @@ const exportSingleUserForm = async (id, authUser) => {
   // Sort chronologically (oldest to newest)
   allRecords.sort((a, b) => a.dateForSort.getTime() - b.dateForSort.getTime());
 
-  const templatePath = path.join(__dirname, '..', '..', '..', 'templates', 'F-D3-14.xlsx');
-  const wbTemplate = xlsx.readFile(templatePath);
-  const tempSheet = wbTemplate.Sheets[wbTemplate.SheetNames[0]];
-
   const pageSize = 16;
   const totalPages = Math.max(1, Math.ceil(allRecords.length / pageSize));
-  
-  const wbOut = xlsx.utils.book_new();
+
+  const templatePath = path.join(__dirname, '..', '..', '..', 'templates', 'F-D3-14.xlsx');
+  const templateBuffer = fs.readFileSync(templatePath);
+  const templateEntries = readZipEntries(templateBuffer);
+  const getTemplateEntry = (name) => {
+    const entry = templateEntries.find((candidate) => candidate.name === name);
+    if (!entry) throw new Error(`F-D3-14 template is missing ${name}`);
+    return entry.data;
+  };
+  const templateSheetXml = getTemplateEntry('xl/worksheets/sheet1.xml').toString('utf8');
+  const templateStylesXml = getTemplateEntry('xl/styles.xml');
+  const templateSharedStringsXml = getTemplateEntry('xl/sharedStrings.xml');
+  const templateThemeXml = getTemplateEntry('xl/theme/theme1.xml');
+  const templatePrinterSettings = getTemplateEntry('xl/printerSettings/printerSettings1.bin');
+  const templateSheetRelsXml = getTemplateEntry('xl/worksheets/_rels/sheet1.xml.rels');
 
   const getPageDateRange = (pageRecords) => {
     const dates = [];
@@ -754,6 +977,59 @@ const exportSingleUserForm = async (id, authUser) => {
     return `${day}/${month}/${year}`;
   };
   const printedDate = getPrintedDateThai();
+
+  const wbOut = xlsx.utils.book_new();
+  for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+    xlsx.utils.book_append_sheet(wbOut, xlsx.utils.aoa_to_sheet([[]]), `หน้า ${pageIdx + 1}`);
+  }
+
+  const shellBuffer = xlsx.write(wbOut, { type: 'buffer', bookType: 'xlsx' });
+  const outputEntries = readZipEntries(shellBuffer);
+
+  for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+    const pageRecords = allRecords.slice(pageIdx * pageSize, (pageIdx + 1) * pageSize);
+    const dateRange = getPageDateRange(pageRecords);
+    const sheetXml = buildTrainingRecordTemplateSheetXml(templateSheetXml, {
+      detail,
+      pageRecords,
+      pageIdx,
+      totalPages,
+      pageSize,
+      printedDate,
+      dateRange
+    });
+    const sheetNumber = pageIdx + 1;
+    upsertZipEntry(outputEntries, `xl/worksheets/sheet${sheetNumber}.xml`, sheetXml);
+    upsertZipEntry(outputEntries, `xl/worksheets/_rels/sheet${sheetNumber}.xml.rels`, templateSheetRelsXml);
+  }
+
+  upsertZipEntry(outputEntries, 'xl/styles.xml', templateStylesXml);
+  upsertZipEntry(outputEntries, 'xl/theme/theme1.xml', templateThemeXml);
+  upsertZipEntry(outputEntries, 'xl/sharedStrings.xml', templateSharedStringsXml);
+  upsertZipEntry(outputEntries, 'xl/printerSettings/printerSettings1.bin', templatePrinterSettings);
+
+  const contentTypesEntry = outputEntries.find((entry) => entry.name === '[Content_Types].xml');
+  if (contentTypesEntry) {
+    let contentTypesXml = contentTypesEntry.data.toString('utf8');
+    const printerSettingsContentType = '<Default Extension="bin" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.printerSettings"/>';
+    contentTypesXml = /<Default Extension="bin" ContentType="[^"]*"\/>/.test(contentTypesXml)
+      ? contentTypesXml.replace(/<Default Extension="bin" ContentType="[^"]*"\/>/, printerSettingsContentType)
+      : ensureContentType(contentTypesXml, printerSettingsContentType);
+    contentTypesXml = ensureContentType(
+      contentTypesXml,
+      '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
+    );
+    upsertZipEntry(outputEntries, '[Content_Types].xml', contentTypesXml);
+  }
+
+  const finalBuffer = writeZipEntries(outputEntries);
+  return { name: detail.name, buffer: finalBuffer };
+};
+
+/*
+ * Legacy SheetJS implementation kept temporarily for reference. It is disabled
+ * because SheetJS rewrote the template without preserving page setup and cell
+ * styles, which removed the F-D3-14 borders and A4 landscape settings.
 
   for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
     const pageRecords = allRecords.slice(pageIdx * pageSize, (pageIdx + 1) * pageSize);
@@ -835,6 +1111,7 @@ const exportSingleUserForm = async (id, authUser) => {
   const buffer = xlsx.write(wbOut, { type: 'buffer', bookType: 'xlsx' });
   return { name: detail.name, buffer };
 };
+*/
 
 module.exports = {
   exportUserProfiles,
