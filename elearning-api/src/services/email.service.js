@@ -70,6 +70,7 @@ const sendEmail = async ({ to, subject, templateName, data }) => {
 
     const html = compileTemplate(templateName, mergedData);
     const fromEmail = process.env.SMTP_FROM || 'no-reply@lmsfda.moph.go.th';
+    const fromName = process.env.SMTP_FROM_NAME || 'ThaiFDA Sikkha';
 
     // Path to the FDA logo inside the API assets folder
     const logoPath = path.join(__dirname, '../assets/fda-logo.webp');
@@ -84,7 +85,7 @@ const sendEmail = async ({ to, subject, templateName, data }) => {
     }
 
     const mailOptions = {
-      from: `"LMSFDA" <${fromEmail}>`,
+      from: `"${fromName}" <${fromEmail}>`,
       to,
       subject,
       html,
