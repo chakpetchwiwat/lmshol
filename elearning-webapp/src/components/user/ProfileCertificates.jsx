@@ -82,6 +82,7 @@ const ProfileCertificates = ({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    event.stopPropagation();
     const savedCertificate = editingCertificate
       ? await onUpdate(editingCertificate.id, form)
       : await onCreate(form);

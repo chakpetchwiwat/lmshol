@@ -36,7 +36,10 @@ const ProfileEducationSection = ({ education = [], saving, onSave }) => {
   const updateForm = (key, value) => setForm((current) => ({ ...current, [key]: value }));
 
   const handleSubmit = async (event) => {
-    if (event) event.preventDefault();
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     
     let newEducation;
     if (editingEducation) {
