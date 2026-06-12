@@ -276,6 +276,134 @@ const getDashboardStats = async (authUser, filters = {}) => {
             DASHBOARD_TYPE_LABELS
         );
 
+        // --- Holy Land Custom Dashboard Queries ---
+        // 1. New Believers (NB) welcome lesson status
+        const newBelievers = await prisma.user.findMany({
+            where: {
+                ...learnerWhere,
+                tier: {
+                    name: {
+                        contains: 'NB'
+                    }
+                }
+            },
+            include: {
+                tier: true,
+                departmentRef: true,
+                enrollments: {
+                    where: {
+                        course: {
+                            title: {
+                                contains: 'ยินดีต้อนรับสู่ Holy Land Community'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const nbWelcomePending = newBelievers.map(user => {
+            const welcomeEnrollment = user.enrollments[0] || null;
+            const status = welcomeEnrollment ? welcomeEnrollment.status : 'NOT_STARTED';
+            const progress = welcomeEnrollment ? welcomeEnrollment.progressPercent : 0;
+            return {
+                id: user.id,
+                name: user.name,
+                nickname: user.nickname || '-',
+                email: user.email,
+                department: user.departmentRef?.name || user.department || '-',
+                status,
+                progress
+            };
+        }).filter(user => user.status !== 'COMPLETED');
+
+        // 2. Baptism statistics & milestones
+        const usersForBaptism = await prisma.user.findMany({
+            where: learnerWhere,
+            select: {
+                id: true,
+                name: true,
+                nickname: true,
+                email: true,
+                departmentRef: { select: { name: true } },
+                department: true,
+                tier: { select: { name: true } },
+                waterBaptismDate: true,
+                spiritBaptismDate: true
+            }
+        });
+
+        const waterBaptizedCount = usersForBaptism.filter(u => u.waterBaptismDate !== null).length;
+        const spiritBaptizedCount = usersForBaptism.filter(u => u.spiritBaptismDate !== null).length;
+        const pendingWaterCount = usersForBaptism.filter(u => u.waterBaptismDate === null).length;
+        const pendingSpiritCount = usersForBaptism.filter(u => u.spiritBaptismDate === null).length;
+
+        const baptismMilestones = {
+            waterBaptizedCount,
+            spiritBaptizedCount,
+            pendingWaterCount,
+            pendingSpiritCount,
+            users: usersForBaptism.map(u => ({
+                id: u.id,
+                name: u.name,
+                nickname: u.nickname || '-',
+                email: u.email,
+                department: u.departmentRef?.name || u.department || '-',
+                tier: u.tier?.name || '-',
+                waterBaptismDate: u.waterBaptismDate,
+                spiritBaptismDate: u.spiritBaptismDate,
+                waterStatus: u.waterBaptismDate ? 'COMPLETED' : 'PENDING',
+                spiritStatus: u.spiritBaptismDate ? 'COMPLETED' : 'PENDING'
+            }))
+        };
+
+        // 3. Supervised Sheep (SP view)
+        const supervisedSheepList = await prisma.userCohortSupervisor.findMany({
+            where: {
+                supervisorId: actor.id || actor.userId
+            },
+            include: {
+                user: {
+                    include: {
+                        departmentRef: true,
+                        tier: true,
+                        enrollments: {
+                            include: {
+                                course: {
+                                    select: {
+                                        id: true,
+                                        title: true
+                                    }
+                                }
+                            },
+                            orderBy: [
+                                { completedAt: 'desc' },
+                                { startedAt: 'desc' }
+                            ]
+                        }
+                    }
+                }
+            }
+        });
+
+        const supervisedSheep = supervisedSheepList.map(item => {
+            const u = item.user;
+            const latestEnrollment = u.enrollments[0] || null;
+            return {
+                id: u.id,
+                name: u.name,
+                nickname: u.nickname || '-',
+                email: u.email,
+                department: u.departmentRef?.name || u.department || '-',
+                tier: u.tier?.name || '-',
+                waterBaptismDate: u.waterBaptismDate,
+                spiritBaptismDate: u.spiritBaptismDate,
+                latestCourse: latestEnrollment?.course?.title || '-',
+                progress: latestEnrollment?.progressPercent || 0,
+                status: latestEnrollment?.status || 'NOT_STARTED'
+            };
+        });
+
         return {
             scope: scopeFilters.scope,
             department: selectedDepartment?.name || actor.department || null,
@@ -298,7 +426,10 @@ const getDashboardStats = async (authUser, filters = {}) => {
             popularCourses,
             weeklyActivity,
             categoryDistribution,
-            typeDistribution
+            typeDistribution,
+            nbWelcomePending,
+            baptismMilestones,
+            supervisedSheep
         };
     });
 };
@@ -307,3 +438,4 @@ module.exports = {
     getDashboardStats,
     buildLatestCourseScoreMap
 };
+

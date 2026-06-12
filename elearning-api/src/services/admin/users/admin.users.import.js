@@ -28,7 +28,11 @@ const PROFILE_MAPPING = {
   nationalId: ['national identification number', 'เลขบัตรประชาชน', 'เลขประจำตัวประชาชน', 'national id', 'citizen id', 'nationalid'],
   positionType: ['position type', 'ประเภทตำแหน่ง', 'ประเภทพนักงาน', 'positiontype'],
   supervisorName: ['supervisor name', 'หัวหน้างาน', 'ชื่อหัวหน้า', 'supervisorname'],
-  password: ['password', 'รหัสผ่าน']
+  password: ['password', 'รหัสผ่าน'],
+  nickname: ['nickname', 'ชื่อเล่น'],
+  birthday: ['birthday', 'วันเกิด', 'วันเดือนปีเกิด', 'date of birth', 'dob'],
+  waterBaptismDate: ['water baptism date', 'วันบัพติศมาในน้ำ', 'บัพติศมาในน้ำ', 'waterbaptismdate'],
+  spiritBaptismDate: ['spirit baptism date', 'วันบัพติศมาในพระวิญญาณ', 'บัพติศมาในพระวิญญาณ', 'spiritbaptismdate']
 };
 
 const TRAINING_MAPPING = {
@@ -264,6 +268,15 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
     const supervisorName = findMappedValue(row, PROFILE_MAPPING.supervisorName);
     const password = findMappedValue(row, PROFILE_MAPPING.password);
     const role1Val = findMappedValue(row, ['role 1', 'role1', 'role', 'บทบาท']);
+    
+    const nickname = findMappedValue(row, PROFILE_MAPPING.nickname);
+    const birthdayRaw = findMappedValue(row, PROFILE_MAPPING.birthday);
+    const waterBaptismDateRaw = findMappedValue(row, PROFILE_MAPPING.waterBaptismDate);
+    const spiritBaptismDateRaw = findMappedValue(row, PROFILE_MAPPING.spiritBaptismDate);
+    
+    const birthday = parseExcelDate(birthdayRaw);
+    const waterBaptismDate = parseExcelDate(waterBaptismDateRaw);
+    const spiritBaptismDate = parseExcelDate(spiritBaptismDateRaw);
 
     try {
       // 1. Process Division / Department
@@ -340,6 +353,10 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
           supervisorName: supervisorName !== undefined ? (supervisorName ? String(supervisorName).trim() : null) : existingUser.supervisorName,
           nationalId: nationalId !== undefined ? (nationalId ? String(nationalId).trim() : null) : existingUser.nationalId,
           retirementDateRaw: retirementDate !== undefined ? (retirementDate ? String(retirementDate).trim() : null) : existingUser.retirementDateRaw,
+          nickname: nickname !== undefined ? (nickname ? String(nickname).trim() : null) : existingUser.nickname,
+          birthday: birthday !== undefined ? birthday : existingUser.birthday,
+          waterBaptismDate: waterBaptismDate !== undefined ? waterBaptismDate : existingUser.waterBaptismDate,
+          spiritBaptismDate: spiritBaptismDate !== undefined ? spiritBaptismDate : existingUser.spiritBaptismDate,
         };
         
         if (eduHistory.length > 0) {
@@ -393,6 +410,10 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
           supervisorName: supervisorName ? String(supervisorName).trim() : null,
           nationalId: nationalId ? String(nationalId).trim() : null,
           retirementDateRaw: retirementDate ? String(retirementDate).trim() : null,
+          nickname: nickname ? String(nickname).trim() : null,
+          birthday: birthday || null,
+          waterBaptismDate: waterBaptismDate || null,
+          spiritBaptismDate: spiritBaptismDate || null,
           educationHistory: eduHistory.length > 0 ? eduHistory : null
         };
 
@@ -417,7 +438,7 @@ const importProfiles = async (fileBuffer, forceMustChangePassword = true) => {
         const EmailService = require('../../email.service');
         EmailService.sendEmail({
           to: email,
-          subject: 'ยินดีต้อนรับสู่ระบบการเรียนรู้ LMSFDA',
+          subject: 'ยินดีต้อนรับสู่ระบบการเรียนรู้ Holy Land LMS',
           templateName: 'welcome',
           data: {
             name: name || username,

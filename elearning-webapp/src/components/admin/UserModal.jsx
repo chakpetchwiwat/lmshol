@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Building2, Check, Tags, X, Eye, EyeOff, UserRound } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
@@ -24,6 +24,7 @@ const UserModal = ({
   subdivisions = [],
   cohortRoles = [],
   canEditRole = true,
+  users = [],
   profileCertificates = [],
   lmsCertificates = [],
   competencies = [],
@@ -119,7 +120,7 @@ const UserModal = ({
   }, [isOpen, formData.roles, formData.departmentId]);
 
   const selectedDepartmentName = React.useMemo(
-    () => departments.find((department) => department.id === formData.departmentId)?.name || 'ยังไม่ได้กำหนดแผนก',
+    () => departments.find((department) => department.id === formData.departmentId)?.name || 'ยังไม่ได้กำหนดสังกัด',
     [departments, formData.departmentId]
   );
 
@@ -175,7 +176,7 @@ const UserModal = ({
               {editingUser ? 'แก้ไขข้อมูลผู้ใช้งาน' : 'เพิ่มผู้ใช้งานใหม่'}
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              กำหนดแผนก ระดับ และสิทธิ์การใช้งานของบัญชีนี้
+              กำหนดสังกัด ตำแหน่ง และสิทธิ์การใช้งานของบัญชีนี้
             </p>
           </div>
           <button
@@ -224,7 +225,7 @@ const UserModal = ({
                 </div>
                 <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               </div>
-              <div className="flex-1 w-full grid gap-5 md:grid-cols-2">
+              <div className="flex-1 w-full grid gap-5 md:grid-cols-3">
                 <div>
                   <label className="mb-1.5 block text-sm font-bold text-slate-700">ชื่อ - นามสกุล</label>
                   <input
@@ -234,6 +235,16 @@ const UserModal = ({
                     value={formData.name}
                     onChange={(event) => setFormData(prev => ({ ...prev, name: event.target.value }))}
                     placeholder="เช่น สมชาย ใจดี"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-bold text-slate-700">ชื่อเล่น</label>
+                  <input
+                    type="text"
+                    className="form-input w-full"
+                    value={formData.nickname || ''}
+                    onChange={(event) => setFormData(prev => ({ ...prev, nickname: event.target.value }))}
+                    placeholder="เช่น สม"
                   />
                 </div>
                 <div>
@@ -305,7 +316,7 @@ const UserModal = ({
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <label className="block text-sm font-black text-slate-900">Assign ผู้ใช้งาน</label>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">จัดแผนกและ Cohort Role ไว้ในส่วนเดียวกัน</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">จัดสังกัดและ Cohort Role ไว้ในส่วนเดียวกัน</p>
                 </div>
                 <div className="inline-flex rounded-2xl border border-slate-200 bg-white p-1">
                   <button
@@ -318,7 +329,7 @@ const UserModal = ({
                     }`}
                   >
                     <Building2 size={15} />
-                    แผนก
+                    สังกัด
                   </button>
                   <button
                     type="button"
@@ -339,22 +350,12 @@ const UserModal = ({
                 {assignmentMode === 'department' ? (
                   <div className="grid gap-4 md:grid-cols-2">
                     <CustomSelect
-                      label="แผนก"
+                      label="สังกัด"
                       value={formData.departmentId}
                       onChange={(event) => setFormData(prev => ({ ...prev, departmentId: event.target.value }))}
                       options={[
-                        { value: '', label: 'ยังไม่ได้กำหนดแผนก' },
+                        { value: '', label: 'ยังไม่ได้กำหนดสังกัด' },
                         ...departments.map((d) => ({ value: d.id, label: d.name }))
-                      ]}
-                    />
-
-                    <CustomSelect
-                      label="กลุ่มงาน (SUB-DIVISION)"
-                      value={formData.subdivision || ''}
-                      onChange={(event) => setFormData(prev => ({ ...prev, subdivision: event.target.value }))}
-                      options={[
-                        { value: '', label: 'ไม่ได้ระบุ' },
-                        ...subdivisions.map(s => ({ value: s.name, label: s.name }))
                       ]}
                     />
 
@@ -369,30 +370,25 @@ const UserModal = ({
                     />
 
                     <CustomSelect
-                      label="ระดับตำแหน่ง (LEVEL)"
-                      value={formData.positionLevel || ''}
-                      onChange={(event) => setFormData(prev => ({ ...prev, positionLevel: event.target.value }))}
+                      label="พี่เลี้ยง (Mentor)"
+                      value={formData.mentorId || ''}
+                      onChange={(event) => setFormData(prev => ({ ...prev, mentorId: event.target.value }))}
                       options={[
-                        { value: '', label: 'ไม่ได้ระบุ' },
-                        ...positionLevels.map(l => {
-                          const name = typeof l === 'string' ? l : l?.name || '';
-                          return { value: name, label: name };
-                        })
+                        { value: '', label: 'ไม่มีพี่เลี้ยง' },
+                        ...users.map((u) => ({ value: u.id, label: `${u.name} ${u.nickname ? `(${u.nickname})` : ''}` }))
                       ]}
                     />
 
-                    <CustomSelect
-                      label="ประเภทตำแหน่ง (TYPE)"
-                      value={formData.positionType || ''}
-                      onChange={(event) => setFormData(prev => ({ ...prev, positionType: event.target.value }))}
-                      options={[
-                        { value: '', label: 'ไม่ได้ระบุ' },
-                        ...positionTypes.map(t => {
-                          const name = typeof t === 'string' ? t : t?.name || '';
-                          return { value: name, label: name };
-                        })
-                      ]}
-                    />
+                    <div>
+                      <label className="mb-1.5 block text-sm font-bold text-slate-700">เดือนที่เข้ามาเป็นสมาชิก</label>
+                      <input
+                        type="text"
+                        className="form-input w-full"
+                        value={formData.joinedMonth || ''}
+                        onChange={(event) => setFormData(prev => ({ ...prev, joinedMonth: event.target.value }))}
+                        placeholder="เช่น มกราคม 2024"
+                      />
+                    </div>
                   </div>
                 ) : (
                   <div>
@@ -504,13 +500,22 @@ const UserModal = ({
               </div>
             )}
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-3">
               <div className="flex flex-col">
                 <CustomDateTimePicker
                   showTime={false}
                   value={formData.employmentDate}
                   onChange={(event) => setFormData(prev => ({ ...prev, employmentDate: event.target.value }))}
-                  label="วันที่เริ่มงาน"
+                  label="วันที่เข้าเป็นสมาชิก"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <CustomDateTimePicker
+                  showTime={false}
+                  value={formData.birthday}
+                  onChange={(event) => setFormData(prev => ({ ...prev, birthday: event.target.value }))}
+                  label="วันเดือนปีเกิด"
                 />
               </div>
 
@@ -524,6 +529,26 @@ const UserModal = ({
                     ...prev,
                     pointsBalance: parseInt(event.target.value, 10) || 0,
                   }))}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="flex flex-col">
+                <CustomDateTimePicker
+                  showTime={false}
+                  value={formData.waterBaptismDate}
+                  onChange={(event) => setFormData(prev => ({ ...prev, waterBaptismDate: event.target.value }))}
+                  label="วันบัพติศมาในน้ำ"
+                />
+              </div>
+
+              <div className="flex flex-col">
+                <CustomDateTimePicker
+                  showTime={false}
+                  value={formData.spiritBaptismDate}
+                  onChange={(event) => setFormData(prev => ({ ...prev, spiritBaptismDate: event.target.value }))}
+                  label="วันบัพติศมาในพระวิญญาณ"
                 />
               </div>
             </div>

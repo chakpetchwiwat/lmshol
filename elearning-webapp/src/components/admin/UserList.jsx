@@ -29,7 +29,9 @@ const UserList = ({
       renderRow={(user) => (
         <tr key={user.id} className="border-b border-border transition-colors hover:bg-gray-50/50">
           <td className="p-3 sm:p-4">
-            <div className="font-medium text-xs sm:text-sm break-words">{user.name}</div>
+            <div className="font-medium text-xs sm:text-sm break-words">
+              {user.name} {user.nickname ? `(${user.nickname})` : ''}
+            </div>
             <div className="mt-0.5 text-[10px] sm:text-xs text-muted break-all">{user.email}</div>
           </td>
           <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted min-w-[120px]">
@@ -52,9 +54,7 @@ const UserList = ({
             )}
           </td>
           <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted break-words whitespace-normal">{user.department || '-'}</td>
-          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted break-words whitespace-normal">{user.subdivision || '-'}</td>
           <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted break-words whitespace-normal">{user.position || '-'}</td>
-          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted break-words whitespace-normal">{user.positionLevel || '-'}</td>
           <td className="p-3 sm:p-4 text-center text-xs sm:text-sm whitespace-nowrap">
             <span className="rounded-full bg-primary-light px-2 py-1 font-bold text-primary">
               {user._count?.enrollments || 0}

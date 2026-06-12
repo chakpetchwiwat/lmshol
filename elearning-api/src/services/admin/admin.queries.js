@@ -73,6 +73,22 @@ const announcementInclude = {
 const userInclude = {
     departmentRef: true,
     tier: true,
+    mentor: {
+        select: {
+            id: true,
+            name: true,
+            nickname: true,
+            position: true
+        }
+    },
+    sheep: {
+        select: {
+            id: true,
+            name: true,
+            nickname: true,
+            position: true
+        }
+    },
     cohortSupervised: {
         select: {
             cohortRoleId: true,

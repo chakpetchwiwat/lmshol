@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Settings2, Plus, GripVertical, Trash2, Shield } from 'lucide-react';
 import useConfirm from '../../hooks/useConfirm';
 import ConfirmDialog from '../common/ConfirmDialog';
@@ -159,15 +159,13 @@ export default function PositionManagementModal({ isOpen, onClose, onPositionsCh
             ✕
           </button>
           <div className="p-6">
-        <h2 className="text-xl font-bold text-slate-800 mb-2">จัดการแผนกและกลุ่มงาน</h2>
+        <h2 className="text-xl font-bold text-slate-800 mb-2">จัดการสังกัด</h2>
         <p className="text-sm text-slate-500 mb-6">
-          คุณสามารถเพิ่ม แก้ไข ลำดับ และลบข้อมูลตำแหน่ง เพื่อให้เป็นตัวเลือกในหน้าผู้ใช้งานได้
+          คุณสามารถเพิ่ม แก้ไข ลำดับ และลบข้อมูลสังกัด เพื่อให้เป็นตัวเลือกในหน้าผู้ใช้งานได้
         </p>
 
         <div className="flex gap-6 border-b border-slate-200 mb-6">
-          {renderTab('position', 'แผนก (Division)')}
-          {renderTab('level', 'กลุ่มงาน (Sub-division)')}
-          {renderTab('type', '')}
+          {renderTab('position', 'สังกัด (Affiliation)')}
         </div>
 
         <form onSubmit={handleAddItem} className="flex gap-2 mb-6">

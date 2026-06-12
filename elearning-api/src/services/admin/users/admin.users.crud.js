@@ -119,6 +119,39 @@ const buildUserMutationData = async (tx, inputData, { isCreate = false } = {}) =
         data.supervisorName = baseData.supervisorName ? String(baseData.supervisorName).trim() : null;
     }
 
+    if (baseData.nickname !== undefined) {
+        data.nickname = baseData.nickname ? String(baseData.nickname).trim() : null;
+    }
+
+    if (baseData.birthday !== undefined) {
+        data.birthday = baseData.birthday ? new Date(baseData.birthday) : null;
+        if (data.birthday && Number.isNaN(data.birthday.getTime())) {
+            throw new Error('Birthday is invalid');
+        }
+    }
+
+    if (baseData.waterBaptismDate !== undefined) {
+        data.waterBaptismDate = baseData.waterBaptismDate ? new Date(baseData.waterBaptismDate) : null;
+        if (data.waterBaptismDate && Number.isNaN(data.waterBaptismDate.getTime())) {
+            throw new Error('Water baptism date is invalid');
+        }
+    }
+
+    if (baseData.spiritBaptismDate !== undefined) {
+        data.spiritBaptismDate = baseData.spiritBaptismDate ? new Date(baseData.spiritBaptismDate) : null;
+        if (data.spiritBaptismDate && Number.isNaN(data.spiritBaptismDate.getTime())) {
+            throw new Error('Spirit baptism date is invalid');
+        }
+    }
+
+    if (baseData.joinedMonth !== undefined) {
+        data.joinedMonth = baseData.joinedMonth ? String(baseData.joinedMonth).trim() : null;
+    }
+
+    if (baseData.mentorId !== undefined) {
+        data.mentorId = baseData.mentorId ? String(baseData.mentorId).trim() : null;
+    }
+
     if (baseData.employmentDate !== undefined) {
         data.employmentDate = baseData.employmentDate ? new Date(baseData.employmentDate) : null;
         if (data.employmentDate && Number.isNaN(data.employmentDate.getTime())) {
@@ -217,7 +250,7 @@ const createUser = async (inputData) => prisma.$transaction(async (tx) => {
     const rawPassword = inputData.password || 'password123';
     EmailService.sendEmail({
       to: user.email,
-      subject: 'ยินดีต้อนรับสู่ระบบการเรียนรู้ LMSFDA',
+      subject: 'ยินดีต้อนรับสู่ระบบการเรียนรู้ Holy Land LMS',
       templateName: 'welcome',
       data: {
         name: user.name,

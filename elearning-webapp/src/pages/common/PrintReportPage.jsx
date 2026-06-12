@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { ExternalLink, Printer, FileDown } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { adminAPI } from '../../utils/api';
@@ -184,7 +184,7 @@ const DashboardPrintContent = ({ report }) => {
             <thead>
               <tr>
                 <th>ผู้เรียน</th>
-                <th>แผนก</th>
+                <th>สังกัด</th>
                 <th>คอร์ส</th>
                 <th>หมวดหมู่</th>
                 <th>สถานะ</th>
@@ -220,14 +220,14 @@ const DashboardPrintContent = ({ report }) => {
 
 const CustomFormPrintContent = ({ report }) => {
   const name = report.profile?.name || '';
-  const subdivision = report.profile?.subdivision || '';
+  const nickname = report.profile?.nickname || '';
   const department = report.profile?.department || '';
 
-  let cleanSub = subdivision.trim();
-  if (cleanSub && !cleanSub.startsWith('กลุ่ม')) {
-    cleanSub = `กลุ่ม${cleanSub}`;
-  }
-  const subdivisionText = [cleanSub, department.trim(), 'สำนักงานคณะกรรมการอาหารและยา']
+  const nameText = name + (nickname ? ` (${nickname})` : '');
+  const subdivisionText = [
+    department.trim() ? `สังกัด ${department.trim()}` : '',
+    'คริสตจักร Holy Land'
+  ]
     .filter(Boolean)
     .join(' ');
 
@@ -463,7 +463,7 @@ const CustomFormPrintContent = ({ report }) => {
             <h1 className="form-title">แบบประวัติการฝึกอบรม (Training Record)</h1>
             <div className="form-person-line">
               <span>ของ</span>
-              <span className="form-fill">{name || '-'}</span>
+              <span className="form-fill">{nameText || '-'}</span>
             </div>
             <div className="form-unit-line">
               <span className="form-fill">{subdivisionText || '-'}</span>

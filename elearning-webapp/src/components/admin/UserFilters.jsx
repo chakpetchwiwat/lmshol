@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Search } from 'lucide-react';
 import { FILTER_VALUES } from '../../utils/constants/filters';
 import CustomSelect from '../common/CustomSelect';
@@ -31,7 +31,7 @@ const UserFilters = ({
         value={selectedDepartment}
         onChange={(event) => onDepartmentChange(event.target.value)}
         options={[
-          { value: FILTER_VALUES.ALL, label: 'ทุกแผนก' },
+          { value: FILTER_VALUES.ALL, label: 'ทุกสังกัด' },
           ...departments.map((d) => ({ value: d.id, label: d.name }))
         ]}
       />

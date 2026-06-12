@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Plus, Settings2, Sparkles, Users, ChevronDown, FileDown, Upload } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -37,6 +37,12 @@ const getDefaultFormData = () => ({
   educationHistory: [],
   profileFiles: [],
   profileImageUrl: '',
+  nickname: '',
+  birthday: '',
+  waterBaptismDate: '',
+  spiritBaptismDate: '',
+  joinedMonth: '',
+  mentorId: '',
 });
 
 const formatDateForInput = (value) => {
@@ -298,6 +304,12 @@ const UserManagement = () => {
       educationHistory: normalizeEducationHistory(user.educationHistory),
       profileFiles: normalizeProfileFiles(user.profileFiles),
       profileImageUrl: user.profileImageUrl || '',
+      nickname: user.nickname || '',
+      birthday: formatDateForInput(user.birthday),
+      waterBaptismDate: formatDateForInput(user.waterBaptismDate),
+      spiritBaptismDate: formatDateForInput(user.spiritBaptismDate),
+      joinedMonth: user.joinedMonth || '',
+      mentorId: user.mentorId || '',
     });
     setShowUserModal(true);
     setProfileCertificates([]);
@@ -315,8 +327,8 @@ const UserManagement = () => {
 
   const handleDepartmentDelete = async (id, name) => {
     const ok = await confirm({
-      title: 'ยืนยันการลบแผนก',
-      message: `ต้องการลบแผนก "${name}" ใช่หรือไม่?`,
+      title: 'ยืนยันการลบสังกัด',
+      message: `ต้องการลบสังกัด "${name}" ใช่หรือไม่?`,
       confirmLabel: 'ลบ',
       variant: 'danger',
     });
@@ -324,18 +336,18 @@ const UserManagement = () => {
 
     try {
       await adminAPI.deleteDepartment(id);
-      toast.success('ลบแผนกเรียบร้อย');
+      toast.success('ลบสังกัดเรียบร้อย');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete department error:', error);
-      toast.error(error.response?.data?.message || 'ลบแผนกไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'ลบสังกัดไม่สำเร็จ');
     }
   };
 
   const handleTierDelete = async (id, name) => {
     const ok = await confirm({
-      title: 'ยืนยันการลบระดับ',
-      message: `ต้องการลบระดับ "${name}" ใช่หรือไม่?`,
+      title: 'ยืนยันการลบตำแหน่ง',
+      message: `ต้องการลบตำแหน่ง "${name}" ใช่หรือไม่?`,
       confirmLabel: 'ลบ',
       variant: 'danger',
     });
@@ -343,11 +355,11 @@ const UserManagement = () => {
 
     try {
       await adminAPI.deleteTier(id);
-      toast.success('ลบระดับเรียบร้อย');
+      toast.success('ลบตำแหน่งเรียบร้อย');
       await Promise.all([fetchReferenceData(), fetchUsers()]);
     } catch (error) {
       console.error('Delete tier error:', error);
-      toast.error(error.response?.data?.message || 'ลบระดับไม่สำเร็จ');
+      toast.error(error.response?.data?.message || 'ลบตำแหน่งไม่สำเร็จ');
     }
   };
 
@@ -375,7 +387,7 @@ const UserManagement = () => {
       const tierIds = reorderedItems.map(item => item.id);
       setTiers(reorderedItems); // Optimistic update
       await adminAPI.reorderTiers(tierIds);
-      toast.success('บันทึกลำดับระดับเรียบร้อย');
+      toast.success('บันทึกลำดับตำแหน่งเรียบร้อย');
     } catch (error) {
       console.error('Reorder tiers error:', error);
       toast.error('ไม่สามารถบันทึกลำดับได้');
@@ -388,7 +400,7 @@ const UserManagement = () => {
       const roleIds = reorderedItems.map(item => item.id);
       setCohortRoles(reorderedItems);
       await adminAPI.reorderCohortRoles(roleIds);
-      toast.success('บันทึกลำดับกลุ่มงานเรียบร้อย');
+      toast.success('บันทึกลำดับ Role เรียบร้อย');
     } catch (error) {
       console.error('Reorder cohort roles error:', error);
       toast.error('ไม่สามารถบันทึกลำดับกลุ่มงานได้');
@@ -525,14 +537,12 @@ const UserManagement = () => {
   }, [searchTerm, selectedDepartment, selectedTier, users, tiers]);
 
   const columns = React.useMemo(() => [
-    { label: 'ผู้ใช้งาน', className: 'w-[18%] min-w-[150px]' },
-    { label: 'บทบาท (Role)', className: 'w-[12%] min-w-[120px]' },
-    { label: 'แผนก', className: 'w-[8%] min-w-[80px]' },
-    { label: 'กลุ่มงาน (Sub-division)', className: 'w-[18%] min-w-[160px]' },
-    { label: 'ตำแหน่ง (Position)', className: 'w-[18%] min-w-[130px]' },
-    { label: 'ระดับตำแหน่ง (Level)', className: 'w-[8%] min-w-[80px]' },
-    { label: 'คอร์สที่จบ', className: 'w-[8%] min-w-[80px] text-center whitespace-nowrap' },
-    { label: 'จัดการ', className: 'w-[10%] min-w-[100px] text-right whitespace-nowrap' },
+    { label: 'ผู้ใช้งาน', className: 'w-[25%] min-w-[180px]' },
+    { label: 'บทบาท (Role)', className: 'w-[15%] min-w-[120px]' },
+    { label: 'สังกัด', className: 'w-[15%] min-w-[100px]' },
+    { label: 'ตำแหน่ง (Position)', className: 'w-[20%] min-w-[140px]' },
+    { label: 'คอร์สที่จบ', className: 'w-[10%] min-w-[80px] text-center whitespace-nowrap' },
+    { label: 'จัดการ', className: 'w-[15%] min-w-[100px] text-right whitespace-nowrap' },
   ], []);
 
   const handleExportProfiles = async () => {
@@ -581,17 +591,17 @@ const UserManagement = () => {
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader
-        title={`${isManagerView ? 'พนักงานในแผนก' : 'ผู้ใช้งานระบบ'} (รวม ${users.length} คน)`}
+        title={`${isManagerView ? 'สมาชิกในสังกัด' : 'ผู้ใช้งานระบบ'} (รวม ${users.length} คน)`}
         subtitle={isManagerView
-          ? `ดูข้อมูลผู้ใช้งานเฉพาะแผนก ${currentUser?.department || 'ของคุณ'} และตรวจสอบประวัติการเรียนกับ Point ได้ในที่เดียว`
-          : 'เพิ่มผู้ใช้งาน จัดการแผนก/ระดับ และดูประวัติการเรียนกับ Point รายบุคคล'}
+          ? `ดูข้อมูลผู้ใช้งานเฉพาะสังกัด ${currentUser?.department || 'ของคุณ'} และตรวจสอบประวัติการเรียนกับ Point ได้ในที่เดียว`
+          : 'เพิ่มผู้ใช้งาน จัดการสังกัด/ตำแหน่ง และดูประวัติการเรียนกับ Point รายบุคคล'}
         actions={(
           <div className="flex flex-wrap gap-2">
             {canEditUsers && (
               <>
                 <button type="button" onClick={() => setShowDepartmentModal(true)} className="btn btn-outline">
                   <Settings2 size={18} />
-                  จัดการแผนก
+                  จัดการสังกัด
                 </button>
                 <button type="button" onClick={() => setShowTierModal(true)} className="btn btn-outline">
                   <Sparkles size={18} />
@@ -757,6 +767,7 @@ const UserManagement = () => {
         subdivisions={subdivisions}
         cohortRoles={cohortRoles}
         canEditRole={canEditUsers}
+        users={users}
         profileCertificates={profileCertificates}
         lmsCertificates={lmsCertificates}
         competencies={competencies}

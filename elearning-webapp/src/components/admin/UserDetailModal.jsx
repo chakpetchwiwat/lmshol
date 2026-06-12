@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import {
   Award,
   CalendarDays,
@@ -15,6 +15,7 @@ import {
   TrendingDown,
   TrendingUp,
   User2,
+  Users,
   X,
 } from 'lucide-react';
 import { formatThaiDateTime, toThaiYear } from '../../utils/dateUtils';
@@ -296,10 +297,10 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
       reportTitle: 'ประวัติผู้ใช้งานรายบุคคล',
       subtitle: `${detail?.name || '-'} · ${mainTitle}`,
       summary: [
-        { label: 'พนักงาน', value: detail?.name || '-' },
+        { label: 'สมาชิก', value: detail?.name || '-' },
         { label: 'อีเมล', value: detail?.email || '-' },
-        { label: 'แผนก', value: detail?.department || '-' },
-        { label: 'ระดับ', value: detail?.tier?.name || detail?.tier || '-' },
+        { label: 'สังกัด', value: detail?.department || '-' },
+        { label: 'ตำแหน่ง', value: detail?.tier?.name || detail?.tier || '-' },
         { label: '\u0e27\u0e31\u0e19\u0e40\u0e23\u0e34\u0e48\u0e21\u0e07\u0e32\u0e19', value: detail?.employmentDate ? formatThaiDateTime(detail.employmentDate) : '-' },
         { label: 'Point Balance', value: `${detail?.pointsBalance?.toLocaleString?.() || 0}` },
       ],
@@ -318,10 +319,8 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
         department: detail?.department || '',
         customFormRows: allRecords,
         items: [
-          { label: 'แผนก', value: detail?.department || '-' },
-          { label: 'ระดับ', value: detail?.tier?.name || detail?.tier || '-' },
-          { label: 'ประเภทตำแหน่ง', value: detail?.positionType || '-' },
-          { label: 'หัวหน้างาน', value: detail?.supervisorName || '-' },
+          { label: 'สังกัด', value: detail?.department || '-' },
+          { label: 'ตำแหน่ง', value: detail?.tier?.name || detail?.tier || '-' },
           { label: 'ประวัติการศึกษา', value: `${educationHistory.length} รายการ` },
           { label: 'ไฟล์ข้อมูลอื่นๆ', value: `${profileFiles.length} ไฟล์` },
         ],
@@ -389,7 +388,7 @@ sections
                     <div className="mb-3 inline-flex rounded-2xl bg-primary/10 p-3 text-primary">
                       <User2 size={18} />
                     </div>
-                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">พนักงาน</div>
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">สมาชิก</div>
                     <div className="mt-2 text-lg font-black text-slate-900">{detail.name}</div>
                     <div className="mt-1 text-sm text-slate-500">{detail.email}</div>
                   </div>
@@ -398,18 +397,18 @@ sections
                     <div className="mb-3 inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-600">
                       <CalendarDays size={18} />
                     </div>
-                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">เริ่มงาน</div>
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">วันที่เข้าเป็นสมาชิก</div>
                     <div className="mt-2 text-lg font-black text-slate-900">{formatThaiDateTime(detail.employmentDate)}</div>
-                    <div className="mt-1 text-sm text-slate-500">วันที่เริ่มเป็นพนักงานในระบบ</div>
+                    <div className="mt-1 text-sm text-slate-500">วันที่เริ่มเป็นสมาชิกในระบบ</div>
                   </div>
 
                   <div className="rounded-3xl border border-slate-100 bg-slate-50/70 p-5">
                     <div className="mb-3 inline-flex rounded-2xl bg-amber-100 p-3 text-amber-600">
                       <Clock3 size={18} />
                     </div>
-                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">แผนก / ระดับ</div>
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">สังกัด / ตำแหน่ง</div>
                     <div className="mt-2 text-lg font-black text-slate-900">{detail.department || '-'}</div>
-                    <div className="mt-1 text-sm text-slate-500">{detail.tier?.name || detail.tier || 'ยังไม่ได้กำหนดระดับ'}</div>
+                    <div className="mt-1 text-sm text-slate-500">{detail.tier?.name || detail.tier || 'ยังไม่ได้กำหนดตำแหน่ง'}</div>
                   </div>
 
                   <div className="rounded-3xl border border-slate-100 bg-slate-50/70 p-5">
@@ -438,37 +437,55 @@ sections
                     </div>
                     
                     <div className="flex-1 w-full">
-                      <h3 className="text-2xl font-black text-slate-900">{detail.name}</h3>
+                      <h3 className="text-2xl font-black text-slate-900">{detail.name} {detail.nickname ? `(${detail.nickname})` : ''}</h3>
                       <p className="text-base font-bold text-slate-500">{detail.email}</p>
                       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-base">
+                        {detail.nickname && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">ชื่อเล่น</span>
+                            <span className="text-lg font-black text-slate-700">{detail.nickname}</span>
+                          </div>
+                        )}
+                        {detail.birthday && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">วันเกิด</span>
+                            <span className="text-lg font-black text-slate-700">{formatThaiDateTime(detail.birthday, false)}</span>
+                          </div>
+                        )}
+                        {detail.waterBaptismDate && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">บัพติศมาในน้ำ</span>
+                            <span className="text-lg font-black text-slate-700">{formatThaiDateTime(detail.waterBaptismDate, false)}</span>
+                          </div>
+                        )}
+                        {detail.spiritBaptismDate && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">บัพติศมาในพระวิญญาณ</span>
+                            <span className="text-lg font-black text-slate-700">{formatThaiDateTime(detail.spiritBaptismDate, false)}</span>
+                          </div>
+                        )}
                         {detail.department && (
                           <div className="flex flex-col gap-1">
-                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">แผนก</span>
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">สังกัด</span>
                             <span className="text-lg font-black text-slate-700">{detail.department}</span>
-                          </div>
-                        )}
-                        {detail.position && (
-                          <div className="flex flex-col gap-1">
-                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">ตำแหน่ง</span>
-                            <span className="text-lg font-black text-slate-700">{detail.position}</span>
-                          </div>
-                        )}
-                        {detail.positionType && (
-                          <div className="flex flex-col gap-1">
-                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">ประเภทตำแหน่ง</span>
-                            <span className="text-lg font-black text-slate-700">{detail.positionType}</span>
                           </div>
                         )}
                         {detail.tier && (
                           <div className="flex flex-col gap-1">
-                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">ระดับ</span>
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">ตำแหน่ง</span>
                             <span className="text-lg font-black text-slate-700">{detail.tier?.name || detail.tier}</span>
                           </div>
                         )}
-                        {detail.supervisorName && (
+                        {detail.mentor && (
                           <div className="flex flex-col gap-1">
-                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">หัวหน้างาน</span>
-                            <span className="text-lg font-black text-slate-700">{detail.supervisorName}</span>
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">พี่เลี้ยง (Mentor)</span>
+                            <span className="text-lg font-black text-slate-700">{detail.mentor.name} {detail.mentor.nickname ? `(${detail.mentor.nickname})` : ''}</span>
+                          </div>
+                        )}
+                        {detail.joinedMonth && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">เดือนที่เข้าเป็นสมาชิก</span>
+                            <span className="text-lg font-black text-slate-700">{detail.joinedMonth}</span>
                           </div>
                         )}
                       </div>
@@ -583,6 +600,31 @@ sections
                         )}
                       </div>
                     </div>
+
+                    {/* Sheep Under Care Section */}
+                    {detail.sheep && detail.sheep.length > 0 && (
+                      <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/60 p-5 md:p-6">
+                        <div className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-400">
+                          <Users size={18} className="text-indigo-600" />
+                          ลูกแกะในการดูแล (Sheep Under Care)
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                          {detail.sheep.map((s) => (
+                            <div key={s.id} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 font-black">
+                                {s.nickname ? s.nickname.slice(0, 2) : s.name.slice(0, 2)}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="truncate text-base font-black text-slate-900">{s.name}</p>
+                                <p className="truncate text-xs font-bold text-slate-400">
+                                  {s.nickname ? `${s.nickname} · ` : ''}{s.position || 'สมาชิก'}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

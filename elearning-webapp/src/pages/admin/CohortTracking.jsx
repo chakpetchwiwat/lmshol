@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Activity, BookOpenCheck, CheckCircle2, Search, Users, ChevronDown, Check, Download } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -170,7 +170,7 @@ const CohortTracking = () => {
         ...group,
         users: (group.users || []).filter((user) => {
           if (!keyword) return true;
-          return `${user.name || ''} ${user.email || ''} ${user.department || ''} ${user.subdivision || ''} ${user.position || ''}`.toLowerCase().includes(keyword);
+          return `${user.name || ''} ${user.email || ''} ${user.department || ''} ${user.position || ''}`.toLowerCase().includes(keyword);
         })
       }))
       .filter((group) => group.users.length > 0 || !keyword);
@@ -199,10 +199,8 @@ const CohortTracking = () => {
         'Cohort Role',
         'ผู้เรียน',
         'อีเมล',
-        'แผนก',
-        'กลุ่มงาน (Sub-division)',
+        'สังกัด',
         'ตำแหน่ง',
-        'ระดับตำแหน่ง',
         'เป้าหมายสำเร็จ',
         'เป้าหมายทั้งหมด',
         'ความคืบหน้าเฉลี่ย',
@@ -219,9 +217,7 @@ const CohortTracking = () => {
             user.name || user.email,
             user.email,
             user.department || '-',
-            user.subdivision || '-',
             user.position || '-',
-            user.positionLevel || '-',
             user.tracking.completedGoals,
             user.tracking.totalGoals,
             `${user.tracking.averageProgress || 0}%`,
@@ -354,10 +350,8 @@ const CohortTracking = () => {
                   <thead className="bg-white">
                     <tr className="text-xs font-black uppercase tracking-wider text-slate-400">
                       <th className="px-5 py-3">ผู้เรียน</th>
-                      <th className="px-5 py-3">แผนก</th>
-                      <th className="px-5 py-3">กลุ่มงาน (Sub-division)</th>
+                      <th className="px-5 py-3">สังกัด</th>
                       <th className="px-5 py-3">ตำแหน่ง</th>
-                      <th className="px-5 py-3">ระดับตำแหน่ง</th>
                       <th className="px-5 py-3">เป้าหมาย</th>
                       <th className="px-5 py-3">ความคืบหน้า</th>
                       <th className="px-5 py-3">ล่าสุด</th>
@@ -380,14 +374,8 @@ const CohortTracking = () => {
                           <td className="px-5 py-4 text-sm font-bold text-slate-600 max-w-[150px] truncate" title={user.department}>
                             {user.department || '-'}
                           </td>
-                          <td className="px-5 py-4 text-sm font-bold text-slate-600 max-w-[150px] truncate" title={user.subdivision}>
-                            {user.subdivision || '-'}
-                          </td>
                           <td className="px-5 py-4 text-sm font-bold text-slate-600 max-w-[150px] truncate" title={user.position}>
                             {user.position || '-'}
-                          </td>
-                          <td className="px-5 py-4 text-sm font-bold text-slate-600 whitespace-nowrap">
-                            {user.positionLevel || '-'}
                           </td>
                           <td className="px-5 py-4 text-sm font-bold text-slate-600">
                             {user.tracking.completedGoals}/{user.tracking.totalGoals}

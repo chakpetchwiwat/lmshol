@@ -2,12 +2,17 @@ import React from 'react';
 import { Camera, Loader2, User as UserIcon } from 'lucide-react';
 import { getRoleLabel } from '../../utils/roles';
 import { getFullUrl } from '../../utils/api';
+import { formatThaiDateTime } from '../../utils/dateUtils';
 
 const ProfileHeader = ({ user, onUploadProfileImage, uploadingImage }) => {
   const fileInputRef = React.useRef(null);
   const imageUrl = user?.profileImageUrl ? getFullUrl(user.profileImageUrl) : '';
   const infoRows = [
     { label: 'ชื่อ-นามสกุล', value: user?.name || '-' },
+    { label: 'ชื่อเล่น', value: user?.nickname || '-' },
+    { label: 'วันเกิด', value: user?.birthday ? formatThaiDateTime(user.birthday, false) : '-' },
+    { label: 'วันบัพติศมาในน้ำ', value: user?.waterBaptismDate ? formatThaiDateTime(user.waterBaptismDate, false) : '-' },
+    { label: 'วันบัพติศมาในพระวิญญาณ', value: user?.spiritBaptismDate ? formatThaiDateTime(user.spiritBaptismDate, false) : '-' },
     { label: 'ตำแหน่ง', value: user?.position || '-' },
     { label: 'ระดับ', value: user?.tier?.name || user?.positionLevel || '-' },
     { label: 'หน่วยงาน', value: user?.department || '-' },

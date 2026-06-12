@@ -61,7 +61,7 @@ const isTimedEntityExpired = (
  */
 const mapUserRecord = (user) => {
     if (!user) return null;
-    const { departmentRef, tier, ...rest } = user;
+    const { departmentRef, tier, mentor, sheep, ...rest } = user;
     const resolvedPermission = rest.permission || rest.role;
     const isCourseStaff = (rest.courseStaff?.length || 0) > 0;
     const isSupervisor = (rest.cohortSupervisors?.length || 0) > 0 ||
@@ -84,7 +84,19 @@ const mapUserRecord = (user) => {
         } : null,
         employmentDate: rest.employmentDate || rest.createdAt,
         isCourseStaff,
-        isSupervisor
+        isSupervisor,
+        mentor: mentor ? {
+            id: mentor.id,
+            name: mentor.name,
+            nickname: mentor.nickname,
+            position: mentor.position
+        } : null,
+        sheep: Array.isArray(sheep) ? sheep.map(s => ({
+            id: s.id,
+            name: s.name,
+            nickname: s.nickname,
+            position: s.position
+        })) : []
     };
 };
 

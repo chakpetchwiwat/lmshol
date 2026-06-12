@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { FileDown, SlidersHorizontal } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
@@ -25,6 +25,9 @@ import CustomSelect from '../../components/common/CustomSelect';
 import * as InsightConfigs from './InsightConfigs';
 import GoalReportModal from '../../components/admin/GoalReportModal';
 import Skeleton from '../../components/common/Skeleton';
+import NewBelieversWidget from '../../components/admin/NewBelieversWidget';
+import BaptismMilestonesWidget from '../../components/admin/BaptismMilestonesWidget';
+import SupervisedSheepWidget from '../../components/admin/SupervisedSheepWidget';
 
 
 
@@ -427,9 +430,29 @@ const Dashboard = () => {
         onOpenGoalReport={handleOpenTrackedGoalReport}
       />
 
+      {stats?.supervisedSheep && stats.supervisedSheep.length > 0 && (
+        <div className="grid grid-cols-1 gap-6">
+          <SupervisedSheepWidget
+            data={stats.supervisedSheep}
+            onViewUser={handleViewUser}
+          />
+        </div>
+      )}
+
       {isManagerView ? (
         <>
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <NewBelieversWidget
+              data={stats?.nbWelcomePending}
+              onViewUser={handleViewUser}
+            />
+            <BaptismMilestonesWidget
+              data={stats?.baptismMilestones}
+              onViewUser={handleViewUser}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 mt-6">
             <RiskIdentificationWidget
               data={advancedStats?.atRisk}
               onSelectRisk={(risk) => openRiskInsight(null, risk)}
@@ -458,7 +481,18 @@ const Dashboard = () => {
         </>
       ) : (
         <>
-          <section className="mt-2 text-slate-800">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <NewBelieversWidget
+              data={stats?.nbWelcomePending}
+              onViewUser={handleViewUser}
+            />
+            <BaptismMilestonesWidget
+              data={stats?.baptismMilestones}
+              onViewUser={handleViewUser}
+            />
+          </div>
+
+          <section className="mt-6 text-slate-800">
             <div className="mb-4 flex items-center gap-2 px-2">
               <div className="h-6 w-1 rounded-full bg-primary" />
               <h2 className="text-xl font-black tracking-tight">Strategic Insights</h2>
@@ -484,8 +518,6 @@ const Dashboard = () => {
             />
           </div>
 
-
-
           <div className="my-2 h-px bg-slate-100" />
 
           <div className="grid grid-cols-1 gap-6">
@@ -501,8 +533,6 @@ const Dashboard = () => {
               onSelectCourse={openCourseInsight}
             />
           </div>
-
-
         </>
       )}
 
