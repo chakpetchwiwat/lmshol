@@ -8,7 +8,8 @@ const ProfileHeader = ({ user, onUploadProfileImage, uploadingImage }) => {
   const imageUrl = user?.profileImageUrl ? getFullUrl(user.profileImageUrl) : '';
   const infoRows = [
     { label: 'ชื่อ-นามสกุล', value: user?.name || '-' },
-    { label: 'ตำแหน่ง', value: user?.tier?.name || user?.position || '-' },
+    { label: 'ตำแหน่ง', value: user?.position || '-' },
+    { label: 'ระดับ', value: user?.tier?.name || user?.positionLevel || '-' },
     { label: 'หน่วยงาน', value: user?.department || '-' },
     { label: 'บทบาทบน Platform', value: getRoleLabel(user) || '-' },
   ];
