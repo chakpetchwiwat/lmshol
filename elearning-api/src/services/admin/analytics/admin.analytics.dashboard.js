@@ -54,8 +54,6 @@ const getDashboardStats = async (authUser, filters = {}) => {
             learnerCount,
             activeCourses, 
             categories, 
-            enrollmentCount, 
-            completedEnrollmentCount, 
             enrollments, 
             selectedDepartment, 
             dashboardGoals
@@ -67,21 +65,6 @@ const getDashboardStats = async (authUser, filters = {}) => {
                     courses: {
                         some: visibleCourseWhere
                     }
-                }
-            }),
-            prisma.userCourse.count({
-                where: {
-                    user: learnerWhere,
-                    course: visibleCourseWhere,
-                    ...buildDateOverlapWhere(period.start, period.end)
-                }
-            }),
-            prisma.userCourse.count({
-                where: {
-                    user: learnerWhere,
-                    course: visibleCourseWhere,
-                    status: ENROLLMENT_STATUS.COMPLETED,
-                    ...buildDateOverlapWhere(period.start, period.end)
                 }
             }),
             prisma.userCourse.findMany({
@@ -164,9 +147,9 @@ const getDashboardStats = async (authUser, filters = {}) => {
         ]);
 
         const totalUsers = learnerCount || 0;
-        const totalEnrollments = enrollmentCount || 0;
-        const completedEnrollments = completedEnrollmentCount || 0;
         const recentEnrollments = enrollments || [];
+        const totalEnrollments = recentEnrollments.length;
+        const completedEnrollments = recentEnrollments.filter((enrollment) => enrollment.status === ENROLLMENT_STATUS.COMPLETED).length;
         const activeGoals = dashboardGoals || [];
 
         const enrollmentUserIds = [...new Set(enrollments.map((enrollment) => enrollment.userId))];
