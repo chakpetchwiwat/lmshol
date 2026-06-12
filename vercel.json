@@ -2,18 +2,18 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "functions": {
-    "elearning-api/src/server.js": {
+    "api/server.js": {
       "maxDuration": 60
     }
   },
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "elearning-api/src/server.js"
+      "destination": "api/server.js"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "elearning-api/src/server.js"
+      "destination": "api/server.js"
     },
     {
       "source": "/((?!assets|favicon\\.ico|favicon\\.svg|vite\\.svg).*)",

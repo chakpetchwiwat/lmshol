@@ -540,7 +540,7 @@ const UserManagement = () => {
     { label: 'ผู้ใช้งาน', className: 'w-[25%] min-w-[180px]' },
     { label: 'บทบาท (Role)', className: 'w-[15%] min-w-[120px]' },
     { label: 'สังกัด', className: 'w-[15%] min-w-[100px]' },
-    { label: 'ตำแหน่ง (Position)', className: 'w-[20%] min-w-[140px]' },
+    { label: 'ตำแหน่งคริสตจักร', className: 'w-[20%] min-w-[140px]' },
     { label: 'คอร์สที่จบ', className: 'w-[10%] min-w-[80px] text-center whitespace-nowrap' },
     { label: 'จัดการ', className: 'w-[15%] min-w-[100px] text-right whitespace-nowrap' },
   ], []);

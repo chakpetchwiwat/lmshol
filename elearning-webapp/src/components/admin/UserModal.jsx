@@ -360,7 +360,7 @@ const UserModal = ({
                     />
 
                     <CustomSelect
-                      label="ตำแหน่ง (POSITION)"
+                      label="ตำแหน่งคริสตจักร"
                       value={formData.tierId}
                       onChange={(event) => setFormData(prev => ({ ...prev, tierId: event.target.value }))}
                       options={[

@@ -13,9 +13,8 @@ const ProfileHeader = ({ user, onUploadProfileImage, uploadingImage }) => {
     { label: 'วันเกิด', value: user?.birthday ? formatThaiDateTime(user.birthday, false) : '-' },
     { label: 'วันบัพติศมาในน้ำ', value: user?.waterBaptismDate ? formatThaiDateTime(user.waterBaptismDate, false) : '-' },
     { label: 'วันบัพติศมาในพระวิญญาณ', value: user?.spiritBaptismDate ? formatThaiDateTime(user.spiritBaptismDate, false) : '-' },
-    { label: 'ตำแหน่ง', value: user?.position || '-' },
-    { label: 'ระดับ', value: user?.tier?.name || user?.positionLevel || '-' },
-    { label: 'หน่วยงาน', value: user?.department || '-' },
+    { label: 'สังกัด', value: user?.department || '-' },
+    { label: 'ตำแหน่งคริสตจักร', value: user?.tier?.name || user?.position || '-' },
     { label: 'บทบาทบน Platform', value: getRoleLabel(user) || '-' },
   ];
 

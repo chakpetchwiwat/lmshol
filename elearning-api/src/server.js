@@ -58,12 +58,14 @@ app.use(errorHandler);
 
 // Start Server
 const PORT = process.env.PORT || SERVER_DEFAULTS.DEFAULT_PORT;
-try {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-} catch (e) {
-  console.error('Failed to start server:', e);
+if (!process.env.VERCEL) {
+  try {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (e) {
+    console.error('Failed to start server:', e);
+  }
 }
 
 module.exports = app;

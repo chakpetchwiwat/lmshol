@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Users, Award, BookOpen, UserCheck, Key, HelpCircle, Check } from 'lucide-react';
 import AppLogo from '../../components/common/AppLogo';
@@ -14,10 +14,10 @@ const UserPermissionGuide = () => {
             <AppLogo className="justify-center" imageClassName="h-14 max-w-[200px]" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-4 bg-gradient-to-r from-indigo-300 via-indigo-200 to-white bg-clip-text text-transparent">
-            คู่มือโครงสร้างสิทธิ์การใช้งานระบบ LMSFDA
+            คู่มือโครงสร้างสิทธิ์การใช้งานระบบ Holy Land LMS
           </h1>
           <p className="text-lg text-slate-400 max-w-3xl mx-auto font-medium">
-            รายละเอียดขอบเขตการเข้าถึงข้อมูลและสิทธิ์ในการจัดการระบบตามบทบาทและตำแหน่งต่าง ๆ ขององค์กร
+            รายละเอียดขอบเขตการเข้าถึงข้อมูลและสิทธิ์ในการจัดการระบบตามบทบาทและตำแหน่งคริสตจักร
           </p>
         </header>
 
@@ -45,7 +45,7 @@ const UserPermissionGuide = () => {
               </p>
               <ul className="space-y-3.5 text-sm text-slate-300">
                 <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>จัดการผู้ใช้งานทั้งหมดในระบบ (เพิ่ม, แก้ไขสิทธิ์, ลบ, กำหนดสังกัด)</span></li>
-                <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>จัดการโครงสร้างองค์กร (แผนก, ระดับตำแหน่ง, และ Cohort Roles)</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>จัดการโครงสร้างคริสตจักร (สังกัด, ตำแหน่งคริสตจักร, และ Cohort Roles)</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>สร้าง แก้ไข และลบ หลักสูตร บทเรียน สื่อ และแบบทดสอบทั้งหมด</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>ดูรายงานความคืบหน้า รายงานผลสัมฤทธิ์ และรายงานแต้มสะสมในภาพรวมระบบ</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-amber-500 shrink-0 mt-0.5" /> <span>จัดการและปรับปรุงแต้มสะสม (Points Balance) ของผู้ใช้งานทุกคน</span></li>
@@ -90,10 +90,10 @@ const UserPermissionGuide = () => {
               </p>
               <ul className="space-y-3.5 text-sm text-slate-300">
                 <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>เข้าถึงระบบหลังบ้าน (Admin Panel) เพื่อดูสถิติและผลการเรียน</span></li>
-                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>ติดตามความคืบหน้าการฝึกอบรมและดูประวัติคะแนนของพนักงานในแผนก</span></li>
-                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>สร้างเป้าหมายการฝึกอบรมประจำสัปดาห์/เดือนสำหรับแผนกหรือกลุ่มงานของตน</span></li>
-                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>เขียนและเผยแพร่ประกาศข่าวสารเฉพาะพนักงานในสังกัดแผนก</span></li>
-                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>ได้รับการปรับสิทธิ์ระบบเป็น 'Manager' อัตโนมัติตามตำแหน่งที่มีสิทธิ์ accessAdmin</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>ติดตามความคืบหน้าการฝึกอบรมและดูประวัติคะแนนของสมาชิกในสังกัด</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>สร้างเป้าหมายการฝึกอบรมประจำสัปดาห์/เดือนสำหรับสังกัดของตน</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>เขียนและเผยแพร่ประกาศข่าวสารเฉพาะสมาชิกในสังกัด</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-indigo-500 shrink-0 mt-0.5" /> <span>ได้รับการปรับสิทธิ์ระบบเป็น 'Manager' อัตโนมัติตามตำแหน่งคริสตจักรที่มีสิทธิ์ accessAdmin</span></li>
               </ul>
             </div>
 
@@ -112,7 +112,7 @@ const UserPermissionGuide = () => {
               </p>
               <ul className="space-y-3.5 text-sm text-slate-300">
                 <li className="flex gap-3"><Check size={16} className="text-blue-500 shrink-0 mt-0.5" /> <span>เข้าใช้งานระบบหลังบ้าน (Admin Panel) ภายใต้ขอบเขต Cohort ที่กำหนด</span></li>
-                <li className="flex gap-3"><Check size={16} className="text-blue-500 shrink-0 mt-0.5" /> <span>สิทธิ์ของระบบจะถูกล็อคตาม "ตำแหน่ง (Position)" อัตโนมัติสำหรับบทบาทผู้ดูแลนี้</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-blue-500 shrink-0 mt-0.5" /> <span>สิทธิ์ของระบบจะถูกล็อคตาม "ตำแหน่งคริสตจักร (Position)" อัตโนมัติสำหรับบทบาทผู้ดูแลนี้</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-blue-500 shrink-0 mt-0.5" /> <span>ติดตามความคืบหน้าของการเรียนและประเมินผลสำหรับผู้เรียนใน Cohort</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-blue-500 shrink-0 mt-0.5" /> <span>ตรวจสอบประวัติการศึกษา ประวัติฝึกอบรม และไฟล์แนบของสมาชิก Cohort</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-blue-500 shrink-0 mt-0.5" /> <span>จัดการเป้าหมายและประเมินระดับคะแนนสะสมของผู้เรียนในกลุ่ม</span></li>
@@ -209,7 +209,7 @@ const UserPermissionGuide = () => {
                 ขอบเขตข้อมูล: <span className="text-white">ข้อมูลการเรียนของตนเองเท่านั้น (Personal Portal)</span>
               </p>
               <ul className="space-y-3.5 text-sm text-slate-300">
-                <li className="flex gap-3"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> <span>เข้าใช้พอร์ทัลหลัก สมัครและเข้าเรียนในวิชาที่สอดคล้องกับแผนก/ตำแหน่ง/Cohort</span></li>
+                <li className="flex gap-3"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> <span>เข้าใช้พอร์ทัลหลัก สมัครและเข้าเรียนในวิชาที่สอดคล้องกับสังกัด/ตำแหน่งคริสตจักร/Cohort</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> <span>เข้าศึกษา ทำการเรียนการสอนผ่านสื่อผสม และดาวน์โหลดเอกสารประกอบการเรียน</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> <span>ทำแบบทดสอบและประเมินผลเพื่อปลดล็อคบทเรียนและรับแต้มสะสม</span></li>
                 <li className="flex gap-3"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> <span>รับใบประกาศนียบัตรออนไลน์และเก็บลงในประวัติการฝึกอบรมส่วนตัว</span></li>
@@ -228,10 +228,10 @@ const UserPermissionGuide = () => {
           </h4>
           <div className="space-y-3 text-sm text-slate-300 leading-relaxed">
             <p>
-              1. <strong className="text-white">การยกระดับสิทธิ์แบบอิงตำแหน่ง (Tiers)</strong>: หากพนักงานมีตำแหน่งที่เป็นหัวหน้าแผนก (เช่น Director) ระบบจะตรวจจับค่า <code className="bg-slate-950 px-1.5 py-0.5 rounded text-indigo-300 text-xs">accessAdmin: true</code> จากตาราง Tier แล้วยกสิทธิ์ในระดับระบบขึ้นเป็น <strong className="text-white">Manager</strong> โดยอัตโนมัติเพื่อให้สามารถเข้าห้องหลังบ้านได้ทันที
+              1. <strong className="text-white">การยกระดับสิทธิ์แบบอิงตำแหน่ง (Tiers)</strong>: หากพนักงานมีตำแหน่งที่เป็นผู้นำ (เช่น Leader) ระบบจะตรวจจับค่า <code className="bg-slate-950 px-1.5 py-0.5 rounded text-indigo-300 text-xs">accessAdmin: true</code> จากตาราง Tier แล้วยกสิทธิ์ในระดับระบบขึ้นเป็น <strong className="text-white">Manager</strong> โดยอัตโนมัติเพื่อให้สามารถเข้าห้องหลังบ้านได้ทันที
             </p>
             <p>
-              2. <strong className="text-white">การยกระดับสิทธิ์แบบอิงผู้ดูแล Cohort (Cohort Supervisor)</strong>: สิทธิ์ระบบจะถูกจำกัดเฉพาะกลุ่ม และล็อคสิทธิ์ตามตำแหน่งงานของผู้ดูแล Cohort คนนั้นโดยตรง
+              2. <strong className="text-white">การยกระดับสิทธิ์แบบอิงผู้ดูแล Cohort (Cohort Supervisor)</strong>: สิทธิ์ระบบจะถูกจำกัดเฉพาะกลุ่ม และล็อคสิทธิ์ตามตำแหน่งคริสตจักรของผู้ดูแล Cohort คนนั้นโดยตรง
             </p>
             <p>
               3. <strong className="text-white">สิทธิ์ในรายวิชา (Course-level Permissions)</strong>: จะมีอำนาจเหนือกว่าในระดับบทเรียนนั้นๆ แม้ผู้ใช้จะเป็นระดับ User ทั่วไป แต่หากถูกแต่งตั้งให้เป็น Owner หรือ Instructor ในวิชานั้นๆ ก็จะมีปุ่มเมนูจัดการวิชาขึ้นมาเฉพาะวิชาที่ดูแล

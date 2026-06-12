@@ -54,7 +54,7 @@ const UserList = ({
             )}
           </td>
           <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted break-words whitespace-normal">{user.department || '-'}</td>
-          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted break-words whitespace-normal">{user.position || '-'}</td>
+          <td className="p-3 sm:p-4 text-xs sm:text-sm text-muted break-words whitespace-normal">{user.tier?.name || user.position || '-'}</td>
           <td className="p-3 sm:p-4 text-center text-xs sm:text-sm whitespace-nowrap">
             <span className="rounded-full bg-primary-light px-2 py-1 font-bold text-primary">
               {user._count?.enrollments || 0}
