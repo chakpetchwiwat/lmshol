@@ -93,6 +93,7 @@ const verifyAdminPanelAccess = async (req, res, next) => {
       res.status(403).json({ message: 'Admin panel access required' });
     }
   } catch (error) {
+    console.error('Verify admin panel access error:', error);
     res.status(500).json({ message: 'Error verifying permissions' });
   }
 };
