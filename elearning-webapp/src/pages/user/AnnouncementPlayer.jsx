@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { BellRing, CalendarClock, CheckCircle, Clock, FileText, Play, BookOpen } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getFullUrl, userAPI } from '../../utils/api';
@@ -33,6 +33,7 @@ const AnnouncementPlayer = () => {
   const [openingDocument, setOpeningDocument] = React.useState(false);
   const [isNavigatingAway, setIsNavigatingAway] = React.useState(false);
   const [shouldScrollToQuizResult, setShouldScrollToQuizResult] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
   const quizResultRef = React.useRef(null);
   const contentRef = React.useRef(null);
@@ -41,6 +42,7 @@ const AnnouncementPlayer = () => {
     const fetchAnnouncement = async () => {
       try {
         setLoading(true);
+        setError(null);
         setAnswers({});
         setQuizResult(null);
         setShowDocViewer(false);
@@ -58,6 +60,7 @@ const AnnouncementPlayer = () => {
         setAnnouncement(detail);
       } catch (error) {
         console.error('Fetch announcement detail error:', error);
+        setError(error.response?.data?.message || 'ไม่พบประกาศที่คุณต้องการ หรือคุณไม่มีสิทธิ์เข้าถึงประกาศนี้');
         toast.error('ไม่สามารถโหลดประกาศนี้ได้');
       } finally {
         setLoading(false);
@@ -147,8 +150,28 @@ const AnnouncementPlayer = () => {
     }
   };
 
-  if (loading || !announcement) {
+  if (loading) {
     return <Skeleton.LessonPlayer />;
+  }
+
+  if (error || !announcement) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 max-w-lg mx-auto mt-12">
+        <div className="w-20 h-20 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-300 mb-6 border border-slate-100">
+          <BellRing size={40} />
+        </div>
+        <h2 className="text-2xl font-black text-slate-900 mb-2">ไม่พบข้อมูลประกาศ</h2>
+        <p className="text-slate-500 font-bold max-w-sm mb-8">
+          {error || 'ประกาศนี้อาจถูกลบหรือหมดอายุแล้ว หรือคุณอาจไม่มีสิทธิ์เข้าถึงประกาศนี้ในขณะนี้'}
+        </p>
+        <button
+          onClick={() => navigate('/user/home')}
+          className="px-8 py-3 bg-primary text-white rounded-2xl font-black shadow-lg shadow-primary/20 hover:bg-primary-hover transition-all active:scale-95"
+        >
+          กลับไปยังหน้าแรก
+        </button>
+      </div>
+    );
   }
 
   const announcementMediaUrl = getFullUrl(announcement.contentUrl?.trim());

@@ -1,4 +1,5 @@
 const UserService = require('../services/user.service');
+const AdminService = require('../services/admin.service');
 const { Readable } = require('stream');
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/errorResponse');
@@ -130,6 +131,12 @@ const getCategories = asyncHandler(async (req, res) => {
   res.json({ success: true, data: categories });
 });
 
+// Get all competencies for external mapping
+const getCompetencies = asyncHandler(async (req, res) => {
+  const competencies = await AdminService.getCompetencies();
+  res.json({ success: true, data: competencies });
+});
+
 // Get quiz questions for a specific lesson
 const getLessonQuestions = asyncHandler(async (req, res) => {
   const questions = await UserService.getLessonQuestions(req.params.id);
@@ -259,6 +266,7 @@ module.exports = {
   getRewards,
   requestRedeem,
   getCategories,
+  getCompetencies,
   submitQuiz,
   submitAssessment,
   getMyAssessmentSubmission,
