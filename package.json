@@ -7,6 +7,7 @@
     "elearning-webapp"
   ],
   "scripts": {
+    "postinstall": "npm run postinstall --workspace=elearning-api",
     "build": "npm run build:vercel --workspace=elearning-webapp"
   }
 }
