@@ -77,7 +77,7 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
                   </span>
                 ) : (
                   <div className="space-y-1">
-                    <div>แผนก {course.visibleDepartments?.length || 0} รายการ</div>
+                    <div>กอง {course.visibleDepartments?.length || 0} รายการ</div>
                     <div>ตำแหน่ง {course.visibleTiers?.length || 0} รายการ</div>
                   </div>
                 )}

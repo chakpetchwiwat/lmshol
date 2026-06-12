@@ -300,7 +300,7 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
       summary: [
         { label: 'พนักงาน', value: detail?.name || '-' },
         { label: 'อีเมล', value: detail?.email || '-' },
-        { label: 'แผนก', value: detail?.department || '-' },
+        { label: 'กอง', value: detail?.department || '-' },
         { label: 'ระดับ', value: detail?.tier?.name || detail?.tier || '-' },
         { label: '\u0e27\u0e31\u0e19\u0e40\u0e23\u0e34\u0e48\u0e21\u0e07\u0e32\u0e19', value: detail?.employmentDate ? formatThaiDateTime(detail.employmentDate) : '-' },
         { label: 'Point Balance', value: `${detail?.pointsBalance?.toLocaleString?.() || 0}` },
@@ -320,7 +320,7 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
         department: detail?.department || '',
         customFormRows: allRecords,
         items: [
-          { label: 'แผนก', value: detail?.department || '-' },
+          { label: 'กอง', value: detail?.department || '-' },
           { label: 'ระดับ', value: detail?.tier?.name || detail?.tier || '-' },
           { label: 'ประเภทตำแหน่ง', value: detail?.positionType || '-' },
           { label: 'หัวหน้างาน', value: detail?.supervisorName || '-' },
@@ -409,7 +409,7 @@ sections
                     <div className="mb-3 inline-flex rounded-2xl bg-amber-100 p-3 text-amber-600">
                       <Clock3 size={18} />
                     </div>
-                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">แผนก / ระดับ</div>
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">กอง / ระดับ</div>
                     <div className="mt-2 text-lg font-black text-slate-900">{detail.department || '-'}</div>
                     <div className="mt-1 text-sm text-slate-500">{detail.tier?.name || detail.tier || 'ยังไม่ได้กำหนดระดับ'}</div>
                   </div>
@@ -445,7 +445,7 @@ sections
                       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-base">
                         {detail.department && (
                           <div className="flex flex-col gap-1">
-                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">แผนก</span>
+                            <span className="text-sm font-bold uppercase tracking-wider text-slate-400">กอง</span>
                             <span className="text-lg font-black text-slate-700">{detail.department}</span>
                           </div>
                         )}

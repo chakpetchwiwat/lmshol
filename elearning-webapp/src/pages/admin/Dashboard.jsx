@@ -89,12 +89,12 @@ const Dashboard = () => {
 
   const selectedDepartmentName = React.useMemo(() => {
     if (!isFullAdmin) {
-      return stats?.department || currentUser?.department || 'แผนกของคุณ';
+      return stats?.department || currentUser?.department || 'กองของคุณ';
     }
     if (!filters.departmentId) {
-      return 'ทุกแผนก';
+      return 'ทุกกอง';
     }
-    return departments.find((department) => department.id === filters.departmentId)?.name || stats?.department || 'แผนกที่เลือก';
+    return departments.find((department) => department.id === filters.departmentId)?.name || stats?.department || 'กองที่เลือก';
   }, [currentUser, departments, filters.departmentId, isFullAdmin, stats?.department]);
 
   const periodLabel = React.useMemo(() => {
@@ -152,7 +152,7 @@ const Dashboard = () => {
         ? `รายงานผลการเรียน ${selectedDepartmentName}`
         : 'Dashboard Performance Report',
       subtitle: isManagerView
-        ? 'สรุปผลการเรียนรายบุคคลของแผนกตามช่วงเวลาที่เลือก'
+        ? 'สรุปผลการเรียนรายบุคคลของกองตามช่วงเวลาที่เลือก'
         : 'สรุปภาพรวมผลการเรียนและรายละเอียดรายบุคคลตามตัวกรองที่เลือก',
       summary: [
         { label: 'ขอบเขต', value: selectedDepartmentName },
@@ -163,10 +163,10 @@ const Dashboard = () => {
       ],
       filters: [
         { label: 'เดือน/ปี', value: periodLabel },
-        { label: 'แผนก', value: selectedDepartmentName },
+        { label: 'กอง', value: selectedDepartmentName },
         { label: 'มุมมอง', value: isManagerView ? 'Manager' : 'Admin' },
       ],
-      columns: ['ผู้เรียน', 'แผนก', 'คอร์ส', 'หมวดหมู่', 'สถานะ', 'คะแนน', 'เริ่มเรียน', 'สำเร็จเมื่อ'],
+      columns: ['ผู้เรียน', 'กอง', 'คอร์ส', 'หมวดหมู่', 'สถานะ', 'คะแนน', 'เริ่มเรียน', 'สำเร็จเมื่อ'],
       rows: performanceRows.map((row) => ([
         safeValue(row.userName),
         safeValue(row.department),
@@ -208,7 +208,7 @@ const Dashboard = () => {
       summary: nextInsight.summary || [],
       filters: [
         { label: 'เดือน/ปี', value: periodLabel },
-        { label: 'แผนก', value: selectedDepartmentName },
+        { label: 'กอง', value: selectedDepartmentName },
       ],
       columns: (nextInsight.columns || []).map((column) => column.label),
       rows: buildPrintRowsFromInsight(nextInsight),
@@ -377,9 +377,9 @@ const Dashboard = () => {
                   size="sm"
                   fullWidth={false}
                   className="w-40 lg:w-44"
-                  placeholder="ทุกแผนก"
+                  placeholder="ทุกกอง"
                   options={[
-                    { value: '', label: 'ทุกแผนก' },
+                    { value: '', label: 'ทุกกอง' },
                     ...departments.map((d) => ({ value: d.id, label: d.name }))
                   ]}
                 />

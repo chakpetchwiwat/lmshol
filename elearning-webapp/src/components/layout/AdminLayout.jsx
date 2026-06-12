@@ -89,7 +89,7 @@ const AdminLayout = () => {
     ...(isFullAdmin ? [{ path: '/admin/competencies', icon: <Network size={20} />, label: 'Competency' }] : []),
     
     // Announcements: Visible to Admin and Managers
-    ...(!isCourseStaffOnly ? [{ path: '/admin/announcements', icon: <BellRing size={20} />, label: 'จัดการประกาศแผนก' }] : []),
+    ...(!isCourseStaffOnly ? [{ path: '/admin/announcements', icon: <BellRing size={20} />, label: 'จัดการประกาศกอง' }] : []),
     
     // Rewards: SuperAdmin/Admin Only
     ...(isFullAdmin

@@ -213,7 +213,7 @@ const AnnouncementPlayer = () => {
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-black tracking-[0.04em] text-amber-700">
                 <BellRing size={14} />
-                ประกาศแผนก
+                ประกาศกอง
               </span>
               <span className="flex items-center gap-1.5 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2 text-xs font-black tracking-[0.04em] text-primary">
                 {announcement.type === 'video' ? <Play size={14} fill="currentColor" /> :
@@ -237,7 +237,7 @@ const AnnouncementPlayer = () => {
                 {announcement.title}
               </h1>
               <p className="mt-4 text-sm font-bold text-amber-700">
-                สำหรับแผนก {announcement.department?.name || 'ของคุณ'}
+                สำหรับกอง {announcement.department?.name || 'ของคุณ'}
               </p>
               {announcement.description && (
                 <p className="mt-4 max-w-3xl text-base leading-7 text-slate-500">

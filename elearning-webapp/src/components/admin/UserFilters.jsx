@@ -31,7 +31,7 @@ const UserFilters = ({
         value={selectedDepartment}
         onChange={(event) => onDepartmentChange(event.target.value)}
         options={[
-          { value: FILTER_VALUES.ALL, label: 'ทุกแผนก' },
+          { value: FILTER_VALUES.ALL, label: 'ทุกกอง' },
           ...departments.map((d) => ({ value: d.id, label: d.name }))
         ]}
       />

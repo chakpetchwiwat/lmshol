@@ -33,7 +33,7 @@ const AnnouncementCard = ({ announcement, onClick, className = '' }) => {
           <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50/95 px-3 py-1 text-[11px] font-black tracking-[0.04em] text-amber-700 shadow-sm">
               <BellRing size={12} />
-              ประกาศแผนก
+              ประกาศกอง
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black tracking-[0.04em] text-slate-700 shadow-sm">
               <TypeIcon size={12} />
@@ -44,7 +44,7 @@ const AnnouncementCard = ({ announcement, onClick, className = '' }) => {
           <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 text-white">
             <div className="min-w-0">
               <p className="text-[11px] font-bold tracking-[0.04em] text-amber-100/95">
-                สำหรับแผนก {announcement.department?.name || 'ของคุณ'}
+                สำหรับกอง {announcement.department?.name || 'ของคุณ'}
               </p>
               <p className="mt-1 text-sm font-semibold text-white/95">
                 คลิกเพื่ออ่านประกาศทันที

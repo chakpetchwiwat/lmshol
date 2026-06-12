@@ -102,25 +102,13 @@ const CourseDetail = () => {
   const durationHours = durationMinutes > 0 ? Math.max(1, Math.round((durationMinutes / 60) * 10) / 10) : 2;
 
   const learningPoints = React.useMemo(
-    () =>
-      tryParse(course?.whatYouWillLearn, [
-        'เข้าใจภาพรวมของเนื้อหาและนำไปใช้ต่อยอดในการทำงานได้จริง',
-        'มีแนวคิดและขั้นตอนที่ชัดเจนสำหรับลงมือทำด้วยตัวเอง',
-        'ได้ตัวอย่างและเทคนิคที่ช่วยให้ทำงานได้เร็วและแม่นยำขึ้น',
-        'พร้อมประยุกต์ใช้ความรู้กับสถานการณ์จริงในองค์กร',
-      ]),
+    () => tryParse(course?.whatYouWillLearn, []),
     [course],
   );
 
   const whatYouGet = React.useMemo(
-    () =>
-      tryParse(course?.whatYouWillGet, [
-        { icon: 'video', text: `วิดีโอคุณภาพสูง ความยาวรวมประมาณ ${durationHours} ชั่วโมง` },
-        { icon: 'file', text: 'เอกสารประกอบการเรียนสำหรับทบทวนหลังเรียน' },
-        { icon: 'infinite', text: 'เข้าถึงเนื้อหาได้ตลอดตามสิทธิ์ของหลักสูตร' },
-        { icon: 'award', text: 'ใบรับรองเมื่อเรียนครบตามเงื่อนไขของหลักสูตร' },
-      ]),
-    [course, durationHours],
+    () => tryParse(course?.whatYouWillGet, []),
+    [course],
   );
 
   const benefitsIconMap = {
@@ -227,7 +215,9 @@ const CourseDetail = () => {
 
       <div className="relative z-20 mx-auto -mt-8 flex w-full max-w-[1450px] flex-col-reverse gap-6 px-4 sm:px-5 md:-mt-16 md:px-8 lg:flex-row lg:gap-10 xl:px-10 2xl:px-12">
         <div className="flex w-full flex-col gap-6 md:gap-8 lg:min-w-0 lg:flex-1">
-          <CourseBenefits learningPoints={learningPoints} />
+          {learningPoints && learningPoints.length > 0 && (
+            <CourseBenefits learningPoints={learningPoints} />
+          )}
 
           <CourseDocumentList 
             course={course}

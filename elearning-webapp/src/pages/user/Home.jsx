@@ -143,7 +143,7 @@ const Home = () => {
           <div className="flex items-center justify-between px-1 md:px-2">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.14em] text-amber-700">Department Announcements</p>
-              <h3 className="mt-1 text-xl md:text-2xl font-bold tracking-tight text-slate-900">ประกาศล่าสุดของแผนกคุณ</h3>
+              <h3 className="mt-1 text-xl md:text-2xl font-bold tracking-tight text-slate-900">ประกาศล่าสุดของกองคุณ</h3>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

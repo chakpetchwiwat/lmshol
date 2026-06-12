@@ -117,21 +117,23 @@ const CourseEnrollAside = ({
 
           <p className="mt-4 text-center text-xs font-bold text-slate-400">พร้อมเรียนได้ทันทีบนทุกอุปกรณ์</p>
 
-          <div className="mt-8 flex flex-col gap-4 border-t border-slate-100 pt-6">
-            <h3 className="text-sm font-black text-slate-900">สิ่งที่จะได้รับ</h3>
-            {whatYouGet.map((item, index) => {
-              const text = typeof item === 'string' ? item : item.text;
-              const iconKey = typeof item === 'string' ? 'video' : item.icon;
-              const IconComponent = benefitsIconMap[iconKey] || MonitorPlay;
+          {whatYouGet && whatYouGet.length > 0 && (
+            <div className="mt-8 flex flex-col gap-4 border-t border-slate-100 pt-6">
+              <h3 className="text-sm font-black text-slate-900">สิ่งที่จะได้รับ</h3>
+              {whatYouGet.map((item, index) => {
+                const text = typeof item === 'string' ? item : item.text;
+                const iconKey = typeof item === 'string' ? 'video' : item.icon;
+                const IconComponent = benefitsIconMap[iconKey] || MonitorPlay;
 
-              return (
-                <div key={index} className="flex items-start gap-3 text-[13.5px] font-medium text-slate-600">
-                  <IconComponent size={18} className="mt-0.5 shrink-0 text-primary" />
-                  <span>{text}</span>
-                </div>
-              );
-            })}
-          </div>
+                return (
+                  <div key={index} className="flex items-start gap-3 text-[13.5px] font-medium text-slate-600">
+                    <IconComponent size={18} className="mt-0.5 shrink-0 text-primary" />
+                    <span>{text}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </aside>

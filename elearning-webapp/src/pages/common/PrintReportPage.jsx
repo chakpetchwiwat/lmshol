@@ -184,7 +184,7 @@ const DashboardPrintContent = ({ report }) => {
             <thead>
               <tr>
                 <th>ผู้เรียน</th>
-                <th>แผนก</th>
+                <th>กอง</th>
                 <th>คอร์ส</th>
                 <th>หมวดหมู่</th>
                 <th>สถานะ</th>
