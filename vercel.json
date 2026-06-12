@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
+  "outputDirectory": "elearning-webapp/dist",
   "functions": {
     "api/server.js": {
       "maxDuration": 60
@@ -17,7 +18,7 @@
     },
     {
       "source": "/((?!assets|favicon\\.ico|favicon\\.svg|vite\\.svg).*)",
-      "destination": "/elearning-webapp/index.html"
+      "destination": "/index.html"
     }
   ],
   "headers": [
