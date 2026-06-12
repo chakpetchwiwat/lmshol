@@ -26,26 +26,42 @@ const UserLayout = () => {
         const storedUser = JSON.parse(localStorage.getItem('user'));
         if (storedUser) setUser(storedUser);
 
-        const [userRes, pointsRes, notificationsRes] = await Promise.all([
+        const [userResult, pointsResult, notificationsResult] = await Promise.allSettled([
           authAPI.getCurrentUser(),
           userAPI.getPoints(),
           userAPI.getNotifications()
         ]);
 
-        const freshUser = userRes?.data || userRes;
-        if (freshUser) {
-          setUser(freshUser);
-          localStorage.setItem('user', JSON.stringify(freshUser));
+        if (userResult.status === 'fulfilled') {
+          const freshUser = userResult.value?.data || userResult.value;
+          if (freshUser) {
+            setUser(freshUser);
+            localStorage.setItem('user', JSON.stringify(freshUser));
 
-          if (freshUser.mustChangePassword && location.pathname !== '/user/profile') {
-            navigate('/user/profile', { replace: true, state: { forcePasswordChange: true } });
-            return;
+            if (freshUser.mustChangePassword && location.pathname !== '/user/profile') {
+              navigate('/user/profile', { replace: true, state: { forcePasswordChange: true } });
+              return;
+            }
           }
+        } else {
+          console.error('Failed to fetch current user', userResult.reason);
         }
 
-        setPoints(pointsRes.data.balance || 0);
-        setNotifications(notificationsRes.data.items || []);
-        setUnreadNotificationCount(notificationsRes.data.unreadCount || 0);
+        if (pointsResult.status === 'fulfilled') {
+          setPoints(pointsResult.value?.data?.balance || 0);
+        } else {
+          console.warn('Points are unavailable', pointsResult.reason);
+          setPoints(0);
+        }
+
+        if (notificationsResult.status === 'fulfilled') {
+          setNotifications(notificationsResult.value?.data?.items || []);
+          setUnreadNotificationCount(notificationsResult.value?.data?.unreadCount || 0);
+        } else {
+          console.warn('Notifications are unavailable', notificationsResult.reason);
+          setNotifications([]);
+          setUnreadNotificationCount(0);
+        }
       } catch (error) {
         console.error('Failed to fetch user data', error);
       }
