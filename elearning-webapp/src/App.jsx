@@ -26,6 +26,7 @@ const GoalDetail = React.lazy(() => import('./pages/user/GoalDetail'));
 const PrintReportPage = React.lazy(() => import('./pages/common/PrintReportPage'));
 const CertificateVerification = React.lazy(() => import('./pages/common/CertificateVerification'));
 const DownloadFilePage = React.lazy(() => import('./pages/common/DownloadFilePage'));
+const UserPermissionGuide = React.lazy(() => import('./pages/common/UserPermissionGuide'));
 
 // Admin Pages
 const AdminDashboard = React.lazy(() => import('./pages/admin/Dashboard'));
@@ -78,6 +79,7 @@ function App() {
         <Route path="/logout" element={<Logout />} />
         <Route path="/print/report/:reportId" element={<PrintReportPage />} />
         <Route path="/certificates/verify/:token" element={<CertificateVerification />} />
+        <Route path="/user-permission-guide" element={<UserPermissionGuide />} />
 
         {/* User Area */}
         <Route element={<ProtectedRoute allowedRoles={['user', 'admin', 'manager']} />}>

@@ -91,6 +91,7 @@ const getUserDetails = async (id, authUser) => {
             id: cert.id,
             certificateNo: cert.certificateNo,
             courseTitle: cert.course?.title,
+            courseId: cert.courseId,
             issuedAt: cert.issuedAt,
             pdfUrl: cert.pdfUrl
         })),

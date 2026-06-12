@@ -212,6 +212,7 @@ export const adminAPI = {
   exportUserTrainings: () => api.get('/admin/users/export-trainings', { responseType: 'blob' }),
   getUserDetails: (id) => api.get(`/admin/users/${id}/details`),
   exportSingleUser: (id) => api.get(`/admin/users/${id}/export`, { responseType: 'blob' }),
+  exportSingleUserForm: (id) => api.get(`/admin/users/${id}/export-form`, { responseType: 'blob' }),
   getProfileFileDownloadUrl: (fileKey) => api.get('/upload/profile-file-url', { params: { key: fileKey } }),
   downloadTemplate: (type) => api.get(`/admin/users/templates/${type}`, { responseType: 'blob' }),
   importUsers: (type, formData) => api.post(`/admin/users/import/${type}`, formData, {
@@ -367,7 +368,7 @@ export const adminAPI = {
 
   // System Settings
   getSettings: () => api.get('/settings'),
-  updateSetting: (key, value) => api.patch(`/settings/${key}`, { value }),
+  patchSetting: (key, value) => api.patch(`/settings/${key}`, { value }),
 
   // Goals
   getGoals: () => api.get('/goals?includeExpired=true'),

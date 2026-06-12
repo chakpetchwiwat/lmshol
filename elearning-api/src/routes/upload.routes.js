@@ -16,8 +16,6 @@ const { writeAuditLog } = require('../services/audit.service');
 const router = express.Router();
 const securityConfig = getSecurityConfig();
 
-// Supabase client is now managed centrally in ../config/supabase
-
 // Use Memory Storage for Serverless (Vercel)
 const storage = multer.memoryStorage();
 
@@ -243,6 +241,14 @@ const canPreviewProfileFile = async (authUser, fileKey) => {
         return { allowed: true, ownerUserId: authUser.userId, accessType: 'owner', fileName: matchedFile.fileName };
     }
 
+    // Check if user owns it via UserCertificate (external certificates)
+    const ownCert = await prisma.userCertificate.findFirst({
+        where: { userId: authUser.userId, fileKey }
+    });
+    if (ownCert) {
+        return { allowed: true, ownerUserId: authUser.userId, accessType: 'owner-certificate', fileName: ownCert.fileName || ownCert.title };
+    }
+
     const actor = await getActorContext(authUser);
     if (!actor.canAccessAdminPanel) {
         return { allowed: false };
@@ -256,6 +262,9 @@ const canPreviewProfileFile = async (authUser, fileKey) => {
     });
 
     let matchedFileAdmin = null;
+    let targetUserId = null;
+    let fileName = null;
+
     const matchedUser = usersWithProfileFiles.find((candidate) => {
         if (Array.isArray(candidate.profileFiles)) {
             const found = candidate.profileFiles.find((file) => file?.fileKey === fileKey);
@@ -267,20 +276,34 @@ const canPreviewProfileFile = async (authUser, fileKey) => {
         return false;
     });
 
-    if (!matchedUser) {
+    if (matchedUser) {
+        targetUserId = matchedUser.id;
+        fileName = matchedFileAdmin ? matchedFileAdmin.fileName : null;
+    } else {
+        // Fallback: Check if fileKey belongs to a UserCertificate (external certificate)
+        const matchingCert = await prisma.userCertificate.findFirst({
+            where: { fileKey }
+        });
+        if (matchingCert) {
+            targetUserId = matchingCert.userId;
+            fileName = matchingCert.fileName || matchingCert.title;
+        }
+    }
+
+    if (!targetUserId) {
         return { allowed: false };
     }
 
     const scopedUser = await prisma.user.findFirst({
-        where: await buildScopedUserWhere(actor, matchedUser.id),
+        where: await buildScopedUserWhere(actor, targetUserId),
         select: { id: true }
     });
 
     return {
         allowed: Boolean(scopedUser),
-        ownerUserId: matchedUser.id,
+        ownerUserId: targetUserId,
         accessType: 'admin-scoped',
-        fileName: matchedFileAdmin ? matchedFileAdmin.fileName : null
+        fileName
     };
 };
 
@@ -471,30 +494,34 @@ router.get('/secure/:token', async (req, res) => {
         const normalizedKey = path.normalize(fileKey).replace(/^(\.\.(\/|\\|$))+/, '');
         let absolutePath = path.join(UPLOADS_DIR, normalizedKey);
         
+        // Try local file exists checks with secure, public, and public/uploads subdirectories
+        const possiblePaths = [
+            absolutePath,
+            path.join(UPLOADS_DIR, 'secure', normalizedKey),
+            path.join(UPLOADS_DIR, 'public', normalizedKey),
+            path.join(UPLOADS_DIR, 'public/uploads', normalizedKey)
+        ];
+
+        for (const p of possiblePaths) {
+            try {
+                await fs.access(p);
+                absolutePath = p;
+                break;
+            } catch (err) {
+                // Try next path
+            }
+        }
+        
         // Ensure it only serves from allowed secure/private directories to prevent arbitrary file read
         const isAllowedPath = 
             absolutePath.includes(path.join('secure', '')) ||
+            absolutePath.includes(path.join('public', '')) ||
             absolutePath.includes(path.join('certificates', '')) ||
             absolutePath.includes(path.join('assessments', '')) ||
             absolutePath.includes(path.join('signatures', ''));
             
         if (!isAllowedPath) {
             return res.status(403).send('Forbidden access to non-secure directory');
-        }
-
-        // Try local file exists check, fallback to prepended secure/ if it's a migrated bucket file
-        try {
-            await fs.access(absolutePath);
-        } catch (e) {
-            if (!normalizedKey.startsWith('secure/') && !normalizedKey.startsWith('secure\\')) {
-                const fallbackPath = path.join(UPLOADS_DIR, 'secure', normalizedKey);
-                try {
-                    await fs.access(fallbackPath);
-                    absolutePath = fallbackPath;
-                } catch (fallbackErr) {
-                    // Let res.sendFile handle error naturally
-                }
-            }
         }
 
         if (originalName) {

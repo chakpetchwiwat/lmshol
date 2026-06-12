@@ -15,7 +15,7 @@ const AdminTable = ({
           <thead>
             <tr className="border-b border-border bg-gray-50 text-xs sm:text-sm text-muted">
               {columns.map((column, index) => (
-                <th key={index} className={`p-3 sm:p-4 font-medium whitespace-nowrap ${column.className || ''}`}>
+                <th key={index} className={`p-3 sm:p-4 font-medium ${column.className || ''}`}>
                   {column.label}
                 </th>
               ))}

@@ -11,7 +11,7 @@ If `JWT_SECRET` is compromised:
 
 ### Database Credentials
 If DB credentials are compromised:
-1. Rotate the password in the Supabase Dashboard.
+1. Rotate the password in the database host or RDS console.
 2. Update `DATABASE_URL` and `DIRECT_URL` in the environment variables.
 3. Restart the API service.
 

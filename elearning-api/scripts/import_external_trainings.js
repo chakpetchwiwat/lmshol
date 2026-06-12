@@ -250,6 +250,9 @@ const mapStandardRow = (row, source) => {
   const courseName = cleanText(row['Course Name']);
   if (!fullName || !courseName) return null;
 
+  const parsedCompletionDate = parseDateText(row['Completion Date']);
+  const parsedEnrolmentDate = parseDateText(row['Enrolment Date']);
+
   return {
     fullName,
     position: cleanText(row.Position),
@@ -257,7 +260,8 @@ const mapStandardRow = (row, source) => {
     courseType: cleanText(row['Course Type']) || inferCourseType(row),
     courseGroup: cleanText(row['Course Group']),
     courseName,
-    issueDate: parseDateText(row['Completion Date']) || parseDateText(row['Enrolment Date']),
+    startDate: parsedEnrolmentDate,
+    issueDate: parsedCompletionDate || parsedEnrolmentDate,
     organizingAgency: normalizeIssuer(row['Organizing Agency']),
     venue: cleanText(row.Venue),
     ...getCompetencyFields(row),
@@ -443,6 +447,7 @@ const importRecords = async (records, userMap) => {
           userId,
           title: record.courseName,
           issuer: record.organizingAgency,
+          startDate: record.startDate,
           issueDate: record.issueDate,
           noExpiration: true,
           trainingType: record.courseType || 'external',

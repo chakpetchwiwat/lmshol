@@ -21,6 +21,7 @@ const ProfileCertificateModal = ({
   const titleId = React.useId();
   const titleInputId = React.useId();
   const issuerInputId = React.useId();
+  const startDateId = React.useId();
   const issueDateId = React.useId();
   const expirationDateId = React.useId();
   const noExpirationId = React.useId();
@@ -156,12 +157,23 @@ const ProfileCertificateModal = ({
               />
             </label>
 
+            <label htmlFor={startDateId}>
+              <span className="mb-2 block text-sm font-bold text-slate-700">วันที่เริ่มอบรม (Enrolment Date)</span>
+              <input
+                id={startDateId}
+                type="date"
+                value={form.startDate || ''}
+                onChange={(event) => onFormChange('startDate', event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white"
+              />
+            </label>
+
             <label htmlFor={issueDateId}>
-              <span className="mb-2 block text-sm font-bold text-slate-700">วันที่ออกเกียรติบัตร / วันที่อบรม</span>
+              <span className="mb-2 block text-sm font-bold text-slate-700">วันที่สิ้นสุดอบรม / วันที่ได้รับใบเซอร์ (Completion Date)</span>
               <input
                 id={issueDateId}
                 type="date"
-                value={form.issueDate}
+                value={form.issueDate || ''}
                 onChange={(event) => onFormChange('issueDate', event.target.value)}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 transition-colors focus:border-primary focus:bg-white"
               />

@@ -51,12 +51,6 @@ const createLesson = async (data) => {
 const updateLesson = async (id, data) => {
     const { questions, ...lessonData } = data;
 
-    if (lessonData.type !== 'quiz') {
-        await prisma.question.deleteMany({
-            where: { lessonId: id }
-        });
-    }
-
     const formattedData = {
         ...lessonData,
         order: parseInteger(lessonData.order, 0),
@@ -65,19 +59,28 @@ const updateLesson = async (id, data) => {
         duration: lessonData.duration ? String(lessonData.duration) : undefined
     };
 
-    if (lessonData.type === 'quiz' && questions && questions.length > 0) {
+    if (lessonData.type !== 'quiz') {
         formattedData.questions = {
-            create: questions.map((question, index) => ({
-                text: question.text,
-                order: index,
-                points: parseInteger(question.points, 1),
-                choices: {
-                    create: question.choices.map((choice) => ({
-                        text: choice.text,
-                        isCorrect: !!choice.isCorrect
+            deleteMany: {}
+        };
+    } else if (Array.isArray(questions)) {
+        formattedData.questions = {
+            deleteMany: {},
+            ...(questions.length > 0
+                ? {
+                    create: questions.map((question, index) => ({
+                        text: question.text,
+                        order: index,
+                        points: parseInteger(question.points, 1),
+                        choices: {
+                            create: question.choices.map((choice) => ({
+                                text: choice.text,
+                                isCorrect: !!choice.isCorrect
+                            }))
+                        }
                     }))
                 }
-            }))
+                : {})
         };
     }
 

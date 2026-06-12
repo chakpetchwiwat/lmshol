@@ -3,6 +3,7 @@ import { formatThaiDateTime } from '../../../utils/dateUtils';
 export const emptyCertificateForm = {
   title: '',
   issuer: '',
+  startDate: '',
   issueDate: '',
   expirationDate: '',
   noExpiration: true,
@@ -31,6 +32,7 @@ const toDateInputValue = (value) => {
 export const buildFormFromCertificate = (certificate) => ({
   title: certificate?.title || '',
   issuer: certificate?.issuer || '',
+  startDate: toDateInputValue(certificate?.startDate),
   issueDate: toDateInputValue(certificate?.issueDate),
   expirationDate: toDateInputValue(certificate?.expirationDate),
   noExpiration: certificate?.noExpiration ?? !certificate?.expirationDate,
@@ -55,13 +57,23 @@ export const buildFormFromCertificate = (certificate) => ({
 
 export const formatCertificateDateRange = (certificate, isLms = false) => {
   const issueDate = isLms ? certificate.issuedAt : certificate.issueDate;
+  const startDate = isLms ? null : certificate.startDate;
   const expirationDate = isLms ? certificate.expiresAt : certificate.expirationDate;
   const noExpiration = isLms ? !certificate.expiresAt : certificate.noExpiration;
 
-  const issued = issueDate ? formatThaiDateTime(issueDate) : 'ไม่ระบุวันที่ออก';
-  if (noExpiration) return `${issued} - ไม่มีวันหมดอายุ`;
-  if (expirationDate) return `${issued} - ${formatThaiDateTime(expirationDate)}`;
-  return issued;
+  const startStr = startDate ? formatThaiDateTime(startDate) : '';
+  const endStr = issueDate ? formatThaiDateTime(issueDate) : 'ไม่ระบุวันที่ออก';
+  
+  let dateRange = '';
+  if (startStr && startStr !== endStr) {
+    dateRange = `${startStr} - ${endStr}`;
+  } else {
+    dateRange = endStr;
+  }
+
+  if (noExpiration) return `${dateRange} · ไม่มีวันหมดอายุ`;
+  if (expirationDate) return `${dateRange} · หมดอายุ: ${formatThaiDateTime(expirationDate)}`;
+  return dateRange;
 };
 
 export const sortCertificatesByIssueDate = (certificates) => (

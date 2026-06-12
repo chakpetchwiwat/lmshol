@@ -1,6 +1,221 @@
 const prisma = require('../../../utils/prisma');
 const authHelpers = require('../../../utils/auth.helpers');
 const xlsx = require('xlsx');
+const fs = require('fs');
+const path = require('path');
+const zlib = require('zlib');
+
+const CRC32_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    table[n] = c >>> 0;
+  }
+  return table;
+})();
+
+const crc32 = (buffer) => {
+  let crc = 0 ^ -1;
+  for (let i = 0; i < buffer.length; i++) {
+    crc = (crc >>> 8) ^ CRC32_TABLE[(crc ^ buffer[i]) & 0xFF];
+  }
+  return (crc ^ -1) >>> 0;
+};
+
+const readZipEntries = (zipBuffer) => {
+  let eocdOffset = -1;
+  for (let i = zipBuffer.length - 22; i >= 0; i--) {
+    if (zipBuffer.readUInt32LE(i) === 0x06054b50) {
+      eocdOffset = i;
+      break;
+    }
+  }
+  if (eocdOffset < 0) throw new Error('Invalid XLSX zip: EOCD not found');
+
+  const totalEntries = zipBuffer.readUInt16LE(eocdOffset + 10);
+  const centralDirectoryOffset = zipBuffer.readUInt32LE(eocdOffset + 16);
+  const entries = [];
+  let offset = centralDirectoryOffset;
+
+  for (let i = 0; i < totalEntries; i++) {
+    if (zipBuffer.readUInt32LE(offset) !== 0x02014b50) {
+      throw new Error('Invalid XLSX zip: central directory is corrupt');
+    }
+
+    const compressionMethod = zipBuffer.readUInt16LE(offset + 10);
+    const compressedSize = zipBuffer.readUInt32LE(offset + 20);
+    const nameLength = zipBuffer.readUInt16LE(offset + 28);
+    const extraLength = zipBuffer.readUInt16LE(offset + 30);
+    const commentLength = zipBuffer.readUInt16LE(offset + 32);
+    const localHeaderOffset = zipBuffer.readUInt32LE(offset + 42);
+    const name = zipBuffer.toString('utf8', offset + 46, offset + 46 + nameLength);
+
+    const localNameLength = zipBuffer.readUInt16LE(localHeaderOffset + 26);
+    const localExtraLength = zipBuffer.readUInt16LE(localHeaderOffset + 28);
+    const dataOffset = localHeaderOffset + 30 + localNameLength + localExtraLength;
+    const rawData = zipBuffer.subarray(dataOffset, dataOffset + compressedSize);
+
+    let data;
+    if (compressionMethod === 0) {
+      data = Buffer.from(rawData);
+    } else if (compressionMethod === 8) {
+      data = zlib.inflateRawSync(rawData);
+    } else {
+      throw new Error(`Unsupported XLSX zip compression method: ${compressionMethod}`);
+    }
+
+    entries.push({ name, data });
+    offset += 46 + nameLength + extraLength + commentLength;
+  }
+
+  return entries;
+};
+
+const writeZipEntries = (entries) => {
+  const localParts = [];
+  const centralParts = [];
+  let offset = 0;
+
+  entries.forEach(({ name, data }) => {
+    const nameBuffer = Buffer.from(name, 'utf8');
+    const fileBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
+    const crc = crc32(fileBuffer);
+
+    const localHeader = Buffer.alloc(30);
+    localHeader.writeUInt32LE(0x04034b50, 0);
+    localHeader.writeUInt16LE(20, 4);
+    localHeader.writeUInt16LE(0x0800, 6);
+    localHeader.writeUInt16LE(0, 8);
+    localHeader.writeUInt32LE(crc, 14);
+    localHeader.writeUInt32LE(fileBuffer.length, 18);
+    localHeader.writeUInt32LE(fileBuffer.length, 22);
+    localHeader.writeUInt16LE(nameBuffer.length, 26);
+
+    localParts.push(localHeader, nameBuffer, fileBuffer);
+
+    const centralHeader = Buffer.alloc(46);
+    centralHeader.writeUInt32LE(0x02014b50, 0);
+    centralHeader.writeUInt16LE(20, 4);
+    centralHeader.writeUInt16LE(20, 6);
+    centralHeader.writeUInt16LE(0x0800, 8);
+    centralHeader.writeUInt16LE(0, 10);
+    centralHeader.writeUInt32LE(crc, 16);
+    centralHeader.writeUInt32LE(fileBuffer.length, 20);
+    centralHeader.writeUInt32LE(fileBuffer.length, 24);
+    centralHeader.writeUInt16LE(nameBuffer.length, 28);
+    centralHeader.writeUInt32LE(offset, 42);
+    centralParts.push(centralHeader, nameBuffer);
+
+    offset += localHeader.length + nameBuffer.length + fileBuffer.length;
+  });
+
+  const centralDirectoryOffset = offset;
+  const centralDirectory = Buffer.concat(centralParts);
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0);
+  eocd.writeUInt16LE(entries.length, 8);
+  eocd.writeUInt16LE(entries.length, 10);
+  eocd.writeUInt32LE(centralDirectory.length, 12);
+  eocd.writeUInt32LE(centralDirectoryOffset, 16);
+
+  return Buffer.concat([...localParts, centralDirectory, eocd]);
+};
+
+const upsertZipEntry = (entries, name, data) => {
+  const index = entries.findIndex((entry) => entry.name === name);
+  const normalizedData = Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8');
+  if (index >= 0) {
+    entries[index] = { name, data: normalizedData };
+  } else {
+    entries.push({ name, data: normalizedData });
+  }
+};
+
+const ensureContentType = (contentTypesXml, xml) => (
+  contentTypesXml.includes(xml)
+    ? contentTypesXml
+    : contentTypesXml.replace('</Types>', `${xml}</Types>`)
+);
+
+const escapeXml = (value) => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+const replaceTemplateCell = (sheetXml, ref, value, type = 's') => {
+  const pattern = new RegExp(`<c\\b(?=[^>]*\\br="${ref}")[^>]*\\/>|<c\\b(?=[^>]*\\br="${ref}")[^>]*>[\\s\\S]*?<\\/c>`);
+  const current = sheetXml.match(pattern)?.[0] || `<c r="${ref}"/>`;
+  const style = current.match(/\ss="[^"]+"/)?.[0] || '';
+
+  let nextCell;
+  if (value === '' || value === null || value === undefined) {
+    nextCell = `<c r="${ref}"${style}/>`;
+  } else if (type === 'n') {
+    nextCell = `<c r="${ref}"${style}><v>${Number(value) || 0}</v></c>`;
+  } else {
+    nextCell = `<c r="${ref}"${style} t="inlineStr"><is><t>${escapeXml(value)}</t></is></c>`;
+  }
+
+  return pattern.test(sheetXml)
+    ? sheetXml.replace(pattern, nextCell)
+    : sheetXml.replace('</row>', `${nextCell}</row>`);
+};
+
+const buildTrainingRecordTemplateSheetXml = (templateSheetXml, { detail, pageRecords, pageIdx, totalPages, pageSize, printedDate, dateRange }) => {
+  let sheetXml = templateSheetXml;
+
+  sheetXml = replaceTemplateCell(sheetXml, 'A2', `ของ ${detail.name || '-'}`);
+
+  let cleanSub = (detail.subdivision || '').trim();
+  if (cleanSub && !cleanSub.startsWith('กลุ่ม')) {
+    cleanSub = `กลุ่ม${cleanSub}`;
+  }
+  const subdivisionText = [
+    cleanSub,
+    (detail.department || '').trim(),
+    'สำนักงานคณะกรรมการอาหารและยา'
+  ].filter(Boolean).join(' ');
+  sheetXml = replaceTemplateCell(sheetXml, 'A3', subdivisionText);
+
+  for (let idx = 0; idx < pageSize; idx++) {
+    const record = pageRecords[idx];
+    const rowNumber = 6 + idx;
+    const rowValues = record
+      ? [
+        { col: 'A', value: pageIdx * pageSize + idx + 1, type: 'n' },
+        { col: 'B', value: record.year },
+        { col: 'C', value: record.startDateFormatted },
+        { col: 'D', value: record.endDateFormatted },
+        { col: 'E', value: Number(record.durationDays) || 1, type: 'n' },
+        { col: 'F', value: record.title },
+        { col: 'G', value: record.issuer },
+        { col: 'H', value: record.code },
+      ]
+      : ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map((col) => ({ col, value: '' }));
+
+    rowValues.forEach(({ col, value, type }) => {
+      sheetXml = replaceTemplateCell(sheetXml, `${col}${rowNumber}`, value, type);
+    });
+  }
+
+  sheetXml = replaceTemplateCell(
+    sheetXml,
+    'A22',
+    pageIdx + 1 < totalPages
+      ? ''
+      : 'หมายเหตุ: วันฝึกอบรม 1 วัน คิดเป็นชั่วโมงฝึกอบรม 8 ชั่วโมง'
+  );
+
+  const footer = `&L&"TH SarabunPSK,Regular"&16Printed date: ${printedDate}&R&"TH SarabunPSK,Regular"&16F-D3-14 (${dateRange}) หน้า ${pageIdx + 1} / ${totalPages}`;
+  return sheetXml.replace(
+    /<headerFooter>[\s\S]*?<\/headerFooter>/,
+    `<headerFooter><oddFooter>${escapeXml(footer)}</oddFooter></headerFooter>`
+  );
+};
 
 const PROFILE_HEADERS = [
   'Username',
@@ -78,6 +293,7 @@ const IMPORT_COMPAT_TRAINING_HEADERS = [
   'Full Name',
   'Course Name',
   'Organizing Agency',
+  'Enrolment Date',
   'Completion Date',
   'Number of Days',
   'Intake No.',
@@ -369,8 +585,19 @@ const buildTrainingItems = (user) => {
   }
   const department = user.departmentRef?.name || user.department || '';
 
+  const courseStartDates = {};
+  if (Array.isArray(user.enrollments)) {
+    user.enrollments.forEach((enroll) => {
+      if (enroll.courseId) {
+        courseStartDates[enroll.courseId] = enroll.startedAt;
+      }
+    });
+  }
+
   const systemItems = (user.issuedCertificates || []).map((cert) => {
     const formattedDate = formatDate(cert.issuedAt);
+    const startedAt = courseStartDates[cert.courseId];
+    const formattedStartDate = startedAt ? formatDate(startedAt) : formattedDate;
     const courseCompetencies = cert.course?.competencies || [];
     return {
       email: user.email || '',
@@ -383,6 +610,7 @@ const buildTrainingItems = (user) => {
       item: 'อบรม',
       details: '',
       courseName: cert.course?.title || '',
+      startDate: formattedStartDate,
       date: formattedDate,
       days: '',
       intake: '',
@@ -397,6 +625,7 @@ const buildTrainingItems = (user) => {
 
   const externalItems = (user.certificates || []).map((cert) => {
     const formattedDate = formatDate(cert.issueDate);
+    const formattedStartDate = cert.startDate ? formatDate(cert.startDate) : formattedDate;
     return {
       email: user.email || '',
       fullName: user.name || '',
@@ -408,6 +637,7 @@ const buildTrainingItems = (user) => {
       item: cert.trainingItem || 'อบรม',
       details: cert.trainingDetails || '',
       courseName: cert.title || '',
+      startDate: formattedStartDate,
       date: formattedDate,
       days: cert.trainingDays || '',
       intake: cert.intakeNo || '',
@@ -425,11 +655,18 @@ const buildTrainingItems = (user) => {
 
 const exportUserTrainings = async (actor) => {
   const users = await getScopedUsersForExport(actor, {
+    enrollments: {
+      select: {
+        courseId: true,
+        startedAt: true
+      }
+    },
     issuedCertificates: {
       where: { status: 'VALID' },
       select: {
         certificateNo: true,
         issuedAt: true,
+        courseId: true,
         course: {
           select: {
             title: true,
@@ -451,6 +688,7 @@ const exportUserTrainings = async (actor) => {
         title: true,
         issuer: true,
         issueDate: true,
+        startDate: true,
         expirationDate: true,
         credentialId: true,
         credentialUrl: true,
@@ -481,6 +719,7 @@ const exportUserTrainings = async (actor) => {
         item.fullName,
         item.courseName,
         item.organizer,
+        item.startDate,
         item.date,
         item.days,
         item.intake,
@@ -500,7 +739,7 @@ const exportUserTrainings = async (actor) => {
     'Training Report',
     IMPORT_COMPAT_TRAINING_HEADERS,
     rows,
-    [15, 30, 50, 25, 15, 15, 15, 25, 18, 18, 25, 20, 18, 25, 25]
+    [15, 30, 50, 25, 15, 15, 15, 15, 25, 18, 18, 25, 20, 18, 25, 25]
   );
 };
 
@@ -561,25 +800,31 @@ const exportSingleUser = async (id, authUser) => {
   ]);
 
   // Sheet 4: ประวัติการอบรม (Training History)
-  const certHeaders = ['หลักสูตร / หัวข้อ', 'ประเภท', 'ผู้จัด / ผู้ออก', 'เลขที่ใบเซอร์ / รายละเอียด', 'วันที่ได้รับ', 'จำนวนวัน', 'รุ่นที่', 'สถานที่', 'หมายเหตุ'];
+  const certHeaders = ['หลักสูตร / หัวข้อ', 'ประเภท', 'ผู้จัด / ผู้ออก', 'เลขที่ใบเซอร์ / รายละเอียด', 'วันที่เริ่ม', 'วันที่สิ้นสุด / วันที่ได้รับ', 'จำนวนวัน', 'รุ่นที่', 'สถานที่', 'หมายเหตุ'];
   
-  const systemCerts = (detail.systemCertificates || []).map(cert => [
-    cert.courseTitle || '-',
-    'ภายใน',
-    'LMS System',
-    cert.certificateNo || '-',
-    cert.issuedAt ? formatDate(cert.issuedAt) : '-',
-    '-',
-    '-',
-    'Online (e-Learning)',
-    ''
-  ]);
+  const systemCerts = (detail.systemCertificates || []).map(cert => {
+    const enroll = (detail.enrollments || []).find(e => e.course?.id === cert.courseId);
+    const startDateVal = enroll?.startedAt ? formatDate(enroll.startedAt) : (cert.issuedAt ? formatDate(cert.issuedAt) : '-');
+    return [
+      cert.courseTitle || '-',
+      'ภายใน',
+      'LMS System',
+      cert.certificateNo || '-',
+      startDateVal,
+      cert.issuedAt ? formatDate(cert.issuedAt) : '-',
+      '-',
+      '-',
+      'Online (e-Learning)',
+      ''
+    ];
+  });
   
   const externalCerts = (detail.externalCertificates || []).map(cert => [
     cert.title || '-',
     cert.trainingType || 'ภายนอก',
     cert.issuer || '-',
     cert.credentialId || cert.trainingDetails || '-',
+    cert.startDate ? formatDate(cert.startDate) : (cert.issueDate ? formatDate(cert.issueDate) : '-'),
     cert.issueDate ? formatDate(cert.issueDate) : '-',
     cert.trainingDays || '-',
     cert.intakeNo || '-',
@@ -602,14 +847,275 @@ const exportSingleUser = async (id, authUser) => {
   addSheet('ข้อมูลทั่วไป', profileHeaders, profileRows, [25, 45]);
   addSheet('ประวัติการเรียน', learningHeaders, learningRows, [45, 25, 18, 18, 15, 15]);
   addSheet('ประวัติ Point', pointsHeaders, pointsRows, [15, 35, 30, 12, 18]);
-  addSheet('ประวัติการอบรม', certHeaders, certRows, [45, 15, 25, 30, 18, 12, 12, 25, 20]);
+  addSheet('ประวัติการอบรม', certHeaders, certRows, [45, 15, 25, 30, 18, 18, 12, 12, 25, 20]);
 
   const buffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
   return { name: detail.name, buffer };
 };
 
+const exportSingleUserForm = async (id, authUser) => {
+  const detailsService = require('./admin.users.details');
+  const detail = await detailsService.getUserDetails(id, authUser);
+  if (!detail) throw new Error('User not found');
+
+  const enrollments = detail.enrollments || [];
+  const systemCertificates = detail.systemCertificates || [];
+  const externalCertificates = detail.externalCertificates || [];
+
+  const getDurationDays = (startDateStr, endDateStr) => {
+    if (!startDateStr || !endDateStr) return '1';
+    const start = new Date(startDateStr);
+    const end = new Date(endDateStr);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return String(diffDays === 0 ? 1 : diffDays);
+  };
+
+  const toThaiYear = (dateVal) => {
+    if (!dateVal) return '-';
+    const date = new Date(dateVal);
+    if (isNaN(date.getTime())) return '-';
+    return String(date.getFullYear() + 543);
+  };
+
+  const allRecords = [
+    ...systemCertificates.map((cert) => {
+      const enrollment = enrollments.find((e) => e.course?.title === cert.courseTitle);
+      const startDate = enrollment?.startedAt || cert.issuedAt;
+      const endDate = enrollment?.completedAt || cert.issuedAt;
+      return {
+        year: toThaiYear(startDate),
+        startDateFormatted: formatDate(startDate) || '-',
+        endDateFormatted: formatDate(endDate) || '-',
+        durationDays: getDurationDays(startDate, endDate),
+        title: cert.courseTitle || '-',
+        issuer: 'สำนักงานคณะกรรมการอาหารและยา',
+        code: cert.certificateNo || '-',
+        dateForSort: startDate ? new Date(startDate) : new Date(),
+        rawStartDate: startDate,
+        rawEndDate: endDate
+      };
+    }),
+    ...externalCertificates.map((cert) => {
+      const startDate = cert.startDate || cert.issueDate;
+      const endDate = cert.issueDate;
+      const venue = cert.trainingVenue;
+      const issuer = cert.issuer || '-';
+      const location = venue ? `${issuer} / ${venue}` : issuer;
+      return {
+        year: toThaiYear(startDate),
+        startDateFormatted: formatDate(startDate) || '-',
+        endDateFormatted: formatDate(endDate) || '-',
+        durationDays: cert.trainingDays ? String(cert.trainingDays) : '1',
+        title: cert.title || '-',
+        issuer: location,
+        code: cert.credentialId || cert.intakeNo || '-',
+        dateForSort: startDate ? new Date(startDate) : new Date(0),
+        rawStartDate: startDate,
+        rawEndDate: endDate
+      };
+    }),
+  ];
+
+  // Sort chronologically (oldest to newest)
+  allRecords.sort((a, b) => a.dateForSort.getTime() - b.dateForSort.getTime());
+
+  const pageSize = 16;
+  const totalPages = Math.max(1, Math.ceil(allRecords.length / pageSize));
+
+  const templatePath = path.join(__dirname, '..', '..', '..', 'templates', 'F-D3-14.xlsx');
+  const templateBuffer = fs.readFileSync(templatePath);
+  const templateEntries = readZipEntries(templateBuffer);
+  const getTemplateEntry = (name) => {
+    const entry = templateEntries.find((candidate) => candidate.name === name);
+    if (!entry) throw new Error(`F-D3-14 template is missing ${name}`);
+    return entry.data;
+  };
+  const templateSheetXml = getTemplateEntry('xl/worksheets/sheet1.xml').toString('utf8');
+  const templateStylesXml = getTemplateEntry('xl/styles.xml');
+  const templateSharedStringsXml = getTemplateEntry('xl/sharedStrings.xml');
+  const templateThemeXml = getTemplateEntry('xl/theme/theme1.xml');
+  const templatePrinterSettings = getTemplateEntry('xl/printerSettings/printerSettings1.bin');
+  const templateSheetRelsXml = getTemplateEntry('xl/worksheets/_rels/sheet1.xml.rels');
+
+  const getPageDateRange = (pageRecords) => {
+    const dates = [];
+    pageRecords.forEach(r => {
+      if (r.rawStartDate) {
+        const d = new Date(r.rawStartDate);
+        if (!isNaN(d.getTime())) dates.push(d);
+      }
+      if (r.rawEndDate) {
+        const d = new Date(r.rawEndDate);
+        if (!isNaN(d.getTime())) dates.push(d);
+      }
+    });
+
+    if (dates.length === 0) return '..............................';
+
+    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+
+    const minStr = formatDate(minDate);
+    const maxStr = formatDate(maxDate);
+
+    if (!minStr || !maxStr) {
+      return '..............................';
+    }
+
+    return `${minStr} - ${maxStr}`;
+  };
+
+  // Get current date formatted as DD/MM/YYYY in Thai Buddhist calendar
+  const getPrintedDateThai = () => {
+    const d = new Date();
+    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    const thDate = new Date(utc + (3600000 * 7));
+    const day = String(thDate.getDate()).padStart(2, '0');
+    const month = String(thDate.getMonth() + 1).padStart(2, '0');
+    const year = String(thDate.getFullYear() + 543);
+    return `${day}/${month}/${year}`;
+  };
+  const printedDate = getPrintedDateThai();
+
+  const wbOut = xlsx.utils.book_new();
+  for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+    xlsx.utils.book_append_sheet(wbOut, xlsx.utils.aoa_to_sheet([[]]), `หน้า ${pageIdx + 1}`);
+  }
+
+  const shellBuffer = xlsx.write(wbOut, { type: 'buffer', bookType: 'xlsx' });
+  const outputEntries = readZipEntries(shellBuffer);
+
+  for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+    const pageRecords = allRecords.slice(pageIdx * pageSize, (pageIdx + 1) * pageSize);
+    const dateRange = getPageDateRange(pageRecords);
+    const sheetXml = buildTrainingRecordTemplateSheetXml(templateSheetXml, {
+      detail,
+      pageRecords,
+      pageIdx,
+      totalPages,
+      pageSize,
+      printedDate,
+      dateRange
+    });
+    const sheetNumber = pageIdx + 1;
+    upsertZipEntry(outputEntries, `xl/worksheets/sheet${sheetNumber}.xml`, sheetXml);
+    upsertZipEntry(outputEntries, `xl/worksheets/_rels/sheet${sheetNumber}.xml.rels`, templateSheetRelsXml);
+  }
+
+  upsertZipEntry(outputEntries, 'xl/styles.xml', templateStylesXml);
+  upsertZipEntry(outputEntries, 'xl/theme/theme1.xml', templateThemeXml);
+  upsertZipEntry(outputEntries, 'xl/sharedStrings.xml', templateSharedStringsXml);
+  upsertZipEntry(outputEntries, 'xl/printerSettings/printerSettings1.bin', templatePrinterSettings);
+
+  const contentTypesEntry = outputEntries.find((entry) => entry.name === '[Content_Types].xml');
+  if (contentTypesEntry) {
+    let contentTypesXml = contentTypesEntry.data.toString('utf8');
+    const printerSettingsContentType = '<Default Extension="bin" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.printerSettings"/>';
+    contentTypesXml = /<Default Extension="bin" ContentType="[^"]*"\/>/.test(contentTypesXml)
+      ? contentTypesXml.replace(/<Default Extension="bin" ContentType="[^"]*"\/>/, printerSettingsContentType)
+      : ensureContentType(contentTypesXml, printerSettingsContentType);
+    contentTypesXml = ensureContentType(
+      contentTypesXml,
+      '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
+    );
+    upsertZipEntry(outputEntries, '[Content_Types].xml', contentTypesXml);
+  }
+
+  const finalBuffer = writeZipEntries(outputEntries);
+  return { name: detail.name, buffer: finalBuffer };
+};
+
+/*
+ * Legacy SheetJS implementation kept temporarily for reference. It is disabled
+ * because SheetJS rewrote the template without preserving page setup and cell
+ * styles, which removed the F-D3-14 borders and A4 landscape settings.
+
+  for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+    const pageRecords = allRecords.slice(pageIdx * pageSize, (pageIdx + 1) * pageSize);
+    
+    // Deep clone the template sheet object
+    const ws = JSON.parse(JSON.stringify(tempSheet));
+    
+    // Write name to cell A2
+    ws['A2'] = { t: 's', v: `ของ ${detail.name || '-'}` };
+    
+    // Write subdivision text to cell A3
+    let cleanSub = (detail.subdivision || '').trim();
+    if (cleanSub && !cleanSub.startsWith('กลุ่ม')) {
+      cleanSub = `กลุ่ม${cleanSub}`;
+    }
+    const subdivisionText = [cleanSub, (detail.department || '').trim(), 'สำนักงานคณะกรรมการอาหารและยา']
+      .filter(Boolean)
+      .join(' ');
+    ws['A3'] = { t: 's', v: subdivisionText };
+
+    // Fill the 16 table rows (rows 6 to 21)
+    for (let idx = 0; idx < pageSize; idx++) {
+      const record = pageRecords[idx];
+      const rNum = 6 + idx;
+      
+      if (record) {
+        ws[`A${rNum}`] = { t: 'n', v: pageIdx * pageSize + idx + 1 };
+        ws[`B${rNum}`] = { t: 's', v: record.year };
+        ws[`C${rNum}`] = { t: 's', v: record.startDateFormatted };
+        ws[`D${rNum}`] = { t: 's', v: record.endDateFormatted };
+        ws[`E${rNum}`] = { t: 'n', v: Number(record.durationDays) || 1 };
+        ws[`F${rNum}`] = { t: 's', v: record.title };
+        ws[`G${rNum}`] = { t: 's', v: record.issuer };
+        ws[`H${rNum}`] = { t: 's', v: record.code };
+      } else {
+        ws[`A${rNum}`] = { t: 's', v: '' };
+        ws[`B${rNum}`] = { t: 's', v: '' };
+        ws[`C${rNum}`] = { t: 's', v: '' };
+        ws[`D${rNum}`] = { t: 's', v: '' };
+        ws[`E${rNum}`] = { t: 's', v: '' };
+        ws[`F${rNum}`] = { t: 's', v: '' };
+        ws[`G${rNum}`] = { t: 's', v: '' };
+        ws[`H${rNum}`] = { t: 's', v: '' };
+      }
+    }
+
+    // Handle note cell A22
+    if (pageIdx + 1 < totalPages) {
+      ws['A22'] = { t: 's', v: '' }; // Clear note if not last page
+    } else {
+      ws['A22'] = { t: 's', v: 'หมายเหตุ: วันฝึกอบรม 1 วัน คิดเป็นชั่วโมงฝึกอบรม 8 ชั่วโมง' };
+    }
+
+    // Page-specific date range
+    const dateRange = getPageDateRange(pageRecords);
+
+    // Set page footer and page print setup options to landscape
+    ws['!margins'] = tempSheet['!margins'] || {
+      left: 0.7874015748031497,
+      right: 0.7874015748031497,
+      top: 0.7874015748031497,
+      bottom: 0.7874015748031497,
+      header: 0.3937007874015748,
+      footer: 0.3937007874015748
+    };
+
+    ws['!pageSetup'] = {
+      orientation: 'landscape',
+      paperSize: 9 // A4
+    };
+
+    ws['!headerFooter'] = {
+      oddFooter: `&L&"TH Sarabun PSK"&16Printed date: ${printedDate}&RF-D3-14 (${dateRange}) หน้า ${pageIdx + 1} / ${totalPages}`
+    };
+
+    xlsx.utils.book_append_sheet(wbOut, ws, `หน้า ${pageIdx + 1}`);
+  }
+
+  const buffer = xlsx.write(wbOut, { type: 'buffer', bookType: 'xlsx' });
+  return { name: detail.name, buffer };
+};
+*/
+
 module.exports = {
   exportUserProfiles,
   exportUserTrainings,
-  exportSingleUser
+  exportSingleUser,
+  exportSingleUserForm
 };

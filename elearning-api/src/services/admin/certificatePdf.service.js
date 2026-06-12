@@ -50,29 +50,6 @@ async function loadImageBuffer(imageUrl) {
     } else {
       relativePath = imageUrl;
     }
-  } else {
-    // Check if it's a Supabase URL pointing to our files (e.g. from migrated DB records)
-    const isSupabase = imageUrl.includes('.supabase.co/storage/v1/object/');
-    if (isSupabase) {
-      try {
-        const parsedUrl = new URL(imageUrl);
-        const match = parsedUrl.pathname.match(/\/storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)$/);
-        if (match) {
-          isLocal = true;
-          let decodedPath = decodeURIComponent(match[2]);
-          if (match[1] === 'secure-documents') {
-            relativePath = 'secure/' + decodedPath;
-          } else {
-            if (decodedPath.startsWith('uploads/')) {
-              decodedPath = decodedPath.replace(/^uploads\//, '');
-            }
-            relativePath = decodedPath;
-          }
-        }
-      } catch (err) {
-        // Ignore and fallback to axios fetch
-      }
-    }
   }
 
   if (isLocal) {
@@ -91,7 +68,7 @@ async function loadImageBuffer(imageUrl) {
     }
   }
 
-  // 2. Fetch remote URLs (e.g. external logos, non-Supabase URLs)
+  // 2. Fetch remote URLs (e.g. external logos)
   if (imageUrl.startsWith('http')) {
     try {
       const response = await axios.get(imageUrl, { 
@@ -412,7 +389,7 @@ async function generatePdfBuffer(_html, options = {}) {
 }
 
 /**
- * Uploads the certificate PDF buffer to local storage (or Supabase if not production).
+ * Uploads the certificate PDF buffer to local storage.
  */
 async function uploadCertificatePdf({ buffer, userId, certificateId }) {
   const fsPromises = require('fs/promises');

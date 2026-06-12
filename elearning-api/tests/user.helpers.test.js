@@ -13,7 +13,7 @@ const {
     canAccessAnnouncement
 } = require('../src/services/user/user.visibility');
 
-test('getStorageObjectRefFromContentUrl parses storage paths and Supabase object URLs', () => {
+test('getStorageObjectRefFromContentUrl parses storage paths', () => {
     assert.deepEqual(getStorageObjectRefFromContentUrl('courses/docs/intro.pdf'), {
         bucket: 'secure-documents',
         path: 'courses/docs/intro.pdf'
@@ -24,12 +24,9 @@ test('getStorageObjectRefFromContentUrl parses storage paths and Supabase object
         path: 'courses/docs/intro.pdf'
     });
 
-    assert.deepEqual(
+    assert.equal(
         getStorageObjectRefFromContentUrl('https://example.supabase.co/storage/v1/object/public/uploads/courses%2Fintro.pdf'),
-        {
-            bucket: 'uploads',
-            path: 'courses/intro.pdf'
-        }
+        null
     );
 
     assert.equal(getStorageObjectRefFromContentUrl(''), null);

@@ -89,6 +89,7 @@ model UserCertificate {
   title           String
   issuer          String
   issueDate       DateTime?
+  startDate       DateTime?
   expirationDate  DateTime?
   noExpiration    Boolean   @default(false)
   credentialId    String?

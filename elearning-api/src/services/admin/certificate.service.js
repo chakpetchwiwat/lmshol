@@ -459,11 +459,44 @@ async function createCertificateSignedUrl({ certificateId, requester }) {
   if (!hasAccess) throw new ErrorResponse('Forbidden: You do not have permission to access this certificate', 403);
 
   let cleanFileKey = cert.pdfUrl;
-  if (cleanFileKey.startsWith('http')) {
+  const isHttp = cleanFileKey.startsWith('http');
+  let existsLocally = false;
+
+  if (isHttp) {
     const { path: storagePath } = extractStoragePath(cleanFileKey);
-    cleanFileKey = storagePath;
+    if (storagePath) {
+      const path = require('path');
+      const fs = require('fs/promises');
+      const UPLOADS_DIR = process.env.NODE_ENV === 'production' ? '/var/www/html/uploads' : path.resolve(__dirname, '../../../uploads');
+      
+      const normalizedKey = path.normalize(storagePath).replace(/^(\.\.(\/|\\|$))+/, '');
+      const possiblePaths = [
+        path.join(UPLOADS_DIR, normalizedKey),
+        path.join(UPLOADS_DIR, 'secure', normalizedKey),
+        path.join(UPLOADS_DIR, 'public', normalizedKey),
+        path.join(UPLOADS_DIR, 'public/uploads', normalizedKey)
+      ];
+      
+      for (const p of possiblePaths) {
+        try {
+          await fs.access(p);
+          existsLocally = true;
+          cleanFileKey = normalizedKey;
+          break;
+        } catch {
+          // ignore
+        }
+      }
+    }
+
+    if (!existsLocally) {
+      return {
+        url: cert.pdfUrl,
+        expiresIn: 3600
+      };
+    }
   }
-  
+
   if (cleanFileKey.startsWith('/uploads/')) {
     cleanFileKey = cleanFileKey.replace(/^\/uploads\//, '');
   } else if (cleanFileKey.startsWith('uploads/')) {

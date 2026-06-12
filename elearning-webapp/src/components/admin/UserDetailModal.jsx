@@ -17,7 +17,7 @@ import {
   User2,
   X,
 } from 'lucide-react';
-import { formatThaiDateTime } from '../../utils/dateUtils';
+import { formatThaiDateTime, toThaiYear } from '../../utils/dateUtils';
 import ModalPortal from '../common/ModalPortal';
 import CustomSelect from '../common/CustomSelect';
 import { useToast } from '../../context/useToast';
@@ -97,6 +97,49 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
     }
   };
 
+  const handleOpenExternalCertificate = async (cert) => {
+    try {
+      if (cert?.fileKey) {
+        const response = await adminAPI.getProfileFileDownloadUrl(cert.fileKey);
+        const url = response?.data?.url || response?.url;
+        if (url) {
+          window.open(url, '_blank', 'noopener,noreferrer');
+          return;
+        }
+      }
+
+      if (cert?.fileUrl) {
+        window.open(getFullUrl(cert.fileUrl), '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      toast.warning('ไม่พบลิงก์ไฟล์เกียรติบัตร');
+    } catch (error) {
+      console.error('Open external certificate error', error);
+      toast.error('เปิดไฟล์เกียรติบัตรไม่สำเร็จ');
+    }
+  };
+
+  const handleOpenSystemCertificate = async (cert) => {
+    try {
+      if (!cert?.id) {
+        toast.warning('ไม่พบข้อมูลเกียรติบัตร');
+        return;
+      }
+
+      const response = await adminAPI.getCertificateDownloadUrl(cert.id);
+      const url = response?.data?.url || response?.url;
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        toast.warning('ไม่พบลิงก์ดาวน์โหลดเกียรติบัตร');
+      }
+    } catch (error) {
+      console.error('Open system certificate error', error);
+      toast.error('ไม่สามารถเปิดไฟล์เกียรติบัตรได้');
+    }
+  };
+
   const handleExport = async () => {
     try {
       toast.info('กำลังสร้างไฟล์รายงานประวัติผู้ใช้งานรายบุคคล กรุณารอสักครู่...');
@@ -123,6 +166,61 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
   const handlePrint = () => {
     const mainTitle = activeTab === 'learning' ? 'ประวัติการเรียน' : 'ประวัติ Point';
     const data = activeTab === 'learning' ? filteredEnrollments : filteredPointsHistory;
+
+    // Pre-map the custom A4 training form records
+    const enrollments = detail?.enrollments || [];
+    const systemCertificates = detail?.systemCertificates || [];
+    const externalCertificates = detail?.externalCertificates || [];
+
+    const getDurationDays = (startDateStr, endDateStr) => {
+      if (!startDateStr || !endDateStr) return '1';
+      const start = new Date(startDateStr);
+      const end = new Date(endDateStr);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return String(diffDays === 0 ? 1 : diffDays);
+    };
+
+    const allRecords = [
+      ...systemCertificates.map((cert) => {
+        const enrollment = enrollments.find((e) => e.course?.title === cert.courseTitle);
+        const startDate = enrollment?.startedAt || cert.issuedAt;
+        const endDate = enrollment?.completedAt || cert.issuedAt;
+        return {
+          year: toThaiYear(startDate),
+          startDateFormatted: formatThaiDateTime(startDate, false),
+          endDateFormatted: formatThaiDateTime(endDate, false),
+          durationDays: getDurationDays(startDate, endDate),
+          title: cert.courseTitle || '-',
+          issuer: 'สำนักงานคณะกรรมการอาหารและยา',
+          code: cert.certificateNo || '-',
+          dateForSort: startDate ? new Date(startDate) : new Date(),
+          rawStartDate: startDate,
+          rawEndDate: endDate
+        };
+      }),
+      ...externalCertificates.map((cert) => {
+        const startDate = cert.startDate || cert.issueDate;
+        const endDate = cert.issueDate;
+        const venue = cert.trainingVenue;
+        const issuer = cert.issuer || '-';
+        const location = venue ? `${issuer} / ${venue}` : issuer;
+        return {
+          year: toThaiYear(startDate),
+          startDateFormatted: formatThaiDateTime(startDate, false),
+          endDateFormatted: formatThaiDateTime(endDate, false),
+          durationDays: cert.trainingDays || '1',
+          title: cert.title || '-',
+          issuer: location,
+          code: cert.credentialId || cert.intakeNo || '-',
+          dateForSort: startDate ? new Date(startDate) : new Date(0),
+          rawStartDate: startDate,
+          rawEndDate: endDate
+        };
+      }),
+    ];
+
+    allRecords.sort((a, b) => a.dateForSort.getTime() - b.dateForSort.getTime());
 
     const sections = [
       {
@@ -213,10 +311,14 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
         { label: 'ปี', value: filterYear === FILTER_VALUES.ALL ? 'ทุกปี' : String(parseInt(filterYear, 10) + 543) },
       ],
       profile: {
+        id: detail?.id,
         title: 'ข้อมูลโปรไฟล์ผู้ใช้',
         name: detail?.name || '-',
         subtitle: detail?.email || '',
         imageUrl: profileImageUrl,
+        subdivision: detail?.subdivision || '',
+        department: detail?.department || '',
+        customFormRows: allRecords,
         items: [
           { label: 'แผนก', value: detail?.department || '-' },
           { label: 'ระดับ', value: detail?.tier?.name || detail?.tier || '-' },
@@ -516,7 +618,7 @@ sections
                               <div 
                                 key={cert.id} 
                                 className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-4 transition-all hover:bg-white hover:border-primary/20 hover:shadow-md cursor-pointer"
-                                onClick={() => cert.fileUrl && window.open(cert.fileUrl, '_blank')}
+                                onClick={() => handleOpenExternalCertificate(cert)}
                               >
                                 <div className="flex items-center gap-3 w-full">
                                   <div className="h-10 w-10 shrink-0 rounded-xl bg-white flex items-center justify-center text-primary border border-slate-100 shadow-sm group-hover:bg-primary group-hover:text-white transition-colors">
@@ -567,7 +669,7 @@ sections
                               <div 
                                 key={cert.id} 
                                 className="group flex items-center justify-between rounded-2xl border border-slate-100 bg-emerald-50/30 p-4 transition-all hover:bg-white hover:border-emerald-200 hover:shadow-md cursor-pointer"
-                                onClick={() => cert.pdfUrl && window.open(cert.pdfUrl, '_blank')}
+                                onClick={() => handleOpenSystemCertificate(cert)}
                               >
                                 <div className="flex items-center gap-3 w-full">
                                   <div className="h-10 w-10 shrink-0 rounded-xl bg-white flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-colors">

@@ -70,6 +70,7 @@ const sendEmail = async ({ to, subject, templateName, data }) => {
 
     const html = compileTemplate(templateName, mergedData);
     const fromEmail = process.env.SMTP_FROM || 'no-reply@looma.co';
+    const fromName = process.env.SMTP_FROM_NAME || 'Looma LMS';
 
     // Path to the Looma logo inside the API assets folder
     const logoPath = path.join(__dirname, '../assets/looma-logo.png');
@@ -84,7 +85,7 @@ const sendEmail = async ({ to, subject, templateName, data }) => {
     }
 
     const mailOptions = {
-      from: `"Looma LMS" <${fromEmail}>`,
+      from: `"${fromName}" <${fromEmail}>`,
       to,
       subject,
       html,

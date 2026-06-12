@@ -125,7 +125,7 @@ const getActorContext = async (prisma, authUser) => {
         (actor.cohortRoleSupervisorRoles?.length || 0) > 0;
     const effectivePermission = (actorPermission === USER_PERMISSIONS.ADMIN || actorPermission === USER_PERMISSIONS.SUPERADMIN)
         ? actorPermission
-        : (actorPermission === USER_PERMISSIONS.MANAGER || actor.tier?.accessAdmin || isSupervisor)
+        : (actorPermission === USER_PERMISSIONS.MANAGER || isSupervisor)
             ? USER_PERMISSIONS.MANAGER
             : USER_PERMISSIONS.USER;
 
@@ -139,9 +139,9 @@ const getActorContext = async (prisma, authUser) => {
         canAccessAdminPanel: ADMIN_PANEL_PERMISSIONS.includes(effectivePermission)
     };
 
-    // Strict validation for managers
+    // Softened validation for managers
     if (mappedActor.isManager && !mappedActor.departmentId && !mappedActor.isSupervisor) {
-        throw new Error('Manager account must belong to a department to determine scope');
+        console.warn(`[Warning] Manager account (User ID: ${mappedActor.id}) does not belong to a department to determine scope`);
     }
 
     return mappedActor;

@@ -1,6 +1,7 @@
-﻿import React from 'react';
-import { ExternalLink, Printer } from 'lucide-react';
+import React from 'react';
+import { ExternalLink, Printer, FileDown } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+import { adminAPI } from '../../utils/api';
 import {
   Bar,
   BarChart,
@@ -217,9 +218,359 @@ const DashboardPrintContent = ({ report }) => {
   );
 };
 
+const CustomFormPrintContent = ({ report }) => {
+  const name = report.profile?.name || '';
+  const subdivision = report.profile?.subdivision || '';
+  const department = report.profile?.department || '';
+
+  let cleanSub = subdivision.trim();
+  if (cleanSub && !cleanSub.startsWith('กลุ่ม')) {
+    cleanSub = `กลุ่ม${cleanSub}`;
+  }
+  const subdivisionText = [cleanSub, department.trim(), 'สำนักงานคณะกรรมการอาหารและยา']
+    .filter(Boolean)
+    .join(' ');
+
+  const records = report.profile?.customFormRows || report.rows || [];
+  const pageSize = 16;
+  const totalPages = Math.max(1, Math.ceil(records.length / pageSize));
+  const pages = Array.from({ length: totalPages }, (_, pageIndex) => (
+    records.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+  ));
+  const emptyRows = (count) => Array.from({ length: count }, (_, index) => index);
+
+  const getPageDateRange = (pageRecords) => {
+    const dates = [];
+    pageRecords.forEach(r => {
+      if (r.rawStartDate) {
+        const d = new Date(r.rawStartDate);
+        if (!isNaN(d.getTime())) dates.push(d);
+      }
+      if (r.rawEndDate) {
+        const d = new Date(r.rawEndDate);
+        if (!isNaN(d.getTime())) dates.push(d);
+      }
+      if (!r.rawStartDate && !r.rawEndDate && r.dateForSort) {
+        const d = new Date(r.dateForSort);
+        if (!isNaN(d.getTime())) dates.push(d);
+      }
+    });
+
+    if (dates.length === 0) return '..............................';
+
+    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+
+    const minStr = formatThaiDateTime(minDate, false);
+    const maxStr = formatThaiDateTime(maxDate, false);
+
+    if (minStr === '-' || maxStr === '-') {
+      return '..............................';
+    }
+
+    return `${minStr} - ${maxStr}`;
+  };
+
+  return (
+    <div className="custom-form-print">
+      <style>{`
+        @font-face {
+          font-family: 'TH Sarabun PSK';
+          src: url('/fonts/THSarabun.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: 'TH Sarabun PSK';
+          src: url('/fonts/THSarabun Bold.ttf') format('truetype');
+          font-weight: bold;
+          font-style: normal;
+        }
+
+        .custom-form-print {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: #eef2ff;
+          padding: 24px 0;
+          min-height: 100vh;
+        }
+
+        .custom-form-page {
+          position: relative;
+          width: 841.92pt;
+          height: 595.32pt;
+          margin-bottom: 22px;
+          padding: 28pt 30pt 24pt;
+          overflow: hidden;
+          box-sizing: border-box;
+          background: #fff;
+          color: #111827;
+          box-shadow: 0 18px 50px -28px rgba(15, 23, 42, 0.45);
+          font-family: 'TH Sarabun PSK', 'Sarabun', 'Tahoma', sans-serif;
+          font-size: 16pt;
+          line-height: 1.1;
+        }
+
+        .form-title {
+          margin: 0 0 1pt;
+          font-size: 16pt;
+          font-weight: 700;
+          line-height: 1.05;
+          text-align: center;
+        }
+
+        .form-person-line,
+        .form-unit-line {
+          display: grid;
+          align-items: end;
+          column-gap: 5pt;
+          height: 17pt;
+        }
+
+        .form-person-line {
+          grid-template-columns: auto 1fr;
+        }
+
+        .form-unit-line {
+          grid-template-columns: 1fr;
+        }
+
+        .form-fill {
+          min-width: 0;
+          border-bottom: 0.7pt dotted #666;
+          padding: 0 4pt 1pt;
+          font-weight: 700;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .training-record-table {
+          width: 100%;
+          margin-top: 10pt;
+          border-collapse: collapse;
+          table-layout: fixed;
+          font-size: 16pt;
+          line-height: 1.15;
+        }
+
+        .training-record-table th,
+        .training-record-table td {
+          border: 0.7pt solid #555;
+          height: 20pt;
+          padding: 1pt 3pt;
+          vertical-align: middle;
+        }
+
+        .training-record-table th {
+          text-align: center;
+          font-weight: 700;
+          line-height: 0.95;
+        }
+
+        .training-record-table td {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .training-record-table .center {
+          text-align: center;
+        }
+
+        .training-record-table .wrap {
+          display: -webkit-box;
+          overflow: hidden;
+          white-space: normal;
+          line-height: 1.02;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+        }
+
+        .form-footer-container {
+          position: absolute;
+          left: 30pt;
+          right: 30pt;
+          bottom: 18pt;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 16pt;
+          font-weight: 700;
+          font-family: 'TH Sarabun PSK', sans-serif;
+        }
+
+        .form-note {
+          margin-top: 8pt;
+          font-size: 16pt;
+          font-weight: 700;
+          font-family: 'TH Sarabun PSK', sans-serif;
+        }
+
+        .training-record-table col:nth-child(1) { width: 45pt; }
+        .training-record-table col:nth-child(2) { width: 60pt; }
+        .training-record-table col:nth-child(3) { width: 100pt; }
+        .training-record-table col:nth-child(4) { width: 100pt; }
+        .training-record-table col:nth-child(5) { width: 60pt; }
+        .training-record-table col:nth-child(6) { width: 200pt; }
+        .training-record-table col:nth-child(7) { width: 180pt; }
+        .training-record-table col:nth-child(8) { width: auto; }
+
+        @media print {
+          @page {
+            size: A4 landscape !important;
+            margin: 0 !important;
+          }
+
+          body, html {
+            background: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+
+          .custom-form-print {
+            padding: 0 !important;
+            background: white !important;
+          }
+
+          .custom-form-page {
+            margin: 0 !important;
+            box-shadow: none !important;
+            page-break-after: always !important;
+            break-after: page !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+          .custom-form-page:last-child {
+            page-break-after: auto !important;
+            break-after: auto !important;
+          }
+        }
+      `}</style>
+
+      {pages.map((pageRecords, pageIdx) => {
+        const pageNum = pageIdx + 1;
+        const missingRowCount = Math.max(0, pageSize - pageRecords.length);
+
+        return (
+          <div key={`form-page-${pageNum}`} className="custom-form-page">
+            <h1 className="form-title">แบบประวัติการฝึกอบรม (Training Record)</h1>
+            <div className="form-person-line">
+              <span>ของ</span>
+              <span className="form-fill">{name || '-'}</span>
+            </div>
+            <div className="form-unit-line">
+              <span className="form-fill">{subdivisionText || '-'}</span>
+            </div>
+
+            <table className="training-record-table" aria-label="Training Record">
+              <colgroup>
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+                <col />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>ลำดับที่</th>
+                  <th>ปี พ.ศ.</th>
+                  <th>ระยะเวลาเริ่มการอบรม</th>
+                  <th>ระยะเวลาสิ้นสุดการอบรม</th>
+                  <th>จำนวนวัน</th>
+                  <th>ชื่อหัวข้อ/หลักสูตร</th>
+                  <th>หน่วยงานที่จัดการฝึกอบรม / สถานที่</th>
+                  <th>รหัสหลักสูตร</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRecords.map((record, recordIdx) => {
+                  const globalIdx = pageIdx * pageSize + recordIdx + 1;
+                  return (
+                    <tr key={`row-${globalIdx}`}>
+                      <td className="center">{globalIdx}</td>
+                      <td className="center">{record.year || '-'}</td>
+                      <td className="center">{record.startDateFormatted || '-'}</td>
+                      <td className="center">{record.endDateFormatted || '-'}</td>
+                      <td className="center">{record.durationDays || '-'}</td>
+                      <td><span className="wrap" title={record.title}>{record.title || '-'}</span></td>
+                      <td><span className="wrap" title={record.issuer}>{record.issuer || '-'}</span></td>
+                      <td className="center">{record.code || '-'}</td>
+                    </tr>
+                  );
+                })}
+                {emptyRows(missingRowCount).map((emptyIndex) => (
+                  <tr key={`empty-row-${pageNum}-${emptyIndex}`} aria-hidden="true">
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                     <td>&nbsp;</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {pageNum === totalPages && (
+              <div className="form-note">
+                หมายเหตุ: วันฝึกอบรม 1 วัน คิดเป็นชั่วโมงฝึกอบรม 8 ชั่วโมง
+              </div>
+            )}
+
+            <div className="form-footer-container">
+              <div>Printed date: {formatThaiDateTime(new Date(), false)}</div>
+              <div>F-D3-14 ({getPageDateRange(pageRecords)}) หน้า {pageNum} / {totalPages}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const PrintReportPage = () => {
   const { reportId } = useParams();
   const report = React.useMemo(() => getStoredPrintReport(reportId), [reportId]);
+  const [isCustomFormView, setIsCustomFormView] = React.useState(false);
+  const [isExporting, setIsExporting] = React.useState(false);
+
+  const handleExportExcel = async () => {
+    const userId = report?.profile?.id;
+    if (!userId) {
+      alert('ไม่พบรหัสผู้ใช้เพื่อดาวน์โหลดแบบฟอร์ม กรุณาปิดหน้านี้ รีเฟรชหน้ารายชื่อผู้ใช้งานหลัก (F5) แล้วกดพิมพ์ใหม่อีกครั้งเพื่อปรับปรุงข้อมูลในเบราว์เซอร์');
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      const response = await adminAPI.exportSingleUserForm(userId);
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const rawName = report?.profile?.name || 'user';
+      link.setAttribute('download', `ประวัติผู้เรียน_${rawName}_แบบฟอร์ม.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export single user form:', error);
+      alert('เกิดข้อผิดพลาดในการดาวน์โหลดแบบฟอร์ม');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   React.useEffect(() => {
     if (!report) {
@@ -535,6 +886,29 @@ const PrintReportPage = () => {
           </div>
 
           <div className="print-toolbar-actions">
+            {report.profile?.customFormRows && (
+              <button
+                type="button"
+                className="print-toolbar-button"
+                style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)', marginRight: '8px' }}
+                onClick={() => setIsCustomFormView(!isCustomFormView)}
+              >
+                <Printer size={16} />
+                <span>{isCustomFormView ? 'แสดงรายงานปกติ' : 'พิมพ์ตามแบบฟอร์ม'}</span>
+              </button>
+            )}
+            {(report.type === 'custom-form' || isCustomFormView) && (
+              <button
+                type="button"
+                className="print-toolbar-button"
+                style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', marginRight: '8px' }}
+                onClick={handleExportExcel}
+                disabled={isExporting}
+              >
+                <FileDown size={16} />
+                <span>{isExporting ? 'กำลังดาวน์โหลด...' : 'Export to Excel'}</span>
+              </button>
+            )}
             <div className="print-toolbar-note">เปิดหน้านี้แล้วสั่งพิมพ์หรือ Save as PDF ได้ทันที</div>
             <button type="button" className="print-toolbar-button" onClick={() => window.print()}>
               <Printer size={16} />
@@ -545,7 +919,9 @@ const PrintReportPage = () => {
       </div>
 
       <div className="print-shell">
-        {report.type === 'dashboard' ? (
+        {(report.type === 'custom-form' || isCustomFormView) ? (
+          <CustomFormPrintContent report={report} />
+        ) : report.type === 'dashboard' ? (
           <DashboardPrintContent report={report} />
         ) : (
           <div dangerouslySetInnerHTML={{ __html: renderPrintReportMarkup(report) }} />

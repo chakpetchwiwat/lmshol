@@ -36,6 +36,30 @@ const CertificationMonitor = () => {
   const [selectedStatus, setSelectedStatus] = React.useState('ALL');
   const [debouncedSearch, setDebouncedSearch] = React.useState('');
   const [retryingIds, setRetryingIds] = React.useState(new Set());
+  const [downloadingIds, setDownloadingIds] = React.useState(new Set());
+
+  const handleDownload = async (certId) => {
+    if (downloadingIds.has(certId)) return;
+    try {
+      setDownloadingIds(prev => new Set(prev).add(certId));
+      const response = await adminAPI.getCertificateDownloadUrl(certId);
+      const url = response.data?.url || response.url;
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        toast.error('ไม่พบลิงก์ดาวน์โหลดเกียรติบัตร');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('ไม่สามารถเปิดไฟล์เกียรติบัตรได้');
+    } finally {
+      setDownloadingIds(prev => {
+        const next = new Set(prev);
+        next.delete(certId);
+        return next;
+      });
+    }
+  };
 
   // Debounce search
   React.useEffect(() => {
@@ -231,15 +255,18 @@ const CertificationMonitor = () => {
                           </button>
                         )}
                         {cert.status === 'VALID' && cert.pdfUrl && (
-                          <a
-                            href={cert.pdfUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 text-slate-400 hover:text-primary transition-colors bg-slate-100 hover:bg-primary/10 rounded-lg"
+                          <button
+                            onClick={() => handleDownload(cert.id)}
+                            disabled={downloadingIds.has(cert.id)}
+                            className="p-1.5 text-slate-400 hover:text-primary transition-colors bg-slate-100 hover:bg-primary/10 rounded-lg disabled:opacity-50"
                             title="View PDF"
                           >
-                            <ExternalLink size={18} />
-                          </a>
+                            {downloadingIds.has(cert.id) ? (
+                              <RefreshCw size={18} className="animate-spin text-primary" />
+                            ) : (
+                              <ExternalLink size={18} />
+                            )}
+                          </button>
                         )}
                       </div>
                     </td>
