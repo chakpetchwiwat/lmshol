@@ -1,6 +1,7 @@
 import React from 'react';
-import { ExternalLink, Printer } from 'lucide-react';
+import { ExternalLink, Printer, FileDown } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+import { adminAPI } from '../../utils/api';
 import {
   Bar,
   BarChart,
@@ -525,7 +526,7 @@ const CustomFormPrintContent = ({ report }) => {
             )}
 
             <div className="form-footer-container">
-              <div>Printed date: ...........................................................</div>
+              <div>Printed date: {formatThaiDateTime(new Date(), false)}</div>
               <div>F-D3-14 ({getPageDateRange(pageRecords)}) หน้า {pageNum} / {totalPages}</div>
             </div>
           </div>
@@ -539,6 +540,37 @@ const PrintReportPage = () => {
   const { reportId } = useParams();
   const report = React.useMemo(() => getStoredPrintReport(reportId), [reportId]);
   const [isCustomFormView, setIsCustomFormView] = React.useState(false);
+  const [isExporting, setIsExporting] = React.useState(false);
+
+  const handleExportExcel = async () => {
+    const userId = report?.profile?.id;
+    if (!userId) {
+      alert('ไม่พบรหัสผู้ใช้เพื่อทำการดาวน์โหลดแบบฟอร์ม');
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      const response = await adminAPI.exportSingleUserForm(userId);
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const rawName = report?.profile?.name || 'user';
+      link.setAttribute('download', `ประวัติผู้เรียน_${rawName}_แบบฟอร์ม.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export single user form:', error);
+      alert('เกิดข้อผิดพลาดในการดาวน์โหลดแบบฟอร์ม');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   React.useEffect(() => {
     if (!report) {
@@ -863,6 +895,18 @@ const PrintReportPage = () => {
               >
                 <Printer size={16} />
                 <span>{isCustomFormView ? 'แสดงรายงานปกติ' : 'พิมพ์ตามแบบฟอร์ม'}</span>
+              </button>
+            )}
+            {(report.type === 'custom-form' || isCustomFormView) && (
+              <button
+                type="button"
+                className="print-toolbar-button"
+                style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', marginRight: '8px' }}
+                onClick={handleExportExcel}
+                disabled={isExporting}
+              >
+                <FileDown size={16} />
+                <span>{isExporting ? 'กำลังดาวน์โหลด...' : 'Export to Excel'}</span>
               </button>
             )}
             <div className="print-toolbar-note">เปิดหน้านี้แล้วสั่งพิมพ์หรือ Save as PDF ได้ทันที</div>

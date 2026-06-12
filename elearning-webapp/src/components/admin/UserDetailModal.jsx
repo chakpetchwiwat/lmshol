@@ -311,6 +311,7 @@ const UserDetailModalContent = ({ loading, detail, onClose, cohortRoles = [] }) 
         { label: 'ปี', value: filterYear === FILTER_VALUES.ALL ? 'ทุกปี' : String(parseInt(filterYear, 10) + 543) },
       ],
       profile: {
+        id: detail?.id,
         title: 'ข้อมูลโปรไฟล์ผู้ใช้',
         name: detail?.name || '-',
         subtitle: detail?.email || '',

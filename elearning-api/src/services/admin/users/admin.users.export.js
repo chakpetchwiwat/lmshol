@@ -534,6 +534,116 @@ const exportSingleUser = async (id, authUser) => {
   const detail = await detailsService.getUserDetails(id, authUser);
   if (!detail) throw new Error('User not found');
 
+  // Sheet 1: ข้อมูลทั่วไป (General Info)
+  const profileHeaders = ['หัวข้อ', 'ข้อมูล'];
+  const firstEdu = getFirstEducation(detail);
+  const highestEdu = getHighestEducation(detail);
+
+  const profileRows = [
+    ['ชื่อ-นามสกุล', detail.name || '-'],
+    ['อีเมล', detail.email || '-'],
+    ['เลขประจำตัวประชาชน', detail.nationalId || '-'],
+    ['แผนก', detail.department || '-'],
+    ['กลุ่มงาน', detail.subdivision || '-'],
+    ['ตำแหน่ง', detail.position || '-'],
+    ['ระดับ', detail.tier?.name || detail.tier || '-'],
+    ['ประเภทตำแหน่ง', detail.positionType || '-'],
+    ['หัวหน้างาน', detail.supervisorName || '-'],
+    ['วันเริ่มงาน', formatDate(detail.employmentDate)],
+    ['วันเกษียณอายุ', detail.retirementDateRaw || '-'],
+    ['แต้มคงเหลือ', String(detail.pointsBalance || 0)],
+    // ประวัติการศึกษา
+    ['ระดับการศึกษา', firstEdu.degree || firstEdu.degreeName || '-'],
+    ['วุฒิการศึกษา', firstEdu.degreeName || firstEdu.degree || '-'],
+    ['สาขาวิชา', firstEdu.major || firstEdu.faculty || '-'],
+    ['สถาบันการศึกษา', firstEdu.institution || '-'],
+    // ประวัติการศึกษาสูงสุด
+    ['ระดับการศึกษาสูงสุด', highestEdu.degree || highestEdu.highestLevel || '-'],
+    ['วุฒิการศึกษาสูงสุด', highestEdu.degreeName || highestEdu.highestDegreeName || '-'],
+    ['สาขาวิชาสูงสุด', highestEdu.major || highestEdu.highestFieldOfStudy || '-'],
+    ['สถาบันการศึกษาสูงสุด', highestEdu.institution || highestEdu.highestInstitution || '-']
+  ];
+
+  // Sheet 2: ประวัติการเรียน (Learning History)
+  const learningHeaders = ['คอร์ส', 'หมวดหมู่', 'เริ่มเรียน', 'สำเร็จเมื่อ', 'ความคืบหน้า', 'สถานะ'];
+  const learningRows = (detail.enrollments || []).map(item => [
+    item.course?.title || '-',
+    item.course?.categoryName || '-',
+    item.startedAt ? formatDate(item.startedAt) : '-',
+    item.completedAt ? formatDate(item.completedAt) : '-',
+    `${Math.round(item.progressPercent || 0)}%`,
+    item.status === 'COMPLETED' ? 'เรียนจบแล้ว' : 'กำลังเรียน'
+  ]);
+
+  // Sheet 3: ประวัติ Point
+  const pointsHeaders = ['ประเภท', 'ที่มา/การใช้งาน', 'หมายเหตุ', 'Point', 'เวลา'];
+  const pointsRows = (detail.pointsHistory || []).map(item => [
+    item.points >= 0 ? 'ได้รับแต้ม' : 'ใช้แต้ม',
+    item.sourceLabel || '-',
+    item.note || '-',
+    String(item.points),
+    item.createdAt ? formatDate(item.createdAt) : '-'
+  ]);
+
+  // Sheet 4: ประวัติการอบรม (Training History)
+  const certHeaders = ['หลักสูตร / หัวข้อ', 'ประเภท', 'ผู้จัด / ผู้ออก', 'เลขที่ใบเซอร์ / รายละเอียด', 'วันที่เริ่ม', 'วันที่สิ้นสุด / วันที่ได้รับ', 'จำนวนวัน', 'รุ่นที่', 'สถานที่', 'หมายเหตุ'];
+  
+  const systemCerts = (detail.systemCertificates || []).map(cert => {
+    const enroll = (detail.enrollments || []).find(e => e.course?.id === cert.courseId);
+    const startDateVal = enroll?.startedAt ? formatDate(enroll.startedAt) : (cert.issuedAt ? formatDate(cert.issuedAt) : '-');
+    return [
+      cert.courseTitle || '-',
+      'ภายใน',
+      'LMS System',
+      cert.certificateNo || '-',
+      startDateVal,
+      cert.issuedAt ? formatDate(cert.issuedAt) : '-',
+      '-',
+      '-',
+      'Online (e-Learning)',
+      ''
+    ];
+  });
+  
+  const externalCerts = (detail.externalCertificates || []).map(cert => [
+    cert.title || '-',
+    cert.trainingType || 'ภายนอก',
+    cert.issuer || '-',
+    cert.credentialId || cert.trainingDetails || '-',
+    cert.startDate ? formatDate(cert.startDate) : (cert.issueDate ? formatDate(cert.issueDate) : '-'),
+    cert.issueDate ? formatDate(cert.issueDate) : '-',
+    cert.trainingDays || '-',
+    cert.intakeNo || '-',
+    cert.trainingVenue || '-',
+    cert.remarks || ''
+  ]);
+  
+  const certRows = [...systemCerts, ...externalCerts];
+
+  // Build Workbook
+  const wb = xlsx.utils.book_new();
+
+  // Helper to add sheet
+  const addSheet = (sheetName, headers, rows, colWidths) => {
+    const ws = xlsx.utils.aoa_to_sheet([headers, ...rows]);
+    setWorkbookView(ws, colWidths);
+    xlsx.utils.book_append_sheet(wb, ws, sheetName);
+  };
+
+  addSheet('ข้อมูลทั่วไป', profileHeaders, profileRows, [25, 45]);
+  addSheet('ประวัติการเรียน', learningHeaders, learningRows, [45, 25, 18, 18, 15, 15]);
+  addSheet('ประวัติ Point', pointsHeaders, pointsRows, [15, 35, 30, 12, 18]);
+  addSheet('ประวัติการอบรม', certHeaders, certRows, [45, 15, 25, 30, 18, 18, 12, 12, 25, 20]);
+
+  const buffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  return { name: detail.name, buffer };
+};
+
+const exportSingleUserForm = async (id, authUser) => {
+  const detailsService = require('./admin.users.details');
+  const detail = await detailsService.getUserDetails(id, authUser);
+  if (!detail) throw new Error('User not found');
+
   const enrollments = detail.enrollments || [];
   const systemCertificates = detail.systemCertificates || [];
   const externalCertificates = detail.externalCertificates || [];
@@ -633,6 +743,18 @@ const exportSingleUser = async (id, authUser) => {
     return `${minStr} - ${maxStr}`;
   };
 
+  // Get current date formatted as DD/MM/YYYY in Thai Buddhist calendar
+  const getPrintedDateThai = () => {
+    const d = new Date();
+    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    const thDate = new Date(utc + (3600000 * 7));
+    const day = String(thDate.getDate()).padStart(2, '0');
+    const month = String(thDate.getMonth() + 1).padStart(2, '0');
+    const year = String(thDate.getFullYear() + 543);
+    return `${day}/${month}/${year}`;
+  };
+  const printedDate = getPrintedDateThai();
+
   for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
     const pageRecords = allRecords.slice(pageIdx * pageSize, (pageIdx + 1) * pageSize);
     
@@ -704,7 +826,7 @@ const exportSingleUser = async (id, authUser) => {
     };
 
     ws['!headerFooter'] = {
-      oddFooter: `&L&"TH Sarabun PSK"&16Printed date: ...............................................&RF-D3-14 (${dateRange}) หน้า ${pageIdx + 1} / ${totalPages}`
+      oddFooter: `&L&"TH Sarabun PSK"&16Printed date: ${printedDate}&RF-D3-14 (${dateRange}) หน้า ${pageIdx + 1} / ${totalPages}`
     };
 
     xlsx.utils.book_append_sheet(wbOut, ws, `หน้า ${pageIdx + 1}`);
@@ -717,5 +839,6 @@ const exportSingleUser = async (id, authUser) => {
 module.exports = {
   exportUserProfiles,
   exportUserTrainings,
-  exportSingleUser
+  exportSingleUser,
+  exportSingleUserForm
 };

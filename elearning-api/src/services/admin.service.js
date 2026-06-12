@@ -12,7 +12,7 @@ const { getCategories, createCategory, updateCategory, republishCategory, archiv
 const { getAdminRewards, createReward, updateReward, deleteReward, getRedeemRequests, updateRedeemStatus } = require('./admin/admin.rewards');
 const { getAdminCourses, createCourse, updateCourse, republishCourse, archiveCourse, getCourseHistory, deleteCourse, getCourseLessons, createLesson, updateLesson, deleteLesson, reorderLessons, getCourseQuizAttempts } = require('./admin/admin.courses');
 
-const { getUsers, getUserDetails, createUser, updateUser, deleteUser, exportUserProfiles, exportUserTrainings, exportSingleUser, downloadTemplate, importProfiles, importTrainings } = require('./admin/admin.users');
+const { getUsers, getUserDetails, createUser, updateUser, deleteUser, exportUserProfiles, exportUserTrainings, exportSingleUser, exportSingleUserForm, downloadTemplate, importProfiles, importTrainings } = require('./admin/admin.users');
 const userCertificates = require('./user/user.certificates');
 const { getDepartments, createDepartment, updateDepartment, deleteDepartment } = require('./admin/admin.departments');
 const { getTiers, createTier, updateTier, deleteTier, reorderTiers } = require('./admin/admin.tiers');
@@ -58,6 +58,7 @@ module.exports = {
     exportUserProfiles,
     exportUserTrainings,
     exportSingleUser,
+    exportSingleUserForm,
     downloadTemplate,
     importProfiles,
     importTrainings,

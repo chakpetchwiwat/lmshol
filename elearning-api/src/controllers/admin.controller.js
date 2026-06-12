@@ -100,6 +100,16 @@ const exportSingleUser = asyncHandler(async (req, res) => {
   res.send(buffer);
 });
 
+const exportSingleUserForm = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { name, buffer } = await AdminService.exportSingleUserForm(id, req.user);
+  const rawFilename = `ประวัติผู้เรียน_${name || 'user'}_แบบฟอร์ม`;
+  const safeFilename = encodeURIComponent(rawFilename);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}.xlsx"; filename*=UTF-8''${safeFilename}.xlsx`);
+  res.send(buffer);
+});
+
 const downloadTemplate = asyncHandler(async (req, res) => {
   const { type } = req.params;
   const buffer = await AdminService.downloadTemplate(type);
@@ -671,6 +681,7 @@ module.exports = {
   exportUserProfiles,
   exportUserTrainings,
   exportSingleUser,
+  exportSingleUserForm,
   downloadTemplate,
   importUsers,
   getCompetencies,
