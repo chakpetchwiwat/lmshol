@@ -117,7 +117,7 @@ const appendToMediaLibrary = async (record) => {
         list.unshift(record);
         await fs.writeFile(metadataPath, JSON.stringify(list, null, 2), 'utf8');
     } catch (err) {
-        console.error('Error writing to media library metadata:', err);
+        console.warn('Error writing to media library metadata file (expected on Vercel):', err.message);
     }
 };
 
@@ -145,10 +145,24 @@ const uploadToLocalDisk = async (req, res, { forceSubDir, includeSignedUrl = fal
         const ext = path.extname(req.file.originalname);
         
         const fileKey = `${visibilityDir}/${subDir}/${crypto.randomUUID()}${ext.toLowerCase()}`;
-        const absolutePath = path.join(UPLOADS_DIR, fileKey);
 
-        await ensureDir(path.dirname(absolutePath));
-        await fs.writeFile(absolutePath, req.file.buffer);
+        // 1. Write to Database first
+        await prisma.dbUpload.create({
+            data: {
+                key: fileKey,
+                data: req.file.buffer,
+                mimeType: req.file.mimetype
+            }
+        });
+
+        // 2. Try to write to local disk as fallback/cache (will fail gracefully on Vercel)
+        try {
+            const absolutePath = path.join(UPLOADS_DIR, fileKey);
+            await ensureDir(path.dirname(absolutePath));
+            await fs.writeFile(absolutePath, req.file.buffer);
+        } catch (localErr) {
+            console.warn('Unable to write upload to local disk (expected on Vercel):', localErr.message);
+        }
 
         const fileUrl = isSensitive ? null : `/uploads/${fileKey}`;
 
@@ -492,25 +506,30 @@ router.get('/secure/:token', async (req, res) => {
         
         // Prevent path traversal
         const normalizedKey = path.normalize(fileKey).replace(/^(\.\.(\/|\\|$))+/, '');
-        let absolutePath = path.join(UPLOADS_DIR, normalizedKey);
         
-        // Try local file exists checks with secure, public, and public/uploads subdirectories
-        const possiblePaths = [
-            absolutePath,
-            path.join(UPLOADS_DIR, 'secure', normalizedKey),
-            path.join(UPLOADS_DIR, 'public', normalizedKey),
-            path.join(UPLOADS_DIR, 'public/uploads', normalizedKey)
-        ];
-
-        for (const p of possiblePaths) {
-            try {
-                await fs.access(p);
-                absolutePath = p;
-                break;
-            } catch (err) {
-                // Try next path
+        // 1. Try fetching from database first
+        try {
+            const upload = await prisma.dbUpload.findUnique({
+                where: { key: normalizedKey }
+            });
+            if (upload) {
+                if (originalName) {
+                    let decodedOriginalName = originalName;
+                    try {
+                        decodedOriginalName = decodeURIComponent(originalName);
+                    } catch (e) {}
+                    const asciiFilename = decodedOriginalName.replace(/[^\x20-\x7E]/g, '_').replace(/"/g, '_');
+                    const encodedName = encodeURIComponent(decodedOriginalName);
+                    res.setHeader('Content-Disposition', `inline; filename="${asciiFilename}"; filename*=UTF-8''${encodedName}`);
+                }
+                res.setHeader('Content-Type', upload.mimeType);
+                return res.send(upload.data);
             }
+        } catch (dbErr) {
+            console.error('Error serving secure file from DB:', dbErr);
         }
+
+        let absolutePath = path.join(UPLOADS_DIR, normalizedKey);
         
         // Ensure it only serves from allowed secure/private directories to prevent arbitrary file read
         const isAllowedPath = 
@@ -522,6 +541,38 @@ router.get('/secure/:token', async (req, res) => {
             
         if (!isAllowedPath) {
             return res.status(403).send('Forbidden access to non-secure directory');
+        }
+
+        // Try local file exists checks with secure, public, and public/uploads subdirectories
+        const possiblePaths = [
+            absolutePath,
+            path.join(UPLOADS_DIR, 'secure', normalizedKey),
+            path.join(UPLOADS_DIR, 'public', normalizedKey),
+            path.join(UPLOADS_DIR, 'public/uploads', normalizedKey)
+        ];
+
+        let existsLocally = false;
+        for (const p of possiblePaths) {
+            try {
+                await fs.access(p);
+                absolutePath = p;
+                existsLocally = true;
+                break;
+            } catch (err) {
+                // Try next path
+            }
+        }
+
+        // Try fallback check if it's a migrated bucket file
+        if (!existsLocally && !normalizedKey.startsWith('secure/') && !normalizedKey.startsWith('secure\\')) {
+            const fallbackPath = path.join(UPLOADS_DIR, 'secure', normalizedKey);
+            try {
+                await fs.access(fallbackPath);
+                absolutePath = fallbackPath;
+                existsLocally = true;
+            } catch (fallbackErr) {
+                // ignore
+            }
         }
 
         if (originalName) {
@@ -546,20 +597,61 @@ router.get('/secure/:token', async (req, res) => {
 // GET /api/upload/media-library - List and search uploaded files
 router.get('/media-library', verifyToken, verifyAdminPanelAccess, async (req, res) => {
     try {
+        let dbList = [];
+        try {
+            const uploads = await prisma.dbUpload.findMany({
+                where: {
+                    key: {
+                        startsWith: 'public/'
+                    }
+                },
+                select: {
+                    key: true,
+                    mimeType: true,
+                    createdAt: true
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                }
+            });
+            dbList = uploads.map(item => {
+                const parts = item.key.split('/');
+                const fileName = parts[parts.length - 1];
+                return {
+                    fileKey: item.key,
+                    fileUrl: `/uploads/${item.key}`,
+                    fileName,
+                    fileMimeType: item.mimeType,
+                    createdAt: item.createdAt.toISOString()
+                };
+            });
+        } catch (dbErr) {
+            console.error('Error listing media library from DB:', dbErr);
+        }
+
         const metadataPath = path.join(UPLOADS_DIR, 'metadata.json');
-        let list = [];
+        let localList = [];
         try {
             const data = await fs.readFile(metadataPath, 'utf8');
-            list = JSON.parse(data);
+            localList = JSON.parse(data);
         } catch (e) {
             try {
-                list = await scanExistingUploads();
-                // Save the scanned list so next time we don't have to rescan
-                await fs.writeFile(metadataPath, JSON.stringify(list, null, 2), 'utf8');
+                localList = await scanExistingUploads();
             } catch (scanErr) {
-                list = [];
+                localList = [];
             }
         }
+
+        const combinedMap = new Map();
+        for (const item of localList) {
+            combinedMap.set(item.fileKey, item);
+        }
+        for (const item of dbList) {
+            combinedMap.set(item.fileKey, item);
+        }
+
+        let list = Array.from(combinedMap.values());
+        list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         
         const search = String(req.query.search || '').trim().toLowerCase();
         if (search) {

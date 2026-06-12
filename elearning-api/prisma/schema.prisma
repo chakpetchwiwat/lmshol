@@ -883,3 +883,10 @@ model Testimony {
   @@index([authorId])
   @@index([status, createdAt])
 }
+
+model DbUpload {
+  key       String   @id
+  data      Bytes
+  mimeType  String
+  createdAt DateTime @default(now())
+}

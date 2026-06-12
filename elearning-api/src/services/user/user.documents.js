@@ -161,6 +161,24 @@ const getDocumentUpstreamResponse = async (documentAccessPayload) => {
     let fileName = 'document';
 
     if (storagePath) {
+        // 1. Try DB first
+        try {
+            const prisma = require('../../utils/prisma');
+            const upload = await prisma.dbUpload.findUnique({
+                where: { key: storagePath }
+            });
+            if (upload) {
+                return {
+                    isDb: true,
+                    data: upload.data,
+                    mimeType: upload.mimeType,
+                    fileName: getDocumentFilename(storagePath)
+                };
+            }
+        } catch (dbErr) {
+            console.error('Error fetching document from DB:', dbErr);
+        }
+
         const localFilePath = await resolveLocalPath(bucket || DEFAULT_SECURE_BUCKET, storagePath);
         fileName = getDocumentFilename(storagePath);
         return {

@@ -53,6 +53,25 @@ async function loadImageBuffer(imageUrl) {
   }
 
   if (isLocal) {
+    // 1. Try DB first
+    try {
+      const prisma = require('../../utils/prisma');
+      const upload = await prisma.dbUpload.findUnique({
+        where: { key: relativePath }
+      });
+      if (upload) {
+        const imageBuffer = upload.data;
+        const isPngOrJpeg = /\.(png|jpe?g)$/i.test(relativePath);
+        if (isPngOrJpeg) {
+          return imageBuffer;
+        }
+        return await sharp(imageBuffer).png().toBuffer();
+      }
+    } catch (dbErr) {
+      console.warn(`[CertificatePdf] Failed to load local file from database: ${imageUrl} (resolved to ${relativePath}) | Error: ${dbErr.message}`);
+    }
+
+    // 2. Local fallback
     try {
       const fsPromises = require('fs/promises');
       const absolutePath = path.join(UPLOADS_DIR, relativePath);
@@ -430,15 +449,30 @@ async function uploadCertificatePdf({ buffer, userId, certificateId }) {
   
   // Save to UPLOADS_DIR/secure/certificates/...
   const relativePath = `secure/certificates/${userId}/${certificateId}/${Date.now()}.pdf`;
-  const fullPath = path.join(UPLOADS_DIR, relativePath);
   
-  // Ensure directory exists
-  await fsPromises.mkdir(path.dirname(fullPath), { recursive: true });
+  // 1. Write to DB first
+  try {
+    const prisma = require('../../utils/prisma');
+    await prisma.dbUpload.create({
+      data: {
+        key: relativePath,
+        data: buffer,
+        mimeType: 'application/pdf'
+      }
+    });
+  } catch (dbErr) {
+    console.error('[CertificatePdf] Failed to write generated PDF to database:', dbErr.message);
+  }
+
+  // 2. Local fallback
+  try {
+    const fullPath = path.join(UPLOADS_DIR, relativePath);
+    await fsPromises.mkdir(path.dirname(fullPath), { recursive: true });
+    await fsPromises.writeFile(fullPath, buffer);
+  } catch (localErr) {
+    console.warn('[CertificatePdf] Unable to write generated PDF to local disk (expected on Vercel):', localErr.message);
+  }
   
-  // Write file
-  await fsPromises.writeFile(fullPath, buffer);
-  
-  // Return the local URL path
   return `/uploads/${relativePath}`;
 }
 

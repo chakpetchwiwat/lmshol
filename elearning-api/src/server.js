@@ -34,6 +34,28 @@ app.use(compression()); // Gzip all responses for smaller payloads
 app.use(express.json({ limit: securityConfig.bodyLimits.json }));
 app.use(express.urlencoded({ limit: securityConfig.bodyLimits.urlencoded, extended: true }));
 
+// Serve public uploaded files from database
+app.get('/uploads/*', async (req, res, next) => {
+  const key = req.params[0]; // gets the path after /uploads/
+  if (key.startsWith('secure/')) {
+    return res.status(403).send('Access Denied');
+  }
+  try {
+    const prisma = require('./utils/prisma');
+    const upload = await prisma.dbUpload.findUnique({
+      where: { key }
+    });
+    if (upload) {
+      res.setHeader('Content-Type', upload.mimeType);
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      return res.send(upload.data);
+    }
+  } catch (err) {
+    console.error('Error fetching file from database:', err);
+  }
+  next();
+});
+
 // Serve uploaded files as static (Only for local development)
 app.use('/uploads/public', express.static(path.join(__dirname, '../uploads/public')));
 

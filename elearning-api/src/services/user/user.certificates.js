@@ -226,14 +226,28 @@ const getCertificateSignedUrl = async (userId, certificateId) => {
                     path.join(UPLOADS_DIR, 'public/uploads', normalizedKey)
                 ];
                 
-                for (const p of possiblePaths) {
-                    try {
-                        await fs.access(p);
+                try {
+                    const upload = await prisma.dbUpload.findUnique({
+                        where: { key: normalizedKey }
+                    });
+                    if (upload) {
                         existsLocally = true;
                         fileKey = normalizedKey;
-                        break;
-                    } catch {
-                        // ignore
+                    }
+                } catch (dbErr) {
+                    // ignore
+                }
+
+                if (!existsLocally) {
+                    for (const p of possiblePaths) {
+                        try {
+                            await fs.access(p);
+                            existsLocally = true;
+                            fileKey = normalizedKey;
+                            break;
+                        } catch {
+                            // ignore
+                        }
                     }
                 }
             }

@@ -180,7 +180,10 @@ const getLessonDocumentStream = asyncHandler(async (req, res) => {
   res.setHeader('Content-Disposition', `inline; filename="${asciiFilename}"; filename*=UTF-8''${encodedName}`);
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
 
-  if (isLocal) {
+  if (result.isDb) {
+    res.setHeader('Content-Type', result.mimeType);
+    return res.send(result.data);
+  } else if (isLocal) {
     res.sendFile(localFilePath, (err) => {
       if (err) {
         console.error('Error sending local lesson document:', err);
@@ -212,7 +215,10 @@ const getAnnouncementDocumentStream = asyncHandler(async (req, res) => {
   res.setHeader('Content-Disposition', `inline; filename="${asciiFilename}"; filename*=UTF-8''${encodedName}`);
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
 
-  if (isLocal) {
+  if (result.isDb) {
+    res.setHeader('Content-Type', result.mimeType);
+    return res.send(result.data);
+  } else if (isLocal) {
     res.sendFile(localFilePath, (err) => {
       if (err) {
         console.error('Error sending local announcement document:', err);
