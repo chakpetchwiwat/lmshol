@@ -12,19 +12,25 @@ const toUniqueList = (values) => [...new Set(values)];
 
 const getAllowedOrigins = (
     nodeEnv = process.env.NODE_ENV,
-    allowedOriginsValue = process.env.ALLOWED_ORIGINS
+    allowedOriginsValue = process.env.ALLOWED_ORIGINS,
+    frontendUrlValue = process.env.FRONTEND_URL
 ) => {
-    const configuredOrigins = splitCsv(allowedOriginsValue);
+    // Helper to strip trailing slashes from origin URLs
+    const stripTrailingSlash = (url = '') => url.replace(/\/+$/, '');
+
+    const configuredOrigins = splitCsv(allowedOriginsValue).map(stripTrailingSlash);
+    const configuredFrontend = frontendUrlValue ? [stripTrailingSlash(frontendUrlValue)] : [];
 
     // Always include local origins for development and debugging
     const defaultOrigins = [
-        ...SECURITY_DEFAULTS.LOCAL_ALLOWED_ORIGINS,
+        ...SECURITY_DEFAULTS.LOCAL_ALLOWED_ORIGINS.map(stripTrailingSlash),
         'https://lms-scaleup.vercel.app' // Hardcoded fallback for current deployment to prevent lockout
     ];
 
     if (nodeEnv !== 'production') {
         return toUniqueList([
             ...configuredOrigins,
+            ...configuredFrontend,
             ...defaultOrigins
         ]);
     }
@@ -32,6 +38,7 @@ const getAllowedOrigins = (
     // In production, prioritize configured origins but allow the current deployment as safety net
     return toUniqueList([
         ...configuredOrigins,
+        ...configuredFrontend,
         'https://lms-scaleup.vercel.app'
     ]);
 };
@@ -108,7 +115,7 @@ const parseBoolean = (value, fallback) => {
 const getSecurityConfig = (env = process.env) => ({
     nodeEnv: env.NODE_ENV || 'development',
     trustProxy: parseTrustProxy(env.TRUST_PROXY),
-    allowedOrigins: getAllowedOrigins(env.NODE_ENV, env.ALLOWED_ORIGINS),
+    allowedOrigins: getAllowedOrigins(env.NODE_ENV, env.ALLOWED_ORIGINS, env.FRONTEND_URL),
     bodyLimits: {
         json: parseLimit(env.API_BODY_LIMIT, SECURITY_DEFAULTS.API_BODY_LIMIT),
         urlencoded: parseLimit(env.URLENCODED_BODY_LIMIT, SECURITY_DEFAULTS.URLENCODED_BODY_LIMIT)

@@ -10,15 +10,17 @@ const {
 } = require('../src/config/security');
 const { SECURITY_DEFAULTS } = require('../src/utils/constants/config');
 
-test('getAllowedOrigins appends localhost origins outside production and removes duplicates', () => {
+test('getAllowedOrigins appends localhost origins outside production, removes duplicates, and strips trailing slashes', () => {
     const allowedOrigins = getAllowedOrigins(
         'development',
-        'https://app.example.com,http://localhost:5173'
+        'https://app.example.com/,http://localhost:5173',
+        'https://frontend.example.com///'
     );
 
     assert.deepEqual(allowedOrigins, [
         'https://app.example.com',
         'http://localhost:5173',
+        'https://frontend.example.com',
         'http://localhost:3000',
         'https://lms-scaleup.vercel.app'
     ]);
