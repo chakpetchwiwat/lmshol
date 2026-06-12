@@ -203,7 +203,7 @@ const AnnouncementManagement = () => {
     }
 
     if (form.scope === 'DEPARTMENT' && !form.departmentId) {
-      toast.error('กรุณาเลือกกอง');
+      toast.error('กรุณาเลือกแผนก');
       return;
     }
 
@@ -384,7 +384,7 @@ const AnnouncementManagement = () => {
 
   const columns = [
     { label: 'ประกาศ' },
-    { label: 'กอง', className: 'min-w-[140px]' },
+    { label: 'แผนก', className: 'min-w-[140px]' },
     { label: 'ชนิดหน้า', className: 'min-w-[120px]' },
     { label: 'หมดอายุ', className: 'min-w-[180px]' },
     { label: 'จัดการ', className: 'w-[100px] text-center' },
@@ -393,8 +393,8 @@ const AnnouncementManagement = () => {
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <AdminPageHeader
-        title="จัดการประกาศกอง"
-        subtitle={isFullAdmin ? 'สร้างและดูประกาศได้ทุกกอง' : `ดูแลประกาศสำหรับกอง ${user?.department || 'ของคุณ'}`}
+        title="จัดการประกาศแผนก"
+        subtitle={isFullAdmin ? 'สร้างและดูประกาศได้ทุกแผนก' : `ดูแลประกาศสำหรับแผนก ${user?.department || 'ของคุณ'}`}
         actions={(
           <button type="button" onClick={openCreateModal} className="btn btn-primary gap-2">
             <BellPlus size={18} />
@@ -420,7 +420,7 @@ const AnnouncementManagement = () => {
               <input
                 type="text"
                 className="w-full rounded-md border border-border bg-gray-50 py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none"
-                placeholder="ค้นหาชื่อประกาศหรือกอง..."
+                placeholder="ค้นหาชื่อประกาศหรือแผนก..."
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
               />

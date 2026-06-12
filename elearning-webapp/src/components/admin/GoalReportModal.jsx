@@ -77,7 +77,7 @@ const GoalReportModal = ({
         { label: 'กำลังเรียน', value: `${statusCounts.IN_PROGRESS} คน` },
         { label: 'ยังไม่เริ่ม', value: `${statusCounts.NOT_STARTED} คน` },
       ],
-      columns: ['พนักงาน', 'กอง', 'ความคืบหน้า', 'สถานะ', 'รายละเอียด'],
+      columns: ['พนักงาน', 'แผนก', 'ความคืบหน้า', 'สถานะ', 'รายละเอียด'],
       rows: filteredRows.map((record) => ([
         record.name || '-',
         record.department || '-',
@@ -210,7 +210,7 @@ const GoalReportModal = ({
                     <thead>
                       <tr className="border-b border-border bg-slate-50 text-slate-500">
                         <th className="p-4 text-left text-[10px] font-bold uppercase">พนักงาน</th>
-                        <th className="p-4 text-left text-[10px] font-bold uppercase">กอง</th>
+                        <th className="p-4 text-left text-[10px] font-bold uppercase">แผนก</th>
                         <th className="p-4 text-center text-[10px] font-bold uppercase">ความคืบหน้า</th>
                         <th className="p-4 text-left text-[10px] font-bold uppercase">รายละเอียดรายคอร์ส</th>
                         <th className="p-4 text-right text-[10px] font-bold uppercase">สถานะ</th>

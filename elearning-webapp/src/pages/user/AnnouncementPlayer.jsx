@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { BellRing, CalendarClock, CheckCircle, Clock, FileText, Play, BookOpen } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getFullUrl, userAPI } from '../../utils/api';
@@ -213,7 +213,7 @@ const AnnouncementPlayer = () => {
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-black tracking-[0.04em] text-amber-700">
                 <BellRing size={14} />
-                ประกาศกอง
+                ประกาศแผนก
               </span>
               <span className="flex items-center gap-1.5 rounded-lg border border-primary/10 bg-primary/5 px-3 py-2 text-xs font-black tracking-[0.04em] text-primary">
                 {announcement.type === 'video' ? <Play size={14} fill="currentColor" /> :
@@ -237,7 +237,7 @@ const AnnouncementPlayer = () => {
                 {announcement.title}
               </h1>
               <p className="mt-4 text-sm font-bold text-amber-700">
-                สำหรับกอง {announcement.department?.name || 'ของคุณ'}
+                สำหรับแผนก {announcement.department?.name || 'ของคุณ'}
               </p>
               {announcement.description && (
                 <p className="mt-4 max-w-3xl text-base leading-7 text-slate-500">

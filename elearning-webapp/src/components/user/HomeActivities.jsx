@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { PlayCircle, ChevronRight, Target } from 'lucide-react';
 import { ENROLLMENT_STATUS } from '../../utils/constants/statuses';
 
@@ -42,7 +42,7 @@ const HomeActivities = ({ courses, goalsProgress, onNavigate }) => {
                   <div className="flex items-center gap-2 mb-1">
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none">{gp.title}</p>
                     <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded border leading-none ${gp.scope === 'DEPARTMENT' ? 'border-warning-border text-warning-text bg-warning-bg' : 'border-info-border text-info-text bg-info-bg'}`}>
-                      {gp.scope === 'DEPARTMENT' ? (gp.deptName || 'กอง') : 'องค์กร'}
+                      {gp.scope === 'DEPARTMENT' ? (gp.deptName || 'แผนก') : 'องค์กร'}
                     </span>
                   </div>
                   <h3 className="text-xl font-bold text-slate-800 leading-none mb-3">{gp.current}/{gp.target} คอร์ส</h3>

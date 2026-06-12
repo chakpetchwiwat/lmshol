@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { FileText } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
 
@@ -20,7 +20,7 @@ const CourseQuizReports = ({ quizReports, loadingReports }) => {
               <tr className="bg-gray-50 border-b border-gray-100 text-muted">
                 <th className="p-3 font-medium">ชื่อผู้ใช้</th>
                 <th className="p-3 font-medium">อีเมล</th>
-                <th className="p-3 font-medium">กอง</th>
+                <th className="p-3 font-medium">แผนก</th>
                 <th className="p-3 font-medium">บททดสอบ</th>
                 <th className="p-3 font-medium text-center">คะแนน</th>
                 <th className="p-3 font-medium text-center">ผลลัพธ์</th>

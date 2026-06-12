@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ArrowUpRight, Award } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -25,7 +25,7 @@ const DepartmentLeaderboard = ({ data, onSelectDepartment }) => {
           </div>
           <div className="text-left">
             <h3 className="text-lg font-bold text-slate-900">Department Benchmarking</h3>
-            <p className="text-sm text-slate-500">คลิกกองเพื่อดูรายชื่อผู้เรียนและผลการเรียนรายบุคคล</p>
+            <p className="text-sm text-slate-500">คลิกแผนกเพื่อดูรายชื่อผู้เรียนและผลการเรียนรายบุคคล</p>
           </div>
         </div>
       </div>

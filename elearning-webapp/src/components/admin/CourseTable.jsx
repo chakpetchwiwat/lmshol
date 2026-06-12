@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import Skeleton from '../common/Skeleton';
 import { RotateCcw, Edit, Trash2, History, Archive } from 'lucide-react';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -77,7 +77,7 @@ const CourseTable = ({ courses, loading, onEdit, onDelete, onRepublish, onViewHi
                   </span>
                 ) : (
                   <div className="space-y-1">
-                    <div>กอง {course.visibleDepartments?.length || 0} รายการ</div>
+                    <div>แผนก {course.visibleDepartments?.length || 0} รายการ</div>
                     <div>ตำแหน่ง {course.visibleTiers?.length || 0} รายการ</div>
                   </div>
                 )}

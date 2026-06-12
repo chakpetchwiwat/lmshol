@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Building2, Check, ChevronRight, Search, Tags, Target, UserRound, UsersRound, X } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
@@ -157,7 +157,7 @@ const CreateGoalModal = ({
                 <ChevronRight size={14} />
                 <span className={formData.scope === 'GLOBAL' ? 'text-primary' : ''}>ทั้งองค์กร</span>
                 <ChevronRight size={14} />
-                <span className={selectedDepartmentIds.length > 0 ? 'text-primary' : ''}>กอง</span>
+                <span className={selectedDepartmentIds.length > 0 ? 'text-primary' : ''}>แผนก</span>
                 <ChevronRight size={14} />
                 <span className={selectedUserIds.length > 0 ? 'text-primary' : ''}>รายบุคคล</span>
               </div>
@@ -195,7 +195,7 @@ const CreateGoalModal = ({
                     }`}
                   >
                     <Building2 size={15} />
-                    กอง
+                    แผนก
                   </button>
                   <button
                     type="button"
@@ -217,9 +217,9 @@ const CreateGoalModal = ({
  
               <div className={targetMode === 'department' && showDepartmentSection ? 'space-y-2' : 'hidden'}>
                 <div className="flex items-center justify-between gap-3">
-                  <label className="text-sm font-bold text-slate-700">เลือกกอง</label>
+                  <label className="text-sm font-bold text-slate-700">เลือกแผนก</label>
                   {selectedDepartmentIds.length > 0 && (
-                    <span className="text-xs font-bold text-primary">{selectedDepartmentIds.length} กอง</span>
+                    <span className="text-xs font-bold text-primary">{selectedDepartmentIds.length} แผนก</span>
                   )}
                 </div>
  
@@ -310,7 +310,7 @@ const CreateGoalModal = ({
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <label className="text-sm font-bold text-slate-700">เลือกรายบุคคล</label>
                     <span className="text-xs font-bold text-slate-400">
-                      {selectedUserIds.length > 0 ? `${selectedUserIds.length} คนที่เลือก` : 'ไม่เลือก = ทั้งกองที่เลือก'}
+                      {selectedUserIds.length > 0 ? `${selectedUserIds.length} คนที่เลือก` : 'ไม่เลือก = ทั้งแผนกที่เลือก'}
                     </span>
                   </div>
 
@@ -318,7 +318,7 @@ const CreateGoalModal = ({
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     <input
                       type="text"
-                      placeholder="ค้นหาชื่อ อีเมล หรือกอง..."
+                      placeholder="ค้นหาชื่อ อีเมล หรือแผนก..."
                       className="w-full rounded-xl border border-slate-200 py-2 pl-10 pr-4 text-sm outline-none transition-all focus:border-primary"
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}

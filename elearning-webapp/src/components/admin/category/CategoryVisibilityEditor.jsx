@@ -1,4 +1,4 @@
-const toggleId = (ids = [], id) => (
+﻿const toggleId = (ids = [], id) => (
   ids.includes(id)
     ? ids.filter((itemId) => itemId !== id)
     : [...ids, id]
@@ -42,7 +42,7 @@ const CategoryVisibilityEditor = ({
     {!categoryForm.visibleToAll && (
       <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-3">
         <div>
-          <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">กอง (Department)</p>
+          <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-slate-500">แผนก (Department)</p>
           <div className="flex flex-wrap gap-1.5">
             {departments.map((department) => {
               const isSelected = (categoryForm.visibleDepartmentIds || []).includes(department.id);

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Plus, Sparkles, Building2 } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { toLocalInputValue } from '../../utils/dateUtils';
@@ -518,7 +518,7 @@ const CourseManagement = () => {
         <div className="text-left">
           <h2 className="mb-1 text-2xl font-bold">จัดการคอร์สเรียน</h2>
           <p className="text-sm text-muted">
-            สร้างคอร์ส จัดการบทเรียน และกำหนดว่ากองหรือระดับผู้ใช้งานไหนจะมองเห็นคอร์สนี้ได้
+            สร้างคอร์ส จัดการบทเรียน และกำหนดว่าแผนกหรือระดับผู้ใช้งานไหนจะมองเห็นคอร์สนี้ได้
           </p>
         </div>
 

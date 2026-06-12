@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { CalendarClock, Printer, Search, Users, X } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -208,14 +208,14 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
       ],
       filters: [
         { label: 'คอร์ส', value: courseTitle },
-        { label: 'กอง', value: departments.find((department) => department.id === filters.departmentId)?.name || 'ทั้งหมด' },
+        { label: 'แผนก', value: departments.find((department) => department.id === filters.departmentId)?.name || 'ทั้งหมด' },
         { label: 'ตำแหน่ง', value: tiers.find((tier) => tier.id === filters.tierId)?.name || 'ทั้งหมด' },
         { label: 'สถานะ', value: STATUS_OPTIONS.find((option) => option.value === filters.status)?.label || 'ทั้งหมด' },
         { label: 'อิงวันที่', value: DATE_FIELD_OPTIONS.find((option) => option.value === filters.dateField)?.label || 'วันที่เริ่มเรียน' },
         { label: 'เดือน', value: months.find((month) => month.value === filters.month)?.label || 'ทุกเดือน' },
         { label: 'ปี', value: filters.month ? (years.find((year) => year.value === filters.year)?.label || 'ทุกปี') : 'ทุกปี' },
       ],
-      columns: ['ชื่อผู้เรียน', 'กอง / ระดับ', 'เริ่มเรียน', 'สถานะ', 'ความคืบหน้า', 'คะแนนแบบทดสอบ', 'สำเร็จเมื่อ'],
+      columns: ['ชื่อผู้เรียน', 'แผนก / ระดับ', 'เริ่มเรียน', 'สถานะ', 'ความคืบหน้า', 'คะแนนแบบทดสอบ', 'สำเร็จเมื่อ'],
       rows: history.map((record) => ([
         record.user?.name || '-',
         [record.user?.department, record.user?.tier].filter(Boolean).join(' / ') || '-',
@@ -256,7 +256,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
           <div className="border-b border-slate-100 bg-white p-5">
             <div className="flex flex-wrap items-end gap-4">
               <CustomSelect
-                label="กอง"
+                label="แผนก"
                 className="min-w-[200px] flex-1"
                 value={filters.departmentId}
                 onChange={(event) => setFilters({ ...filters, departmentId: event.target.value })}
@@ -370,7 +370,7 @@ const CourseAttendanceModal = ({ isOpen, onClose, course, departments, tiers }) 
                 <thead className="sticky top-0 bg-white/95 shadow-sm backdrop-blur">
                   <tr className="border-b border-slate-200 text-sm text-slate-500">
                     <th className="p-4 font-bold">ชื่อผู้เรียน</th>
-                    <th className="p-4 font-bold">กอง / ระดับ</th>
+                    <th className="p-4 font-bold">แผนก / ระดับ</th>
                     <th className="p-4 font-bold">วันที่เริ่มเรียน</th>
                     <th className="p-4 font-bold">สถานะ</th>
                     <th className="p-4 font-bold">ความคืบหน้า</th>

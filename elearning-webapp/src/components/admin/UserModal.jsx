@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Building2, Check, Tags, X, Eye, EyeOff, UserRound } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
@@ -119,7 +119,7 @@ const UserModal = ({
   }, [isOpen, formData.roles, formData.departmentId]);
 
   const selectedDepartmentName = React.useMemo(
-    () => departments.find((department) => department.id === formData.departmentId)?.name || 'ยังไม่ได้กำหนดกอง',
+    () => departments.find((department) => department.id === formData.departmentId)?.name || 'ยังไม่ได้กำหนดแผนก',
     [departments, formData.departmentId]
   );
 
@@ -175,7 +175,7 @@ const UserModal = ({
               {editingUser ? 'แก้ไขข้อมูลผู้ใช้งาน' : 'เพิ่มผู้ใช้งานใหม่'}
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              กำหนดกอง ระดับ และสิทธิ์การใช้งานของบัญชีนี้
+              กำหนดแผนก ระดับ และสิทธิ์การใช้งานของบัญชีนี้
             </p>
           </div>
           <button
@@ -305,7 +305,7 @@ const UserModal = ({
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <label className="block text-sm font-black text-slate-900">Assign ผู้ใช้งาน</label>
-                  <p className="mt-1 text-xs font-semibold text-slate-500">จัดกองและ Cohort Role ไว้ในส่วนเดียวกัน</p>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">จัดแผนกและ Cohort Role ไว้ในส่วนเดียวกัน</p>
                 </div>
                 <div className="inline-flex rounded-2xl border border-slate-200 bg-white p-1">
                   <button
@@ -318,7 +318,7 @@ const UserModal = ({
                     }`}
                   >
                     <Building2 size={15} />
-                    กอง
+                    แผนก
                   </button>
                   <button
                     type="button"
@@ -339,11 +339,11 @@ const UserModal = ({
                 {assignmentMode === 'department' ? (
                   <div className="grid gap-4 md:grid-cols-2">
                     <CustomSelect
-                      label="กอง"
+                      label="แผนก"
                       value={formData.departmentId}
                       onChange={(event) => setFormData(prev => ({ ...prev, departmentId: event.target.value }))}
                       options={[
-                        { value: '', label: 'ยังไม่ได้กำหนดกอง' },
+                        { value: '', label: 'ยังไม่ได้กำหนดแผนก' },
                         ...departments.map((d) => ({ value: d.id, label: d.name }))
                       ]}
                     />

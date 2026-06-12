@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { ExternalLink, Printer, FileDown } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { adminAPI } from '../../utils/api';
@@ -184,7 +184,7 @@ const DashboardPrintContent = ({ report }) => {
             <thead>
               <tr>
                 <th>ผู้เรียน</th>
-                <th>กอง</th>
+                <th>แผนก</th>
                 <th>คอร์ส</th>
                 <th>หมวดหมู่</th>
                 <th>สถานะ</th>

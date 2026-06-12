@@ -360,7 +360,7 @@ const GoalManagement = () => {
         <div className="flex flex-col gap-6">
             <AdminPageHeader
                 title="จัดการเป้าหมายการเรียนรู้"
-                subtitle="กำหนดเป้าหมายการเรียนรายสัปดาห์หรือรายเดือนสำหรับพนักงานทุกคนหรือเฉพาะกอง"
+                subtitle="กำหนดเป้าหมายการเรียนรายสัปดาห์หรือรายเดือนสำหรับพนักงานทุกคนหรือเฉพาะแผนก"
                 actions={(
                     <button type="button" onClick={() => setIsModalOpen(true)} className="btn btn-primary">
                         <Plus size={18} />

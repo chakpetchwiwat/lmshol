@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { X, Upload, FileDown, CheckCircle2, AlertTriangle, Info, AlertCircle } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
@@ -142,7 +142,7 @@ const ImportModal = ({ isOpen, onClose, type = 'profiles', onImportSuccess }) =>
                         <li>ระบุคอลัมน์ <span className="font-bold">Email</span> เป็นช่องหลักในการอัปเดตข้อมูล</li>
                         <li>หากพนักงานไม่มีในระบบ ระบบจะสร้างบัญชีให้ใหม่โดยใช้ Email คอลัมน์</li>
                         <li>สามารถระบุรหัสผ่านเริ่มต้นในคอลัมน์ <span className="font-bold">Password</span> หากปล่อยว่างไว้ระบบจะตั้งรหัสผ่านเริ่มต้นเป็น <code className="bg-blue-100 px-1 py-0.5 rounded font-mono font-bold text-blue-900">P@ssword123</code></li>
-                        <li>หากไม่มีกองหรือตำแหน่งในระบบ ระบบจะสร้างให้ใหม่โดยอัตโนมัติ</li>
+                        <li>หากไม่มีแผนกหรือตำแหน่งในระบบ ระบบจะสร้างให้ใหม่โดยอัตโนมัติ</li>
                       </ul>
                     ) : (
                       <ul className="list-disc pl-4 space-y-1">
