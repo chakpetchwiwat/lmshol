@@ -84,16 +84,18 @@ const sendEmail = async ({ to, subject, templateName, data }) => {
       });
     }
 
+    const prefixedSubject = subject ? `[ระบบ LMS] ${subject}` : '[ระบบ LMS]';
+
     const mailOptions = {
       from: `"${fromName}" <${fromEmail}>`,
       to,
-      subject,
+      subject: prefixedSubject,
       html,
       attachments
     };
 
     if (!clientTransporter) {
-      console.info(`[EmailService] [Mock Send] To: ${to} | Subject: ${subject}`);
+      console.info(`[EmailService] [Mock Send] To: ${to} | Subject: ${prefixedSubject}`);
       console.info(`[EmailService] [Mock Content Preview]:\n`, html.slice(0, 500) + '...');
       return { mock: true };
     }
