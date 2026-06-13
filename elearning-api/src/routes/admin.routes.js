@@ -34,6 +34,8 @@ router.post('/users/:id/certificates', verifySuperAdmin, auditRequest('admin.use
 router.put('/users/:id/certificates/:certificateId', verifySuperAdmin, auditRequest('admin.user_certificate.updated', { entityType: 'userCertificate' }), adminController.updateUserCertificate);
 router.delete('/users/:id/certificates/:certificateId', verifySuperAdmin, auditRequest('admin.user_certificate.deleted', { entityType: 'userCertificate', includeBody: false }), adminController.deleteUserCertificate);
 router.post('/users', verifySuperAdmin, auditRequest('admin.user.created', { entityType: 'user' }), adminController.createUser);
+router.put('/users/assign-mentor', verifySuperAdmin, auditRequest('admin.user.mentor_assigned', { entityType: 'user' }), adminController.bulkAssignMentor);
+router.put('/users/transfer-mentor', verifySuperAdmin, auditRequest('admin.user.mentor_transferred', { entityType: 'user' }), adminController.bulkTransferMentor);
 router.put('/users/:id', verifySuperAdmin, auditRequest('admin.user.updated', { entityType: 'user' }), adminController.updateUser);
 router.delete('/users/:id', verifySuperAdmin, auditRequest('admin.user.deleted', { entityType: 'user', includeBody: false }), adminController.deleteUser);
 

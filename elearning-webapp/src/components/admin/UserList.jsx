@@ -13,21 +13,57 @@ const UserList = ({
   onDeleteUser,
   canEditUsers,
   cohortRoles = [],
+  selectedUserIds = [],
+  onSelectUser,
+  onSelectAll,
 }) => {
   const cohortRoleLabelMap = React.useMemo(
     () => Object.fromEntries(cohortRoles.map((role) => [role.key, role.name || role.key])),
     [cohortRoles]
   );
 
+  const isAllSelected = React.useMemo(
+    () => users.length > 0 && users.every((u) => selectedUserIds.includes(u.id)),
+    [users, selectedUserIds]
+  );
+
+  const displayColumns = React.useMemo(() => {
+    if (!canEditUsers) return columns;
+    return [
+      {
+        label: (
+          <input
+            type="checkbox"
+            className="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+            checked={isAllSelected}
+            onChange={onSelectAll}
+          />
+        ),
+        className: 'w-[5%] text-center p-3 sm:p-4'
+      },
+      ...columns
+    ];
+  }, [columns, canEditUsers, isAllSelected, onSelectAll]);
+
   return (
     <AdminTable
-      columns={columns}
+      columns={displayColumns}
       data={users}
       loading={loading}
       emptyMessage="ยังไม่พบผู้ใช้งานที่ตรงกับตัวกรอง"
       className="border-none shadow-none rounded-none bg-transparent"
       renderRow={(user) => (
         <tr key={user.id} className="border-b border-border transition-colors hover:bg-gray-50/50">
+          {canEditUsers && (
+            <td className="p-3 sm:p-4 text-center">
+              <input
+                type="checkbox"
+                className="rounded border-slate-300 text-primary focus:ring-primary h-4 w-4 cursor-pointer"
+                checked={selectedUserIds.includes(user.id)}
+                onChange={() => onSelectUser(user.id)}
+              />
+            </td>
+          )}
           <td className="p-3 sm:p-4">
             <div className="font-medium text-xs sm:text-sm break-words">
               {user.name} {user.nickname ? `(${user.nickname})` : ''}

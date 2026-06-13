@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Settings2, Sparkles, Users, ChevronDown, FileDown, Upload } from 'lucide-react';
+import { Plus, Settings2, Sparkles, Users, ChevronDown, FileDown, Upload, RefreshCw, X } from 'lucide-react';
 import { adminAPI } from '../../utils/api';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import UserModal from '../../components/admin/UserModal';
@@ -151,6 +151,14 @@ const UserManagement = () => {
   const [showImportDropdown, setShowImportDropdown] = React.useState(false);
   const [importModalOpen, setImportModalOpen] = React.useState(false);
   const [importModalType, setImportModalType] = React.useState('profiles');
+
+  const [selectedUserIds, setSelectedUserIds] = React.useState([]);
+  const [showBulkAssignModal, setShowBulkAssignModal] = React.useState(false);
+  const [showBulkTransferModal, setShowBulkTransferModal] = React.useState(false);
+  const [bulkMentorId, setBulkMentorId] = React.useState('');
+  const [transferFromMentorId, setTransferFromMentorId] = React.useState('');
+  const [transferToMentorId, setTransferToMentorId] = React.useState('');
+  const [bulkSubmitting, setBulkSubmitting] = React.useState(false);
 
   const currentUser = React.useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const canEditUsers = canEditAdminUsers(currentUser);
@@ -505,6 +513,90 @@ const UserManagement = () => {
     }
   };
 
+  const handleSelectUser = (userId) => {
+    setSelectedUserIds((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    const visibleUserIds = filteredUsers.map((u) => u.id);
+    const allVisibleSelected = visibleUserIds.every((id) => selectedUserIds.includes(id));
+    if (allVisibleSelected) {
+      setSelectedUserIds((prev) => prev.filter((id) => !visibleUserIds.includes(id)));
+    } else {
+      setSelectedUserIds((prev) => {
+        const newSelection = [...prev];
+        visibleUserIds.forEach((id) => {
+          if (!newSelection.includes(id)) {
+            newSelection.push(id);
+          }
+        });
+        return newSelection;
+      });
+    }
+  };
+
+  const handleOpenBulkAssign = () => {
+    setBulkMentorId('');
+    setShowBulkAssignModal(true);
+  };
+
+  const handleOpenBulkTransfer = () => {
+    setTransferFromMentorId('');
+    setTransferToMentorId('');
+    setShowBulkTransferModal(true);
+  };
+
+  const handleExecuteBulkAssign = async (e) => {
+    e.preventDefault();
+    if (!bulkMentorId) {
+      toast.warning('กรุณาเลือกพี่เลี้ยงที่ต้องการแต่งตั้ง');
+      return;
+    }
+    try {
+      setBulkSubmitting(true);
+      await adminAPI.bulkAssignMentor(selectedUserIds, bulkMentorId);
+      toast.success('ระบุพี่เลี้ยงกลุ่มสำเร็จเรียบร้อย');
+      setSelectedUserIds([]);
+      setShowBulkAssignModal(false);
+      fetchUsers();
+    } catch (error) {
+      console.error('Bulk assign mentor error:', error);
+      toast.error(error.response?.data?.message || 'ไม่สามารถระบุพี่เลี้ยงกลุ่มได้');
+    } finally {
+      setBulkSubmitting(false);
+    }
+  };
+
+  const handleExecuteBulkTransfer = async (e) => {
+    e.preventDefault();
+    if (!transferFromMentorId) {
+      toast.warning('กรุณาเลือกพี่เลี้ยงต้นทาง');
+      return;
+    }
+    if (!transferToMentorId) {
+      toast.warning('กรุณาเลือกพี่เลี้ยงปลายทาง');
+      return;
+    }
+    if (transferFromMentorId === transferToMentorId) {
+      toast.warning('พี่เลี้ยงต้นทางและปลายทางต้องไม่ซ้ำกัน');
+      return;
+    }
+    try {
+      setBulkSubmitting(true);
+      await adminAPI.bulkTransferMentor(transferFromMentorId, transferToMentorId);
+      toast.success('โอนย้ายลูกแกะสำเร็จเรียบร้อย');
+      setShowBulkTransferModal(false);
+      fetchUsers();
+    } catch (error) {
+      console.error('Bulk transfer mentor error:', error);
+      toast.error(error.response?.data?.message || 'ไม่สามารถโอนย้ายลูกแกะได้');
+    } finally {
+      setBulkSubmitting(false);
+    }
+  };
+
   const filteredUsers = React.useMemo(() => {
     const tierOrderMap = Object.fromEntries(tiers.map((t) => [t.id, t.order]));
     
@@ -743,6 +835,14 @@ const UserManagement = () => {
                     </>
                   )}
                 </div>
+                <button
+                  type="button"
+                  onClick={handleOpenBulkTransfer}
+                  className="btn btn-outline border-indigo-200 bg-white text-indigo-700 hover:bg-indigo-50 hover:border-indigo-300 shadow-sm flex items-center gap-1.5"
+                >
+                  <RefreshCw size={18} />
+                  <span>โอนย้ายพี่เลี้ยง</span>
+                </button>
                 <button type="button" onClick={openAddUser} className="btn btn-primary">
                   <Plus size={18} />
                   เพิ่มผู้ใช้งาน
@@ -874,6 +974,9 @@ const UserManagement = () => {
           onDeleteUser={handleDeleteUser}
           canEditUsers={canEditUsers}
           cohortRoles={cohortRoles}
+          selectedUserIds={selectedUserIds}
+          onSelectUser={handleSelectUser}
+          onSelectAll={handleSelectAll}
         />
       </div>
       <ImportModal
@@ -883,6 +986,170 @@ const UserManagement = () => {
         onImportSuccess={fetchUsers}
       />
       <ConfirmDialog {...ConfirmDialogProps} />
+
+      {/* Floating Action Bar */}
+      {selectedUserIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-6 animate-scale-in border border-slate-800 backdrop-blur-md max-w-[90vw] sm:max-w-none flex-wrap sm:flex-nowrap justify-between sm:justify-start">
+          <div className="flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-indigo-500 animate-pulse" />
+            <span className="text-sm font-bold">เลือกอยู่ {selectedUserIds.length} รายการ</span>
+          </div>
+          <div className="hidden sm:block h-5 w-px bg-slate-800" />
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
+            <button
+              type="button"
+              onClick={handleOpenBulkAssign}
+              className="btn btn-primary btn-sm flex items-center gap-1 bg-primary text-white hover:bg-primary-dark border-none px-3 py-1.5 text-xs rounded-xl"
+            >
+              <Users size={12} />
+              <span>ระบุพี่เลี้ยงกลุ่ม</span>
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => setSelectedUserIds([])}
+              className="btn btn-ghost btn-sm text-slate-400 hover:text-white hover:bg-slate-800 px-3 py-1.5 text-xs rounded-xl"
+            >
+              ยกเลิก
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Assign Modal */}
+      {showBulkAssignModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
+          <div className="card flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl animate-scale-in rounded-[2rem]">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+              <h3 className="text-lg font-black text-slate-900">ระบุพี่เลี้ยงแบบกลุ่ม</h3>
+              <button
+                type="button"
+                onClick={() => setShowBulkAssignModal(false)}
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleExecuteBulkAssign} className="flex flex-col flex-1 overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 text-xs font-semibold text-primary leading-relaxed">
+                  ระบุพี่เลี้ยงให้กับสมาชิกที่เลือกทั้งหมด {selectedUserIds.length} คน
+                </div>
+                
+                <div>
+                  <label className="mb-1.5 block text-sm font-bold text-slate-700">เลือกพี่เลี้ยง (Mentor)</label>
+                  <select
+                    className="form-input w-full cursor-pointer"
+                    value={bulkMentorId}
+                    onChange={(e) => setBulkMentorId(e.target.value)}
+                    required
+                  >
+                    <option value="">-- เลือกสมาชิกที่จะรับบทบาทเป็นพี่เลี้ยง --</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} {u.nickname ? `(${u.nickname})` : ''} ({u.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="border-t border-slate-100 bg-slate-50 px-6 py-4 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkAssignModal(false)}
+                  className="btn btn-outline min-w-[100px]"
+                  disabled={bulkSubmitting}
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary min-w-[100px] flex items-center justify-center gap-1.5"
+                  disabled={bulkSubmitting}
+                >
+                  {bulkSubmitting ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Transfer Modal */}
+      {showBulkTransferModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
+          <div className="card flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl animate-scale-in rounded-[2rem]">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+              <h3 className="text-lg font-black text-slate-900">โอนย้ายพี่เลี้ยง</h3>
+              <button
+                type="button"
+                onClick={() => setShowBulkTransferModal(false)}
+                className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleExecuteBulkTransfer} className="flex flex-col flex-1 overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 text-xs font-semibold text-amber-700 leading-relaxed">
+                  โอนย้ายลูกแกะทั้งหมดจากพี่เลี้ยงต้นทาง ไปยังพี่เลี้ยงปลายทาง
+                </div>
+                
+                <div>
+                  <label className="mb-1.5 block text-sm font-bold text-slate-700">พี่เลี้ยงคนเดิม (ต้นทาง)</label>
+                  <select
+                    className="form-input w-full cursor-pointer"
+                    value={transferFromMentorId}
+                    onChange={(e) => setTransferFromMentorId(e.target.value)}
+                    required
+                  >
+                    <option value="">-- เลือกพี่เลี้ยงต้นทาง --</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} {u.nickname ? `(${u.nickname})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-sm font-bold text-slate-700">พี่เลี้ยงคนใหม่ (ปลายทาง)</label>
+                  <select
+                    className="form-input w-full cursor-pointer"
+                    value={transferToMentorId}
+                    onChange={(e) => setTransferToMentorId(e.target.value)}
+                    required
+                  >
+                    <option value="">-- เลือกพี่เลี้ยงปลายทาง --</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} {u.nickname ? `(${u.nickname})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="border-t border-slate-100 bg-slate-50 px-6 py-4 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkTransferModal(false)}
+                  className="btn btn-outline min-w-[100px]"
+                  disabled={bulkSubmitting}
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary min-w-[100px] flex items-center justify-center gap-1.5"
+                  disabled={bulkSubmitting}
+                >
+                  {bulkSubmitting ? 'กำลังย้าย...' : 'โอนย้าย'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

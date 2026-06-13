@@ -646,6 +646,17 @@ const getSupervisorTracking = asyncHandler(async (req, res) => {
   res.json({ success: true, data: tracking });
 });
 
+const bulkAssignMentor = asyncHandler(async (req, res) => {
+  const { sheepIds, mentorId } = req.body;
+  const result = await AdminService.bulkAssignMentor(sheepIds, mentorId);
+  res.json({ success: true, data: result });
+});
+
+const bulkTransferMentor = asyncHandler(async (req, res) => {
+  const { fromMentorId, toMentorId } = req.body;
+  const result = await AdminService.bulkTransferMentor(fromMentorId, toMentorId);
+  res.json({ success: true, data: result });
+});
 
 module.exports = {
   getDashboardStats,
@@ -743,5 +754,7 @@ module.exports = {
   deleteLesson,
   reorderLessons,
   getCourseQuizAttempts,
-  getAllAssessmentSubmissions
+  getAllAssessmentSubmissions,
+  bulkAssignMentor,
+  bulkTransferMentor
 };

@@ -258,6 +258,16 @@ const clearAllNotifications = asyncHandler(async (req, res) => {
   res.json({ success: true, data: notifications });
 });
 
+const getMySheep = asyncHandler(async (req, res) => {
+  const sheep = await UserService.getMySheep(req.user.userId);
+  res.json({ success: true, data: sheep });
+});
+
+const getSheepDetails = asyncHandler(async (req, res) => {
+  const details = await UserService.getSheepDetails(req.user.userId, req.params.id);
+  res.json({ success: true, data: details });
+});
+
 module.exports = {
   getCourses,
   getBookmarkedCourses,
@@ -293,5 +303,7 @@ module.exports = {
   getNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-  clearAllNotifications
+  clearAllNotifications,
+  getMySheep,
+  getSheepDetails
 };

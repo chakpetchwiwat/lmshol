@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Gift, User, Bookmark, LogOut, Settings, Bell, Target, ClipboardCheck } from 'lucide-react';
+import { Home, BookOpen, Gift, User, Bookmark, LogOut, Settings, Bell, Target, ClipboardCheck, Users } from 'lucide-react';
 import { authAPI, userAPI } from '../../utils/api';
 import { canAccessAdminPanel } from '../../utils/roles';
 import { formatThaiDateTime } from '../../utils/dateUtils';
@@ -19,6 +19,7 @@ const UserLayout = () => {
   const [unreadNotificationCount, setUnreadNotificationCount] = React.useState(0);
   const [isNotificationOpen, setIsNotificationOpen] = React.useState(false);
   const [showClearConfirm, setShowClearConfirm] = React.useState(false);
+  const [hasSheep, setHasSheep] = React.useState(false);
 
   React.useEffect(() => {
     const fetchUser = async () => {
@@ -26,10 +27,11 @@ const UserLayout = () => {
         const storedUser = JSON.parse(localStorage.getItem('user'));
         if (storedUser) setUser(storedUser);
 
-        const [userResult, pointsResult, notificationsResult] = await Promise.allSettled([
+        const [userResult, pointsResult, notificationsResult, sheepResult] = await Promise.allSettled([
           authAPI.getCurrentUser(),
           userAPI.getPoints(),
-          userAPI.getNotifications()
+          userAPI.getNotifications(),
+          userAPI.getMySheep()
         ]);
 
         if (userResult.status === 'fulfilled') {
@@ -61,6 +63,13 @@ const UserLayout = () => {
           console.warn('Notifications are unavailable', notificationsResult.reason);
           setNotifications([]);
           setUnreadNotificationCount(0);
+        }
+
+        if (sheepResult.status === 'fulfilled') {
+          setHasSheep(sheepResult.value?.data?.length > 0);
+        } else {
+          console.warn('Sheep list is unavailable', sheepResult.reason);
+          setHasSheep(false);
         }
       } catch (error) {
         console.error('Failed to fetch user data', error);
@@ -293,6 +302,12 @@ const UserLayout = () => {
             <User size={20} /> <span className="font-bold">โปรไฟล์</span>
           </NavLink>
 
+          {hasSheep && (
+            <NavLink to="/user/my-sheep" className={({ isActive }) => `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 ${isActive ? 'bg-primary/5 text-primary border border-primary/5 shadow-sm shadow-primary/5' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 hover:translate-x-1'}`}>
+              <Users size={20} /> <span className="font-bold">ลูกแกะของฉัน</span>
+            </NavLink>
+          )}
+
           {canAccessAdminPanel(user) && (
             <NavLink to={user?.isSupervisor && user?.role === 'user' ? '/admin/cohort-tracking' : '/admin/dashboard'} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium transition-all duration-300 text-rose-500 hover:bg-rose-50 hover:translate-x-1 mt-auto bg-rose-50/30">
               <Settings size={20} /> <span className="font-bold">จัดการระบบ</span>
@@ -364,6 +379,13 @@ const UserLayout = () => {
               <div className="nav-icon-wrapper"><Gift size={22} /></div>
               <span>ของรางวัล</span>
             </NavLink>
+
+            {hasSheep && (
+              <NavLink to="/user/my-sheep" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <div className="nav-icon-wrapper"><Users size={22} /></div>
+                <span>ลูกแกะ</span>
+              </NavLink>
+            )}
 
             <NavLink to="/user/profile" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               <div className="nav-icon-wrapper"><User size={22} /></div>

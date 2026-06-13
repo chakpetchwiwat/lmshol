@@ -198,7 +198,9 @@ export const userAPI = {
   },
   getSettings: () => api.get('/settings'),
   getGoals: () => api.get('/goals'),
-  getGoalDetails: (id) => api.get(`/goals/${id}`)
+  getGoalDetails: (id) => api.get(`/goals/${id}`),
+  getMySheep: () => api.get('/sheep'),
+  getSheepDetails: (id) => api.get(`/sheep/${id}`)
 };
 
 // Admin Endpoints
@@ -379,7 +381,8 @@ export const adminAPI = {
   deleteGoal: (id) => api.delete(`/goals/${id}`),
   getGoalReport: (id, config = {}) => api.get(`/goals/${id}/report`, config),
   getGoalTrackingSummary: (config = {}) => api.get('/goals/tracking-summary', config),
-
+  bulkAssignMentor: (sheepIds, mentorId) => api.put('/admin/users/assign-mentor', { sheepIds, mentorId }),
+  bulkTransferMentor: (fromMentorId, toMentorId) => api.put('/admin/users/transfer-mentor', { fromMentorId, toMentorId }),
 };
 
 export const courseStaffAPI = {

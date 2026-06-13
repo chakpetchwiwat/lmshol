@@ -23,6 +23,7 @@ const PointsHistory = React.lazy(() => import('./pages/user/PointsHistory'));
 const Profile = React.lazy(() => import('./pages/user/Profile'));
 const OngoingCourses = React.lazy(() => import('./pages/user/OngoingCourses'));
 const GoalDetail = React.lazy(() => import('./pages/user/GoalDetail'));
+const ShepherdDashboard = React.lazy(() => import('./pages/user/ShepherdDashboard'));
 const PrintReportPage = React.lazy(() => import('./pages/common/PrintReportPage'));
 const CertificateVerification = React.lazy(() => import('./pages/common/CertificateVerification'));
 const DownloadFilePage = React.lazy(() => import('./pages/common/DownloadFilePage'));
@@ -98,6 +99,7 @@ function App() {
             <Route path="rewards" element={<Rewards />} />
             <Route path="points-history" element={<PointsHistory />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="my-sheep" element={<ShepherdDashboard />} />
           </Route>
         </Route>
 

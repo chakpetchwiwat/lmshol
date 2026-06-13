@@ -43,4 +43,8 @@ router.delete('/certificates/:id', userController.deleteCertificate);
 router.post('/redeem/:id', userController.requestRedeem);
 router.put('/profile', userController.updateProfile);
 
+// Mentor-Sheep tracking routes
+router.get('/sheep', userController.getMySheep);
+router.get('/sheep/:id', userController.getSheepDetails);
+
 module.exports = router;

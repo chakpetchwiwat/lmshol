@@ -14,6 +14,7 @@ const announcements = require('./user/user.announcements');
 const notifications = require('./user/user.notifications');
 const documents = require('./user/user.documents');
 const certificates = require('./user/user.certificates');
+const sheep = require('./user/user.sheep');
 
 module.exports = {
     // Profile & Identity
@@ -39,5 +40,8 @@ module.exports = {
     ...documents,
 
     // User Certificates
-    ...certificates
+    ...certificates,
+
+    // User Sheep tracking
+    ...sheep
 };
