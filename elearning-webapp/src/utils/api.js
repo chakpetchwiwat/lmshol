@@ -13,19 +13,18 @@ const getApiUrl = () => {
 };
 
 const getBaseUrl = (apiUrl) => {
-  if (/^https?:\/\//i.test(apiUrl)) {
-    return new URL('.', apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`).toString().replace(/\/$/, '');
+  if (!apiUrl) return '';
+  let url = apiUrl.replace(/\/$/, ''); // Remove trailing slash if any
+  
+  if (url.endsWith(API_DEFAULTS.API_PATH)) {
+    url = url.slice(0, -API_DEFAULTS.API_PATH.length);
   }
-
-  if (typeof window !== 'undefined') {
+  
+  if (!url && typeof window !== 'undefined') {
     return window.location.origin;
   }
-
-  if (apiUrl.endsWith(API_DEFAULTS.API_PATH)) {
-    return apiUrl.slice(0, -API_DEFAULTS.API_PATH.length) || '';
-  }
-
-  return apiUrl.replace(/\/$/, '');
+  
+  return url.replace(/\/$/, '');
 };
 
 const API_URL = getApiUrl();

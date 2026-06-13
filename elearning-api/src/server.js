@@ -35,8 +35,8 @@ app.use(express.json({ limit: securityConfig.bodyLimits.json }));
 app.use(express.urlencoded({ limit: securityConfig.bodyLimits.urlencoded, extended: true }));
 
 // Serve public uploaded files from database
-app.get('/uploads/*', async (req, res, next) => {
-  const key = req.params[0]; // gets the path after /uploads/
+app.get(['/uploads/*', '/api/uploads/*'], async (req, res, next) => {
+  const key = req.params[0]; // gets the path after /uploads/ or /api/uploads/
   if (key.startsWith('secure/')) {
     return res.status(403).send('Access Denied');
   }
@@ -58,6 +58,7 @@ app.get('/uploads/*', async (req, res, next) => {
 
 // Serve uploaded files as static (Only for local development)
 app.use('/uploads/public', express.static(path.join(__dirname, '../uploads/public')));
+app.use('/api/uploads/public', express.static(path.join(__dirname, '../uploads/public')));
 
 // Basic Route for Testing
 app.get('/', (req, res) => {
