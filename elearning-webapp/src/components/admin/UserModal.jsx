@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, Check, Tags, X, Eye, EyeOff, UserRound } from 'lucide-react';
+import { Building2, Check, Tags, X, Eye, EyeOff, UserRound, Users } from 'lucide-react';
 import ModalPortal from '../common/ModalPortal';
 import CustomDateTimePicker from '../common/CustomDateTimePicker';
 import CustomSelect from '../common/CustomSelect';
@@ -27,6 +27,7 @@ const UserModal = ({
   users = [],
   profileCertificates = [],
   lmsCertificates = [],
+  editingUserSheep = [],
   competencies = [],
   savingProfileDetails = false,
   uploadingProfileFile = false,
@@ -373,6 +374,7 @@ const UserModal = ({
                       label="พี่เลี้ยง (Mentor)"
                       value={formData.mentorId || ''}
                       onChange={(event) => setFormData(prev => ({ ...prev, mentorId: event.target.value }))}
+                      searchable={true}
                       options={[
                         { value: '', label: 'ไม่มีพี่เลี้ยง' },
                         ...users.map((u) => ({ value: u.id, label: `${u.name} ${u.nickname ? `(${u.nickname})` : ''}` }))
@@ -497,6 +499,30 @@ const UserModal = ({
                   onDelete={onDeleteCertificate}
                   onUpload={onUploadCertificate}
                 />
+
+                {editingUserSheep && editingUserSheep.length > 0 && (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 md:p-6 space-y-4">
+                    <div className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-slate-400">
+                      <Users size={18} className="text-indigo-600" />
+                      ลูกแกะในการดูแล ({editingUserSheep.length} คน)
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+                      {editingUserSheep.map((s) => (
+                        <div key={s.id} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3.5 shadow-sm">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 font-black text-xs">
+                            {s.nickname && s.nickname !== '-' ? s.nickname.slice(0, 2) : s.name.slice(0, 2)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-black text-slate-900 leading-tight">{s.name}</p>
+                            <p className="truncate text-[10px] font-bold text-slate-400 mt-0.5">
+                              {s.nickname && s.nickname !== '-' ? `${s.nickname} · ` : ''}{s.email}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

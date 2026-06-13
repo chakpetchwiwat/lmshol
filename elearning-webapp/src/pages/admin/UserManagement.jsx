@@ -18,6 +18,7 @@ import { FILTER_VALUES } from '../../utils/constants/filters';
 // Sub-components
 import UserFilters from '../../components/admin/UserFilters';
 import UserList from '../../components/admin/UserList';
+import CustomSelect from '../../components/common/CustomSelect';
 
 const getDefaultFormData = () => ({
   name: '',
@@ -159,6 +160,7 @@ const UserManagement = () => {
   const [transferFromMentorId, setTransferFromMentorId] = React.useState('');
   const [transferToMentorId, setTransferToMentorId] = React.useState('');
   const [bulkSubmitting, setBulkSubmitting] = React.useState(false);
+  const [editingUserSheep, setEditingUserSheep] = React.useState([]);
 
   const currentUser = React.useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const canEditUsers = canEditAdminUsers(currentUser);
@@ -289,6 +291,7 @@ const UserManagement = () => {
     setFormData(getDefaultFormData());
     setProfileCertificates([]);
     setLmsCertificates([]);
+    setEditingUserSheep([]);
     setShowUserModal(true);
   };
 
@@ -328,6 +331,7 @@ const UserManagement = () => {
     ]).then(([certificatesRes, detailsRes]) => {
       setProfileCertificates(Array.isArray(certificatesRes?.data) ? certificatesRes.data : []);
       setLmsCertificates(Array.isArray(detailsRes?.data?.systemCertificates) ? detailsRes.data.systemCertificates : []);
+      setEditingUserSheep(Array.isArray(detailsRes?.data?.sheep) ? detailsRes.data.sheep : []);
     }).catch((error) => {
       console.error('Fetch editable profile extras error:', error);
     });
@@ -870,6 +874,7 @@ const UserManagement = () => {
         users={users}
         profileCertificates={profileCertificates}
         lmsCertificates={lmsCertificates}
+        editingUserSheep={editingUserSheep}
         competencies={competencies}
         savingProfileDetails={savingProfileDetails}
         uploadingProfileFile={uploadingProfileFile}
@@ -1036,22 +1041,19 @@ const UserManagement = () => {
                   ระบุพี่เลี้ยงให้กับสมาชิกที่เลือกทั้งหมด {selectedUserIds.length} คน
                 </div>
                 
-                <div>
-                  <label className="mb-1.5 block text-sm font-bold text-slate-700">เลือกพี่เลี้ยง (Mentor)</label>
-                  <select
-                    className="form-input w-full cursor-pointer"
-                    value={bulkMentorId}
-                    onChange={(e) => setBulkMentorId(e.target.value)}
-                    required
-                  >
-                    <option value="">-- เลือกสมาชิกที่จะรับบทบาทเป็นพี่เลี้ยง --</option>
-                    {users.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name} {u.nickname ? `(${u.nickname})` : ''} ({u.email})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <CustomSelect
+                  label="เลือกพี่เลี้ยง (Mentor)"
+                  value={bulkMentorId}
+                  onChange={(event) => setBulkMentorId(event.target.value)}
+                  searchable={true}
+                  options={[
+                    { value: '', label: '-- เลือกสมาชิกที่จะรับบทบาทเป็นพี่เลี้ยง --' },
+                    ...users.map((u) => ({
+                      value: u.id,
+                      label: `${u.name} ${u.nickname ? `(${u.nickname})` : ''} (${u.email})`
+                    }))
+                  ]}
+                />
               </div>
               <div className="border-t border-slate-100 bg-slate-50 px-6 py-4 flex justify-end gap-3">
                 <button
@@ -1095,38 +1097,34 @@ const UserManagement = () => {
                   โอนย้ายลูกแกะทั้งหมดจากพี่เลี้ยงต้นทาง ไปยังพี่เลี้ยงปลายทาง
                 </div>
                 
-                <div>
-                  <label className="mb-1.5 block text-sm font-bold text-slate-700">พี่เลี้ยงคนเดิม (ต้นทาง)</label>
-                  <select
-                    className="form-input w-full cursor-pointer"
-                    value={transferFromMentorId}
-                    onChange={(e) => setTransferFromMentorId(e.target.value)}
-                    required
-                  >
-                    <option value="">-- เลือกพี่เลี้ยงต้นทาง --</option>
-                    {users.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name} {u.nickname ? `(${u.nickname})` : ''}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <CustomSelect
+                  label="พี่เลี้ยงคนเดิม (ต้นทาง)"
+                  value={transferFromMentorId}
+                  onChange={(event) => setTransferFromMentorId(event.target.value)}
+                  searchable={true}
+                  options={[
+                    { value: '', label: '-- เลือกพี่เลี้ยงต้นทาง --' },
+                    ...users.map((u) => ({
+                      value: u.id,
+                      label: `${u.name} ${u.nickname ? `(${u.nickname})` : ''} (${u.email})`
+                    }))
+                  ]}
+                />
 
-                <div>
-                  <label className="mb-1.5 block text-sm font-bold text-slate-700">พี่เลี้ยงคนใหม่ (ปลายทาง)</label>
-                  <select
-                    className="form-input w-full cursor-pointer"
+                <div className="mt-4">
+                  <CustomSelect
+                    label="พี่เลี้ยงคนใหม่ (ปลายทาง)"
                     value={transferToMentorId}
-                    onChange={(e) => setTransferToMentorId(e.target.value)}
-                    required
-                  >
-                    <option value="">-- เลือกพี่เลี้ยงปลายทาง --</option>
-                    {users.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name} {u.nickname ? `(${u.nickname})` : ''}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(event) => setTransferToMentorId(event.target.value)}
+                    searchable={true}
+                    options={[
+                      { value: '', label: '-- เลือกพี่เลี้ยงปลายทาง --' },
+                      ...users.map((u) => ({
+                        value: u.id,
+                        label: `${u.name} ${u.nickname ? `(${u.nickname})` : ''} (${u.email})`
+                      }))
+                    ]}
+                  />
                 </div>
               </div>
               <div className="border-t border-slate-100 bg-slate-50 px-6 py-4 flex justify-end gap-3">

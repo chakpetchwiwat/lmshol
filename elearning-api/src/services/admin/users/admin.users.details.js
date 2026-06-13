@@ -80,7 +80,8 @@ const getUserDetails = async (id, authUser) => {
             enrollments: {
                 include: { course: { include: { category: true } } },
                 orderBy: { startedAt: 'desc' }
-            }
+            },
+            sheep: true
         }
     });
 
@@ -125,7 +126,14 @@ const getUserDetails = async (id, authUser) => {
                 competencyCode: competencyCodes.join(', ') || ''
             };
         }),
-        pointsHistory
+        pointsHistory,
+        sheep: (user.sheep || []).map(s => ({
+            id: s.id,
+            name: s.name,
+            nickname: s.nickname || '-',
+            email: s.email,
+            status: s.status
+        }))
     };
 };
 

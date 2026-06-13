@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogOut } from 'lucide-react';
+import { LogOut, Users } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authAPI, userAPI } from '../../utils/api';
 import { useToast } from '../../context/useToast';
@@ -432,6 +432,57 @@ const Profile = () => {
         onDelete={handleDeleteCertificate}
         onUpload={handleUploadCertificateFile}
       />
+
+      {/* Mentor and Sheep Details */}
+      {(user?.mentor || (user?.sheep && user.sheep.length > 0)) && (
+        <div className="card border border-slate-100 bg-white p-6 shadow-sm rounded-3xl space-y-6">
+          <div className="border-b border-slate-100 pb-4">
+            <h3 className="text-lg font-black text-slate-900">การดูแลฝ่ายวิญญาณ (Spiritual Care)</h3>
+            <p className="text-xs font-semibold text-slate-400 mt-0.5">ข้อมูลพี่เลี้ยงและลูกแกะในความรับผิดชอบของคุณ</p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {user?.mentor && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-3">
+                <span className="text-xs font-black uppercase tracking-widest text-slate-400">พี่เลี้ยงของฉัน (My Mentor)</span>
+                <div className="flex items-center gap-3 bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                  <div className="h-10 w-10 shrink-0 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                    {user.mentor.nickname && user.mentor.nickname !== '-' ? user.mentor.nickname.slice(0, 2) : user.mentor.name.slice(0, 2)}
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 leading-tight">{user.mentor.name}</h4>
+                    <p className="text-xs font-bold text-slate-400 mt-0.5">
+                      {user.mentor.nickname && user.mentor.nickname !== '-' ? `ชื่อเล่น: ${user.mentor.nickname} · ` : ''}
+                      {user.mentor.position || 'พี่เลี้ยง'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {user?.sheep && user.sheep.length > 0 && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-3">
+                <span className="text-xs font-black uppercase tracking-widest text-slate-400">ลูกแกะในการดูแล (Sheep Under Care)</span>
+                <div className="grid gap-3 max-h-48 overflow-y-auto pr-1">
+                  {user.sheep.map((s) => (
+                    <div key={s.id} className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                      <div className="h-8 w-8 shrink-0 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xs">
+                        {s.nickname && s.nickname !== '-' ? s.nickname.slice(0, 2) : s.name.slice(0, 2)}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-black text-slate-900 leading-tight truncate">{s.name}</h4>
+                        <p className="text-[10px] font-bold text-slate-400 truncate mt-0.5">
+                          {s.nickname && s.nickname !== '-' ? `ชื่อเล่น: ${s.nickname} · ` : ''}
+                          {s.position || 'สมาชิก'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <ProfileSettings 
         user={user}

@@ -199,8 +199,8 @@ export const userAPI = {
   getSettings: () => api.get('/settings'),
   getGoals: () => api.get('/goals'),
   getGoalDetails: (id) => api.get(`/goals/${id}`),
-  getMySheep: () => api.get('/sheep'),
-  getSheepDetails: (id) => api.get(`/sheep/${id}`)
+  getMySheep: () => api.get('/user/sheep'),
+  getSheepDetails: (id) => api.get(`/user/sheep/${id}`)
 };
 
 // Admin Endpoints

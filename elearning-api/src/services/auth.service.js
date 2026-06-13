@@ -16,7 +16,9 @@ const login = async (email, password) => {
             tier: true,
             courseStaff: { take: 1 },
             cohortSupervisors: { take: 1 },
-            cohortRoleSupervisorRoles: { take: 1 }
+            cohortRoleSupervisorRoles: { take: 1 },
+            mentor: true,
+            sheep: true
         }
     });
 
@@ -53,7 +55,9 @@ const getCurrentUser = async (userId) => {
             tier: true,
             courseStaff: { take: 1 },
             cohortSupervisors: { take: 1 },
-            cohortRoleSupervisorRoles: { take: 1 }
+            cohortRoleSupervisorRoles: { take: 1 },
+            mentor: true,
+            sheep: true
         }
     });
 
