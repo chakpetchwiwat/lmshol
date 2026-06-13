@@ -68,9 +68,10 @@ const COURSES_DATA = [
     title: 'ยินดีต้อนรับสู่ Holy Land Community',
     description: 'บทเรียนแรกสำหรับผู้เชื่อใหม่ ทำความรู้จักกับชุมชน Holy Land และก้าวแรกแห่งชีวิตใหม่',
     points: 50,
+    image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'HL คืออะไร? ทำไมถึงมาที่นี่', order: 1 },
-      { type: 'video', title: 'ครอบครัว Holy Land และโครงสร้างชุมชน', order: 2 },
+      { type: 'file', title: 'คู่มือครอบครัว Holy Land (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
       { type: 'quiz', title: 'ทำความรู้จัก HL — แบบทดสอบ', order: 3, passScore: 60,
         questions: [
           { text: 'HL ย่อมาจากอะไร?', choices: [
@@ -90,6 +91,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
+      { type: 'assessment', title: 'Assignment — ก้าวแรกใน Holy Land', order: 4 }
     ],
   },
 
@@ -99,11 +101,13 @@ const COURSES_DATA = [
     title: 'HLBS ชั้น Beginning — รากฐานแห่งความเชื่อ',
     description: 'ศึกษาพื้นฐานความเชื่อคริสเตียน: พระเจ้าคือใคร พระเยซูคือใคร และความรอดคืออะไร',
     points: 150,
+    image: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'บทที่ 1 — พระเจ้าคือใคร?', order: 1 },
-      { type: 'video', title: 'บทที่ 2 — พระเยซูคริสต์และความรอด', order: 2 },
-      { type: 'video', title: 'บทที่ 3 — พระวิญญาณบริสุทธิ์', order: 3 },
-      { type: 'quiz', title: 'แบบทดสอบ Beginning — ทบทวนบทที่ 1-3', order: 4, passScore: 70,
+      { type: 'file', title: 'เอกสารอ้างอิงหลักข้อเชื่อ Beginning (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'บทที่ 2 — พระเยซูคริสต์และความรอด', order: 3 },
+      { type: 'video', title: 'บทที่ 3 — พระวิญญาณบริสุทธิ์', order: 4 },
+      { type: 'quiz', title: 'แบบทดสอบ Beginning — ทบทวนบทที่ 1-3', order: 5, passScore: 70,
         questions: [
           { text: 'ลักษณะสำคัญของพระเจ้าคือ?', choices: [
             { text: 'ทรงรัก ทรงยุติธรรม และทรงสัตย์ซื่อ', isCorrect: true },
@@ -122,7 +126,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
-      { type: 'assessment', title: 'Assignment — สะท้อนความคิด: พระเจ้าในชีวิตของฉัน', order: 5 },
+      { type: 'assessment', title: 'Assignment — สะท้อนความคิด: พระเจ้าในชีวิตของฉัน', order: 6 },
     ],
   },
 
@@ -132,12 +136,14 @@ const COURSES_DATA = [
     title: 'HLBS ชั้น Basic — เติบโตในความเชื่อ',
     description: 'เรียนรู้การใช้ชีวิตคริสเตียนอย่างเป็นปฏิบัติ: การอธิษฐาน การอ่านพระคัมภีร์ และการสามัคคีธรรม',
     points: 200,
+    image: 'https://images.unsplash.com/photo-1507434965515-61970f2bd7c6?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'บทที่ 1 — ศิลปะการอธิษฐาน', order: 1 },
-      { type: 'video', title: 'บทที่ 2 — การอ่านพระคัมภีร์อย่างมีชีวิต', order: 2 },
-      { type: 'video', title: 'บทที่ 3 — การสามัคคีธรรมในชุมชน', order: 3 },
-      { type: 'video', title: 'บทที่ 4 — การให้ทศางค์และเครื่องบูชา', order: 4 },
-      { type: 'quiz', title: 'แบบทดสอบ Basic — วิถีชีวิตคริสเตียน', order: 5, passScore: 70,
+      { type: 'file', title: 'คู่มือการอธิษฐานและสร้างพลัง (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'บทที่ 2 — การอ่านพระคัมภีร์อย่างมีชีวิต', order: 3 },
+      { type: 'video', title: 'บทที่ 3 — การสามัคคีธรรมในชุมชน', order: 4 },
+      { type: 'video', title: 'บทที่ 4 — การให้ทศางค์และเครื่องบูชา', order: 5 },
+      { type: 'quiz', title: 'แบบทดสอบ Basic — วิถีชีวิตคริสเตียน', order: 6, passScore: 70,
         questions: [
           { text: 'การอธิษฐาน ACTS คือ?', choices: [
             { text: 'Adoration, Confession, Thanksgiving, Supplication', isCorrect: true },
@@ -156,7 +162,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
-      { type: 'assessment', title: 'Assignment — บันทึกการอธิษฐาน 7 วัน', order: 6 },
+      { type: 'assessment', title: 'Assignment — บันทึกการอธิษฐาน 7 วัน', order: 7 },
     ],
   },
 
@@ -166,10 +172,12 @@ const COURSES_DATA = [
     title: 'HLBC — ชุมชนแห่งการสามัคคีธรรม',
     description: 'เรียนรู้ความหมายที่แท้จริงของชุมชนคริสเตียน และการสร้างสัมพันธ์ที่ยั่งยืนในชุมชน',
     points: 200,
+    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'ชุมชนคืออะไร? เหตุใดจึงสำคัญ', order: 1 },
-      { type: 'video', title: 'รูปแบบชุมชนในพระคัมภีร์', order: 2 },
-      { type: 'quiz', title: 'แบบทดสอบ — ชุมชนแห่งการสามัคคีธรรม', order: 3, passScore: 70,
+      { type: 'file', title: 'คู่มือการสร้างสามัคคีธรรมในกลุ่มแคร์ (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'รูปแบบชุมชนในพระคัมภีร์', order: 3 },
+      { type: 'quiz', title: 'แบบทดสอบ — ชุมชนแห่งการสามัคคีธรรม', order: 4, passScore: 70,
         questions: [
           { text: 'ชุมชนคริสเตียนในกิจการ 2 มีลักษณะอย่างไร?', choices: [
             { text: 'แบ่งปัน อธิษฐาน และรับประทานร่วมกัน', isCorrect: true },
@@ -178,7 +186,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
-      { type: 'assessment', title: 'Assignment — วางแผนการดูแลสมาชิกในแคร์', order: 4 },
+      { type: 'assessment', title: 'Assignment — วางแผนการดูแลสมาชิกในแคร์', order: 5 },
     ],
   },
 
@@ -187,10 +195,12 @@ const COURSES_DATA = [
     title: 'HLBC — การทรงเรียกของพระเจ้า',
     description: 'ค้นพบการทรงเรียกส่วนตัวและเข้าใจแผนการของพระเจ้าสำหรับชีวิตคุณ',
     points: 200,
+    image: 'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'การทรงเรียกคืออะไร?', order: 1 },
-      { type: 'video', title: 'ค้นพบของประทานและพรสวรรค์', order: 2 },
-      { type: 'quiz', title: 'แบบทดสอบ — การทรงเรียก', order: 3, passScore: 70,
+      { type: 'file', title: 'คู่มือค้นหาของประทานฝ่ายวิญญาณ (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'ค้นพบของประทานและพรสวรรค์', order: 3 },
+      { type: 'quiz', title: 'แบบทดสอบ — การทรงเรียก', order: 4, passScore: 70,
         questions: [
           { text: 'การทรงเรียกของพระเจ้าประกอบด้วยอะไร?', choices: [
             { text: 'การรับใช้ด้วยของประทานที่เรามี ณ ที่ที่เราอยู่', isCorrect: true },
@@ -199,7 +209,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
-      { type: 'assessment', title: 'Assignment — แผนที่การรับใช้ส่วนตัว', order: 4 },
+      { type: 'assessment', title: 'Assignment — แผนที่การรับใช้ส่วนตัว', order: 5 },
     ],
   },
 
@@ -208,10 +218,12 @@ const COURSES_DATA = [
     title: 'HLBC — ชุมชนที่มีพลัง',
     description: 'เรียนรู้ว่าอะไรทำให้ชุมชนมีพลังทางวิญญาณ และวิธีสร้างบรรยากาศที่พระวิญญาณทรงเคลื่อนไหว',
     points: 250,
+    image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'แหล่งพลังของชุมชนคริสเตียน', order: 1 },
-      { type: 'video', title: 'การนมัสการและการอธิษฐานร่วมกัน', order: 2 },
-      { type: 'quiz', title: 'แบบทดสอบ — ชุมชนที่มีพลัง', order: 3, passScore: 70,
+      { type: 'file', title: 'คู่มือเฝ้าเดี่ยวและการร่วมใจอธิษฐาน (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'การนมัสการและการอธิษฐานร่วมกัน', order: 3 },
+      { type: 'quiz', title: 'แบบทดสอบ — ชุมชนที่มีพลัง', order: 4, passScore: 70,
         questions: [
           { text: 'พลังของชุมชนคริสเตียนมาจาก?', choices: [
             { text: 'พระวิญญาณบริสุทธิ์ที่ทรงสถิตในชุมชน', isCorrect: true },
@@ -220,6 +232,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
+      { type: 'assessment', title: 'Assignment — บันทึกการอธิษฐานกลุ่มแคร์ 7 วัน', order: 5 },
     ],
   },
 
@@ -228,10 +241,12 @@ const COURSES_DATA = [
     title: 'HLBC — ชุมชนที่เติบโตอย่างยั่งยืน',
     description: 'หลักการสร้างชุมชนที่เติบโตอย่างสุขภาพดีและยั่งยืน ทั้งเชิงคุณภาพและปริมาณ',
     points: 250,
+    image: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'ความหมายของการเติบโตอย่างยั่งยืน', order: 1 },
-      { type: 'video', title: 'วงจรชีวิตของชุมชน', order: 2 },
-      { type: 'quiz', title: 'แบบทดสอบ — การเติบโตอย่างยั่งยืน', order: 3, passScore: 70,
+      { type: 'file', title: 'คู่มือการประเมินและการพัฒนาสุขภาพแคร์ (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'วงจรชีวิตของชุมชน', order: 3 },
+      { type: 'quiz', title: 'แบบทดสอบ — การเติบโตอย่างยั่งยืน', order: 4, passScore: 70,
         questions: [
           { text: 'ตัวชี้วัดสุขภาพของชุมชนคือ?', choices: [
             { text: 'ความเชื่อ ความสัมพันธ์ และผลผลิตทางวิญญาณ', isCorrect: true },
@@ -240,7 +255,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
-      { type: 'assessment', title: 'Assignment — ประเมินสุขภาพแคร์ของคุณ', order: 4 },
+      { type: 'assessment', title: 'Assignment — ประเมินสุขภาพแคร์ของคุณ', order: 5 },
     ],
   },
 
@@ -250,11 +265,13 @@ const COURSES_DATA = [
     title: 'ชั้นสร้าง CL — การเป็นผู้นำแคร์ที่มีประสิทธิภาพ',
     description: 'หลักสูตรเตรียมผู้นำแคร์: บทบาท CL, การดูแลสมาชิก, การเลด 1:1 และการสร้างแคร์ที่แข็งแกร่ง',
     points: 300,
+    image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'บทบาทและหน้าที่ของ Care Leader', order: 1 },
-      { type: 'video', title: 'การเลด 1:1 อย่างมีประสิทธิภาพ', order: 2 },
-      { type: 'video', title: 'การจัดการกับสถานการณ์ยาก', order: 3 },
-      { type: 'quiz', title: 'แบบทดสอบ — ทักษะ CL', order: 4, passScore: 75,
+      { type: 'file', title: 'คู่มือการเป็นพี่เลี้ยงและผู้ดูแลกลุ่มแคร์ (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'การเลด 1:1 อย่างมีประสิทธิภาพ', order: 3 },
+      { type: 'video', title: 'การจัดการกับสถานการณ์ยาก', order: 4 },
+      { type: 'quiz', title: 'แบบทดสอบ — ทักษะ CL', order: 5, passScore: 75,
         questions: [
           { text: 'เมื่อสมาชิกในแคร์มีปัญหา CL ควรทำอะไรก่อน?', choices: [
             { text: 'รับฟังอย่างตั้งใจและอธิษฐานร่วมกัน', isCorrect: true },
@@ -268,7 +285,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
-      { type: 'assessment', title: 'Assignment — แผนการดูแลสมาชิกรายบุคคล 3 เดือน', order: 5 },
+      { type: 'assessment', title: 'Assignment — แผนการดูแลสมาชิกรายบุคคล 3 เดือน', order: 6 },
     ],
   },
 
@@ -277,11 +294,13 @@ const COURSES_DATA = [
     title: 'ชั้นสร้าง พล. — การเป็นผู้นำหน่วยและแขวง',
     description: 'หลักสูตรสำหรับ UL/SDL: การบริหารหน่วย การ Mentor CL และการวางแผนเชิงกลยุทธ์สำหรับชุมชน',
     points: 350,
+    image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'วิสัยทัศน์ผู้นำระดับกลางและสูง', order: 1 },
-      { type: 'video', title: 'การ Mentor และพัฒนาผู้นำรุ่นต่อไป', order: 2 },
-      { type: 'video', title: 'การวางแผนเชิงกลยุทธ์ชุมชน', order: 3 },
-      { type: 'quiz', title: 'แบบทดสอบ — ทักษะผู้นำ พล.', order: 4, passScore: 75,
+      { type: 'file', title: 'คู่มือการบริหารหน่วยและแขวง Holy Land (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'การ Mentor และพัฒนาผู้นำรุ่นต่อไป', order: 3 },
+      { type: 'video', title: 'การวางแผนเชิงกลยุทธ์ชุมชน', order: 4 },
+      { type: 'quiz', title: 'แบบทดสอบ — ทักษะผู้นำ พล.', order: 5, passScore: 75,
         questions: [
           { text: 'หน้าที่หลักของ Unit Leader คือ?', choices: [
             { text: 'พัฒนาและสนับสนุน Care Leader ในหน่วย', isCorrect: true },
@@ -290,7 +309,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
-      { type: 'assessment', title: 'Assignment — แผนพัฒนาหน่วยประจำไตรมาส', order: 5 },
+      { type: 'assessment', title: 'Assignment — แผนพัฒนาหน่วยประจำไตรมาส', order: 6 },
     ],
   },
 
@@ -300,10 +319,12 @@ const COURSES_DATA = [
     title: 'พระธรรมโยชูวา — ผู้นำที่พระเจ้าเลือก',
     description: 'ศึกษาชีวิตและความเชื่อของโยชูวา บทเรียนสำหรับผู้นำในทุกยุค',
     points: 100,
+    image: 'https://images.unsplash.com/photo-1447069387593-a5de0862481e?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'โยชูวา 1 — จงเข้มแข็งและกล้าหาญ', order: 1 },
-      { type: 'video', title: 'โยชูวา 3-4 — ข้ามแม่น้ำจอร์แดน', order: 2 },
-      { type: 'quiz', title: 'แบบทดสอบ — พระธรรมโยชูวา', order: 3, passScore: 60,
+      { type: 'file', title: 'คู่มือบทศึกษาพระธรรมโยชูวา (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'โยชูวา 3-4 — ข้ามแม่น้ำจอร์แดน', order: 3 },
+      { type: 'quiz', title: 'แบบทดสอบ — พระธรรมโยชูวา', order: 4, passScore: 60,
         questions: [
           { text: 'โยชูวา 1:9 กล่าวว่า?', choices: [
             { text: 'จงเข้มแข็งและกล้าหาญ อย่ากลัวหรือย่อท้อ', isCorrect: true },
@@ -312,6 +333,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
+      { type: 'assessment', title: 'Assignment — สรุปแนวคิดการเป็นผู้นำจากโยชูวา', order: 5 }
     ],
   },
 
@@ -320,10 +342,12 @@ const COURSES_DATA = [
     title: 'Topical — ชีวิตใหม่ในพระคริสต์',
     description: 'ซีรีส์เรื่องการเริ่มต้นชีวิตใหม่ การเปลี่ยนแปลงจากภายใน และอัตลักษณ์ใหม่ในพระคริสต์',
     points: 100,
+    image: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'คุณเป็นใครในพระคริสต์?', order: 1 },
-      { type: 'video', title: 'ทิ้งชีวิตเก่า รับชีวิตใหม่', order: 2 },
-      { type: 'quiz', title: 'แบบทดสอบ — ชีวิตใหม่', order: 3, passScore: 60,
+      { type: 'file', title: 'เอกสารชีวิตใหม่ในพระคริสต์ (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'ทิ้งชีวิตเก่า รับชีวิตใหม่', order: 3 },
+      { type: 'quiz', title: 'แบบทดสอบ — ชีวิตใหม่', order: 4, passScore: 60,
         questions: [
           { text: '2 โครินธ์ 5:17 สอนว่า?', choices: [
             { text: 'ถ้าใครอยู่ในพระคริสต์ เขาเป็นคนใหม่แล้ว', isCorrect: true },
@@ -332,6 +356,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
+      { type: 'assessment', title: 'Assignment — เล่าเรื่องการเปลี่ยนแปลงชีวิตของตนเอง', order: 5 }
     ],
   },
 
@@ -341,11 +366,13 @@ const COURSES_DATA = [
     title: 'HL Empowerment — เสริมพลังชีวิตและการรับใช้',
     description: 'หลักสูตรเสริมพลังสำหรับสมาชิก HL: การใช้ของประทาน ชีวิตอธิษฐาน และการรับใช้ด้วยใจรัก',
     points: 150,
+    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'ค้นพบของประทานฝ่ายวิญญาณ', order: 1 },
-      { type: 'video', title: 'การอธิษฐานที่ทะลุฟ้า', order: 2 },
-      { type: 'video', title: 'รับใช้ด้วยใจรัก ไม่ใช่ภาระผูกพัน', order: 3 },
-      { type: 'quiz', title: 'แบบทดสอบ — HL Empowerment', order: 4, passScore: 65,
+      { type: 'file', title: 'คู่มือการพัฒนาของประทานและการรับใช้ (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'การอธิษฐานที่ทะลุฟ้า', order: 3 },
+      { type: 'video', title: 'รับใช้ด้วยใจรัก ไม่ใช่ภาระผูกพัน', order: 4 },
+      { type: 'quiz', title: 'แบบทดสอบ — HL Empowerment', order: 5, passScore: 65,
         questions: [
           { text: 'ของประทานฝ่ายวิญญาณมีไว้เพื่ออะไร?', choices: [
             { text: 'สร้างเสริมคริสตจักรและรับใช้ผู้อื่น', isCorrect: true },
@@ -354,6 +381,7 @@ const COURSES_DATA = [
           ]},
         ],
       },
+      { type: 'assessment', title: 'Assignment — แผนการมีส่วนร่วมรับใช้ในกลุ่มแคร์', order: 6 }
     ],
   },
 
@@ -363,9 +391,21 @@ const COURSES_DATA = [
     title: 'คู่มือการเลด 1:1 — ฉบับ SP/CL',
     description: 'แนวทางและเครื่องมือสำหรับการทำ 1:1 อย่างมีประสิทธิภาพ พร้อมตัวอย่างคำถามและ flow การสนทนา',
     points: 0,
+    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80',
     lessons: [
-      { type: 'video', title: 'วิธีเริ่มต้นการเลด 1:1 ครั้งแรก', order: 1 },
-      { type: 'video', title: 'คำถาม GROW Model สำหรับ 1:1', order: 2 },
+      { type: 'file', title: 'คู่มือ 1:1 Discipleship Guidebook (PDF)', order: 1, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'วิธีเริ่มต้นการเลด 1:1 ครั้งแรก', order: 2 },
+      { type: 'video', title: 'คำถาม GROW Model สำหรับ 1:1', order: 3 },
+      { type: 'quiz', title: 'ทบทวนหัวใจของการเลด 1:1', order: 4, passScore: 70,
+        questions: [
+          { text: 'หัวใจของการเลด 1:1 คืออะไร?', choices: [
+            { text: 'การสร้างสาวกและการฟังอย่างใส่ใจด้วยความรัก', isCorrect: true },
+            { text: 'การสอนสั่งฝ่ายเดียว', isCorrect: false },
+            { text: 'การควบคุมเวลาอย่างเคร่งครัด', isCorrect: false },
+          ]}
+        ]
+      },
+      { type: 'assessment', title: 'Assignment — สรุปความประทับใจจากการเลด 1:1 ครั้งแรก', order: 5 }
     ],
   },
 
@@ -374,9 +414,21 @@ const COURSES_DATA = [
     title: 'คลังบทเรียน Care — สำหรับผู้นำแคร์',
     description: 'รวมบทเรียนและแนวทางการนำ Care Group ที่มีชีวิตชีวา',
     points: 0,
+    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80',
     lessons: [
-      { type: 'video', title: 'นำ Care Group แบบมีส่วนร่วม', order: 1 },
-      { type: 'video', title: 'จัดการกับสมาชิกที่เงียบและสมาชิกที่พูดมาก', order: 2 },
+      { type: 'file', title: 'คู่มือนำกลุ่มแคร์สำหรับผู้เริ่มต้น (PDF)', order: 1, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'นำ Care Group แบบมีส่วนร่วม', order: 2 },
+      { type: 'video', title: 'จัดการกับสมาชิกที่เงียบและสมาชิกที่พูดมาก', order: 3 },
+      { type: 'quiz', title: 'ประเมินความรู้การแก้ปัญหากลุ่มแคร์', order: 4, passScore: 70,
+        questions: [
+          { text: 'เมื่อสมาชิกแบ่งปันเรื่องส่วนตัวที่เปราะบาง ควรทำอย่างไร?', choices: [
+            { text: 'รักษาความลับ อธิษฐานเผื่อ และโอบอุ้มด้วยความรัก', isCorrect: true },
+            { text: 'เล่าให้ทุกคนในกลุ่มฟังต่อ', isCorrect: false },
+            { text: 'เพิกเฉยและเปลี่ยนเรื่องพูด', isCorrect: false },
+          ]}
+        ]
+      },
+      { type: 'assessment', title: 'Assignment — แผนการเตรียมตัวนำแคร์ประจำสัปดาห์', order: 5 }
     ],
   },
 
@@ -385,9 +437,21 @@ const COURSES_DATA = [
     title: 'คำพยาน — ชีวิตที่เปลี่ยนแปลง',
     description: 'รวบรวมคำพยานจากสมาชิก HL ที่ชีวิตได้รับการเปลี่ยนแปลงจากความเชื่อ',
     points: 0,
+    image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80',
     lessons: [
       { type: 'video', title: 'คำพยาน: จากผู้ไม่เชื่อ สู่ผู้นำแคร์', order: 1 },
-      { type: 'video', title: 'คำพยาน: พระเจ้าสัตย์ซื่อในวิกฤต', order: 2 },
+      { type: 'file', title: 'คลังหนังสือคำพยานโบสถ์ Holy Land (PDF)', order: 2, contentUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { type: 'video', title: 'คำพยาน: พระเจ้าสัตย์ซื่อในวิกฤต', order: 3 },
+      { type: 'quiz', title: 'คำถามสรุปบทเรียนจากคำพยานชีวิต', order: 4, passScore: 60,
+        questions: [
+          { text: 'คำพยานที่ดีควรมีอะไร?', choices: [
+            { text: 'การเปรียบเทียบชีวิตก่อนและหลังรู้จักพระเจ้า และยกเกียรติพระองค์', isCorrect: true },
+            { text: 'การโฆษณาตัวเองยาวๆ', isCorrect: false },
+            { text: 'ความโอ้อวดเรื่องโชคลาภ', isCorrect: false },
+          ]}
+        ]
+      },
+      { type: 'assessment', title: 'Assignment — เขียนคำพยานชีวิตความยาว 1 หน้ากระดาษ', order: 5 }
     ],
   },
 ];
@@ -879,6 +943,7 @@ async function main() {
         instructorName: presets[presetIdx].name,
         instructorRole: presets[presetIdx].role,
         visibleToAll: true,
+        image: courseData.image || null,
       },
     });
     courseMap[courseData.title] = course.id;
@@ -911,9 +976,10 @@ async function main() {
             title: lesson.title,
             type: lesson.type,
             order: lesson.order,
+            contentUrl: lesson.contentUrl || null,
             content: lesson.type === 'assessment'
               ? 'ส่งงาน Assignment ผ่านการอัปโหลดไฟล์หรือเขียนในช่องด้านล่าง'
-              : 'เนื้อหาวีดีโอจะแสดงที่นี่',
+              : 'เนื้อหาบทเรียนจะแสดงที่นี่',
           },
         });
       }
