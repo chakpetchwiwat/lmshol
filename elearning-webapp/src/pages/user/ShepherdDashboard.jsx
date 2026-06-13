@@ -3,6 +3,7 @@ import { Users, Droplet, Flame, BookOpen, Search, Award, RefreshCw, X, Calendar,
 import { userAPI, getFullUrl } from '../../utils/api';
 import { useToast } from '../../context/useToast';
 import Skeleton from '../../components/common/Skeleton';
+import ModalPortal from '../../components/common/ModalPortal';
 
 const ShepherdDashboard = () => {
   const toast = useToast();
@@ -203,8 +204,9 @@ const ShepherdDashboard = () => {
 
       {/* Detailed Modal */}
       {selectedSheep && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
-          <div className="card flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden border border-slate-100 bg-white shadow-2xl animate-fade-in">
+        <ModalPortal>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md">
+            <div className="flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden border border-slate-100 bg-white rounded-3xl shadow-2xl animate-fade-in">
             {/* Modal Header */}
             <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
               <div className="flex items-center gap-3">
@@ -416,6 +418,7 @@ const ShepherdDashboard = () => {
             </div>
           </div>
         </div>
+        </ModalPortal>
       )}
     </div>
   );

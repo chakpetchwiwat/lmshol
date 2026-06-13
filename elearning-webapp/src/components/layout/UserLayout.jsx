@@ -278,6 +278,12 @@ const UserLayout = () => {
           <div className="mt-3 text-center px-2">
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.08em] mb-0.5">ผู้ใช้งาน</p>
             <p className="font-extrabold text-[15px] text-gray-900 tracking-tight truncate">{user?.name || 'Loading...'}</p>
+            {user?.mentor && (
+              <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-50/50 border border-indigo-100/40 text-xs font-semibold text-slate-500">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">พี่เลี้ยง:</span>
+                <span className="text-indigo-600 font-black">{user.mentor.name} {user.mentor.nickname && user.mentor.nickname !== '-' ? `(${user.mentor.nickname})` : ''}</span>
+              </div>
+            )}
           </div>
         </div>
 
